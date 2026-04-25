@@ -14,10 +14,11 @@
       <router-link class="hover:text-blue-600" to="/login">Login</router-link>
       <router-link class="hover:text-blue-600" to="/about">About</router-link>
       <router-link class="hover:text-blue-600" to="/faq">FAQ</router-link>
+      <router-link class="hover:text-blue-600" to="/dashboard">Dashboard</router-link>
     </div>
   </nav>
 
-  <main class="pt-10">
+  <main class="pt-16">
     <router-view />
   </main>
 </template>
