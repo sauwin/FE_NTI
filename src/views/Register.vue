@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api/axios'
@@ -82,7 +82,7 @@ async function submit() {
       <input type="submit" class="bg-blue-700 text-white w-100 h-10 mt-4">
       
       <div class = "text-center mt-4">
-        Already have an account? <router-link class="text-blue-600 hover:text-blue-900" to="/login">Log in</router-link>
+        Already have an account? <router-link class="text-blue-600 hover:text-blue-900" to="/auth/login">Log in</router-link>
       </div>
     </form>
   </div>

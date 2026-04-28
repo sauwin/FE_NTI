@@ -35,7 +35,7 @@
       </div>
       <input type="submit" class="bg-blue-700 text-white w-100 h-10 mt-4">
       <div class = "text-center mt-4">
-        Not registered? <router-link class="text-blue-600 hover:text-blue-900" to="/register">Create an account</router-link>
+        Not registered? <router-link class="text-blue-600 hover:text-blue-900" to="/auth/register">Create an account</router-link>
       </div>
     </form>
   </div>
