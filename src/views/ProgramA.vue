@@ -65,7 +65,6 @@
           <h2 class="text-4xl font-bold mb-4">Eligibility <span class="text-blue-400">Criteria</span></h2>
           <p class="text-gray-400 max-w-xl">Make sure your team meets the program’s basic requirements before submitting your application.</p>
         </div>
-        <div class="hidden lg:block h-px flex-1 bg-gradient-to-r from-transparent via-blue-900 to-transparent mx-10 mb-5"></div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
