@@ -1,5 +1,5 @@
 <template>
-  <nav class="w-screen h-12 flex justify-between px-4 fixed bg-slate-800">
+  <nav class="w-screen h-12 flex justify-between px-4 fixed bg-slate-900">
     <div class="font-medium text-2xl flex gap-1 items-center">
       <img src="/logo.png" class="h-8 w-8">
       NTI

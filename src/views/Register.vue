@@ -36,42 +36,42 @@ async function submit() {
 <template>
   <h1 class="font-bold text-4xl text-center p-4">Register</h1>
   <div class="flex justify-center">
-    <form class="flex flex-col gap-2 mt-5" @submit.prevent="submit">
+    <form class="flex flex-col gap-1.5 mt-5" @submit.prevent="submit">
       <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
       <div class="flex gap-4">
         <div>
-          <label class="block text-blue-800">Name</label>
-          <input v-model="firstName" type="text" class="border border-black w-48 h-8" />
+          <label class="block text-white">Name</label>
+          <input v-model="firstName" type="text" class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-48 h-9" />
         </div>
 
         <div>
-          <label class="block text-blue-800">Surname</label>
-          <input v-model="lastName" type="text" class="border border-black w-48 h-8" />
+          <label class="block text-white">Surname</label>
+          <input v-model="lastName" type="text" class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-48 h-9" />
         </div>
       </div>
 
       <div>
-        <label class="block text-blue-800">Email</label>
-        <input v-model="email" type="email" class="border border-black w-100 h-8" />
+        <label class="block text-white">Email</label>
+        <input v-model="email" type="email" class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-100 h-9" />
       </div>
 
       <div>
-        <label class="block text-blue-800">Password</label>
-        <input v-model="password" type="password" class="border border-black w-100 h-8" />
+        <label class="block text-white">Password</label>
+        <input v-model="password" type="password" class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-100 h-9" />
       </div>
 
       <div>
-        <label class="block text-blue-800">Confirm password</label>
-        <input v-model="passwordConfirm" type="password" class="border border-black w-100 h-8" />
+        <label class="block text-white">Confirm password</label>
+        <input v-model="passwordConfirm" type="password" class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-100 h-9" />
       </div>
 
       <div>
-        <label class="block text-blue-800">Type of account</label>
-        <select v-model="role" class="border border-black w-100 h-8">
-          <option value="student">Student</option>
-          <option value="company">Company</option>
-          <option value="mentor">Mentor</option>
-          <option value="internal">Internal role</option>
+        <label class="block text-white">Type of account</label>
+        <select v-model="role" class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-100 h-9">
+          <option value="student" class="bg-slate-800">Student</option>
+          <option value="company" class="bg-slate-800">Company</option>
+          <option value="mentor" class="bg-slate-800">Mentor</option>
+          <option value="internal" class="bg-slate-800">Internal role</option>
         </select>
       </div>
 

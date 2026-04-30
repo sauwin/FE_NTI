@@ -26,12 +26,12 @@
     <form class="flex flex-col gap-2 mt-5" @submit.prevent="submit">
       <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
       <div>
-        <label for="email" class="block text-blue-800">Email</label>
-        <input v-model="email" type="email" class="border border-black w-100 h-8" />
+        <label for="email" class="block text-white">Email</label>
+        <input v-model="email" type="email" class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-100 h-9" />
       </div>
       <div>
-        <label for="password" class="block text-blue-800">Password</label>
-        <input v-model="password" type="password" class="border border-black w-100 h-8" />
+        <label for="password" class="block text-white">Password</label>
+        <input v-model="password" type="password" class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-100 h-9" />
       </div>
       <input type="submit" class="bg-blue-700 text-white w-100 h-10 mt-4">
       <div class = "text-center mt-4">
