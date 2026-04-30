@@ -5,3 +5,7 @@ body {
   color: theme('colors.white');
   overflow-x: hidden;
 }
+
+button {
+  cursor: pointer;
+}

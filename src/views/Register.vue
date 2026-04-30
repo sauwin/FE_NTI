@@ -79,10 +79,10 @@ async function submit() {
         I read and agree to Terms and conditions <input v-model="agreed" type="checkbox" class="align-middle" />
       </div>
 
-      <input type="submit" class="bg-blue-700 text-white w-100 h-10 mt-4">
+      <input type="submit" class="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white w-100 h-10 mt-4">
       
       <div class = "text-center mt-4">
-        Already have an account? <router-link class="text-blue-600 hover:text-blue-900" to="/auth/login">Log in</router-link>
+        Already have an account? <router-link class="text-blue-500 hover:text-blue-600" to="/auth/login">Log in</router-link>
       </div>
     </form>
   </div>
