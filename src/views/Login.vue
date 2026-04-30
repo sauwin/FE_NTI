@@ -33,9 +33,9 @@
         <label for="password" class="block text-white">Password</label>
         <input v-model="password" type="password" class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-100 h-9" />
       </div>
-      <input type="submit" class="bg-blue-700 text-white w-100 h-10 mt-4">
+      <input type="submit" class="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white w-100 h-10 mt-4">
       <div class = "text-center mt-4">
-        Not registered? <router-link class="text-blue-600 hover:text-blue-900" to="/auth/register">Create an account</router-link>
+        Not registered? <router-link class="text-blue-500 hover:text-blue-600" to="/auth/register">Create an account</router-link>
       </div>
     </form>
   </div>
