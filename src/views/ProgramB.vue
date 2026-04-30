@@ -1,3 +1,15 @@
+<script setup lang="ts">
+import { useAttrs } from 'vue';
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const goToUpload = () => {
+  router.push('/programs/b/upload')
+}
+
+</script>
+
 <template>
   <div class="px-20 py-10">
     <div class="bg-blue-950 absolute rounded-[100%] h-120 w-120 -z-10 -right-30 -top-10 "></div>
@@ -14,7 +26,7 @@
       </p>
 
       <div class="flex gap-4">
-        <button class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition">Submit Application</button>
+        <button @click="goToUpload" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition">Submit Application</button>
         <button class="border border-gray-500 hover:border-gray-400 text-gray-300 px-8 py-3 rounded-lg font-medium transition">Learn more</button>
       </div>
     </div>
