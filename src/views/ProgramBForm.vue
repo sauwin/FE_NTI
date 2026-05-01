@@ -61,28 +61,37 @@ function nextStep() {
 async function submit() {
   error.value = ''
   loading.value = true
-
+ 
   const typeMap: Record<string, string> = {
-    cv:                'cv',
+    cv: 'cv',
     motivation_letter: 'motivation_letter',
     technical_proposal: 'other',
   }
-
+ 
   try {
+    const appRes = await api.post('/applications', {
+      call_id: 1,
+      applicant_type: 'team',
+      program_type: 'b',
+    })
+    const applicationId = appRes.data.application_id
+ 
     for (const [type, file] of Object.entries(files.value)) {
       if (!file) { error.value = `Missing: ${docLabels[type]}`; loading.value = false; return }
-
+ 
       const formData = new FormData()
       formData.append('file', file)
       formData.append('type', typeMap[type] ?? type)
       formData.append('classification', 'confidential')
-
+      formData.append('application_id', String(applicationId))
+ 
       await api.post('/documents/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
     }
-
+ 
     step.value = 3
+ 
   } catch (e: any) {
     error.value = e?.response?.data?.message || 'Upload failed'
   } finally {
@@ -95,7 +104,6 @@ async function submit() {
   <div class="flex justify-center px-4 py-12">
     <div class="w-full max-w-xl">
 
-      <!-- Header -->
       <div class="mb-8 text-center">
         <div class="inline-block text-xs font-semibold tracking-widest uppercase text-blue-400 bg-blue-600/10 border border-blue-900 px-4 py-1.5 rounded-full mb-4">
           Program B
@@ -125,7 +133,6 @@ async function submit() {
         </div>
       </div>
 
-      <!-- Success -->
       <div v-if="step === 3" class="text-center py-12">
         <div class="text-5xl mb-4">✓</div>
         <h2 class="text-2xl font-bold text-white mb-2">Application Submitted</h2>
