@@ -74,7 +74,7 @@ function nextStep() {
 async function submit() {
   error.value = ''
   loading.value = true
-
+ 
   const typeMap: Record<string, string> = {
     executive_summary:      'executive_summary',
     technical_architecture: 'technical_architecture',
@@ -83,22 +83,31 @@ async function submit() {
     risk_analysis:          'risk_analysis',
     monetization:           'monetization',
   }
-
+ 
   try {
+    const appRes = await api.post('/applications', {
+      call_id: 1,
+      applicant_type: 'team',
+      program_type: 'a',
+    })
+    const applicationId = appRes.data.application_id
+ 
     for (const [type, file] of Object.entries(files.value)) {
-      if (!file) { error.value = `Missing: ${docLabels[type]}`; return }
-
+      if (!file) { error.value = `Missing: ${docLabels[type]}`; loading.value = false; return }
+ 
       const formData = new FormData()
       formData.append('file', file)
       formData.append('type', typeMap[type] ?? type)
       formData.append('classification', 'confidential')
-
+      formData.append('application_id', String(applicationId))
+ 
       await api.post('/documents/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
     }
-
+ 
     step.value = 3
+ 
   } catch (e: any) {
     error.value = e?.response?.data?.message || 'Upload failed'
   } finally {
@@ -121,27 +130,22 @@ async function submit() {
 
       <!-- Step indicator -->
       <div class="flex items-center mb-8">
-        <!-- Step 1 -->
         <div class="flex flex-col items-center">
           <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
             step >= 1 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">1</div>
           <span class="text-xs mt-1.5" :class="step >= 1 ? 'text-blue-400' : 'text-gray-600'">Info</span>
         </div>
 
-        <!-- Line 1-2 -->
         <div class="flex-1 h-px mx-2 mb-4" :class="step >= 2 ? 'bg-blue-600' : 'bg-blue-900'"></div>
 
-        <!-- Step 2 -->
         <div class="flex flex-col items-center">
           <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
             step >= 2 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">2</div>
           <span class="text-xs mt-1.5" :class="step >= 2 ? 'text-blue-400' : 'text-gray-600'">Documents</span>
         </div>
 
-        <!-- Line 2-3 -->
         <div class="flex-1 h-px mx-2 mb-4" :class="step >= 3 ? 'bg-blue-600' : 'bg-blue-900'"></div>
 
-        <!-- Step 3 -->
         <div class="flex flex-col items-center">
           <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
             step >= 3 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">3</div>
@@ -149,7 +153,6 @@ async function submit() {
         </div>
       </div>
 
-      <!-- Success -->
       <div v-if="step === 3" class="text-center py-12">
         <div class="text-5xl mb-4">✓</div>
         <h2 class="text-2xl font-bold text-white mb-2">Application Submitted</h2>
