@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { watch, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api/axios'
 
@@ -8,6 +8,8 @@ const error = ref('')
 const success = ref(false)
 const loading = ref(false)
 const step = ref(1)
+
+const DRAFT_KEY = 'draft_program_b'
 
 // Step 1 — Team info
 const teamName = ref('')
@@ -41,6 +43,25 @@ onMounted(async () => {
     localStorage.removeItem('token')
     router.push('/auth/login')
   }
+
+  const saved = localStorage.getItem(DRAFT_KEY)
+  if (saved) {
+    const draft = JSON.parse(saved)
+    teamName.value         = draft.teamName         ?? ''
+    teamDescription.value  = draft.teamDescription  ?? ''
+    projectTitle.value     = draft.projectTitle     ?? ''
+    proposedSolution.value = draft.proposedSolution ?? ''
+  }
+})
+
+// Зберігати при кожній зміні
+watch([teamName, teamDescription, projectTitle, proposedSolution], () => {
+  localStorage.setItem(DRAFT_KEY, JSON.stringify({
+    teamName:         teamName.value,
+    teamDescription:  teamDescription.value,
+    projectTitle:     projectTitle.value,
+    proposedSolution: proposedSolution.value,
+  }))
 })
 
 function onFileChange(type: string, event: Event) {
@@ -60,40 +81,37 @@ function nextStep() {
 
 async function submit() {
   error.value = ''
-  loading.value = true
- 
-  const typeMap: Record<string, string> = {
-    cv: 'cv',
-    motivation_letter: 'motivation_letter',
-    technical_proposal: 'other',
-  }
- 
-  try {
-    const appRes = await api.post('/applications', {
-      call_id: 1,
-      applicant_type: 'team',
-      program_type: 'b',
-    })
-    const applicationId = appRes.data.application_id
- 
-    for (const [type, file] of Object.entries(files.value)) {
-      if (!file) { error.value = `Missing: ${docLabels[type]}`; loading.value = false; return }
- 
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('type', typeMap[type] ?? type)
-      formData.append('classification', 'confidential')
-      formData.append('application_id', String(applicationId))
- 
-      await api.post('/documents/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
+
+  for (const key of Object.keys(files.value)) {
+    if (!files.value[key]) {
+      error.value = `Please upload: ${docLabels[key]}`
+      return
     }
- 
+  }
+
+  loading.value = true
+  try {
+    const formData = new FormData()
+    formData.append('program', 'b')
+    formData.append('team_name', teamName.value)
+    formData.append('team_description', teamDescription.value)
+    formData.append('project_title', projectTitle.value)
+    formData.append('proposed_solution', proposedSolution.value)
+
+    for (const [type, file] of Object.entries(files.value)) {
+      if (file) formData.append(type, file)
+    }
+
+    await api.post('/applications/program-b', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+
+    localStorage.removeItem(DRAFT_KEY)
     step.value = 3
- 
+
+    success.value = true
   } catch (e: any) {
-    error.value = e?.response?.data?.message || 'Upload failed'
+    error.value = e?.response?.data?.message || 'Something went wrong. Please try again.'
   } finally {
     loading.value = false
   }
@@ -104,6 +122,7 @@ async function submit() {
   <div class="flex justify-center px-4 py-12">
     <div class="w-full max-w-xl">
 
+      <!-- Header -->
       <div class="mb-8 text-center">
         <div class="inline-block text-xs font-semibold tracking-widest uppercase text-blue-400 bg-blue-600/10 border border-blue-900 px-4 py-1.5 rounded-full mb-4">
           Program B
@@ -113,27 +132,18 @@ async function submit() {
       </div>
 
       <!-- Step indicator -->
-      <div class="flex items-center mb-8">
-        <div class="flex flex-col items-center">
-          <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
-            step >= 1 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">1</div>
-          <span class="text-xs mt-1.5" :class="step >= 1 ? 'text-blue-400' : 'text-gray-600'">Info</span>
-        </div>
-        <div class="flex-1 h-px mx-2 mb-4" :class="step >= 2 ? 'bg-blue-600' : 'bg-blue-900'"></div>
-        <div class="flex flex-col items-center">
-          <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
-            step >= 2 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">2</div>
-          <span class="text-xs mt-1.5" :class="step >= 2 ? 'text-blue-400' : 'text-gray-600'">Documents</span>
-        </div>
-        <div class="flex-1 h-px mx-2 mb-4" :class="step >= 3 ? 'bg-blue-600' : 'bg-blue-900'"></div>
-        <div class="flex flex-col items-center">
-          <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
-            step >= 3 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">3</div>
-          <span class="text-xs mt-1.5" :class="step >= 3 ? 'text-blue-400' : 'text-gray-600'">Final</span>
-        </div>
+      <div class="flex items-center gap-3 mb-8">
+        <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
+          step >= 1 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">1</div>
+        <div class="flex-1 h-px" :class="step >= 2 ? 'bg-blue-600' : 'bg-blue-900'"></div>
+        <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
+          step >= 2 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">2</div>
+        <div class="flex-1 h-px bg-blue-900"></div>
+        <div class="text-xs text-gray-500">{{ step === 1 ? 'Project Info' : 'Documents' }}</div>
       </div>
 
-      <div v-if="step === 3" class="text-center py-12">
+      <!-- Success -->
+      <div v-if="success" class="text-center py-12">
         <div class="text-5xl mb-4">✓</div>
         <h2 class="text-2xl font-bold text-white mb-2">Application Submitted</h2>
         <p class="text-gray-400 text-sm mb-6">Your application is under review. The committee will contact you by email.</p>
@@ -176,6 +186,8 @@ async function submit() {
           After submitting, the NTI committee will review your application together with the company representative. You will be notified by email about the decision.
         </div>
 
+        <p v-if="teamName || teamDescription || projectTitle || proposedSolution" class="text-xs text-slate-500">Draft auto-saved</p>
+
         <button type="submit"
           class="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white w-full h-10 mt-2 rounded-md text-sm font-medium">
           Continue to Documents →
@@ -183,7 +195,7 @@ async function submit() {
       </form>
 
       <!-- STEP 2 — Documents -->
-      <form v-else-if="step === 2" class="flex flex-col gap-4" @submit.prevent="submit">
+      <form v-else class="flex flex-col gap-4" @submit.prevent="submit">
         <p v-if="error" class="text-red-400 text-sm">{{ error }}</p>
 
         <p class="text-gray-400 text-sm">Upload all required documents before submitting.</p>

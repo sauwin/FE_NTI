@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { watch, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api/axios'
 
@@ -7,6 +7,8 @@ const router = useRouter()
 const error = ref('')
 const loading = ref(false)
 const step = ref(1)
+
+const DRAFT_KEY = 'draft_program_a'
 
 // Step 1 — Team info
 const teamName = ref('')
@@ -41,7 +43,7 @@ const categories = [
   'IoT & Embedded Systems',
 ]
 
-// Auth guard
+// Auth guard + відновити чернетку
 onMounted(async () => {
   const token = localStorage.getItem('token')
   if (!token) {
@@ -54,6 +56,25 @@ onMounted(async () => {
     localStorage.removeItem('token')
     router.push('/auth/login')
   }
+
+  const saved = localStorage.getItem(DRAFT_KEY)
+  if (saved) {
+    const draft = JSON.parse(saved)
+    teamName.value            = draft.teamName            ?? ''
+    teamDescription.value     = draft.teamDescription     ?? ''
+    category.value            = draft.category            ?? ''
+    academicDeclaration.value = draft.academicDeclaration ?? false
+  }
+})
+
+// Зберігати при кожній зміні
+watch([teamName, teamDescription, category, academicDeclaration], () => {
+  localStorage.setItem(DRAFT_KEY, JSON.stringify({
+    teamName:             teamName.value,
+    teamDescription:      teamDescription.value,
+    category:             category.value,
+    academicDeclaration:  academicDeclaration.value,
+  }))
 })
 
 function onFileChange(type: string, event: Event) {
@@ -74,7 +95,7 @@ function nextStep() {
 async function submit() {
   error.value = ''
   loading.value = true
- 
+
   const typeMap: Record<string, string> = {
     executive_summary:      'executive_summary',
     technical_architecture: 'technical_architecture',
@@ -83,7 +104,7 @@ async function submit() {
     risk_analysis:          'risk_analysis',
     monetization:           'monetization',
   }
- 
+
   try {
     const appRes = await api.post('/applications', {
       call_id: 1,
@@ -91,23 +112,24 @@ async function submit() {
       program_type: 'a',
     })
     const applicationId = appRes.data.application_id
- 
+
     for (const [type, file] of Object.entries(files.value)) {
       if (!file) { error.value = `Missing: ${docLabels[type]}`; loading.value = false; return }
- 
+
       const formData = new FormData()
       formData.append('file', file)
       formData.append('type', typeMap[type] ?? type)
       formData.append('classification', 'confidential')
       formData.append('application_id', String(applicationId))
- 
+
       await api.post('/documents/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
     }
- 
+
+    localStorage.removeItem(DRAFT_KEY)
     step.value = 3
- 
+
   } catch (e: any) {
     error.value = e?.response?.data?.message || 'Upload failed'
   } finally {
@@ -196,6 +218,8 @@ async function submit() {
             </span>
           </label>
         </div>
+
+        <p v-if="teamName || teamDescription || category" class="text-xs text-slate-500">Draft auto-saved</p>
 
         <button type="submit"
           class="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white w-full h-10 mt-2 rounded-md text-sm font-medium">
