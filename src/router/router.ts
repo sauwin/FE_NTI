@@ -46,11 +46,28 @@ const routes = [
       { path: 'b/upload', component: ProgramBForm },
     ]
   },
+  { path: '/pending-verification', component: () => import('../views/PendingVerification.vue') },
+  { path: '/verified', component: () => import('../views/Verified.vue') },
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes
 })
+router.beforeEach((to, _, next) => {
+  const token = localStorage.getItem('token')
+  const user = localStorage.getItem('user')
+  const status = user ? JSON.parse(user).status : null
 
+  const protectedRoutes = ['/dashboard', '/programs/a/upload', '/programs/b/upload']
+  const isProtected = protectedRoutes.some(r => to.path.startsWith(r))
+
+  if (isProtected && !token) {
+    next('/auth/login')
+  } else if (isProtected && status === 'pending_verification') {
+    next('/pending-verification')
+  } else {
+    next()
+  }
+})
 export default router

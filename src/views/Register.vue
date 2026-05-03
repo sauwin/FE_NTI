@@ -26,7 +26,7 @@ async function submit() {
       role: role.value,
     })
     localStorage.setItem('token', res.data.token)
-    router.push('/dashboard')
+    router.push('/pending-verification')  // was /dashboard
   } catch (e: any) {
     error.value = e.response?.data?.message ?? 'Registration failed'
   }

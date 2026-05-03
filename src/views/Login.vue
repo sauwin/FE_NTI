@@ -14,8 +14,12 @@
       const res = await api.post('/auth/login', { email: email.value, password: password.value })
       localStorage.setItem('token', res.data.token)
       router.push('/dashboard')
-    } catch {
-      error.value = 'Invalid email or password'
+    } catch (e: any) {
+      if (e.response?.status === 403 && e.response?.data?.message === 'pending_verification') {
+        router.push('/pending-verification')
+      } else {
+        error.value = 'Invalid email or password'
+      }
     }
   }
 </script>
