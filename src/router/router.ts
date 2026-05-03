@@ -12,6 +12,7 @@ import ProgramB from '../views/ProgramB.vue'
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import Dashboard from '../views/Dashboard.vue'
+import ArticleRedactor from '../views/ArticleRedactor.vue'
 import ProgramAForm from '../views/ProgramAForm.vue'
 import ProgramBForm from '../views/ProgramBForm.vue'
 
@@ -26,6 +27,7 @@ const routes = [
       { path: 'programs/a', component: ProgramA },
       { path: 'programs/b', component: ProgramB },
       { path: 'dashboard', component: Dashboard },
+      { path: 'article/edit', component: ArticleRedactor },
     ],
   },
   {
