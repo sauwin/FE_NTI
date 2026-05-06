@@ -6,6 +6,7 @@
   const isAuthentified = ref(false)
   const userObj = ref<User | null>(null)
   const router = useRouter()
+  const token = ref<String | null>(null)
 
   type User = {
     email: string;
@@ -16,6 +17,7 @@
       const res = await api.get('/auth/me')
       userObj.value = res.data
       isAuthentified.value = true
+      token.value = localStorage.getItem('token')
     } catch(e: any) {
       isAuthentified.value = false
     }
@@ -40,6 +42,7 @@
   <h1 class="font-bold text-4xl text-center p-4">Dashboard</h1>
   <div v-if="isAuthentified" class="flex flex-col mt-5 w-full items-center">
     <div>Dashboard of user {{userObj?.email}}</div>
+    <div>Token: {{token}}</div>
     <button @click="logout" class=" bg-blue-700 text-white mt-5 w-40 h-10">Log out</button>
   </div>
   <div v-else class="flex mt-5 justify-center">
