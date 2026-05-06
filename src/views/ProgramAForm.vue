@@ -60,9 +60,9 @@ onMounted(async () => {
   const saved = localStorage.getItem(DRAFT_KEY)
   if (saved) {
     const draft = JSON.parse(saved)
-    teamName.value            = draft.teamName            ?? ''
-    teamDescription.value     = draft.teamDescription     ?? ''
-    category.value            = draft.category            ?? ''
+    teamName.value = draft.teamName ?? ''
+    teamDescription.value = draft.teamDescription ?? ''
+    category.value = draft.category ?? ''
     academicDeclaration.value = draft.academicDeclaration ?? false
   }
 })
@@ -70,10 +70,10 @@ onMounted(async () => {
 // Зберігати при кожній зміні
 watch([teamName, teamDescription, category, academicDeclaration], () => {
   localStorage.setItem(DRAFT_KEY, JSON.stringify({
-    teamName:             teamName.value,
-    teamDescription:      teamDescription.value,
-    category:             category.value,
-    academicDeclaration:  academicDeclaration.value,
+    teamName: teamName.value,
+    teamDescription: teamDescription.value,
+    category: category.value,
+    academicDeclaration: academicDeclaration.value,
   }))
 })
 
@@ -97,12 +97,12 @@ async function submit() {
   loading.value = true
 
   const typeMap: Record<string, string> = {
-    executive_summary:      'executive_summary',
+    executive_summary: 'executive_summary',
     technical_architecture: 'technical_architecture',
-    roadmap:                'roadmap',
-    budget:                 'budget',
-    risk_analysis:          'risk_analysis',
-    monetization:           'monetization',
+    roadmap: 'roadmap',
+    budget: 'budget',
+    risk_analysis: 'risk_analysis',
+    monetization: 'monetization',
   }
 
   try {

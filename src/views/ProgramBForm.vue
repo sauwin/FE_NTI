@@ -47,9 +47,9 @@ onMounted(async () => {
   const saved = localStorage.getItem(DRAFT_KEY)
   if (saved) {
     const draft = JSON.parse(saved)
-    teamName.value         = draft.teamName         ?? ''
-    teamDescription.value  = draft.teamDescription  ?? ''
-    projectTitle.value     = draft.projectTitle     ?? ''
+    teamName.value = draft.teamName ?? ''
+    teamDescription.value = draft.teamDescription ?? ''
+    projectTitle.value = draft.projectTitle ?? ''
     proposedSolution.value = draft.proposedSolution ?? ''
   }
 })
@@ -57,9 +57,9 @@ onMounted(async () => {
 // Зберігати при кожній зміні
 watch([teamName, teamDescription, projectTitle, proposedSolution], () => {
   localStorage.setItem(DRAFT_KEY, JSON.stringify({
-    teamName:         teamName.value,
-    teamDescription:  teamDescription.value,
-    projectTitle:     projectTitle.value,
+    teamName: teamName.value,
+    teamDescription: teamDescription.value,
+    projectTitle: projectTitle.value,
     proposedSolution: proposedSolution.value,
   }))
 })

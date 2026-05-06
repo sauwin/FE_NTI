@@ -45,7 +45,7 @@ const faqs = [
 
 <template>
   <div class="px-20 py-16 pt-24">
-    <div class="bg-blue-950 absolute rounded-full h-120 w-120 -z-10 -right-30 -top-10 blur-sm"></div>
+    <div class="bg-blue-950 absolute rounded-full h-120 w-120 -z-10 -right-30 -top-10"></div>
 
     <div class="mb-16">
       <div class="inline-flex items-center gap-2 bg-blue-600/15 border border-blue-800 text-blue-400 text-xs font-bold tracking-widest uppercase py-1.5 px-4 rounded-full mb-6">

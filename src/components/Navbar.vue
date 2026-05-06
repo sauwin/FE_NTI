@@ -29,7 +29,7 @@ function logout() {
     <div class="flex items-center gap-7 text-sm">
       <router-link
         class="text-slate-400 hover:text-white transition"
-        active-class="text-white"
+        exact-active-class="text-white" 
         to="/">Home</router-link>
       <router-link
         class="text-slate-400 hover:text-white transition"
