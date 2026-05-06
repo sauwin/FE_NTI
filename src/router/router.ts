@@ -27,7 +27,8 @@ const routes = [
       { path: 'programs/a', component: ProgramA },
       { path: 'programs/b', component: ProgramB },
       { path: 'dashboard', component: Dashboard },
-      { path: 'article/edit', component: ArticleRedactor },
+      { path: 'article/create', component: ArticleRedactor },
+      { path: 'article/edit/:id', component: ArticleRedactor },
     ],
   },
   {
