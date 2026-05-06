@@ -1,6 +1,27 @@
+<script setup lang="ts">
+const mission = [
+  {
+    title: 'Incubate Ideas',
+    desc: 'We help students develop innovative ideas into real products with structured support and funding.',
+  },
+  {
+    title: 'Connect with Companies',
+    desc: 'We bridge the gap between student talent and companies that need software development.',
+  },
+  {
+    title: 'Mentor & Guide',
+    desc: 'Every project gets an assigned mentor who guides the team through milestones and challenges.',
+  },
+  {
+    title: 'Launch Products',
+    desc: 'Our goal is working software — not just presentations. Teams ship real, usable products.',
+  },
+]
+</script>
+
 <template>
   <div class="px-20 py-16 pt-24">
-    <div class="bg-blue-950 absolute rounded-full h-120 w-120 -z-10 -right-30 -top-10 blur-sm"></div>
+    <div class="bg-blue-950 absolute rounded-full h-120 w-120 -z-10 -right-30 -top-10"></div>
 
     <div class="mb-16">
       <div class="inline-flex items-center gap-2 bg-blue-600/15 border border-blue-800 text-blue-400 text-xs font-bold tracking-widest uppercase py-1.5 px-4 rounded-full mb-6">
@@ -70,24 +91,3 @@
 
   </div>
 </template>
-
-<script setup lang="ts">
-const mission = [
-  {
-    title: 'Incubate Ideas',
-    desc: 'We help students develop innovative ideas into real products with structured support and funding.',
-  },
-  {
-    title: 'Connect with Companies',
-    desc: 'We bridge the gap between student talent and companies that need software development.',
-  },
-  {
-    title: 'Mentor & Guide',
-    desc: 'Every project gets an assigned mentor who guides the team through milestones and challenges.',
-  },
-  {
-    title: 'Launch Products',
-    desc: 'Our goal is working software — not just presentations. Teams ship real, usable products.',
-  },
-]
-</script>

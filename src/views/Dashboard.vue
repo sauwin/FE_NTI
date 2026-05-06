@@ -43,7 +43,7 @@ onMounted(() => {
 
 <template>
   <div class="px-20 py-16 pt-24">
-    <div class="bg-blue-950 absolute rounded-full h-96 w-96 -z-10 -right-20 -top-10 blur-sm"></div>
+    <div class="bg-blue-950 absolute rounded-full h-96 w-96 -z-10 -right-20 -top-10"></div>
 
     <!-- Not logged in -->
     <div v-if="!isAuthentified" class="flex flex-col items-center justify-center py-32 gap-4">
