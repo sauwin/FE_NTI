@@ -47,16 +47,6 @@ const categories = [
 
 // Auth guard + відновити чернетку
 onMounted(async () => {
-  if (!auth.isLoggedIn) {
-    router.push('/auth/login')
-    return
-  }
-  try {
-    await api.get('/auth/me')
-  } catch {
-    auth.logout()
-    router.push('/auth/login')
-  }
 
   const saved = localStorage.getItem(DRAFT_KEY)
   if (saved) {
