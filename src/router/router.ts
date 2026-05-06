@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 
 import MainLayout from '../layouts/MainLayout.vue'
 import AuthLayout from '../layouts/AuthLayout.vue'
@@ -26,7 +27,7 @@ const routes = [
       { path: 'faq', component: FAQ },
       { path: 'programs/a', component: ProgramA },
       { path: 'programs/b', component: ProgramB },
-      { path: 'dashboard', component: Dashboard },
+      { path: 'dashboard', component: Dashboard,  meta: { requiresAuth: true } },
       { path: 'article/create', component: ArticleRedactor },
       { path: 'article/edit/:id', component: ArticleRedactor },
     ],
@@ -43,11 +44,12 @@ const routes = [
     path: '/programs',
     component: FormLayout,
     children: [
-      { path: 'a/upload', component: ProgramAForm },
-      { path: 'b/upload', component: ProgramBForm },
+      { path: 'a/upload', component: ProgramAForm, meta: { requiresAuth: true, role: 'student' } },
+      { path: 'b/upload', component: ProgramBForm, meta: { requiresAuth: true, role: 'company' } },
     ]
   },
   { path: '/pending-verification', component: () => import('../views/PendingVerification.vue') },
+  { path: '/pending-approval', component: () => import('../views/PendingApproval.vue') },
   { path: '/verified', component: () => import('../views/Verified.vue') },
 ]
 
@@ -56,17 +58,13 @@ const router = createRouter({
   routes
 })
 router.beforeEach((to, _, next) => {
-  const token = localStorage.getItem('token')
-  const user = localStorage.getItem('user')
-  const status = user ? JSON.parse(user).status : null
-
-  const protectedRoutes = ['/dashboard', '/programs/a/upload', '/programs/b/upload']
-  const isProtected = protectedRoutes.some(r => to.path.startsWith(r))
-
-  if (isProtected && !token) {
+  const auth = useAuthStore()
+  if (to.meta.requiresAuth && !auth.isLoggedIn) {
     next('/auth/login')
-  } else if (isProtected && status === 'pending_verification') {
+  } else if (to.meta.requiresAuth && auth.user?.status === 'pending_verification') {
     next('/pending-verification')
+  } else if (to.meta.role && auth.role !== to.meta.role) {
+    next('/unauthorized')
   } else {
     next()
   }

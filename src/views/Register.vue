@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api/axios'
+import { useAuthStore } from '../stores/auth'
 
 const firstName = ref('')
 const lastName = ref('')
@@ -12,6 +13,7 @@ const role = ref('student')
 const agreed = ref(false)
 const error = ref('')
 const router = useRouter()
+const auth = useAuthStore()
 
 async function submit() {
   error.value = ''
@@ -25,7 +27,7 @@ async function submit() {
       password_confirmation: passwordConfirm.value,
       role: role.value,
     })
-    localStorage.setItem('token', res.data.token)
+    auth.login(res.data.token, res.data.user)
     router.push('/pending-verification')  // was /dashboard
   } catch (e: any) {
     error.value = e.response?.data?.message ?? 'Registration failed'
@@ -71,7 +73,6 @@ async function submit() {
           <option value="student" class="bg-slate-800">Student</option>
           <option value="company" class="bg-slate-800">Company</option>
           <option value="mentor" class="bg-slate-800">Mentor</option>
-          <option value="internal" class="bg-slate-800">Internal role</option>
         </select>
       </div>
 

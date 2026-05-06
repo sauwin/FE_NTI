@@ -2,23 +2,29 @@
   import { ref } from 'vue'
   import { useRouter } from 'vue-router'
   import api from '../api/axios'
+  import { useAuthStore } from '../stores/auth'
 
   const email = ref('')
   const password = ref('')
   const error = ref('')
   const router = useRouter()
-
+  const auth = useAuthStore()
   async function submit() {
     error.value = ''
     try {
       const res = await api.post('/auth/login', { email: email.value, password: password.value })
-      localStorage.setItem('token', res.data.token)
+      auth.login(res.data.token, res.data.user)
       router.push('/dashboard')
     } catch (e: any) {
-      if (e.response?.status === 403 && e.response?.data?.message === 'pending_verification') {
-        router.push('/pending-verification')
-      } else {
-        error.value = 'Invalid email or password'
+      if (e.response?.status === 403) {
+        const msg = e.response.data.message
+        if (msg === 'pending_verification') {
+          router.push('/pending-verification')
+        } else if (msg === 'pending_approval') {
+          router.push('/pending-approval')
+        } else {
+          error.value = 'Access denied'
+        }
       }
     }
   }

@@ -2,11 +2,13 @@
 import { watch, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api/axios'
+import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
 const error = ref('')
 const loading = ref(false)
 const step = ref(1)
+const auth = useAuthStore()
 
 const DRAFT_KEY = 'draft_program_a'
 
@@ -45,15 +47,14 @@ const categories = [
 
 // Auth guard + відновити чернетку
 onMounted(async () => {
-  const token = localStorage.getItem('token')
-  if (!token) {
+  if (!auth.isLoggedIn) {
     router.push('/auth/login')
     return
   }
   try {
     await api.get('/auth/me')
   } catch {
-    localStorage.removeItem('token')
+    auth.logout()
     router.push('/auth/login')
   }
 

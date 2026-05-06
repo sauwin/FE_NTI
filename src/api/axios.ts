@@ -1,14 +1,14 @@
 import axios from 'axios'
+import { useAuthStore } from '../stores/auth'
 
 const api = axios.create({
     baseURL: 'http://localhost:8000/api',
     headers: { 'Content-Type': 'application/json' },
 })
 
-// Attach token to every request if present
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token')
-    if (token) config.headers.Authorization = `Bearer ${token}`
+    const auth = useAuthStore()
+    if (auth.token) config.headers.Authorization = `Bearer ${auth.token}`
     return config
 })
 

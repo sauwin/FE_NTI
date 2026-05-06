@@ -2,16 +2,18 @@
 import { watch, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api/axios'
+import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
 const error = ref('')
 const success = ref(false)
 const loading = ref(false)
 const step = ref(1)
+const auth = useAuthStore()
 
 const DRAFT_KEY = 'draft_program_b'
 
-// Step 1 — Team info
+// Step 1 — Team infotoken
 const teamName = ref('')
 const teamDescription = ref('')
 const projectTitle = ref('')
@@ -32,15 +34,14 @@ const docLabels: Record<string, string> = {
 
 // Auth guard
 onMounted(async () => {
-  const token = localStorage.getItem('token')
-  if (!token) {
+  if (!auth.isLoggedIn) {
     router.push('/auth/login')
     return
   }
   try {
     await api.get('/auth/me')
   } catch {
-    localStorage.removeItem('token')
+    auth.logout()
     router.push('/auth/login')
   }
 
