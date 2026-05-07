@@ -50,6 +50,7 @@ const routes = [
   },
   { path: '/pending-verification', component: () => import('../views/PendingVerification.vue') },
   { path: '/pending-approval', component: () => import('../views/PendingApproval.vue') },
+  { path: '/unauthorized', component: () => import('../views/Unauthorized.vue') },
   { path: '/verified', component: () => import('../views/Verified.vue') },
 ]
 
