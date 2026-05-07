@@ -34,6 +34,18 @@ const docLabels: Record<string, string> = {
 
 // Auth guard
 onMounted(async () => {
+  const token = localStorage.getItem('token')
+  if (!token) {
+    router.push('/auth/login')
+    return
+  }
+  try {
+    await api.get('/auth/me')
+  } catch {
+    localStorage.removeItem('token')
+    router.push('/auth/login')
+  }
+
   const saved = localStorage.getItem(DRAFT_KEY)
   if (saved) {
     const draft = JSON.parse(saved)
@@ -92,24 +104,9 @@ async function submit() {
       if (file) formData.append(type, file)
     }
 
-    const appRes = await api.post('/applications', {
-      call_id: 1,
-      applicant_type: 'team',
-      program_type: 'b',
+    await api.post('/applications/program-b', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
     })
-    const applicationId = appRes.data.application_id
-
-    for (const [type, file] of Object.entries(files.value)) {
-      if (!file) continue
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('type', type)
-      formData.append('classification', 'confidential')
-      formData.append('application_id', String(applicationId))
-      await api.post('/documents/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-    }
 
     localStorage.removeItem(DRAFT_KEY)
     step.value = 3
