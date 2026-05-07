@@ -2,14 +2,12 @@
 import { watch, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api/axios'
-import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
 const error = ref('')
 const success = ref(false)
 const loading = ref(false)
 const step = ref(1)
-const auth = useAuthStore()
 
 const DRAFT_KEY = 'draft_program_b'
 
@@ -34,18 +32,6 @@ const docLabels: Record<string, string> = {
 
 // Auth guard
 onMounted(async () => {
-  const token = localStorage.getItem('token')
-  if (!token) {
-    router.push('/auth/login')
-    return
-  }
-  try {
-    await api.get('/auth/me')
-  } catch {
-    localStorage.removeItem('token')
-    router.push('/auth/login')
-  }
-
   const saved = localStorage.getItem(DRAFT_KEY)
   if (saved) {
     const draft = JSON.parse(saved)
@@ -150,7 +136,7 @@ async function submit() {
         <h2 class="text-2xl font-bold text-white mb-2">Application Submitted</h2>
         <p class="text-gray-400 text-sm mb-6">Your application is under review. The committee will contact you by email.</p>
         <button @click="router.push('/dashboard')"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-8 h-10 rounded-md text-sm cursor-pointer">
+                class="bg-blue-600 hover:bg-blue-700 text-white px-8 h-10 rounded-md text-sm cursor-pointer">
           Go to Dashboard
         </button>
       </div>
@@ -162,25 +148,25 @@ async function submit() {
         <div>
           <label class="block text-white text-sm mb-1">Team name <span class="text-red-400">*</span></label>
           <input v-model="teamName" type="text" placeholder="e.g. CodeForce Team"
-            class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+                 class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
         </div>
 
         <div>
           <label class="block text-white text-sm mb-1">Team description</label>
           <textarea v-model="teamDescription" rows="2" placeholder="Briefly describe your team's skills and experience..."
-            class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                    class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"></textarea>
         </div>
 
         <div>
           <label class="block text-white text-sm mb-1">Project / task title <span class="text-red-400">*</span></label>
           <input v-model="projectTitle" type="text" placeholder="Name of the company task you are applying for"
-            class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+                 class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
         </div>
 
         <div>
           <label class="block text-white text-sm mb-1">Proposed solution <span class="text-red-400">*</span></label>
           <textarea v-model="proposedSolution" rows="4" placeholder="Briefly describe how your team plans to solve this task..."
-            class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                    class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"></textarea>
         </div>
 
         <!-- Info box -->
@@ -191,7 +177,7 @@ async function submit() {
         <p v-if="teamName || teamDescription || projectTitle || proposedSolution" class="text-xs text-slate-500">Draft auto-saved</p>
 
         <button type="submit"
-          class="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white w-full h-10 mt-2 rounded-md text-sm font-medium">
+                class="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white w-full h-10 mt-2 rounded-md text-sm font-medium">
           Continue to Documents →
         </button>
       </form>
@@ -208,10 +194,10 @@ async function submit() {
           </label>
           <div class="relative">
             <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx"
-              @change="onFileChange(type, $event)"
-              class="hidden" :id="`file-${type}`" />
+                   @change="onFileChange(type, $event)"
+                   class="hidden" :id="`file-${type}`" />
             <label :for="`file-${type}`"
-              class="flex items-center justify-between bg-blue-600/10 border border-blue-900 hover:border-blue-600 rounded-md px-3 h-9 cursor-pointer transition-colors">
+                   class="flex items-center justify-between bg-blue-600/10 border border-blue-900 hover:border-blue-600 rounded-md px-3 h-9 cursor-pointer transition-colors">
               <span class="text-sm" :class="files[type] ? 'text-white' : 'text-gray-600'">
                 {{ files[type] ? (files[type] as File).name : 'Choose file...' }}
               </span>
@@ -222,11 +208,11 @@ async function submit() {
 
         <div class="flex gap-3 mt-2">
           <button type="button" @click="step = 1"
-            class="border border-blue-900 hover:border-blue-600 text-gray-400 hover:text-white w-1/3 h-10 rounded-md text-sm cursor-pointer transition-colors">
+                  class="border border-blue-900 hover:border-blue-600 text-gray-400 hover:text-white w-1/3 h-10 rounded-md text-sm cursor-pointer transition-colors">
             ← Back
           </button>
           <button type="submit" :disabled="loading"
-            class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 cursor-pointer text-white flex-1 h-10 rounded-md text-sm font-medium">
+                  class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 cursor-pointer text-white flex-1 h-10 rounded-md text-sm font-medium">
             {{ loading ? 'Submitting...' : 'Submit Application' }}
           </button>
         </div>
