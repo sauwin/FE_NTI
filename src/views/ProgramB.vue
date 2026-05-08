@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useAttrs } from 'vue';
 import { useRouter } from 'vue-router'
 
 const router = useRouter()

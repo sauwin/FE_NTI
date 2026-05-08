@@ -9,6 +9,7 @@ const error = ref('')
 const loading = ref(false)
 const step = ref(1)
 const auth = useAuthStore()
+const callId = ref<number | null>(null)
 
 const DRAFT_KEY = 'draft_program_a'
 
@@ -45,7 +46,24 @@ const categories = [
   'IoT & Embedded Systems',
 ]
 
-// Auth guard + відновити чернетку
+function debounce(fn: Function, delay: number) {
+  let timer: ReturnType<typeof setTimeout>
+  return (...args: any[]) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => fn(...args), delay)
+  }
+}
+
+const saveDraftToServer = debounce(async (data: object) => {
+  try {
+    await api.post('/drafts', {
+      program_type: 'a',
+      data: data,
+    })
+  } catch {}
+}, 1500)
+
+// Auth guard + draft
 onMounted(async () => {
   if (!auth.isLoggedIn) {
     router.push('/auth/login')
@@ -58,24 +76,48 @@ onMounted(async () => {
     router.push('/auth/login')
   }
 
-  const saved = localStorage.getItem(DRAFT_KEY)
-  if (saved) {
-    const draft = JSON.parse(saved)
-    teamName.value            = draft.teamName            ?? ''
-    teamDescription.value     = draft.teamDescription     ?? ''
-    category.value            = draft.category            ?? ''
-    academicDeclaration.value = draft.academicDeclaration ?? false
+  try {
+    const res = await api.get('/calls/active/a') // або 'b' для Program B
+    callId.value = res.data.call_id
+  } catch {
+    error.value = 'No active call available'
+  }
+
+  try {
+    const res = await api.get('/drafts/a')
+    if (res.data) {
+      teamName.value = res.data.data.teamName ?? ''
+      teamDescription.value = res.data.data.teamDescription ?? ''
+      category.value = res.data.data.category ?? ''
+      academicDeclaration.value = res.data.data.academicDeclaration ?? false
+    }
+  } catch {
+    const saved = localStorage.getItem(DRAFT_KEY)
+    if (saved) {
+      const draft = JSON.parse(saved)
+      teamName.value = draft.teamName ?? ''
+      teamDescription.value = draft.teamDescription ?? ''
+      category.value = draft.category ?? ''
+      academicDeclaration.value = draft.academicDeclaration ?? false
+    }
   }
 })
 
 // Зберігати при кожній зміні
 watch([teamName, teamDescription, category, academicDeclaration], () => {
   localStorage.setItem(DRAFT_KEY, JSON.stringify({
-    teamName:             teamName.value,
-    teamDescription:      teamDescription.value,
-    category:             category.value,
-    academicDeclaration:  academicDeclaration.value,
+    teamName: teamName.value,
+    teamDescription: teamDescription.value,
+    category: category.value,
+    academicDeclaration: academicDeclaration.value,
   }))
+
+  saveDraftToServer({
+  teamName: teamName.value,
+  teamDescription: teamDescription.value,
+  category: category.value,
+  academicDeclaration: academicDeclaration.value,
+})
 })
 
 function onFileChange(type: string, event: Event) {
@@ -94,21 +136,22 @@ function nextStep() {
 }
 
 async function submit() {
+  if (!callId.value) { error.value = 'No active call available'; return }
   error.value = ''
   loading.value = true
 
   const typeMap: Record<string, string> = {
-    executive_summary:      'executive_summary',
+    executive_summary: 'executive_summary',
     technical_architecture: 'technical_architecture',
-    roadmap:                'roadmap',
-    budget:                 'budget',
-    risk_analysis:          'risk_analysis',
-    monetization:           'monetization',
+    roadmap: 'roadmap',
+    budget: 'budget',
+    risk_analysis: 'risk_analysis',
+    monetization: 'monetization',
   }
 
   try {
     const appRes = await api.post('/applications', {
-      call_id: 1,
+      call_id: callId.value,
       applicant_type: 'team',
       program_type: 'a',
     })
@@ -129,10 +172,11 @@ async function submit() {
     }
 
     localStorage.removeItem(DRAFT_KEY)
+    await api.post('/drafts', { program_type: 'a', data: {} })
     step.value = 3
 
   } catch (e: any) {
-    error.value = e?.response?.data?.message || 'Upload failed'
+    error.value = e?.response?.data?.message || 'Something went wrong. Please try again.'
   } finally {
     loading.value = false
   }
