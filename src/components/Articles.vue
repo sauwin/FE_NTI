@@ -28,6 +28,11 @@
     created_at: string
     updated_at: string
     translations: Translation[]
+    cover_image?: Image
+  }
+
+  type Image = {
+    image_path: string
   }
 
   type PaginationMeta = {
@@ -77,7 +82,7 @@
 
     <div v-for="article in articlesObj?.slice(0, 2)" :key="article.id" class="w-100 border-3 border-blue-600/90 flex flex-col items-center rounded-3xl">
       <h2 class="text-xl p-4">{{ article.translations.find(t => t.language == 'en')?.title }}</h2>
-      <img src="/missing_image.png" class="w-[85%] h-45 object-cover">
+      <img :src="article.cover_image?.image_path ?? '/missing_image.png'" class="w-[85%] h-45 object-cover">
       <div class="px-8 py-4">
         {{ article.translations.find(t => t.language == 'en')?.excerpt }}
       </div>
