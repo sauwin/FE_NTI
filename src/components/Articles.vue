@@ -1,96 +1,131 @@
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue'
-  import { useRouter } from 'vue-router'
-  import api from '../api/axios'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import api from '../api/axios'
 
-  const router = useRouter()
+const router = useRouter()
+const articlesObj = ref<Article[] | null>(null)
+const fetchSuccessfull = ref<boolean | null>(null)
 
-  const articlesObj = ref<Article[] | null>(null)
-  const fetchSuccessfull = ref<boolean | null>(null);
+type Translation = {
+  id: number
+  article_id: number
+  language: string
+  title: string
+  excerpt: string
+  content: string
+  created_at: string
+  updated_at: string
+}
 
-  type Translation = {
-    id: number
-    article_id: number
-    language: string
-    title: string
-    excerpt: string
-    content: string
-    created_at: string
-    updated_at: string
+type Article = {
+  id: number
+  slug: string
+  author_id: number
+  is_published: boolean
+  published_at: string
+  created_at: string
+  updated_at: string
+  translations: Translation[]
+  cover_image?: Image
+}
+
+type Image = {
+  image_path: string
+}
+
+type PaginationMeta = {
+  current_page: number
+  last_page: number
+  per_page: number
+  total: number
+}
+
+type ArticlesResponse = {
+  data: Article[]
+  meta: PaginationMeta
+}
+
+async function fetchData() {
+  try {
+    const res = await api.get('/articles')
+    articlesObj.value = res.data.data
+    fetchSuccessfull.value = true
+  } catch(e: any) {
+    fetchSuccessfull.value = false
   }
+}
 
-  type Article = {
-    id: number
-    slug: string
-    author_id: number
-    is_published: boolean
-    published_at: string
-    created_at: string
-    updated_at: string
-    translations: Translation[]
-    cover_image?: Image
+async function deleteArticle(id: Number) {
+  try {
+    await api.delete('/articles/' + id)
+    articlesObj.value = articlesObj.value?.filter(article => article.id != id) ?? []
+    console.log('Article deleted successfully')
+  } catch(e: any) {
+    console.warn('Error during deletion of article')
   }
+}
 
-  type Image = {
-    image_path: string
-  }
-
-  type PaginationMeta = {
-    current_page: number
-    last_page: number
-    per_page: number
-    total: number
-  }
-
-  type ArticlesResponse = {
-    data: Article[]
-    meta: PaginationMeta
-  }
-
-  async function fetchData() {
-    try {
-      const res = await api.get('/articles')
-      articlesObj.value = res.data.data
-      fetchSuccessfull.value = true
-    } catch(e: any) {
-      fetchSuccessfull.value = false
-    }
-  }
-
-  async function deleteArticle(id: Number) {
-    try {
-      const res = await api.delete('/articles/' + id)
-      articlesObj.value = articlesObj.value?.filter(article => article.id != id) ?? []
-      console.log('Article deleted successfully')
-    } catch(e: any) {
-      console.warn('Error during deletion of article')
-    }
-  }
-
-  onMounted(() => {
-    fetchData()
-  })
+onMounted(() => {
+  fetchData()
+})
 </script>
 
 <template>
-  <h2 class="text-xl font-medium mb-2 bg-blue-600 w-35 py-2 pl-8 rounded-r-2xl">Články</h2>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-  <div class="flex w-screen bg-slate-900 gap-20 py-8 px-12">
-    <button @click="router.push('/article/create')" class="w-100 border-6 border-gray-700/80 hover:border-gray-600 text-gray-700/80 hover:text-gray-600 pb-4 rounded-3xl text-9xl select-none transition">
-      +
+    <!-- Add new article -->
+    <button
+      @click="router.push('/article/create')"
+      class="border-2 border-dashed border-slate-700 hover:border-blue-700 bg-slate-900/30 rounded-2xl flex flex-col items-center justify-center gap-4 cursor-pointer transition group min-h-80">
+      <div class="text-5xl text-slate-600 group-hover:text-blue-600 transition select-none font-thin">+</div>
+      <span class="text-xs font-semibold tracking-widest text-slate-600 group-hover:text-slate-400 transition uppercase">New article</span>
     </button>
 
-    <div v-for="article in articlesObj?.slice(0, 2)" :key="article.id" class="w-100 border-3 border-blue-600/90 flex flex-col items-center rounded-3xl">
-      <h2 class="text-xl p-4">{{ article.translations.find(t => t.language == 'en')?.title }}</h2>
-      <img :src="article.cover_image?.image_path ?? '/missing_image.png'" class="w-[85%] h-45 object-cover">
-      <div class="px-8 py-4">
-        {{ article.translations.find(t => t.language == 'en')?.excerpt }}
-      </div>
-      <div class="flex w-full px-8 pb-6 gap-3 justify-end">
-        <button @click="deleteArticle(article.id)" class="border-3 border-red-600/50 hover:border-red-700 text-red-500/50 hover:text-red-600 px-6 py-1 rounded-lg font-medium transition">Delete</button>
-        <button @click="router.push(`/article/edit/${article.id}`)" class="border-3 border-yellow-500/50 hover:border-yellow-500 text-yellow-400/50 hover:text-yellow-500 px-6 py-1 rounded-lg font-medium transition mr-">Edit</button>
-        <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-1 rounded-lg font-medium transition">Read more</button>
+    <!-- Article cards -->
+    <div
+      v-for="article in articlesObj?.slice(0, 2)" :key="article.id"
+      class="border-2 border-blue-800 hover:border-blue-600 bg-slate-900/50 rounded-2xl flex flex-col overflow-hidden transition">
+
+      <!-- Image — taller -->
+      <img
+        :src="article.cover_image?.image_path ?? '/missing_image.png'"
+        class="w-full h-56 object-cover" />
+
+      <!-- Content -->
+      <div class="flex flex-col flex-1 p-6">
+        <h3 class="text-lg font-bold text-white mb-2 leading-snug">
+          {{ article.translations.find(t => t.language === 'en')?.title ?? 'Untitled' }}
+        </h3>
+        <p class="text-sm text-gray-400 leading-relaxed flex-1">
+          {{ article.translations.find(t => t.language === 'en')?.excerpt ?? '' }}
+        </p>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-2 mt-6">
+          <button
+            @click="deleteArticle(article.id)"
+            class="border border-red-800/60 hover:border-red-600 text-red-400/60 hover:text-red-400 px-4 py-1.5 rounded-lg text-sm font-medium transition">
+            Delete
+          </button>
+          <button
+            @click="router.push(`/article/edit/${article.id}`)"
+            class="border border-yellow-700/60 hover:border-yellow-500 text-yellow-400/60 hover:text-yellow-400 px-4 py-1.5 rounded-lg text-sm font-medium transition">
+            Edit
+          </button>
+          <button
+            class="ml-auto bg-blue-600 hover:bg-blue-500 text-white px-6 py-1.5 rounded-lg text-sm font-medium transition">
+            Read more
+          </button>
+        </div>
       </div>
     </div>
+
+    <!-- Error state -->
+    <div v-if="fetchSuccessfull === false"
+      class="border border-slate-800 rounded-2xl flex items-center justify-center py-16 col-span-3">
+      <p class="text-sm text-slate-600">Failed to load articles</p>
+    </div>
+
   </div>
 </template>
