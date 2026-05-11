@@ -6,12 +6,13 @@ import api from '../api/axios'
 const router = useRouter()
 const isAuthentified = ref(false)
 const userObj = ref<User | null>(null)
+const onboardingCompleted = ref(true)
 
 type User = {
   email: string
   first_name?: string
   last_name?: string
-  account_type?: string
+  role_slug?: string
   status?: string
 }
 
@@ -20,6 +21,12 @@ async function fetchData() {
     const res = await api.get('/auth/me')
     userObj.value = res.data
     isAuthentified.value = true
+
+    // Check onboarding only for students
+    if (res.data.role_slug === 'student') {
+      const ob = await api.get('/onboarding/status')
+      onboardingCompleted.value = ob.data.completed
+    }
   } catch {
     isAuthentified.value = false
   }
@@ -56,8 +63,9 @@ onMounted(() => {
 
     <!-- Logged in -->
     <div v-else>
+
       <!-- Header -->
-      <div class="mb-12">
+      <div class="mb-10">
         <div class="inline-flex items-center bg-blue-600/15 border border-blue-800 text-blue-400 text-xs font-bold tracking-widest uppercase py-1.5 px-4 rounded-full mb-5">
           Dashboard
         </div>
@@ -68,7 +76,7 @@ onMounted(() => {
           <span class="text-sm text-gray-500">{{ userObj?.email }}</span>
           <span class="text-slate-700">·</span>
           <span class="text-xs capitalize bg-blue-600/15 border border-blue-800 text-blue-400 px-2.5 py-0.5 rounded-full">
-            {{ userObj?.account_type ?? 'student' }}
+            {{ userObj?.role_slug ?? '—' }}
           </span>
           <span class="text-slate-700">·</span>
           <span :class="[
@@ -82,15 +90,32 @@ onMounted(() => {
         </div>
       </div>
 
+      <!-- Onboarding banner — only for students with incomplete profile -->
+      <div v-if="userObj?.role_slug === 'student' && !onboardingCompleted"
+        class="border border-yellow-800/50 bg-yellow-900/10 rounded-xl px-6 py-4 flex items-center justify-between gap-4 mb-10">
+        <div>
+          <div class="text-sm font-semibold text-yellow-400 mb-1">Complete your profile</div>
+          <div class="text-xs text-slate-500">Fill in your student profile before submitting an application</div>
+        </div>
+        <router-link to="/onboarding"
+          class="bg-yellow-600 hover:bg-yellow-500 text-white px-5 py-2 rounded-lg text-xs font-medium transition whitespace-nowrap">
+          Complete now
+        </router-link>
+      </div>
+
       <!-- Quick actions -->
       <section class="mb-16">
         <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Quick actions</div>
         <div class="flex gap-4 flex-wrap">
-          <router-link to="/programs/a/upload"
+          <router-link
+            v-if="userObj?.role_slug === 'student'"
+            to="/programs/a/upload"
             class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
             Apply to Program A
           </router-link>
-          <router-link to="/programs/b/upload"
+          <router-link
+            v-if="userObj?.role_slug === 'student'"
+            to="/programs/b/upload"
             class="border border-slate-700 hover:border-blue-700 text-gray-400 hover:text-white px-6 py-3 rounded-lg text-sm font-medium transition">
             Apply to Program B
           </router-link>
@@ -110,7 +135,7 @@ onMounted(() => {
           <p class="text-slate-600 text-xs mt-1">Submit your first application to get started.</p>
         </div>
       </section>
-    </div>
 
+    </div>
   </div>
 </template>
