@@ -16,6 +16,7 @@ import Dashboard from '../views/Dashboard.vue'
 import ArticleRedactor from '../views/ArticleRedactor.vue'
 import ProgramAForm from '../views/ProgramAForm.vue'
 import ProgramBForm from '../views/ProgramBForm.vue'
+import Onboarding from '../views/Onboarding.vue'
 
 const routes = [
   {
@@ -27,7 +28,7 @@ const routes = [
       { path: 'faq', component: FAQ },
       { path: 'programs/a', component: ProgramA },
       { path: 'programs/b', component: ProgramB },
-      { path: 'dashboard', component: Dashboard,  meta: { requiresAuth: true } },
+      { path: 'dashboard', component: Dashboard, meta: { requiresAuth: true } },
       { path: 'article/create', component: ArticleRedactor },
       { path: 'article/edit/:id', component: ArticleRedactor },
     ],
@@ -44,10 +45,11 @@ const routes = [
     path: '/programs',
     component: FormLayout,
     children: [
-      { path: 'a/upload', component: ProgramAForm, meta: { requiresAuth: true, role: 'student' } },
+      { path: 'a/upload', component: ProgramAForm, meta: { requiresAuth: true, requiresOnboarding: true, role: 'student' } },
       { path: 'b/upload', component: ProgramBForm, meta: { requiresAuth: true, role: 'company' } },
     ]
   },
+  { path: '/onboarding', component: Onboarding, meta: { requiresAuth: true } },
   { path: '/pending-verification', component: () => import('../views/PendingVerification.vue') },
   { path: '/pending-approval', component: () => import('../views/PendingApproval.vue') },
   { path: '/unauthorized', component: () => import('../views/Unauthorized.vue') },
@@ -58,16 +60,35 @@ const router = createRouter({
   history: createWebHistory(),
   routes
 })
-router.beforeEach((to, _, next) => {
+
+router.beforeEach(async (to, _, next) => {
   const auth = useAuthStore()
+
   if (to.meta.requiresAuth && !auth.isLoggedIn) {
-    next('/auth/login')
-  } else if (to.meta.requiresAuth && auth.user?.status === 'pending_verification') {
-    next('/pending-verification')
-  } else if (to.meta.role && auth.role !== to.meta.role) {
-    next('/unauthorized')
-  } else {
-    next()
+    return next('/auth/login')
   }
+
+  if (to.meta.requiresAuth && auth.user?.status === 'pending_verification') {
+    return next('/pending-verification')
+  }
+
+  if (to.meta.role && auth.role !== to.meta.role) {
+    return next('/unauthorized')
+  }
+
+  if (to.meta.requiresOnboarding && auth.isStudent) {
+    try {
+      const { default: api } = await import('../api/axios')
+      const res = await api.get('/onboarding/status')
+      if (!res.data.completed) {
+        return next('/onboarding')
+      }
+    } catch {
+      return next('/onboarding')
+    }
+  }
+
+  next()
 })
+
 export default router
