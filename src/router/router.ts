@@ -17,6 +17,7 @@ import ArticleRedactor from '../views/ArticleRedactor.vue'
 import ProgramAForm from '../views/ProgramAForm.vue'
 import ProgramBForm from '../views/ProgramBForm.vue'
 import Onboarding from '../views/Onboarding.vue'
+import StudentProfile from '../views/StudentProfile.vue'
 
 const routes = [
   {
@@ -31,6 +32,7 @@ const routes = [
       { path: 'dashboard', component: Dashboard, meta: { requiresAuth: true } },
       { path: 'article/create', component: ArticleRedactor },
       { path: 'article/edit/:id', component: ArticleRedactor },
+      { path: 'profile', component: StudentProfile, meta: { requiresAuth: true } },
     ],
   },
   {

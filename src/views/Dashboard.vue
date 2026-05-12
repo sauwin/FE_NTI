@@ -22,7 +22,6 @@ async function fetchData() {
     userObj.value = res.data
     isAuthentified.value = true
 
-    // Check onboarding only for students
     if (res.data.role_slug === 'student') {
       const ob = await api.get('/onboarding/status')
       onboardingCompleted.value = ob.data.completed
@@ -90,7 +89,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Onboarding banner — only for students with incomplete profile -->
+      <!-- Onboarding banner -->
       <div v-if="userObj?.role_slug === 'student' && !onboardingCompleted"
         class="border border-yellow-800/50 bg-yellow-900/10 rounded-xl px-6 py-4 flex items-center justify-between gap-4 mb-10">
         <div>
@@ -103,38 +102,131 @@ onMounted(() => {
         </router-link>
       </div>
 
-      <!-- Quick actions -->
-      <section class="mb-16">
-        <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Quick actions</div>
-        <div class="flex gap-4 flex-wrap">
-          <router-link
-            v-if="userObj?.role_slug === 'student'"
-            to="/programs/a/upload"
-            class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
-            Apply to Program A
-          </router-link>
-          <router-link
-            v-if="userObj?.role_slug === 'student'"
-            to="/programs/b/upload"
-            class="border border-slate-700 hover:border-blue-700 text-gray-400 hover:text-white px-6 py-3 rounded-lg text-sm font-medium transition">
-            Apply to Program B
-          </router-link>
-          <button
-            @click="logout"
-            class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition ml-auto">
+      <!-- STUDENT dashboard -->
+      <div v-if="userObj?.role_slug === 'student'">
+
+        <section class="mb-16">
+          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Quick actions</div>
+          <div class="flex gap-4 flex-wrap">
+            <router-link to="/programs/a/upload"
+              class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
+              Apply to Program A
+            </router-link>
+            <router-link to="/programs/b/upload"
+              class="border border-slate-700 hover:border-blue-700 text-gray-400 hover:text-white px-6 py-3 rounded-lg text-sm font-medium transition">
+              Apply to Program B
+            </router-link>
+            <router-link to="/profile"
+              class="border border-slate-700 hover:border-blue-700 text-gray-400 hover:text-white px-6 py-3 rounded-lg text-sm font-medium transition">
+              My Profile
+            </router-link>
+            <button @click="logout"
+              class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition ml-auto">
+              Log out
+            </button>
+          </div>
+        </section>
+
+        <section>
+          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">My Applications</div>
+          <div class="border border-slate-800 rounded-2xl p-12 text-center bg-slate-900/30">
+            <p class="text-slate-500 text-sm">No applications yet.</p>
+            <p class="text-slate-600 text-xs mt-1">Submit your first application to get started.</p>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- MENTOR dashboard -->
+      <div v-else-if="userObj?.role_slug === 'mentor'">
+
+        <section class="mb-16">
+          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Quick actions</div>
+          <div class="flex gap-4 flex-wrap">
+            <button @click="logout"
+              class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition ml-auto">
+              Log out
+            </button>
+          </div>
+        </section>
+
+        <section>
+          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">My Projects</div>
+          <div class="border border-slate-800 rounded-2xl p-12 text-center bg-slate-900/30">
+            <p class="text-slate-500 text-sm">No projects assigned yet.</p>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- COMPANY dashboard -->
+      <div v-else-if="userObj?.role_slug === 'company'">
+
+        <section class="mb-16">
+          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Quick actions</div>
+          <div class="flex gap-4 flex-wrap">
+            <router-link to="/programs/b/upload"
+              class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
+              Submit Project Task
+            </router-link>
+            <button @click="logout"
+              class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition ml-auto">
+              Log out
+            </button>
+          </div>
+        </section>
+
+        <section>
+          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">My Tasks</div>
+          <div class="border border-slate-800 rounded-2xl p-12 text-center bg-slate-900/30">
+            <p class="text-slate-500 text-sm">No tasks submitted yet.</p>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ADMIN dashboard -->
+      <div v-else-if="userObj?.role_slug === 'nti_admin' || userObj?.role_slug === 'super_admin'">
+
+        <section class="mb-16">
+          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Quick actions</div>
+          <div class="flex gap-4 flex-wrap">
+            <button @click="logout"
+              class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition ml-auto">
+              Log out
+            </button>
+          </div>
+        </section>
+
+        <section>
+          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Overview</div>
+          <div class="grid grid-cols-3 gap-4">
+            <div class="border border-slate-800 rounded-2xl p-6 bg-slate-900/30">
+              <div class="text-xs text-slate-500 mb-1">Applications</div>
+              <div class="text-2xl font-bold text-white">—</div>
+            </div>
+            <div class="border border-slate-800 rounded-2xl p-6 bg-slate-900/30">
+              <div class="text-xs text-slate-500 mb-1">Active Projects</div>
+              <div class="text-2xl font-bold text-white">—</div>
+            </div>
+            <div class="border border-slate-800 rounded-2xl p-6 bg-slate-900/30">
+              <div class="text-xs text-slate-500 mb-1">Open Calls</div>
+              <div class="text-2xl font-bold text-white">—</div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Fallback for unknown role -->
+      <div v-else>
+        <div class="flex gap-4">
+          <button @click="logout"
+            class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition">
             Log out
           </button>
         </div>
-      </section>
-
-      <!-- Applications -->
-      <section>
-        <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">My Applications</div>
-        <div class="border border-slate-800 rounded-2xl p-12 text-center bg-slate-900/30">
-          <p class="text-slate-500 text-sm">No applications yet.</p>
-          <p class="text-slate-600 text-xs mt-1">Submit your first application to get started.</p>
-        </div>
-      </section>
+      </div>
 
     </div>
   </div>
