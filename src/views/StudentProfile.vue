@@ -6,14 +6,13 @@ import api from '../api/axios'
 
 const router = useRouter()
 const auth = useAuthStore()
-const loading = ref(false)
+const loading = ref(true)
 const saving = ref(false)
 const error = ref('')
 const success = ref(false)
 const editMode = ref(false)
 
 type Skill = { skill: string; level: 'beginner' | 'intermediate' | 'advanced' }
-
 type Profile = {
   university: string
   study_program: string
@@ -25,27 +24,25 @@ type Profile = {
 }
 
 const profile = ref<Profile>({
-  university: '',
-  study_program: '',
-  year_of_study: null,
-  bio: '',
-  github_url: '',
-  academic_declaration_confirmed: false,
-  skills: [],
+  university: '', study_program: '', year_of_study: null,
+  bio: '', github_url: '', academic_declaration_confirmed: false, skills: [],
 })
+
+const isNew = ref(false)
 
 onMounted(async () => {
   if (!auth.isLoggedIn) { router.push('/auth/login'); return }
-  loading.value = true
   try {
     const res = await api.get('/profile')
-    profile.value = {
-      ...res.data,
-      skills: res.data.skills ?? [],
+    if (res.data) {
+      profile.value = { ...res.data, skills: res.data.skills ?? [] }
+    } else {
+      isNew.value = true
+      editMode.value = true
     }
   } catch {
-    // profile not found — redirect to onboarding
-    router.push('/onboarding')
+    isNew.value = true
+    editMode.value = true
   } finally {
     loading.value = false
   }
@@ -54,13 +51,16 @@ onMounted(async () => {
 function addSkill() {
   profile.value.skills.push({ skill: '', level: 'beginner' })
 }
-
 function removeSkill(i: number) {
   profile.value.skills.splice(i, 1)
 }
 
 async function save() {
   error.value = ''
+  if (!profile.value.university.trim()) { error.value = 'University is required'; return }
+  if (!profile.value.study_program.trim()) { error.value = 'Study program is required'; return }
+  if (!profile.value.year_of_study) { error.value = 'Year of study is required'; return }
+
   saving.value = true
   try {
     await api.put('/profile', {
@@ -69,26 +69,22 @@ async function save() {
       year_of_study: profile.value.year_of_study,
       bio: profile.value.bio,
       github_url: profile.value.github_url,
+      academic_declaration_confirmed: profile.value.academic_declaration_confirmed,
       skills: profile.value.skills.filter(s => s.skill.trim()),
     })
     success.value = true
     editMode.value = false
+    isNew.value = false
     setTimeout(() => success.value = false, 3000)
   } catch (e: any) {
-    error.value = e?.response?.data?.message || 'Failed to save profile'
+    error.value = e?.response?.data?.message || 'Failed to save'
   } finally {
     saving.value = false
   }
 }
 
-const levelLabel: Record<string, string> = {
-  beginner: 'Beginner',
-  intermediate: 'Intermediate',
-  advanced: 'Advanced',
-}
-
 const levelColor: Record<string, string> = {
-  beginner: 'text-slate-400 bg-slate-800 border-slate-700',
+  beginner: 'text-slate-400 bg-slate-800/60 border-slate-700',
   intermediate: 'text-blue-400 bg-blue-900/30 border-blue-800',
   advanced: 'text-green-400 bg-green-900/30 border-green-800',
 }
@@ -100,12 +96,12 @@ const levelColor: Record<string, string> = {
 
     <div v-if="loading" class="text-slate-500 text-sm">Loading...</div>
 
+    <!-- Header -->
     <div v-else>
-      <!-- Header -->
-      <div class="mb-10 flex items-start justify-between">
+      <div class="mb-10 flex items-start justify-between gap-6">
         <div>
           <button @click="router.push('/dashboard')"
-            class="text-xs text-slate-500 hover:text-slate-300 transition mb-4 flex items-center gap-1">
+            class="text-xs text-slate-500 hover:text-slate-300 transition mb-4 block">
             ← Back to Dashboard
           </button>
           <div class="inline-flex items-center bg-blue-600/15 border border-blue-800 text-blue-400 text-xs font-bold tracking-widest uppercase py-1.5 px-4 rounded-full mb-4">
@@ -115,36 +111,39 @@ const levelColor: Record<string, string> = {
             My <span class="text-blue-400">Profile</span>
           </h1>
         </div>
-        <div class="flex gap-3 mt-8">
+        <div class="flex gap-3 pt-10">
           <button v-if="!editMode" @click="editMode = true"
             class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition">
             Edit Profile
           </button>
           <template v-else>
-            <button @click="editMode = false; error = ''"
+            <button v-if="!isNew" @click="editMode = false; error = ''"
               class="border border-slate-700 hover:border-slate-500 text-gray-400 hover:text-white px-6 py-2.5 rounded-lg text-sm font-medium transition">
               Cancel
             </button>
             <button @click="save" :disabled="saving"
               class="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition">
-              {{ saving ? 'Saving...' : 'Save Changes' }}
+              {{ saving ? 'Saving...' : (isNew ? 'Create Profile' : 'Save Changes') }}
             </button>
           </template>
         </div>
       </div>
 
-      <!-- Success message -->
-      <div v-if="success"
-        class="border border-green-800/50 bg-green-900/10 rounded-xl px-6 py-3 flex items-center gap-3 mb-8">
-        <span class="text-green-400 text-sm font-medium">Profile saved successfully</span>
+      <!-- New profile notice -->
+      <div v-if="isNew"
+        class="border border-yellow-800/50 bg-yellow-900/10 rounded-xl px-6 py-4 mb-8">
+        <div class="text-sm font-semibold text-yellow-400 mb-1">Profile not filled in yet</div>
+        <div class="text-xs text-slate-500">Fill in your profile before submitting an application</div>
       </div>
 
+      <div v-if="success"
+        class="border border-green-800/50 bg-green-900/10 rounded-xl px-6 py-3 mb-8">
+        <span class="text-green-400 text-sm font-medium">Profile saved successfully</span>
+      </div>
       <p v-if="error" class="text-red-400 text-sm mb-6">{{ error }}</p>
 
       <!-- VIEW MODE -->
-      <div v-if="!editMode" class="flex flex-col gap-8">
-
-        <!-- Basic info -->
+      <div v-if="!editMode" class="flex flex-col gap-10">
         <section>
           <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Basic Info</div>
           <div class="grid grid-cols-2 gap-4">
@@ -158,12 +157,14 @@ const levelColor: Record<string, string> = {
             </div>
             <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
               <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Year of Study</div>
-              <div class="text-white font-medium">{{ profile.year_of_study ? `${profile.year_of_study}. year` : '—' }}</div>
+              <div class="text-white font-medium">
+                {{ profile.year_of_study ? `${profile.year_of_study}. year` : '—' }}
+              </div>
             </div>
             <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
               <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">GitHub</div>
               <a v-if="profile.github_url" :href="profile.github_url" target="_blank"
-                class="text-blue-400 hover:text-blue-300 text-sm transition">
+                class="text-blue-400 hover:text-blue-300 text-sm transition break-all">
                 {{ profile.github_url }}
               </a>
               <div v-else class="text-slate-500">—</div>
@@ -175,37 +176,33 @@ const levelColor: Record<string, string> = {
           </div>
         </section>
 
-        <!-- Skills -->
         <section>
           <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Skills</div>
           <div v-if="profile.skills.length" class="flex flex-wrap gap-2">
             <span v-for="s in profile.skills" :key="s.skill"
               :class="['text-xs font-medium px-3 py-1.5 rounded-full border', levelColor[s.level]]">
-              {{ s.skill }} · {{ levelLabel[s.level] }}
+              {{ s.skill }} · {{ s.level }}
             </span>
           </div>
           <div v-else class="text-slate-600 text-sm">No skills added yet.</div>
         </section>
 
-        <!-- Declaration -->
         <section>
           <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Academic Declaration</div>
           <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5 flex items-center gap-3">
-            <div :class="['w-4 h-4 rounded border flex items-center justify-center flex-shrink-0',
-              profile.academic_declaration_confirmed
-                ? 'bg-green-600 border-green-600'
-                : 'border-slate-600']">
-              <span v-if="profile.academic_declaration_confirmed" class="text-white text-xs">✓</span>
+            <div :class="['w-5 h-5 rounded border flex items-center justify-center flex-shrink-0',
+              profile.academic_declaration_confirmed ? 'bg-blue-600 border-blue-600' : 'border-slate-600']">
+              <span v-if="profile.academic_declaration_confirmed" class="text-white text-xs font-bold">✓</span>
             </div>
-            <span class="text-sm text-slate-400">Academic declaration confirmed</span>
+            <span class="text-sm text-slate-400">
+              I declare no carried-over courses and my grade average meets the required threshold
+            </span>
           </div>
         </section>
-
       </div>
 
       <!-- EDIT MODE -->
-      <div v-else class="flex flex-col gap-6">
-
+      <div v-else class="flex flex-col gap-8">
         <section>
           <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Basic Info</div>
           <div class="grid grid-cols-2 gap-4">
@@ -223,6 +220,7 @@ const levelColor: Record<string, string> = {
               <label class="block text-white text-sm mb-1">Year of Study <span class="text-red-400">*</span></label>
               <select v-model="profile.year_of_study"
                 class="bg-blue-600/10 border border-blue-900 rounded-md w-full h-9 px-3 text-white focus:outline-none focus:border-blue-500">
+                <option :value="null" disabled class="bg-[#080f1e]">Select year</option>
                 <option v-for="y in [1,2,3,4,5,6]" :key="y" :value="y" class="bg-[#080f1e]">{{ y }}. year</option>
               </select>
             </div>
@@ -255,12 +253,23 @@ const levelColor: Record<string, string> = {
                 class="text-slate-600 hover:text-red-400 text-xl transition px-1 leading-none">×</button>
             </div>
             <button @click="addSkill" type="button"
-              class="border border-dashed border-slate-700 hover:border-blue-700 text-slate-500 hover:text-blue-400 w-full h-9 rounded-md text-sm transition mt-1">
+              class="border border-dashed border-slate-700 hover:border-blue-700 text-slate-500 hover:text-blue-400 w-full h-9 rounded-md text-sm transition">
               + Add skill
             </button>
           </div>
         </section>
 
+        <section>
+          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Academic Declaration</div>
+          <div class="bg-blue-600/10 border border-blue-900 rounded-xl p-5">
+            <label class="flex items-start gap-3 cursor-pointer">
+              <input v-model="profile.academic_declaration_confirmed" type="checkbox" class="mt-0.5 accent-blue-500" />
+              <span class="text-sm text-gray-300">
+                I declare that I have no carried-over courses and my average grade of core courses meets the required threshold. I understand this will be verified by the committee.
+              </span>
+            </label>
+          </div>
+        </section>
       </div>
     </div>
   </div>
