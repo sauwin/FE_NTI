@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { watch, ref, onMounted } from 'vue'
+import {watch, ref, onMounted, computed} from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api/axios'
 import { useAuthStore } from '../stores/auth'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
+const editId = ref<number | null>(route.query.edit ? Number(route.query.edit) : null)
+const isEditMode = computed(() => !!editId.value)
 const router = useRouter()
 const error = ref('')
 const loading = ref(false)
@@ -87,6 +91,13 @@ onMounted(async () => {
       proposedSolution.value = draft.proposedSolution ?? ''
     }
   }
+  if (editId.value) {
+    try {
+      const res = await api.get(`/applications/${editId.value}`)
+    } catch {
+      error.value = 'Could not load application'
+    }
+  }
 })
 
 watch([teamName, teamDescription, projectTitle, proposedSolution], () => {
@@ -134,13 +145,19 @@ async function submit() {
   }
 
   try {
-    const appRes = await api.post('/applications', {
-      call_id: callId.value,
-      applicant_type: 'team',
-      program_type: 'b',
-    })
+    let applicationId: number
 
-    const applicationId = appRes.data.application_id
+    if (isEditMode.value) {
+      await api.patch(`/applications/${editId.value}`, {
+        applicant_type: 'team', program_type: 'b',
+      })
+      applicationId = editId.value!
+    } else {
+      const appRes = await api.post('/applications', {
+        call_id: 1, applicant_type: 'team', program_type: 'b',
+      })
+      applicationId = appRes.data.application_id
+    }
 
     const typeMap: Record<string, string> = {
       cv: 'cv',

@@ -15,12 +15,16 @@ type User = {
   role_slug?: string
   status?: string
 }
+const applications = ref<any[]>([])
 
 async function fetchData() {
   try {
     const res = await api.get('/auth/me')
     userObj.value = res.data
     isAuthentified.value = true
+
+    const appRes = await api.get('/applications')
+    applications.value = appRes.data
 
     // Check onboarding only for students
     if (res.data.role_slug === 'student') {
@@ -130,12 +134,32 @@ onMounted(() => {
       <!-- Applications -->
       <section>
         <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">My Applications</div>
-        <div class="border border-slate-800 rounded-2xl p-12 text-center bg-slate-900/30">
+        <div v-if="applications.length === 0" class="border border-slate-800 rounded-2xl p-12 text-center bg-slate-900/30">
           <p class="text-slate-500 text-sm">No applications yet.</p>
           <p class="text-slate-600 text-xs mt-1">Submit your first application to get started.</p>
         </div>
+        <div v-else class="flex flex-col gap-3">
+          <div v-for="app in applications" :key="app.id"
+               class="border border-slate-800 rounded-xl px-6 py-4 bg-slate-900/30 flex items-center justify-between">
+            <div>
+              <span class="text-white text-sm font-medium">Program {{ app.program_type.toUpperCase() }}</span>
+              <span class="text-slate-600 text-xs ml-3">#{{ app.id }}</span>
+              <p class="text-slate-500 text-xs mt-1">{{ new Date(app.created_at).toLocaleDateString() }}</p>
+            </div>
+            <div class="flex items-center gap-3">
+            <span :class="[
+              'text-xs px-2.5 py-0.5 rounded-full border capitalize',
+              app.status === 'approved' ? 'bg-green-900/30 border-green-800 text-green-400' :
+              app.status === 'rejected' ? 'bg-red-900/30 border-red-800 text-red-400' :
+              'bg-blue-900/30 border-blue-800 text-blue-400'
+            ]">{{ app.status }}</span>
+              <router-link :to="`/applications/${app.id}`" class="text-white text-sm font-medium hover:text-blue-400 transition">
+                Program {{ app.program_type.toUpperCase() }} #{{ app.id }}
+              </router-link>
+            </div>
+          </div>
+        </div>
       </section>
-
     </div>
   </div>
 </template>

@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { watch, ref, onMounted } from 'vue'
+import {watch, ref, onMounted, computed} from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api/axios'
 import { useAuthStore } from '../stores/auth'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const router = useRouter()
 const error = ref('')
 const loading = ref(false)
@@ -11,6 +13,8 @@ const step = ref(1)
 const auth = useAuthStore()
 const callId = ref<number | null>(null)
 
+const editId = ref<number | null>(route.query.edit ? Number(route.query.edit) : null)
+const isEditMode = computed(() => !!editId.value)
 const DRAFT_KEY = 'draft_program_a'
 
 // Step 1 — Team info
@@ -101,6 +105,14 @@ onMounted(async () => {
       academicDeclaration.value = draft.academicDeclaration ?? false
     }
   }
+
+  if (editId.value) {
+    try {
+      const res = await api.get(`/applications/${editId.value}`)
+    } catch {
+      error.value = 'Could not load application'
+    }
+  }
 })
 
 // Зберігати при кожній зміні
@@ -150,12 +162,19 @@ async function submit() {
   }
 
   try {
-    const appRes = await api.post('/applications', {
-      call_id: callId.value,
-      applicant_type: 'team',
-      program_type: 'a',
-    })
-    const applicationId = appRes.data.application_id
+    let applicationId: number
+
+    if (isEditMode.value) {
+      await api.patch(`/applications/${editId.value}`, {
+        applicant_type: 'team', program_type: 'a',
+      })
+      applicationId = editId.value!
+    } else {
+      const appRes = await api.post('/applications', {
+        call_id: 1, applicant_type: 'team', program_type: 'a',
+      })
+      applicationId = appRes.data.application_id
+    }
 
     for (const [type, file] of Object.entries(files.value)) {
       if (!file) { error.value = `Missing: ${docLabels[type]}`; loading.value = false; return }
