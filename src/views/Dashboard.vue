@@ -132,7 +132,7 @@ onMounted(() => { fetchData() })
         </router-link>
       </div>
 
-      <!-- Quick actions -->
+      <!-- Quick actions --><!--
       <section class="mb-16">
         <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Quick actions</div>
         <div class="flex gap-4 flex-wrap">
@@ -154,7 +154,7 @@ onMounted(() => { fetchData() })
             Log out
           </button>
         </div>
-      </section>
+      </section>-->
 
       <!-- Applications -->
       <section>
@@ -206,13 +206,6 @@ onMounted(() => { fetchData() })
               class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition ml-auto">
               Log out
             </button>
-          </div>
-        </section>
-        <section>
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">My Applications</div>
-          <div class="border border-slate-800 rounded-2xl p-12 text-center bg-slate-900/30">
-            <p class="text-slate-500 text-sm">No applications yet.</p>
-            <p class="text-slate-600 text-xs mt-1">Submit your first application to get started.</p>
           </div>
         </section>
       </div>

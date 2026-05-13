@@ -56,7 +56,6 @@ const routes = [
   },
   { path: '/applications/:id', component: () => import('../views/ApplicationView.vue'), meta: { requiresAuth: true } },
   { path: '/applications/:id/edit', component: () => import('../views/ApplicationEdit.vue'), meta: { requiresAuth: true } },
-  { path: '/onboarding', component: Onboarding, meta: { requiresAuth: true } },
   { path: '/pending-verification', component: () => import('../views/PendingVerification.vue') },
   { path: '/pending-approval', component: () => import('../views/PendingApproval.vue') },
   { path: '/unauthorized', component: () => import('../views/Unauthorized.vue') },
@@ -88,10 +87,10 @@ router.beforeEach(async (to, _, next) => {
   if (to.meta.requiresProfile && auth.isStudent) {
     try {
       const { default: api } = await import('../api/axios')
-      const res = await api.get('/profile')
-      if (!res.data) return next('/profile')
+      const res = await api.get('/profile/student')
+      if (!res.data) return next('/profile/complete')
     } catch {
-      return next('/profile')
+      return next('/profile/complete')
     }
   }
 

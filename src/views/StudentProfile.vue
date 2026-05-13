@@ -33,7 +33,7 @@ const isNew = ref(false)
 onMounted(async () => {
   if (!auth.isLoggedIn) { router.push('/auth/login'); return }
   try {
-    const res = await api.get('/profile')
+    const res = await api.get('/profile/student')
     if (res.data) {
       profile.value = { ...res.data, skills: res.data.skills ?? [] }
     } else {
