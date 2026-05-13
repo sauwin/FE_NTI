@@ -68,7 +68,7 @@ onMounted(async () => {
 
   try {
     const res = await api.get('/calls/active/b')
-    callId.value = res.data.call_id
+    callId.value = res.data.id
   } catch {
     error.value = 'No active call available'
   }
@@ -154,7 +154,7 @@ async function submit() {
       applicationId = editId.value!
     } else {
       const appRes = await api.post('/applications', {
-        call_id: 1, applicant_type: 'team', program_type: 'b',
+        applicant_type: 'team', program_type: 'b',
       })
       applicationId = appRes.data.application_id
     }

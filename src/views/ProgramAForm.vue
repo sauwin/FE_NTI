@@ -81,9 +81,11 @@ onMounted(async () => {
   }
 
   try {
-    const res = await api.get('/calls/active/a') // або 'b' для Program B
-    callId.value = res.data.call_id
-  } catch {
+    const res = await api.get('/calls/active/a')
+    callId.value = res.data.id
+    console.log('Call Response:', res.data)
+  } catch(e: any) {
+    console.error(e.response)
     error.value = 'No active call available'
   }
 
@@ -171,7 +173,7 @@ async function submit() {
       applicationId = editId.value!
     } else {
       const appRes = await api.post('/applications', {
-        call_id: 1, applicant_type: 'team', program_type: 'a',
+        applicant_type: 'team', program_type: 'a',
       })
       applicationId = appRes.data.application_id
     }
