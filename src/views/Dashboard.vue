@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import AdminDashboard from '../components/admin/AdminDashboard.vue'
 import api from '../api/axios'
 
 const router = useRouter()
@@ -19,6 +20,7 @@ type User = {
   status?: string
 }
 const applications = ref<any[]>([])
+const error = ref('')
 
 async function fetchData() {
   try {
@@ -59,7 +61,7 @@ async function logout() {
     auth.logout()
     router.push('/auth/login')
   } catch {
-    alert('Unable to log out')
+    error.value = 'Unable to log out'
   }
 }
 
@@ -79,7 +81,7 @@ onMounted(() => { fetchData() })
     <div v-if="!isAuthentified" class="flex flex-col items-center justify-center py-32 gap-4">
       <p class="text-gray-400 text-base">User is not logged in</p>
       <router-link to="/auth/login"
-        class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition">
+                   class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition">
         Go to Login
       </router-link>
     </div>
@@ -110,9 +112,15 @@ onMounted(() => { fetchData() })
         </div>
       </div>
 
+      <!-- Error message -->
+      <div v-if="error" class="border border-red-800/50 bg-red-900/10 rounded-xl px-6 py-4 mb-8 flex items-center justify-between gap-4">
+        <div class="text-sm text-red-400">{{ error }}</div>
+        <button @click="error = ''" class="text-red-400 hover:text-red-300">×</button>
+      </div>
+
       <!-- Role not approved banner -->
       <div v-if="!roleApproved"
-        class="border border-orange-800/50 bg-orange-900/10 rounded-xl px-6 py-4 flex items-center justify-between gap-4 mb-8">
+           class="border border-orange-800/50 bg-orange-900/10 rounded-xl px-6 py-4 flex items-center justify-between gap-4 mb-8">
         <div>
           <div class="text-sm font-semibold text-orange-400 mb-1">Role pending approval</div>
           <div class="text-xs text-slate-500">An NTI administrator will confirm your role. You will be notified by email.</div>
@@ -121,13 +129,13 @@ onMounted(() => { fetchData() })
 
       <!-- Profile incomplete banner -->
       <div v-if="roleApproved && !profileComplete && userObj?.role_slug && ['student','mentor','company'].includes(userObj.role_slug)"
-        class="border border-yellow-800/50 bg-yellow-900/10 rounded-xl px-6 py-4 flex items-center justify-between gap-4 mb-8">
+           class="border border-yellow-800/50 bg-yellow-900/10 rounded-xl px-6 py-4 flex items-center justify-between gap-4 mb-8">
         <div>
           <div class="text-sm font-semibold text-yellow-400 mb-1">Complete your profile</div>
           <div class="text-xs text-slate-500">Fill in your profile before using the full platform</div>
         </div>
         <router-link :to="profileRoute[userObj!.role_slug!] ?? '/dashboard'"
-          class="bg-yellow-600 hover:bg-yellow-500 text-white px-5 py-2 rounded-lg text-xs font-medium transition whitespace-nowrap">
+                     class="bg-yellow-600 hover:bg-yellow-500 text-white px-5 py-2 rounded-lg text-xs font-medium transition whitespace-nowrap">
           Complete now
         </router-link>
       </div>
@@ -157,7 +165,7 @@ onMounted(() => { fetchData() })
       </section>-->
 
       <!-- Applications -->
-      <section>
+      <section v-if="!['super_admin', 'nti_admin'].includes(userObj?.role_slug)">
         <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">My Applications</div>
         <div v-if="applications.length === 0" class="border border-slate-800 rounded-2xl p-12 text-center bg-slate-900/30">
           <p class="text-slate-500 text-sm">No applications yet.</p>
@@ -191,19 +199,19 @@ onMounted(() => { fetchData() })
           <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Quick actions</div>
           <div class="flex gap-4 flex-wrap">
             <router-link to="/programs/a/upload"
-              class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
+                         class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
               Apply to Program A
             </router-link>
             <router-link to="/programs/b/upload"
-              class="border border-slate-700 hover:border-blue-700 text-gray-400 hover:text-white px-6 py-3 rounded-lg text-sm font-medium transition">
+                         class="border border-slate-700 hover:border-blue-700 text-gray-400 hover:text-white px-6 py-3 rounded-lg text-sm font-medium transition">
               Apply to Program B
             </router-link>
             <router-link to="/profile"
-              class="border border-slate-700 hover:border-blue-700 text-gray-400 hover:text-white px-6 py-3 rounded-lg text-sm font-medium transition">
+                         class="border border-slate-700 hover:border-blue-700 text-gray-400 hover:text-white px-6 py-3 rounded-lg text-sm font-medium transition">
               My Profile
             </router-link>
             <button @click="logout"
-              class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition ml-auto">
+                    class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition ml-auto">
               Log out
             </button>
           </div>
@@ -216,11 +224,11 @@ onMounted(() => { fetchData() })
           <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Quick actions</div>
           <div class="flex gap-4 flex-wrap">
             <router-link to="/mentor-profile"
-              class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
+                         class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
               My Profile
             </router-link>
             <button @click="logout"
-              class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition ml-auto">
+                    class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition ml-auto">
               Log out
             </button>
           </div>
@@ -239,15 +247,15 @@ onMounted(() => { fetchData() })
           <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Quick actions</div>
           <div class="flex gap-4 flex-wrap">
             <router-link to="/programs/b/upload"
-              class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
+                         class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
               Submit Project Task
             </router-link>
             <router-link to="/company-profile"
-              class="border border-slate-700 hover:border-blue-700 text-gray-400 hover:text-white px-6 py-3 rounded-lg text-sm font-medium transition">
+                         class="border border-slate-700 hover:border-blue-700 text-gray-400 hover:text-white px-6 py-3 rounded-lg text-sm font-medium transition">
               Company Profile
             </router-link>
             <button @click="logout"
-              class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition ml-auto">
+                    class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition ml-auto">
               Log out
             </button>
           </div>
@@ -261,47 +269,12 @@ onMounted(() => { fetchData() })
       </div>
 
       <!-- ── ADMIN ── -->
-      <div v-else-if="userObj?.role_slug === 'nti_admin' || userObj?.role_slug === 'super_admin'">
-        <section class="mb-16">
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Quick actions</div>
-          <div class="flex gap-4 flex-wrap">
-            <router-link to="/admin/users"
-              class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
-              Manage Users
-            </router-link>
-            <router-link to="/admin/approvals"
-              class="border border-slate-700 hover:border-blue-700 text-gray-400 hover:text-white px-6 py-3 rounded-lg text-sm font-medium transition">
-              Pending Approvals
-            </router-link>
-            <button @click="logout"
-              class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition ml-auto">
-              Log out
-            </button>
-          </div>
-        </section>
-        <section>
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Overview</div>
-          <div class="grid grid-cols-3 gap-4">
-            <div class="border border-slate-800 rounded-2xl p-6 bg-slate-900/30">
-              <div class="text-xs text-slate-500 mb-1">Applications</div>
-              <div class="text-2xl font-bold text-white">—</div>
-            </div>
-            <div class="border border-slate-800 rounded-2xl p-6 bg-slate-900/30">
-              <div class="text-xs text-slate-500 mb-1">Active Projects</div>
-              <div class="text-2xl font-bold text-white">—</div>
-            </div>
-            <div class="border border-slate-800 rounded-2xl p-6 bg-slate-900/30">
-              <div class="text-xs text-slate-500 mb-1">Pending Approvals</div>
-              <div class="text-2xl font-bold text-white">—</div>
-            </div>
-          </div>
-        </section>
-      </div>
+      <AdminDashboard v-if="userObj?.role_slug === 'nti_admin' || userObj?.role_slug === 'super_admin'" />
 
       <!-- Fallback -->
       <div v-else>
         <button @click="logout"
-          class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition">
+                class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition">
           Log out
         </button>
       </div>

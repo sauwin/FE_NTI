@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../api/axios'
+import { useConfirm } from '../composables/useConfirm'
 
 const route = useRoute()
 const router = useRouter()
@@ -43,7 +44,15 @@ const docLabels: Record<string, string> = {
 }
 
 async function deleteApp() {
-  if (!confirm('Are you sure you want to delete this application? This cannot be undone.')) return
+  const confirmed = await useConfirm({
+    title: 'Delete Application',
+    message: 'Delete this application? This action cannot be undone.',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    danger: true,
+  })
+  if (!confirmed) return
+
   deleting.value = true
   try {
     await api.delete(`/applications/${id}`)
