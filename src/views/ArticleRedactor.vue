@@ -106,7 +106,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex justify-center px-4 py-12">
+  <div class="flex-center-page">
     <div class="w-full max-w-xl">
 
       <!-- Header -->
@@ -119,7 +119,7 @@ onMounted(async () => {
 
       <!-- Stage indicator -->
       <div class="flex items-center mb-8">
-        <div class="flex flex-col items-center">
+        <div class="flex-center">
           <button type="button" @click="stage = 'main'"
             :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border transition',
               stage === 'main' ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500 hover:border-blue-600']">
@@ -130,7 +130,7 @@ onMounted(async () => {
 
         <div class="flex-1 h-px mx-2 mb-4 bg-blue-900"></div>
 
-        <div class="flex flex-col items-center">
+        <div class="flex-center">
           <button type="button" @click="stage = 'translation-sk'"
             :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border transition',
               stage === 'translation-sk' ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500 hover:border-blue-600']">
@@ -141,7 +141,7 @@ onMounted(async () => {
 
         <div class="flex-1 h-px mx-2 mb-4 bg-blue-900"></div>
 
-        <div class="flex flex-col items-center">
+        <div class="flex-center">
           <button type="button" @click="stage = 'translation-en'"
             :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border transition',
               stage === 'translation-en' ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500 hover:border-blue-600']">
@@ -151,18 +151,18 @@ onMounted(async () => {
         </div>
       </div>
 
-      <form class="flex flex-col gap-4" @submit.prevent="submit">
-        <p v-if="error" class="text-red-400 text-sm">{{ error }}</p>
+      <form class="flex-col-gap" @submit.prevent="submit">
+        <p v-if="error" class="text-error-sm">{{ error }}</p>
 
         <!-- STAGE 1 — Main -->
-        <div v-show="stage === 'main'" class="flex flex-col gap-4">
+        <div v-show="stage === 'main'" class="flex-col-gap">
           <div>
-            <label class="block text-white text-sm mb-1">Slug</label>
+            <label class="label">Slug</label>
             <input type="text" v-model="form.slug"
-              class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+              class="input-mt" />
           </div>
           <div>
-            <label class="block text-white text-sm mb-1">Image</label>
+            <label class="label">Image</label>
             <input type="file" @change="handleFile" accept=".jpg,.jpeg,.png,.webp"
               class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-gray-400 focus:outline-none focus:border-blue-500 file:hidden cursor-pointer" />
           </div>
@@ -173,19 +173,19 @@ onMounted(async () => {
         </div>
 
         <!-- STAGE 2 — SK -->
-        <div v-show="stage === 'translation-sk'" class="flex flex-col gap-4">
+        <div v-show="stage === 'translation-sk'" class="flex-col-gap">
           <div>
-            <label class="block text-white text-sm mb-1">Title (SK)</label>
+            <label class="label">Title (SK)</label>
             <input type="text" v-model="form.translations.sk.title"
-              class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+              class="input-mt" />
           </div>
           <div>
-            <label class="block text-white text-sm mb-1">Excerpt (SK)</label>
+            <label class="label">Excerpt (SK)</label>
             <input type="text" v-model="form.translations.sk.excerpt"
-              class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+              class="input-mt" />
           </div>
           <div>
-            <label class="block text-white text-sm mb-1">Content (SK)</label>
+            <label class="label">Content (SK)</label>
             <textarea v-model="form.translations.sk.content" rows="6"
               class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"></textarea>
           </div>
@@ -202,19 +202,19 @@ onMounted(async () => {
         </div>
 
         <!-- STAGE 3 — EN -->
-        <div v-show="stage === 'translation-en'" class="flex flex-col gap-4">
+        <div v-show="stage === 'translation-en'" class="flex-col-gap">
           <div>
-            <label class="block text-white text-sm mb-1">Title (EN)</label>
+            <label class="label">Title (EN)</label>
             <input type="text" v-model="form.translations.en.title"
-              class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+              class="input-mt" />
           </div>
           <div>
-            <label class="block text-white text-sm mb-1">Excerpt (EN)</label>
+            <label class="label">Excerpt (EN)</label>
             <input type="text" v-model="form.translations.en.excerpt"
-              class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+              class="input-mt" />
           </div>
           <div>
-            <label class="block text-white text-sm mb-1">Content (EN)</label>
+            <label class="label">Content (EN)</label>
             <textarea v-model="form.translations.en.content" rows="6"
               class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"></textarea>
           </div>

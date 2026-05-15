@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { watch, ref, onMounted } from 'vue'
+import {watch, ref, onMounted, computed} from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api/axios'
 import { useAuthStore } from '../stores/auth'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const router = useRouter()
 const error = ref('')
 const loading = ref(false)
@@ -11,6 +13,8 @@ const step = ref(1)
 const auth = useAuthStore()
 const callId = ref<number | null>(null)
 
+const editId = ref<number | null>(route.query.edit ? Number(route.query.edit) : null)
+const isEditMode = computed(() => !!editId.value)
 const DRAFT_KEY = 'draft_program_a'
 
 // Step 1 — Team info
@@ -77,9 +81,11 @@ onMounted(async () => {
   }
 
   try {
-    const res = await api.get('/calls/active/a') // або 'b' для Program B
-    callId.value = res.data.call_id
-  } catch {
+    const res = await api.get('/calls/active/a')
+    callId.value = res.data.id
+    console.log('Call Response:', res.data)
+  } catch(e: any) {
+    console.error(e.response)
     error.value = 'No active call available'
   }
 
@@ -99,6 +105,14 @@ onMounted(async () => {
       teamDescription.value = draft.teamDescription ?? ''
       category.value = draft.category ?? ''
       academicDeclaration.value = draft.academicDeclaration ?? false
+    }
+  }
+
+  if (editId.value) {
+    try {
+      const res = await api.get(`/applications/${editId.value}`)
+    } catch {
+      error.value = 'Could not load application'
     }
   }
 })
@@ -150,12 +164,19 @@ async function submit() {
   }
 
   try {
-    const appRes = await api.post('/applications', {
-      call_id: callId.value,
-      applicant_type: 'team',
-      program_type: 'a',
-    })
-    const applicationId = appRes.data.application_id
+    let applicationId: number
+
+    if (isEditMode.value) {
+      await api.patch(`/applications/${editId.value}`, {
+        applicant_type: 'team', program_type: 'a',
+      })
+      applicationId = editId.value!
+    } else {
+      const appRes = await api.post('/applications', {
+        applicant_type: 'team', program_type: 'a',
+      })
+      applicationId = appRes.data.application_id
+    }
 
     for (const [type, file] of Object.entries(files.value)) {
       if (!file) { error.value = `Missing: ${docLabels[type]}`; loading.value = false; return }
@@ -184,7 +205,7 @@ async function submit() {
 </script>
 
 <template>
-  <div class="flex justify-center px-4 py-12">
+  <div class="flex-center-page">
     <div class="w-full max-w-xl">
 
       <div class="mb-8 text-center">
@@ -197,7 +218,7 @@ async function submit() {
 
       <!-- Step indicator -->
       <div class="flex items-center mb-8">
-        <div class="flex flex-col items-center">
+        <div class="flex-center">
           <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
             step >= 1 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">1</div>
           <span class="text-xs mt-1.5" :class="step >= 1 ? 'text-blue-400' : 'text-gray-600'">Info</span>
@@ -205,7 +226,7 @@ async function submit() {
 
         <div class="flex-1 h-px mx-2 mb-4" :class="step >= 2 ? 'bg-blue-600' : 'bg-blue-900'"></div>
 
-        <div class="flex flex-col items-center">
+        <div class="flex-center">
           <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
             step >= 2 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">2</div>
           <span class="text-xs mt-1.5" :class="step >= 2 ? 'text-blue-400' : 'text-gray-600'">Documents</span>
@@ -213,7 +234,7 @@ async function submit() {
 
         <div class="flex-1 h-px mx-2 mb-4" :class="step >= 3 ? 'bg-blue-600' : 'bg-blue-900'"></div>
 
-        <div class="flex flex-col items-center">
+        <div class="flex-center">
           <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
             step >= 3 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">3</div>
           <span class="text-xs mt-1.5" :class="step >= 3 ? 'text-blue-400' : 'text-gray-600'">Final</span>
@@ -231,27 +252,27 @@ async function submit() {
       </div>
 
       <!-- STEP 1 — Team Info -->
-      <form v-else-if="step === 1" class="flex flex-col gap-4" @submit.prevent="nextStep">
-        <p v-if="error" class="text-red-400 text-sm">{{ error }}</p>
+      <form v-else-if="step === 1" class="flex-col-gap" @submit.prevent="nextStep">
+        <p v-if="error" class="text-error-sm">{{ error }}</p>
 
         <div>
-          <label class="block text-white text-sm mb-1">Team name <span class="text-red-400">*</span></label>
+          <label class="label">Team name <span class="text-error">*</span></label>
           <input v-model="teamName" type="text" placeholder="e.g. TechVision Team"
-            class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+            class="input-mt" />
         </div>
 
         <div>
-          <label class="block text-white text-sm mb-1">Short description</label>
+          <label class="label">Short description</label>
           <textarea v-model="teamDescription" rows="3" placeholder="Briefly describe your project idea..."
             class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"></textarea>
         </div>
 
         <div>
-          <label class="block text-white text-sm mb-1">Category <span class="text-red-400">*</span></label>
+          <label class="label">Category <span class="text-error">*</span></label>
           <select v-model="category"
             class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white focus:outline-none focus:border-blue-500">
-            <option value="" disabled class="bg-[#080f1e]">Select a category</option>
-            <option v-for="cat in categories" :key="cat" :value="cat" class="bg-[#080f1e]">{{ cat }}</option>
+            <option value="" disabled class="bg-dark">Select a category</option>
+            <option v-for="cat in categories" :key="cat" :value="cat" class="bg-dark">{{ cat }}</option>
           </select>
         </div>
 
@@ -264,7 +285,7 @@ async function submit() {
           </label>
         </div>
 
-        <p v-if="teamName || teamDescription || category" class="text-xs text-slate-500">Draft auto-saved</p>
+        <p v-if="teamName || teamDescription || category" class="text-muted-sm">Draft auto-saved</p>
 
         <button type="submit"
           class="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white w-full h-10 mt-2 rounded-md text-sm font-medium">
@@ -273,14 +294,14 @@ async function submit() {
       </form>
 
       <!-- STEP 2 — Documents -->
-      <form v-else-if="step === 2" class="flex flex-col gap-4" @submit.prevent="submit">
-        <p v-if="error" class="text-red-400 text-sm">{{ error }}</p>
+      <form v-else-if="step === 2" class="flex-col-gap" @submit.prevent="submit">
+        <p v-if="error" class="text-error-sm">{{ error }}</p>
 
         <p class="text-gray-400 text-sm">Upload all 6 required documents before submitting.</p>
 
         <div v-for="(label, type) in docLabels" :key="type">
-          <label class="block text-white text-sm mb-1">
-            {{ label }} <span class="text-red-400">*</span>
+          <label class="label">
+            {{ label }} <span class="text-error">*</span>
           </label>
           <div class="relative">
             <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx"

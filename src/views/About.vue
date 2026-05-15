@@ -20,10 +20,10 @@ const mission = [
 </script>
 
 <template>
-  <div class="px-20 py-16 pt-24">
+  <div class="container-main">
     <div class="bg-blue-950 absolute rounded-full h-120 w-120 -z-10 -right-30 -top-10"></div>
 
-    <div class="mb-16">
+    <div class="section-divider-md">
       <div class="inline-flex items-center gap-2 bg-blue-600/15 border border-blue-800 text-blue-400 text-xs font-bold tracking-widest uppercase py-1.5 px-4 rounded-full mb-6">
         About
       </div>
@@ -37,8 +37,8 @@ const mission = [
     </div>
 
     <!-- MISSION -->
-    <section class="mb-24">
-      <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-3">Mission</div>
+    <section class="section-divider">
+      <div class="section-label-light">Mission</div>
       <h2 class="text-3xl font-semibold mb-10">What we do</h2>
       <div class="flex flex-wrap lg:flex-nowrap gap-0 border border-slate-800 rounded-2xl overflow-hidden">
         <div v-for="item in mission" :key="item.title"
@@ -50,8 +50,8 @@ const mission = [
     </section>
 
     <!-- TEAM -->
-    <section class="mb-24">
-      <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-3">Who we are</div>
+    <section class="section-divider">
+      <div class="section-label-light">Who we are</div>
       <h2 class="text-3xl font-semibold mb-10">Built for students, by UKF</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="border border-slate-800 bg-slate-900/50 rounded-2xl p-8">
@@ -72,7 +72,7 @@ const mission = [
     </section>
 
     <!-- CTA -->
-    <div class="border border-slate-800 rounded-2xl px-12 py-10 flex items-center justify-between gap-8 bg-gradient-to-r from-blue-950/30 to-transparent">
+    <div class="card-cta">
       <div>
         <h3 class="text-xl font-semibold text-white mb-1">Want to join?</h3>
         <p class="text-sm text-slate-500">Check out our programs and apply for the next open call</p>
