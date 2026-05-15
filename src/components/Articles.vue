@@ -2,8 +2,10 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api/axios'
+import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
+const store = useAuthStore()
 const articlesObj = ref<Article[] | null>(null)
 const fetchSuccessfull = ref<boolean | null>(null)
 
@@ -103,17 +105,21 @@ onMounted(() => {
 
         <!-- Actions -->
         <div class="flex items-center gap-2 mt-6">
+          <div class="text-blue-400" v-show="!store.isAdmin">Published {{ new Date(article.published_at).toLocaleDateString() }}</div>
           <button
             @click="deleteArticle(article.id)"
+            v-show="store.isAdmin"
             class="border border-red-800/60 hover:border-red-600 text-red-400/60 hover:text-red-400 px-4 py-1.5 rounded-lg text-sm font-medium transition">
             Delete
           </button>
           <button
             @click="router.push(`/article/edit/${article.id}`)"
+            v-show="store.isAdmin"
             class="border border-yellow-700/60 hover:border-yellow-500 text-yellow-400/60 hover:text-yellow-400 px-4 py-1.5 rounded-lg text-sm font-medium transition">
             Edit
           </button>
           <button
+            @click="router.push(`/article/${article.id}`)"
             class="ml-auto bg-blue-600 hover:bg-blue-500 text-white px-6 py-1.5 rounded-lg text-sm font-medium transition">
             Read more
           </button>
