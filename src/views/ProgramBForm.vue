@@ -192,7 +192,7 @@ async function submit() {
 </script>
 
 <template>
-  <div class="flex justify-center px-4 py-12">
+  <div class="flex-center-page">
     <div class="w-full max-w-xl">
 
       <!-- Header -->
@@ -206,19 +206,19 @@ async function submit() {
 
       <!-- Step indicator -->
       <div class="flex items-center mb-8">
-        <div class="flex flex-col items-center">
+        <div class="flex-center">
           <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
             step >= 1 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">1</div>
           <span class="text-xs mt-1.5" :class="step >= 1 ? 'text-blue-400' : 'text-gray-600'">Info</span>
         </div>
         <div class="flex-1 h-px mx-2 mb-4" :class="step >= 2 ? 'bg-blue-600' : 'bg-blue-900'"></div>
-        <div class="flex flex-col items-center">
+        <div class="flex-center">
           <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
             step >= 2 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">2</div>
           <span class="text-xs mt-1.5" :class="step >= 2 ? 'text-blue-400' : 'text-gray-600'">Documents</span>
         </div>
         <div class="flex-1 h-px mx-2 mb-4" :class="step >= 3 ? 'bg-blue-600' : 'bg-blue-900'"></div>
-        <div class="flex flex-col items-center">
+        <div class="flex-center">
           <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
             step >= 3 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">3</div>
           <span class="text-xs mt-1.5" :class="step >= 3 ? 'text-blue-400' : 'text-gray-600'">Final</span>
@@ -237,29 +237,29 @@ async function submit() {
       </div>
 
       <!-- STEP 1 — Project Info -->
-      <form v-else-if="step === 1" class="flex flex-col gap-4" @submit.prevent="nextStep">
-        <p v-if="error" class="text-red-400 text-sm">{{ error }}</p>
+      <form v-else-if="step === 1" class="flex-col-gap" @submit.prevent="nextStep">
+        <p v-if="error" class="text-error-sm">{{ error }}</p>
 
         <div>
-          <label class="block text-white text-sm mb-1">Team name <span class="text-red-400">*</span></label>
+          <label class="label">Team name <span class="text-error">*</span></label>
           <input v-model="teamName" type="text" placeholder="e.g. CodeForce Team"
-            class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+            class="input-mt" />
         </div>
 
         <div>
-          <label class="block text-white text-sm mb-1">Team description</label>
+          <label class="label">Team description</label>
           <textarea v-model="teamDescription" rows="2" placeholder="Briefly describe your team's skills and experience..."
             class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"></textarea>
         </div>
 
         <div>
-          <label class="block text-white text-sm mb-1">Project / task title <span class="text-red-400">*</span></label>
+          <label class="label">Project / task title <span class="text-error">*</span></label>
           <input v-model="projectTitle" type="text" placeholder="Name of the company task you are applying for"
-            class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+            class="input-mt" />
         </div>
 
         <div>
-          <label class="block text-white text-sm mb-1">Proposed solution <span class="text-red-400">*</span></label>
+          <label class="label">Proposed solution <span class="text-error">*</span></label>
           <textarea v-model="proposedSolution" rows="4" placeholder="Briefly describe how your team plans to solve this task..."
             class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"></textarea>
         </div>
@@ -268,7 +268,7 @@ async function submit() {
           After submitting, the NTI committee will review your application together with the company representative. You will be notified by email about the decision.
         </div>
 
-        <p v-if="teamName || teamDescription || projectTitle || proposedSolution" class="text-xs text-slate-500">
+        <p v-if="teamName || teamDescription || projectTitle || proposedSolution" class="text-muted-sm">
           ✦ Draft auto-saved
         </p>
 
@@ -279,14 +279,14 @@ async function submit() {
       </form>
 
       <!-- STEP 2 — Documents -->
-      <form v-else-if="step === 2" class="flex flex-col gap-4" @submit.prevent="submit">
-        <p v-if="error" class="text-red-400 text-sm">{{ error }}</p>
+      <form v-else-if="step === 2" class="flex-col-gap" @submit.prevent="submit">
+        <p v-if="error" class="text-error-sm">{{ error }}</p>
 
         <p class="text-gray-400 text-sm">Upload all required documents before submitting.</p>
 
         <div v-for="(label, type) in docLabels" :key="type">
-          <label class="block text-white text-sm mb-1">
-            {{ label }} <span class="text-red-400">*</span>
+          <label class="label">
+            {{ label }} <span class="text-error">*</span>
           </label>
           <div class="relative">
             <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx"

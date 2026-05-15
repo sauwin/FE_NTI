@@ -42,46 +42,46 @@ async function submit() {
 </script>
 
 <template>
-  <div class="flex justify-center px-4 py-12">
+  <div class="flex-center-page">
     <div class="w-full max-w-xl">
       <div class="mb-8 text-center">
         <h1 class="font-bold text-4xl text-white">Complete your profile</h1>
         <p class="text-gray-400 mt-2 text-sm">This information helps NTI evaluate your application.</p>
       </div>
 
-      <form class="flex flex-col gap-4" @submit.prevent="submit">
-        <p v-if="error" class="text-red-400 text-sm">{{ error }}</p>
+      <form class="flex-col-gap" @submit.prevent="submit">
+        <p v-if="error" class="text-error-sm">{{ error }}</p>
 
         <div>
-          <label class="block text-white text-sm mb-1">Study program <span class="text-red-400">*</span></label>
+          <label class="label">Study program <span class="text-error">*</span></label>
           <input v-model="studyProgram" type="text" placeholder="e.g. Applied Informatics"
-                 class="bg-blue-600/10 border border-blue-900 rounded-md w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+                 class="input" />
         </div>
 
         <div>
-          <label class="block text-white text-sm mb-1">Year of study <span class="text-red-400">*</span></label>
+          <label class="label">Year of study <span class="text-error">*</span></label>
           <select v-model="yearOfStudy"
                   class="bg-blue-600/10 border border-blue-900 rounded-md w-full h-9 px-3 text-white focus:outline-none focus:border-blue-500">
-            <option v-for="y in 6" :key="y" :value="y" class="bg-[#080f1e]">Year {{ y }}</option>
+            <option v-for="y in 6" :key="y" :value="y" class="bg-dark">Year {{ y }}</option>
           </select>
         </div>
 
         <div>
-          <label class="block text-white text-sm mb-1">University</label>
+          <label class="label">University</label>
           <input v-model="university" type="text" placeholder="e.g. UKF Nitra"
-                 class="bg-blue-600/10 border border-blue-900 rounded-md w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+                 class="input" />
         </div>
 
         <div>
-          <label class="block text-white text-sm mb-1">Bio</label>
+          <label class="label">Bio</label>
           <textarea v-model="bio" rows="3" placeholder="Tell us about yourself..."
-                    class="bg-blue-600/10 border border-blue-900 rounded-md w-full px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                    class="textarea"></textarea>
         </div>
 
         <div>
-          <label class="block text-white text-sm mb-1">GitHub URL</label>
+          <label class="label">GitHub URL</label>
           <input v-model="githubUrl" type="url" placeholder="https://github.com/username"
-                 class="bg-blue-600/10 border border-blue-900 rounded-md w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+                 class="input" />
         </div>
 
         <div class="bg-blue-600/10 border border-blue-900 rounded-md p-4">

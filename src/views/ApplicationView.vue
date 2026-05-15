@@ -66,11 +66,11 @@ async function deleteApp() {
 </script>
 
 <template>
-  <div class="flex justify-center px-4 py-12">
+  <div class="flex-center-page">
     <div class="w-full max-w-2xl">
       <button @click="router.push('/dashboard')" class="text-gray-500 hover:text-white text-sm mb-6">← Back to Dashboard</button>
 
-      <p v-if="error" class="text-red-400">{{ error }}</p>
+      <p v-if="error" class="text-error">{{ error }}</p>
 
       <div v-if="app">
         <div class="flex items-center justify-between mb-6">

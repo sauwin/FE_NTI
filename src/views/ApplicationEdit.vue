@@ -102,7 +102,7 @@ async function submit() {
 </script>
 
 <template>
-  <div class="flex justify-center px-4 py-12">
+  <div class="flex-center-page">
     <div class="w-full max-w-xl">
       <button @click="router.push(`/applications/${id}`)" class="text-gray-500 hover:text-white text-sm mb-6">← Back to Application</button>
 
@@ -113,33 +113,33 @@ async function submit() {
 
       <p v-if="error" class="text-red-400 text-sm mb-4">{{ error }}</p>
 
-      <form class="flex flex-col gap-4" @submit.prevent="submit">
+      <form class="flex-col-gap" @submit.prevent="submit">
 
         <!-- Program A fields -->
         <template v-if="programType === 'a'">
           <div>
-            <label class="block text-white text-sm mb-1">Team name</label>
+            <label class="label">Team name</label>
             <input v-model="teamName" type="text"
-                   class="bg-blue-600/10 border border-blue-900 rounded-md w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+                   class="input" />
           </div>
           <div>
-            <label class="block text-white text-sm mb-1">Description</label>
+            <label class="label">Description</label>
             <textarea v-model="teamDescription" rows="3"
-                      class="bg-blue-600/10 border border-blue-900 rounded-md w-full px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                      class="textarea"></textarea>
           </div>
         </template>
 
         <!-- Program B fields -->
         <template v-if="programType === 'b'">
           <div>
-            <label class="block text-white text-sm mb-1">Project title</label>
+            <label class="label">Project title</label>
             <input v-model="projectTitle" type="text"
-                   class="bg-blue-600/10 border border-blue-900 rounded-md w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+                   class="input" />
           </div>
           <div>
-            <label class="block text-white text-sm mb-1">Proposed solution</label>
+            <label class="label">Proposed solution</label>
             <textarea v-model="proposedSolution" rows="4"
-                      class="bg-blue-600/10 border border-blue-900 rounded-md w-full px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                      class="textarea"></textarea>
           </div>
         </template>
 
@@ -148,7 +148,7 @@ async function submit() {
         <p class="text-gray-500 text-xs -mt-2">Leave empty to keep existing files.</p>
 
         <div v-for="(label, type) in (programType === 'a' ? docLabelsA : docLabelsB)" :key="type">
-          <label class="block text-white text-sm mb-1">{{ label }}</label>
+          <label class="label">{{ label }}</label>
           <div class="text-gray-600 text-xs mb-1">
             Current: {{ existingDocs.find(d => d.type === type)?.file_name ?? 'None' }}
           </div>

@@ -76,7 +76,7 @@ async function save() {
 </script>
 
 <template>
-  <div class="px-20 py-16 pt-24">
+  <div class="container-main">
     <div class="bg-blue-950 absolute rounded-full h-96 w-96 -z-10 -right-20 -top-10 blur-sm"></div>
 
     <div v-if="loading" class="text-slate-500 text-sm">Loading...</div>
@@ -111,7 +111,7 @@ async function save() {
 
       <div v-if="isNew" class="border border-yellow-800/50 bg-yellow-900/10 rounded-xl px-6 py-4 mb-8">
         <div class="text-sm font-semibold text-yellow-400 mb-1">Profile not filled in yet</div>
-        <div class="text-xs text-slate-500">Fill in your mentor profile to appear in the system</div>
+        <div class="text-muted-sm">Fill in your mentor profile to appear in the system</div>
       </div>
       <div v-if="success" class="border border-green-800/50 bg-green-900/10 rounded-xl px-6 py-3 mb-8">
         <span class="text-green-400 text-sm font-medium">Profile saved successfully</span>
@@ -121,23 +121,23 @@ async function save() {
       <!-- VIEW -->
       <div v-if="!editMode" class="flex flex-col gap-10">
         <section>
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Info</div>
+          <div class="section-label">Info</div>
           <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5 flex items-center justify-between mb-4">
             <div>
-              <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Availability</div>
+              <div class="label-hint">Availability</div>
               <div :class="profile.available ? 'text-green-400' : 'text-red-400'" class="font-medium text-sm">
                 {{ profile.available ? 'Available for projects' : 'Not available' }}
               </div>
             </div>
             <div :class="['w-3 h-3 rounded-full', profile.available ? 'bg-green-500' : 'bg-red-500']"></div>
           </div>
-          <div v-if="profile.bio" class="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
+          <div v-if="profile.bio" class="card">
             <div class="text-xs text-slate-500 uppercase tracking-wide mb-2">Bio</div>
             <div class="text-slate-300 text-sm leading-relaxed">{{ profile.bio }}</div>
           </div>
         </section>
         <section>
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Expertise</div>
+          <div class="section-label">Expertise</div>
           <div v-if="profile.expertise_areas.length" class="flex flex-wrap gap-2">
             <span v-for="area in profile.expertise_areas" :key="area"
               class="text-xs font-medium px-3 py-1.5 rounded-full border text-blue-400 bg-blue-900/30 border-blue-800">
@@ -151,11 +151,11 @@ async function save() {
       <!-- EDIT -->
       <div v-else class="flex flex-col gap-8">
         <section>
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Info</div>
+          <div class="section-label">Info</div>
           <div>
-            <label class="block text-white text-sm mb-1">Bio</label>
+            <label class="label">Bio</label>
             <textarea v-model="profile.bio" rows="4" placeholder="Describe your background..."
-              class="bg-blue-600/10 border border-blue-900 rounded-md w-full px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"></textarea>
+              class="textarea"></textarea>
           </div>
           <div class="mt-4">
             <label class="flex items-center gap-3 cursor-pointer">
@@ -165,7 +165,7 @@ async function save() {
           </div>
         </section>
         <section>
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Expertise Areas</div>
+          <div class="section-label">Expertise Areas</div>
           <div class="flex flex-wrap gap-2 mb-3">
             <span v-for="(area, i) in profile.expertise_areas" :key="area"
               class="text-xs font-medium px-3 py-1.5 rounded-full border text-blue-400 bg-blue-900/30 border-blue-800 flex items-center gap-1.5">

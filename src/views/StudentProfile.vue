@@ -91,7 +91,7 @@ const levelColor: Record<string, string> = {
 </script>
 
 <template>
-  <div class="px-20 py-16 pt-24">
+  <div class="container-main">
     <div class="bg-blue-950 absolute rounded-full h-96 w-96 -z-10 -right-20 -top-10 blur-sm"></div>
 
     <div v-if="loading" class="text-slate-500 text-sm">Loading...</div>
@@ -133,7 +133,7 @@ const levelColor: Record<string, string> = {
       <div v-if="isNew"
         class="border border-yellow-800/50 bg-yellow-900/10 rounded-xl px-6 py-4 mb-8">
         <div class="text-sm font-semibold text-yellow-400 mb-1">Profile not filled in yet</div>
-        <div class="text-xs text-slate-500">Fill in your profile before submitting an application</div>
+        <div class="text-muted-sm">Fill in your profile before submitting an application</div>
       </div>
 
       <div v-if="success"
@@ -145,24 +145,24 @@ const levelColor: Record<string, string> = {
       <!-- VIEW MODE -->
       <div v-if="!editMode" class="flex flex-col gap-10">
         <section>
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Basic Info</div>
+          <div class="section-label">Basic Info</div>
           <div class="grid grid-cols-2 gap-4">
-            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
-              <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">University</div>
+            <div class="card">
+              <div class="label-hint">University</div>
               <div class="text-white font-medium">{{ profile.university || '—' }}</div>
             </div>
-            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
-              <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Study Program</div>
+            <div class="card">
+              <div class="label-hint">Study Program</div>
               <div class="text-white font-medium">{{ profile.study_program || '—' }}</div>
             </div>
-            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
-              <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Year of Study</div>
+            <div class="card">
+              <div class="label-hint">Year of Study</div>
               <div class="text-white font-medium">
                 {{ profile.year_of_study ? `${profile.year_of_study}. year` : '—' }}
               </div>
             </div>
-            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
-              <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">GitHub</div>
+            <div class="card">
+              <div class="label-hint">GitHub</div>
               <a v-if="profile.github_url" :href="profile.github_url" target="_blank"
                 class="text-blue-400 hover:text-blue-300 text-sm transition break-all">
                 {{ profile.github_url }}
@@ -177,7 +177,7 @@ const levelColor: Record<string, string> = {
         </section>
 
         <section>
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Skills</div>
+          <div class="section-label">Skills</div>
           <div v-if="profile.skills.length" class="flex flex-wrap gap-2">
             <span v-for="s in profile.skills" :key="s.skill"
               :class="['text-xs font-medium px-3 py-1.5 rounded-full border', levelColor[s.level]]">
@@ -188,7 +188,7 @@ const levelColor: Record<string, string> = {
         </section>
 
         <section>
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Academic Declaration</div>
+          <div class="section-label">Academic Declaration</div>
           <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5 flex items-center gap-3">
             <div :class="['w-5 h-5 rounded border flex items-center justify-center flex-shrink-0',
               profile.academic_declaration_confirmed ? 'bg-blue-600 border-blue-600' : 'border-slate-600']">
@@ -204,50 +204,50 @@ const levelColor: Record<string, string> = {
       <!-- EDIT MODE -->
       <div v-else class="flex flex-col gap-8">
         <section>
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Basic Info</div>
+          <div class="section-label">Basic Info</div>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-white text-sm mb-1">University <span class="text-red-400">*</span></label>
+              <label class="label">University <span class="text-error">*</span></label>
               <input v-model="profile.university" type="text" placeholder="e.g. UKF Nitra"
-                class="bg-blue-600/10 border border-blue-900 rounded-md w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+                class="input" />
             </div>
             <div>
-              <label class="block text-white text-sm mb-1">Study Program <span class="text-red-400">*</span></label>
+              <label class="label">Study Program <span class="text-error">*</span></label>
               <input v-model="profile.study_program" type="text" placeholder="e.g. Applied Informatics"
-                class="bg-blue-600/10 border border-blue-900 rounded-md w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+                class="input" />
             </div>
             <div>
-              <label class="block text-white text-sm mb-1">Year of Study <span class="text-red-400">*</span></label>
+              <label class="label">Year of Study <span class="text-error">*</span></label>
               <select v-model="profile.year_of_study"
                 class="bg-blue-600/10 border border-blue-900 rounded-md w-full h-9 px-3 text-white focus:outline-none focus:border-blue-500">
-                <option :value="null" disabled class="bg-[#080f1e]">Select year</option>
-                <option v-for="y in [1,2,3,4,5,6]" :key="y" :value="y" class="bg-[#080f1e]">{{ y }}. year</option>
+                <option :value="null" disabled class="bg-dark">Select year</option>
+                <option v-for="y in [1,2,3,4,5,6]" :key="y" :value="y" class="bg-dark">{{ y }}. year</option>
               </select>
             </div>
             <div>
-              <label class="block text-white text-sm mb-1">GitHub URL</label>
+              <label class="label">GitHub URL</label>
               <input v-model="profile.github_url" type="url" placeholder="https://github.com/username"
-                class="bg-blue-600/10 border border-blue-900 rounded-md w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+                class="input" />
             </div>
           </div>
           <div class="mt-4">
-            <label class="block text-white text-sm mb-1">Bio</label>
+            <label class="label">Bio</label>
             <textarea v-model="profile.bio" rows="3" placeholder="Tell us about yourself..."
-              class="bg-blue-600/10 border border-blue-900 rounded-md w-full px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"></textarea>
+              class="textarea"></textarea>
           </div>
         </section>
 
         <section>
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Skills</div>
+          <div class="section-label">Skills</div>
           <div class="flex flex-col gap-2">
             <div v-for="(s, i) in profile.skills" :key="i" class="flex gap-2 items-center">
               <input v-model="s.skill" type="text" placeholder="e.g. Vue.js"
                 class="bg-blue-600/10 border border-blue-900 rounded-md h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 flex-1" />
               <select v-model="s.level"
                 class="bg-blue-600/10 border border-blue-900 rounded-md h-9 px-3 text-white focus:outline-none focus:border-blue-500 w-36">
-                <option value="beginner" class="bg-[#080f1e]">Beginner</option>
-                <option value="intermediate" class="bg-[#080f1e]">Intermediate</option>
-                <option value="advanced" class="bg-[#080f1e]">Advanced</option>
+                <option value="beginner" class="bg-dark">Beginner</option>
+                <option value="intermediate" class="bg-dark">Intermediate</option>
+                <option value="advanced" class="bg-dark">Advanced</option>
               </select>
               <button @click="removeSkill(i)" type="button"
                 class="text-slate-600 hover:text-red-400 text-xl transition px-1 leading-none">×</button>
@@ -260,7 +260,7 @@ const levelColor: Record<string, string> = {
         </section>
 
         <section>
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Academic Declaration</div>
+          <div class="section-label">Academic Declaration</div>
           <div class="bg-blue-600/10 border border-blue-900 rounded-xl p-5">
             <label class="flex items-start gap-3 cursor-pointer">
               <input v-model="profile.academic_declaration_confirmed" type="checkbox" class="mt-0.5 accent-blue-500" />

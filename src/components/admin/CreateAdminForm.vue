@@ -55,27 +55,27 @@ async function createAdmin() {
   <div class="max-w-md">
     <form @submit.prevent="createAdmin" class="space-y-4">
       <div>
-        <label class="block text-sm font-medium text-white mb-2">First Name</label>
+        <label class="label-small">First Name</label>
         <input v-model="form.first_name" type="text" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-white mb-2">Last Name</label>
+        <label class="label-small">Last Name</label>
         <input v-model="form.last_name" type="text" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-white mb-2">Email</label>
+        <label class="label-small">Email</label>
         <input v-model="form.email" type="email" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-white mb-2">Password</label>
+        <label class="label-small">Password</label>
         <input v-model="form.password" type="password" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-white mb-2">Admin Role</label>
+        <label class="label-small">Admin Role</label>
         <select v-model="form.role" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm">
           <option v-for="role in adminRoles" :key="role" :value="role">
             {{ role }}

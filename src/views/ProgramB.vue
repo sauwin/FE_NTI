@@ -35,23 +35,23 @@ const goToUpload = () => {
       <div class="flex flex-wrap lg:flex-nowrap gap-6">
         <div class="flex-1 min-w-62 border-2 border-blue-600 rounded-2xl p-8 bg-slate-900/50">
           <div class="text-6xl font-bold text-blue-500">1.</div> 
-          <h3 class="text-xl font-bold mt-8">Company Submission</h3>
-          <div class="text-sm text-gray-300 mt-4">A company defines a real technical problem, budget, and expectations.</div>
+          <h3 class="heading-xl">Company Submission</h3>
+          <div class="text-muted">A company defines a real technical problem, budget, and expectations.</div>
         </div>
         <div class="flex-1 min-w-62 border-2 border-blue-800 rounded-2xl p-8 bg-slate-900/50">
           <div class="text-6xl font-bold text-blue-600">2.</div>
-          <h3 class="text-xl font-bold mt-8">Team Matching</h3>
-          <div class="text-sm text-gray-300 mt-4">NTI assigns or selects student teams based on skills and motivation.</div>
+          <h3 class="heading-xl">Team Matching</h3>
+          <div class="text-muted">NTI assigns or selects student teams based on skills and motivation.</div>
         </div>
         <div class="flex-1 min-w-62 border-2 border-blue-600 rounded-2xl p-8 bg-slate-900/50">
           <div class="text-6xl font-bold text-blue-500">3.</div> 
-          <h3 class="text-xl font-bold mt-8">Execution</h3>
-          <div class="text-sm text-gray-300 mt-4">Teams work with mentors and Product Owners on real deliverables.</div>
+          <h3 class="heading-xl">Execution</h3>
+          <div class="text-muted">Teams work with mentors and Product Owners on real deliverables.</div>
         </div>
         <div class="flex-1 min-w-62 border-2 border-blue-800 rounded-2xl p-8 bg-slate-900/50">
           <div class="text-6xl font-bold text-blue-600">4.</div> 
-          <h3 class="text-xl font-bold mt-8">Delivery</h3>
-          <div class="text-sm text-gray-300 mt-4">Final solution is reviewed, accepted by company, and archived.</div>
+          <h3 class="heading-xl">Delivery</h3>
+          <div class="text-muted">Final solution is reviewed, accepted by company, and archived.</div>
         </div>
       </div>
     </section>

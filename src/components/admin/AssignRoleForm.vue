@@ -50,7 +50,7 @@ async function assignRole() {
   <div class="max-w-md">
     <form @submit.prevent="assignRole" class="space-y-4">
       <div>
-        <label class="block text-sm font-medium text-white mb-2">Select User</label>
+        <label class="label-small">Select User</label>
         <select v-model="selectedUserId" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm">
           <option value="">Choose user...</option>
           <option v-for="user in users" :key="user.id" :value="user.id">
@@ -60,7 +60,7 @@ async function assignRole() {
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-white mb-2">Select Role</label>
+        <label class="label-small">Select Role</label>
         <select v-model="selectedRole" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm">
           <option value="">Choose role...</option>
           <option v-for="role in availableRoles" :key="role" :value="role">

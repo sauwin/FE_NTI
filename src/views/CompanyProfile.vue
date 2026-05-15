@@ -64,7 +64,7 @@ async function save() {
 </script>
 
 <template>
-  <div class="px-20 py-16 pt-24">
+  <div class="container-main">
     <div class="bg-blue-950 absolute rounded-full h-96 w-96 -z-10 -right-20 -top-10 blur-sm"></div>
 
     <div v-if="loading" class="text-slate-500 text-sm">Loading...</div>
@@ -99,7 +99,7 @@ async function save() {
 
       <div v-if="isNew" class="border border-yellow-800/50 bg-yellow-900/10 rounded-xl px-6 py-4 mb-8">
         <div class="text-sm font-semibold text-yellow-400 mb-1">Profile not filled in yet</div>
-        <div class="text-xs text-slate-500">Fill in your company profile to submit projects</div>
+        <div class="text-muted-sm">Fill in your company profile to submit projects</div>
       </div>
       <div v-if="success" class="border border-green-800/50 bg-green-900/10 rounded-xl px-6 py-3 mb-8">
         <span class="text-green-400 text-sm font-medium">Profile saved successfully</span>
@@ -109,22 +109,22 @@ async function save() {
       <!-- VIEW -->
       <div v-if="!editMode" class="flex flex-col gap-10">
         <section>
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Company Info</div>
+          <div class="section-label">Company Info</div>
           <div class="grid grid-cols-2 gap-4">
-            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
-              <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Company Name</div>
+            <div class="card">
+              <div class="label-hint">Company Name</div>
               <div class="text-white font-medium">{{ profile.name || '—' }}</div>
             </div>
-            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
-              <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Registration Number</div>
+            <div class="card">
+              <div class="label-hint">Registration Number</div>
               <div class="text-white font-medium">{{ profile.registration_number || '—' }}</div>
             </div>
-            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
-              <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Sector</div>
+            <div class="card">
+              <div class="label-hint">Sector</div>
               <div class="text-white font-medium">{{ profile.sector || '—' }}</div>
             </div>
-            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
-              <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Website</div>
+            <div class="card">
+              <div class="label-hint">Website</div>
               <a v-if="profile.website" :href="profile.website" target="_blank"
                 class="text-blue-400 hover:text-blue-300 text-sm transition break-all">
                 {{ profile.website }}
@@ -142,33 +142,33 @@ async function save() {
       <!-- EDIT -->
       <div v-else class="flex flex-col gap-6">
         <section>
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Company Info</div>
+          <div class="section-label">Company Info</div>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-white text-sm mb-1">Company Name <span class="text-red-400">*</span></label>
+              <label class="label">Company Name <span class="text-error">*</span></label>
               <input v-model="profile.name" type="text" placeholder="e.g. TechCorp s.r.o."
-                class="bg-blue-600/10 border border-blue-900 rounded-md w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+                class="input" />
             </div>
             <div>
-              <label class="block text-white text-sm mb-1">Registration Number (IČO)</label>
+              <label class="label">Registration Number (IČO)</label>
               <input v-model="profile.registration_number" type="text" placeholder="12345678"
-                class="bg-blue-600/10 border border-blue-900 rounded-md w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+                class="input" />
             </div>
             <div>
-              <label class="block text-white text-sm mb-1">Sector</label>
+              <label class="label">Sector</label>
               <input v-model="profile.sector" type="text" placeholder="e.g. Software Development"
-                class="bg-blue-600/10 border border-blue-900 rounded-md w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+                class="input" />
             </div>
             <div>
-              <label class="block text-white text-sm mb-1">Website</label>
+              <label class="label">Website</label>
               <input v-model="profile.website" type="url" placeholder="https://example.com"
-                class="bg-blue-600/10 border border-blue-900 rounded-md w-full h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500" />
+                class="input" />
             </div>
           </div>
           <div class="mt-4">
-            <label class="block text-white text-sm mb-1">Description</label>
+            <label class="label">Description</label>
             <textarea v-model="profile.description" rows="4" placeholder="Describe your company..."
-              class="bg-blue-600/10 border border-blue-900 rounded-md w-full px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"></textarea>
+              class="textarea"></textarea>
           </div>
         </section>
       </div>

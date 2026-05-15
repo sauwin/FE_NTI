@@ -75,7 +75,7 @@ onMounted(() => { fetchData() })
 </script>
 
 <template>
-  <div class="px-20 py-16 pt-24">
+  <div class="container-main">
     <div class="bg-blue-950 absolute rounded-full h-96 w-96 -z-10 -right-20 -top-10"></div>
 
     <div v-if="!isAuthentified" class="flex flex-col items-center justify-center py-32 gap-4">
@@ -123,7 +123,7 @@ onMounted(() => { fetchData() })
            class="border border-orange-800/50 bg-orange-900/10 rounded-xl px-6 py-4 flex items-center justify-between gap-4 mb-8">
         <div>
           <div class="text-sm font-semibold text-orange-400 mb-1">Role pending approval</div>
-          <div class="text-xs text-slate-500">An NTI administrator will confirm your role. You will be notified by email.</div>
+          <div class="text-muted-sm">An NTI administrator will confirm your role. You will be notified by email.</div>
         </div>
       </div>
 
@@ -132,7 +132,7 @@ onMounted(() => { fetchData() })
            class="border border-yellow-800/50 bg-yellow-900/10 rounded-xl px-6 py-4 flex items-center justify-between gap-4 mb-8">
         <div>
           <div class="text-sm font-semibold text-yellow-400 mb-1">Complete your profile</div>
-          <div class="text-xs text-slate-500">Fill in your profile before using the full platform</div>
+          <div class="text-muted-sm">Fill in your profile before using the full platform</div>
         </div>
         <router-link :to="profileRoute[userObj!.role_slug!] ?? '/dashboard'"
                      class="bg-yellow-600 hover:bg-yellow-500 text-white px-5 py-2 rounded-lg text-xs font-medium transition whitespace-nowrap">
@@ -141,8 +141,8 @@ onMounted(() => { fetchData() })
       </div>
 
       <!-- Quick actions --><!--
-      <section class="mb-16">
-        <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Quick actions</div>
+      <section class="section-divider-md">
+        <div class="section-label">Quick actions</div>
         <div class="flex gap-4 flex-wrap">
           <router-link
             v-if="userObj?.role_slug === 'student'"
@@ -166,7 +166,7 @@ onMounted(() => { fetchData() })
 
       <!-- Applications -->
       <section v-if="!['super_admin', 'nti_admin'].includes(userObj?.role_slug)">
-        <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">My Applications</div>
+        <div class="section-label">My Applications</div>
         <div v-if="applications.length === 0" class="border border-slate-800 rounded-2xl p-12 text-center bg-slate-900/30">
           <p class="text-slate-500 text-sm">No applications yet.</p>
           <p class="text-slate-600 text-xs mt-1">Submit your first application to get started.</p>
@@ -195,8 +195,8 @@ onMounted(() => { fetchData() })
       </section>
       <!-- ── STUDENT ── -->
       <div v-if="userObj?.role_slug === 'student'">
-        <section class="mb-16">
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Quick actions</div>
+        <section class="section-divider-md">
+          <div class="section-label">Quick actions</div>
           <div class="flex gap-4 flex-wrap">
             <router-link to="/programs/a/upload"
                          class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
@@ -220,8 +220,8 @@ onMounted(() => { fetchData() })
 
       <!-- ── MENTOR ── -->
       <div v-else-if="userObj?.role_slug === 'mentor'">
-        <section class="mb-16">
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Quick actions</div>
+        <section class="section-divider-md">
+          <div class="section-label">Quick actions</div>
           <div class="flex gap-4 flex-wrap">
             <router-link to="/mentor-profile"
                          class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
@@ -234,7 +234,7 @@ onMounted(() => { fetchData() })
           </div>
         </section>
         <section>
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">My Projects</div>
+          <div class="section-label">My Projects</div>
           <div class="border border-slate-800 rounded-2xl p-12 text-center bg-slate-900/30">
             <p class="text-slate-500 text-sm">No projects assigned yet.</p>
           </div>
@@ -243,8 +243,8 @@ onMounted(() => { fetchData() })
 
       <!-- ── COMPANY ── -->
       <div v-else-if="userObj?.role_slug === 'company'">
-        <section class="mb-16">
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">Quick actions</div>
+        <section class="section-divider-md">
+          <div class="section-label">Quick actions</div>
           <div class="flex gap-4 flex-wrap">
             <router-link to="/programs/b/upload"
                          class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
@@ -261,7 +261,7 @@ onMounted(() => { fetchData() })
           </div>
         </section>
         <section>
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-5">My Tasks</div>
+          <div class="section-label">My Tasks</div>
           <div class="border border-slate-800 rounded-2xl p-12 text-center bg-slate-900/30">
             <p class="text-slate-500 text-sm">No tasks submitted yet.</p>
           </div>

@@ -33,28 +33,28 @@ const goToUpload = () => {
       <div class="flex flex-wrap lg:flex-nowrap gap-6">
         <div class="flex-1 min-w-62 border-2 border-blue-600 rounded-2xl p-8 bg-slate-900/50">
           <div class="text-6xl font-bold text-blue-500">1.</div> 
-          <h3 class="text-xl font-bold mt-8">Register Team</h3>
-          <div class="text-sm text-gray-300 mt-4">Create your profile and form a team of at least 3 members to get started.</div>
+          <h3 class="heading-xl">Register Team</h3>
+          <div class="text-muted">Create your profile and form a team of at least 3 members to get started.</div>
         </div>
         <div class="flex-1 min-w-62 border-2 border-blue-800 rounded-2xl p-8 bg-slate-900/50">
           <div class="text-6xl font-bold text-blue-600">2.</div>
-          <h3 class="text-xl font-bold mt-8">Submit Proposal</h3>
-          <div class="text-sm text-gray-300 mt-4">Upload your Roadmap, Executive Summary, and Technical Architecture.</div>
+          <h3 class="heading-xl">Submit Proposal</h3>
+          <div class="text-muted">Upload your Roadmap, Executive Summary, and Technical Architecture.</div>
         </div>
         <div class="flex-1 min-w-62 border-2 border-blue-600 rounded-2xl p-8 bg-slate-900/50">
           <div class="text-6xl font-bold text-blue-500">3.</div> 
-          <h3 class="text-xl font-bold mt-8">Evaluation</h3>
-          <div class="text-sm text-gray-300 mt-4">Your application will undergo formal verification and assessment by the commission.</div>
+          <h3 class="heading-xl">Evaluation</h3>
+          <div class="text-muted">Your application will undergo formal verification and assessment by the commission.</div>
         </div>
         <div class="flex-1 min-w-62 border-2 border-blue-800 rounded-2xl p-8 bg-slate-900/50">
           <div class="text-6xl font-bold text-blue-600">4.</div> 
-          <h3 class="text-xl font-bold mt-8">Incubation</h3>
-          <div class="text-sm text-gray-300 mt-4">Upon approval, receive funding, get assigned a mentor, and start building your product.</div>
+          <h3 class="heading-xl">Incubation</h3>
+          <div class="text-muted">Upon approval, receive funding, get assigned a mentor, and start building your product.</div>
         </div>
       </div>
     </section>
 
-    <section class="mb-24">
+    <section class="section-divider">
       <h2 class="text-3xl font-medium mb-10">What projects are we looking for?</h2>
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <div v-for="stack in ['Software Development', 'AI & Data Tech', 'Web Applications', 'Game Development', 'IoT & Embedded']" 
