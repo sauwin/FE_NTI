@@ -269,7 +269,7 @@ onMounted(() => { fetchData() })
       </div>
 
       <!-- ── ADMIN ── -->
-      <AdminDashboard v-if="userObj?.role_slug === 'nti_admin' || userObj?.role_slug === 'super_admin'" />
+      <AdminDashboard v-if="userObj?.role_slug === 'nti_admin' || userObj?.role_slug === 'super_admin'" :user-role="userObj?.role_slug" />
 
       <!-- Fallback -->
       <div v-else>
