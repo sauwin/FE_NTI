@@ -5,6 +5,8 @@ import CreateAdminForm from './CreateAdminForm.vue'
 import AssignRoleForm from './AssignRoleForm.vue'
 import UsersList from './UsersList.vue'
 import UserManagementTable from './UserManagementTable.vue'
+import PendingApprovalsTable from './PendingApprovalTable.vue'
+import AdminLogs from "./AdminLogs.vue"
 
 const props = defineProps<{
   userRole?: string
@@ -13,6 +15,7 @@ const props = defineProps<{
 const activeTab = ref('overview')
 const stats = ref({ users: 0, activeProjects: 0, pendingApprovals: 0 })
 const users = ref([])
+const pendingUsers = ref([])
 const error = ref('')
 const isSuperAdmin = props.userRole === 'super_admin'
 const selectedUserProfile = ref<any>(null)
@@ -34,6 +37,7 @@ async function loadStats() {
     users.value = res.data
     stats.value.users = res.data.length
     const appRes = await api.get('/admin/approvals')
+    pendingUsers.value = appRes.data
     stats.value.pendingApprovals = appRes.data.length
   } catch (e: any) {
     error.value = e.response?.data?.message || 'Failed to load data'
@@ -72,6 +76,18 @@ activeTab === 'assign-role'
 ? 'border-b-2 border-blue-500 text-blue-400'
 : 'text-slate-500 hover:text-slate-400'
 ]">Assign Role</button>
+        <button @click="activeTab = 'approvals'" :class="[
+'px-4 py-2 text-sm font-medium transition',
+activeTab === 'approvals'
+? 'border-b-2 border-blue-500 text-blue-400'
+: 'text-slate-500 hover:text-slate-400'
+]">Pending Approvals</button>
+        <button @click="activeTab = 'logs'" :class="[
+'px-4 py-2 text-sm font-medium transition',
+activeTab === 'logs'
+? 'border-b-2 border-blue-500 text-blue-400'
+: 'text-slate-500 hover:text-slate-400'
+]">Logs</button>
       </div>
     </div>
 
@@ -110,6 +126,16 @@ activeTab === 'assign-role'
     <!-- Assign Role Tab -->
     <div v-show="activeTab === 'assign-role'">
       <AssignRoleForm :users="users" @assigned="loadStats" />
+    </div>
+
+    <!-- Pending Approvals Tab -->
+    <div v-show="activeTab === 'approvals'">
+      <PendingApprovalsTable :pending-users="pendingUsers" @refresh="loadStats" />
+    </div>
+
+    <!-- Logs Tab -->
+    <div v-show="activeTab === 'logs'">
+      <AdminLogs :users="users" />
     </div>
 
     <!-- User Profile Modal -->

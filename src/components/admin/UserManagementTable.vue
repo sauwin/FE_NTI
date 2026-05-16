@@ -38,6 +38,31 @@ async function blockUser(userId: number) {
   }
 }
 
+async function unblockUser(userId: number) {
+  const confirmed = await useConfirm({
+    title: 'Unblock User',
+    message: 'Unblock this user? They will be able to access the platform.',
+    confirmText: 'Unblock',
+    cancelText: 'Cancel',
+    danger: false,
+  })
+  if (!confirmed) return
+
+  loading.value = true
+  try {
+    await api.post(`/admin/unblock/${userId}`)
+    success.value = true
+    message.value = 'User unblocked'
+    emit('refresh')
+    setTimeout(() => success.value = false, 3000)
+  } catch (e: any) {
+    success.value = false
+    message.value = e.response?.data?.message || 'Failed to unblock user'
+  } finally {
+    loading.value = false
+  }
+}
+
 async function deleteUser(userId: number) {
   const confirmed = await useConfirm({
     title: 'Delete User',
@@ -138,6 +163,9 @@ user.status === 'active' ? 'bg-green-900/30 text-green-400' : 'bg-yellow-900/30 
               </button>
               <button v-if="user.status === 'active'" @click="blockUser(user.id)" :disabled="loading" class="text-xs bg-yellow-600/30 hover:bg-yellow-600/50 disabled:opacity-50 text-yellow-400 px-2 py-1 rounded transition">
                 Block
+              </button>
+              <button v-if="user.status === 'blocked'" @click="unblockUser(user.id)" :disabled="loading" class="text-xs bg-green-600/30 hover:bg-green-600/50 disabled:opacity-50 text-green-400 px-2 py-1 rounded transition">
+                Unblock
               </button>
               <button v-if="isSuperAdmin" @click="deleteUser(user.id)" :disabled="loading" class="text-xs bg-red-600/30 hover:bg-red-600/50 disabled:opacity-50 text-red-400 px-2 py-1 rounded transition">
                 Delete
