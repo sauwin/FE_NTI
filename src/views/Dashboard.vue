@@ -165,7 +165,7 @@ onMounted(() => { fetchData() })
       </section>-->
 
       <!-- Applications -->
-      <section v-if="!['super_admin', 'nti_admin'].includes(userObj?.role_slug)">
+      <section v-if="!['super_admin', 'nti_admin'].includes(userObj?.role_slug ?? '')">
         <div class="section-label">My Applications</div>
         <div v-if="applications.length === 0" class="border border-slate-800 rounded-2xl p-12 text-center bg-slate-900/30">
           <p class="text-slate-500 text-sm">No applications yet.</p>
