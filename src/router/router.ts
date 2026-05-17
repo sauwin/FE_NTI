@@ -20,6 +20,7 @@ import StudentProfile from '../views/StudentProfile.vue'
 import MentorProfile from '../views/MentorProfile.vue'
 import CompanyProfile from '../views/CompanyProfile.vue'
 import ArticleView from '../views/ArticleView.vue'
+import CompanyTaskForm from '../views/CompanyTaskForm.vue'
 
 const routes = [
   {
@@ -29,6 +30,8 @@ const routes = [
       { path: '', component: Home },
       { path: 'about', component: About },
       { path: 'faq', component: FAQ },
+      { path: 'privacy', component: () => import('../views/Privacy.vue') },
+      { path: 'terms', component: () => import('../views/Terms.vue') },
       { path: 'programs/a', component: ProgramA },
       { path: 'programs/b', component: ProgramB },
       { path: 'dashboard', component: Dashboard, meta: { requiresAuth: true }},
@@ -53,7 +56,9 @@ const routes = [
     component: FormLayout,
     children: [
       { path: 'a/upload', component: ProgramAForm, meta: { requiresAuth: true, requiresProfile: true, role: 'student' }},
-      { path: 'b/upload', component: ProgramBForm, meta: { requiresAuth: true, role: 'company' }},
+      { path: 'b/upload', component: ProgramBForm, meta: { requiresAuth: true, requiresProfile: true, role: 'student' }},
+      { path: 'b/apply/:callOrganizationId', component: ProgramBForm, meta: { requiresAuth: true, requiresProfile: true, role: 'student' }},
+      { path: 'b/create-task', component: CompanyTaskForm, meta: { requiresAuth: true, role: 'company' }},
     ],
   },
   { path: '/applications/:id', component: () => import('../views/ApplicationView.vue'), meta: { requiresAuth: true } },
@@ -70,19 +75,19 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach(async (to, _, next) => {
+router.beforeEach(async (to) => {
   const auth = useAuthStore()
 
   if (to.meta.requiresAuth && !auth.isLoggedIn) {
-    return next('/auth/login')
+    return '/auth/login'
   }
 
   if (to.meta.requiresAuth && auth.user?.status === 'pending_verification') {
-    return next('/pending-verification')
+    return '/pending-verification'
   }
 
   if (to.meta.role && auth.role !== to.meta.role) {
-    return next('/unauthorized')
+    return '/unauthorized'
   }
 
   // Require student profile before applying
@@ -90,13 +95,13 @@ router.beforeEach(async (to, _, next) => {
     try {
       const { default: api } = await import('../api/axios')
       const res = await api.get('/profile/student')
-      if (!res.data) return next('/profile/complete')
+      if (!res.data) return '/profile/complete'
     } catch {
-      return next('/profile/complete')
+      return '/profile/complete'
     }
   }
 
-  next()
+  return true
 })
 
 export default router

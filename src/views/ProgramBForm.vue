@@ -1,29 +1,43 @@
 <script setup lang="ts">
-import {watch, ref, onMounted, computed} from 'vue'
-import { useRouter } from 'vue-router'
+import { watch, ref, onMounted, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import api from '../api/axios'
 import { useAuthStore } from '../stores/auth'
-import { useRoute } from 'vue-router'
+
+// Інтерфейс для збереження структури чернетки
+interface DraftData {
+  teamName: string
+  teamDescription: string
+  projectTitle: string
+  proposedSolution: string
+}
 
 const route = useRoute()
-const editId = ref<number | null>(route.query.edit ? Number(route.query.edit) : null)
-const isEditMode = computed(() => !!editId.value)
 const router = useRouter()
-const error = ref('')
-const loading = ref(false)
-const step = ref(1)
 const auth = useAuthStore()
-const callId = ref<number | null>(null)
+
+const callId = ref<number | null>(
+  route.query.call_organization_id ? Number(route.query.call_organization_id) :
+  route.params.callOrganizationId ? Number(route.params.callOrganizationId) :
+  route.params.callId ? Number(route.params.callId) :
+  null
+)
+const editId = ref<number | null>(route.query.edit ? Number(route.query.edit) : null)
+const isEditMode = computed<boolean>(() => !!editId.value)
+
+const error = ref<string>('')
+const loading = ref<boolean>(false)
+const step = ref<number>(1)
 
 const DRAFT_KEY = 'draft_program_b'
 
-// Step 1 — Team info
-const teamName = ref('')
-const teamDescription = ref('')
-const projectTitle = ref('')
-const proposedSolution = ref('')
+// Реактивні текстові змінні
+const teamName = ref<string>('')
+const teamDescription = ref<string>('')
+const projectTitle = ref<string>('')
+const proposedSolution = ref<string>('')
 
-// Step 2 — Documents
+// Сувора типізація сховища файлів
 const files = ref<Record<string, File | null>>({
   cv: null,
   motivation_letter: null,
@@ -36,106 +50,88 @@ const docLabels: Record<string, string> = {
   technical_proposal: 'Technical Proposal / Solution Design',
 }
 
-function debounce(fn: Function, delay: number) {
+// Сувора типізація дженерик-функції Debounce в TypeScript
+function debounce<T extends (...args: any[]) => any>(fn: T, delay: number) {
   let timer: ReturnType<typeof setTimeout>
-  return (...args: any[]) => {
+  return (...args: Parameters<T>): void => {
     clearTimeout(timer)
     timer = setTimeout(() => fn(...args), delay)
   }
 }
 
-const saveDraftToServer = debounce(async (data: object) => {
+const saveDraftToServer = debounce(async (data: DraftData) => {
   try {
-    await api.post('/drafts', {
-      program_type: 'b',
-      data: data,
-    })
+    await api.post('/drafts', { program_type: 'b', data })
   } catch {}
 }, 1500)
 
-// Auth guard + draft
 onMounted(async () => {
   if (!auth.isLoggedIn) {
     router.push('/auth/login')
     return
   }
-  try {
-    await api.get('/auth/me')
-  } catch {
-    auth.logout()
-    router.push('/auth/login')
+
+  if (!callId.value && !isEditMode.value) {
+    error.value = 'No challenge selected. Please choose a task from the catalog first.'
+    return
   }
 
   try {
-    const res = await api.get('/calls/active/b')
-    callId.value = res.data.id
-  } catch {
-    error.value = 'No active call available'
-  }
-
-  try {
-    const res = await api.get('/drafts/b')
-    if (res.data) {
+    // Спроба отримати чернетку з сервера
+    const res = await api.get<{ data: Partial<DraftData> }>('/drafts/b')
+    if (res.data?.data) {
       teamName.value = res.data.data.teamName ?? ''
       teamDescription.value = res.data.data.teamDescription ?? ''
       projectTitle.value = res.data.data.projectTitle ?? ''
       proposedSolution.value = res.data.data.proposedSolution ?? ''
     }
   } catch {
+    // Якщо сервер лежить — беремо з localStorage
     const saved = localStorage.getItem(DRAFT_KEY)
     if (saved) {
-      const draft = JSON.parse(saved)
+      const draft = JSON.parse(saved) as Partial<DraftData>
       teamName.value = draft.teamName ?? ''
       teamDescription.value = draft.teamDescription ?? ''
       projectTitle.value = draft.projectTitle ?? ''
       proposedSolution.value = draft.proposedSolution ?? ''
     }
   }
-  if (editId.value) {
-    try {
-      const res = await api.get(`/applications/${editId.value}`)
-    } catch {
-      error.value = 'Could not load application'
-    }
-  }
 })
 
+// Слідкуємо за змінами для автозбереження чернетки
 watch([teamName, teamDescription, projectTitle, proposedSolution], () => {
-  localStorage.setItem(DRAFT_KEY, JSON.stringify({
+  const currentData: DraftData = {
     teamName: teamName.value,
     teamDescription: teamDescription.value,
     projectTitle: projectTitle.value,
     proposedSolution: proposedSolution.value,
-  }))
-
-  saveDraftToServer({
-    teamName: teamName.value,
-    teamDescription: teamDescription.value,
-    projectTitle: projectTitle.value,
-    proposedSolution: proposedSolution.value,
-  })
+  }
+  localStorage.setItem(DRAFT_KEY, JSON.stringify(currentData))
+  saveDraftToServer(currentData)
 })
 
-function onFileChange(type: string, event: Event) {
-  const input = event.target as HTMLInputElement
+// КРИТИЧНО ДЛЯ TS: Правильна типізація завантаження файлу через Input Event
+function onFileChange(type: string, event: Event): void {
+  const input = event.target as HTMLInputElement // Явне приведення типів
   if (input.files && input.files[0]) {
     files.value[type] = input.files[0]
   }
 }
 
-function nextStep() {
+function nextStep(): void {
   error.value = ''
   if (!teamName.value.trim()) { error.value = 'Team name is required'; return }
   if (!projectTitle.value.trim()) { error.value = 'Project title is required'; return }
-  if (!proposedSolution.value.trim()) { error.value = 'Please briefly describe your proposed solution'; return }
+  if (!proposedSolution.value.trim()) { error.value = 'Please describe your solution'; return }
   step.value = 2
 }
 
-async function submit() {
-  if (!callId.value) { error.value = 'No active call available'; return }
+async function submit(): Promise<void> {
+  if (!callId.value) { error.value = 'No challenge selected'; return }
   error.value = ''
   loading.value = true
 
+  // Перевірка наявності всіх файлів
   for (const key of Object.keys(files.value)) {
     if (!files.value[key]) {
       error.value = `Please upload: ${docLabels[key]}`
@@ -147,14 +143,22 @@ async function submit() {
   try {
     let applicationId: number
 
+    interface AppResponse {
+      application_id: number
+    }
+
     if (isEditMode.value) {
       await api.patch(`/applications/${editId.value}`, {
-        applicant_type: 'team', program_type: 'b',
+        applicant_type: 'team', 
+        program_type: 'b',
+        call_id: callId.value 
       })
       applicationId = editId.value!
     } else {
-      const appRes = await api.post('/applications', {
-        applicant_type: 'team', program_type: 'b',
+      const appRes = await api.post<AppResponse>('/applications', {
+        applicant_type: 'team', 
+        program_type: 'b',
+        call_id: callId.value 
       })
       applicationId = appRes.data.application_id
     }
@@ -165,9 +169,9 @@ async function submit() {
       technical_proposal: 'other',
     }
 
+    // Завантаження файлів через FormData
     for (const [type, file] of Object.entries(files.value)) {
-      if (!file) { error.value = `Missing: ${docLabels[type]}`; loading.value = false; return }
-
+      if (!file) continue
       const formData = new FormData()
       formData.append('file', file)
       formData.append('type', typeMap[type] ?? type)
@@ -184,7 +188,7 @@ async function submit() {
     step.value = 3
 
   } catch (e: any) {
-    error.value = e?.response?.data?.message || 'Something went wrong. Please try again.'
+    error.value = e?.response?.data?.message || 'Something went wrong.'
   } finally {
     loading.value = false
   }
@@ -192,127 +196,60 @@ async function submit() {
 </script>
 
 <template>
-  <div class="flex-center-page">
-    <div class="w-full max-w-xl">
-
-      <!-- Header -->
-      <div class="mb-8 text-center">
-        <div class="inline-block text-xs font-semibold tracking-widest uppercase text-blue-400 bg-blue-600/10 border border-blue-900 px-4 py-1.5 rounded-full mb-4">
-          Program B
-        </div>
-        <h1 class="font-bold text-4xl text-white">Submit Application</h1>
-        <p class="text-gray-400 mt-2 text-sm">Live practice program</p>
-      </div>
-
-      <!-- Step indicator -->
-      <div class="flex items-center mb-8">
-        <div class="flex-center">
-          <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
-            step >= 1 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">1</div>
-          <span class="text-xs mt-1.5" :class="step >= 1 ? 'text-blue-400' : 'text-gray-600'">Info</span>
-        </div>
-        <div class="flex-1 h-px mx-2 mb-4" :class="step >= 2 ? 'bg-blue-600' : 'bg-blue-900'"></div>
-        <div class="flex-center">
-          <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
-            step >= 2 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">2</div>
-          <span class="text-xs mt-1.5" :class="step >= 2 ? 'text-blue-400' : 'text-gray-600'">Documents</span>
-        </div>
-        <div class="flex-1 h-px mx-2 mb-4" :class="step >= 3 ? 'bg-blue-600' : 'bg-blue-900'"></div>
-        <div class="flex-center">
-          <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
-            step >= 3 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">3</div>
-          <span class="text-xs mt-1.5" :class="step >= 3 ? 'text-blue-400' : 'text-gray-600'">Final</span>
+  <div class="flex justify-center items-center min-h-screen py-10">
+    <div class="w-full max-w-xl bg-slate-950 p-8 border border-blue-900 rounded-2xl">
+      
+      <div v-if="step === 1">
+        <h2 class="text-2xl font-bold text-white mb-4">Application details (Team)</h2>
+        <p v-if="error" class="text-red-500 text-sm mb-4 bg-red-500/10 p-2 rounded border border-red-900">{{ error }}</p>
+        
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="block text-xs text-gray-400 font-semibold uppercase mb-1">Team Name *</label>
+            <input v-model="teamName" type="text" class="w-full bg-blue-900/20 border border-blue-900 h-10 px-3 rounded text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 font-semibold uppercase mb-1">Team Description (Optional)</label>
+            <textarea v-model="teamDescription" rows="2" class="w-full bg-blue-900/20 border border-blue-900 p-3 rounded text-white resize-none"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 font-semibold uppercase mb-1">Project Title *</label>
+            <input v-model="projectTitle" type="text" class="w-full bg-blue-900/20 border border-blue-900 h-10 px-3 rounded text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 font-semibold uppercase mb-1">Proposed Solution Outline *</label>
+            <textarea v-model="proposedSolution" rows="4" class="w-full bg-blue-900/20 border border-blue-900 p-3 rounded text-white resize-none"></textarea>
+          </div>
+          <button @click="nextStep" class="bg-blue-600 text-white h-11 rounded font-medium mt-2 hover:bg-blue-700 transition">Next: Upload Documents</button>
         </div>
       </div>
 
-      <!-- STEP 3 — Final -->
-      <div v-if="step === 3" class="text-center py-12">
-        <div class="text-5xl mb-4">✓</div>
-        <h2 class="text-2xl font-bold text-white mb-2">Application Submitted</h2>
-        <p class="text-gray-400 text-sm mb-6">Your application is under review. The committee will contact you by email.</p>
-        <button @click="router.push('/dashboard')"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-8 h-10 rounded-md text-sm cursor-pointer">
-          Go to Dashboard
-        </button>
-      </div>
+      <div v-else id="step === 2">
+        <h2 class="text-2xl font-bold text-white mb-4">Required Documentation</h2>
+        <p v-if="error" class="text-red-500 text-sm mb-4 bg-red-500/10 p-2 rounded border border-red-900">{{ error }}</p>
 
-      <!-- STEP 1 — Project Info -->
-      <form v-else-if="step === 1" class="flex-col-gap" @submit.prevent="nextStep">
-        <p v-if="error" class="text-error-sm">{{ error }}</p>
+        <div class="flex flex-col gap-4">
+          <div v-for="(label, key) in docLabels" :key="key" class="border border-slate-900 p-4 rounded bg-slate-900/40">
+            <label class="block text-sm font-medium text-gray-300 mb-2">{{ label }} *</label>
+            <input type="file" accept=".pdf,.doc,.docx" @change="onFileChange(key, $event)" class="text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-900 file:text-blue-200 hover:file:bg-blue-800 file:cursor-pointer" />
+            <p v-if="files[key]" class="text-xs text-green-400 mt-1">✓ Selected: {{ files[key]?.name }}</p>
+          </div>
 
-        <div>
-          <label class="label">Team name <span class="text-error">*</span></label>
-          <input v-model="teamName" type="text" placeholder="e.g. CodeForce Team"
-            class="input-mt" />
-        </div>
-
-        <div>
-          <label class="label">Team description</label>
-          <textarea v-model="teamDescription" rows="2" placeholder="Briefly describe your team's skills and experience..."
-            class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"></textarea>
-        </div>
-
-        <div>
-          <label class="label">Project / task title <span class="text-error">*</span></label>
-          <input v-model="projectTitle" type="text" placeholder="Name of the company task you are applying for"
-            class="input-mt" />
-        </div>
-
-        <div>
-          <label class="label">Proposed solution <span class="text-error">*</span></label>
-          <textarea v-model="proposedSolution" rows="4" placeholder="Briefly describe how your team plans to solve this task..."
-            class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"></textarea>
-        </div>
-
-        <div class="bg-blue-600/10 border border-blue-900 rounded-md p-4 text-sm text-gray-400">
-          After submitting, the NTI committee will review your application together with the company representative. You will be notified by email about the decision.
-        </div>
-
-        <p v-if="teamName || teamDescription || projectTitle || proposedSolution" class="text-muted-sm">
-          ✦ Draft auto-saved
-        </p>
-
-        <button type="submit"
-          class="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white w-full h-10 mt-2 rounded-md text-sm font-medium">
-          Continue to Documents →
-        </button>
-      </form>
-
-      <!-- STEP 2 — Documents -->
-      <form v-else-if="step === 2" class="flex-col-gap" @submit.prevent="submit">
-        <p v-if="error" class="text-error-sm">{{ error }}</p>
-
-        <p class="text-gray-400 text-sm">Upload all required documents before submitting.</p>
-
-        <div v-for="(label, type) in docLabels" :key="type">
-          <label class="label">
-            {{ label }} <span class="text-error">*</span>
-          </label>
-          <div class="relative">
-            <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx"
-              @change="onFileChange(type, $event)"
-              class="hidden" :id="`file-${type}`" />
-            <label :for="`file-${type}`"
-              class="flex items-center justify-between bg-blue-600/10 border border-blue-900 hover:border-blue-600 rounded-md px-3 h-9 cursor-pointer transition-colors">
-              <span class="text-sm" :class="files[type] ? 'text-white' : 'text-gray-600'">
-                {{ files[type] ? (files[type] as File).name : 'Choose file...' }}
-              </span>
-              <span class="text-xs text-blue-400">Browse</span>
-            </label>
+          <div class="flex gap-4 mt-2">
+            <button @click="step = 1" class="w-1/3 border border-blue-900 text-gray-400 h-11 rounded hover:text-white transition">Back</button>
+            <button @click="submit" :disabled="loading" class="flex-1 bg-blue-600 text-white h-11 rounded font-medium hover:bg-blue-700 transition">
+              {{ loading ? 'Submitting...' : 'Submit Application' }}
+            </button>
           </div>
         </div>
+      </div>
 
-        <div class="flex gap-3 mt-2">
-          <button type="button" @click="step = 1"
-            class="border border-blue-900 hover:border-blue-600 text-gray-400 hover:text-white w-1/3 h-10 rounded-md text-sm cursor-pointer transition-colors">
-            ← Back
-          </button>
-          <button type="submit" :disabled="loading"
-            class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 cursor-pointer text-white flex-1 h-10 rounded-md text-sm font-medium">
-            {{ loading ? 'Submitting...' : 'Submit Application' }}
-          </button>
-        </div>
-      </form>
+      <div v-if="step === 3" class="text-center py-6">
+        <div class="text-5xl mb-4 text-green-500">🎉</div>
+        <h2 class="text-2xl font-bold text-white mb-2">Application Submitted!</h2>
+        <p class="text-gray-400 text-sm mb-6">Your team proposal has been registered successfully under call organization parameters.</p>
+        <button @click="router.push('/programs/b')" class="bg-blue-600 text-white px-6 py-2 rounded text-sm font-medium hover:bg-blue-700 transition">Back to Program B</button>
+      </div>
 
     </div>
   </div>

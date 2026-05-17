@@ -1,18 +1,64 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import Documentation from '../components/Documentation.vue'
+import { useAuthStore } from '../stores/auth'
+import api from '../api/axios'
 
-const router = useRouter()
-
-const goToUpload = () => {
-  router.push('/programs/b/upload')
+interface Organization {
+  id: number
+  name: string
+  logo_path: string | null
 }
 
+interface CallOrganizationTask {
+  id: number
+  call_id: number
+  organization_id: number
+  budget: string | null
+  brief: string
+  status: 'draft' | 'published' | 'in_matching' | 'assigned' | 'in_progress' | 'closed'
+  title: string 
+  deadline_at: string | null
+  min_team_size: number
+  max_team_size: number
+  organization?: Organization
+}
+
+const router = useRouter()
+const auth = useAuthStore()
+
+const tasks = ref<CallOrganizationTask[]>([])
+const myTasks = ref<CallOrganizationTask[]>([])
+const loading = ref<boolean>(true)
+
+onMounted(async () => {
+  try {
+    if (auth.isCompany) {
+      const res = await api.get<CallOrganizationTask[]>('/company/tasks')
+      myTasks.value = res.data
+    } else {
+      const res = await api.get<CallOrganizationTask[]>('/programs/b/tasks')
+      tasks.value = res.data
+    }
+  } catch (err) {
+    console.error('Error fetching tasks data:', err)
+  } finally {
+    loading.value = false
+  }
+})
+
+const goToCreateTask = (): void => {
+  router.push('/programs/b/create-task')
+}
+
+const applyForTask = (callId: number): void => {
+  router.push(`/programs/b/apply/${callId}`)
+}
 </script>
 
 <template>
   <div class="px-20 py-10">
-    <div class="bg-blue-950 absolute rounded-[100%] h-120 w-120 -z-10 -right-30 -top-10 "></div>
+    <div class="bg-blue-950 absolute rounded-[100%] h-120 w-120 -z-10 -right-30 -top-10"></div>
 
     <div class="pb-20 mb-12">
       <div class="bg-blue-600 text-blue-100 text-xs font-bold text-center py-1 rounded-xl w-32 mb-5">PROGRAM B</div>
@@ -20,83 +66,70 @@ const goToUpload = () => {
         Real-world<br> 
         <span class="text-blue-400">Industry Practice</span>
       </h1>
-      <p class="text-gray-300 max-w-2xl mt-7 mb-8 leading-relaxed">
-        Program B connects student teams with real companies and live industry challenges. 
-        You work on production-like tasks, deliver real value, and gain hands-on experience in a team-driven environment.
-      </p>
 
-      <div class="flex gap-4">
-        <button @click="goToUpload" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition">Submit Application</button>
-        <button class="border border-gray-500 hover:border-gray-400 text-gray-300 px-8 py-3 rounded-lg font-medium transition">Learn more</button>
+      <div v-if="auth.isCompany" class="mt-12">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-white">Our Published Challenges</h2>
+          <button @click="goToCreateTask" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition">
+            + Create New Task
+          </button>
+        </div>
+
+        <div v-if="loading" class="text-gray-400">Loading tasks...</div>
+        <div v-else class="grid gap-6 md:grid-cols-2">
+          <div v-for="task in myTasks" :key="task.id" class="border border-blue-900 bg-slate-950 p-6 rounded-2xl">
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="text-xl font-bold text-blue-300">{{ task.title }}</h3>
+              <span class="text-xs px-2 py-0.5 rounded border border-blue-800 bg-blue-950 text-blue-400 uppercase font-semibold">
+                {{ task.status }}
+              </span>
+            </div>
+            <p class="text-gray-400 text-sm mb-4 line-clamp-3">{{ task.brief }}</p>
+            <div class="flex justify-between text-xs text-gray-500 border-t border-slate-900 pt-4">
+              <span>Budget: {{ task.budget ? `€${task.budget}` : 'Not specified' }}</span>
+              <span>Deadline: {{ task.deadline_at ? new Date(task.deadline_at).toLocaleDateString() : 'N/A' }}</span>
+            </div>
+          </div>
+          <div v-if="!myTasks.length" class="text-gray-500 italic">You haven't added any challenges yet.</div>
+        </div>
       </div>
+
+      <div v-else class="mt-12">
+        <h2 class="text-2xl font-bold text-white mb-6">Available Industry Tasks</h2>
+        
+        <div v-if="loading" class="text-gray-400">Loading catalog...</div>
+        <div v-else class="grid gap-6 md:grid-cols-2">
+          <div v-for="task in tasks" :key="task.id" class="border border-blue-800 bg-slate-950 p-6 rounded-2xl flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-blue-900 rounded-full flex items-center justify-center font-bold text-xs text-white">
+                    {{ task.organization?.name?.substring(0,2).toUpperCase() }}
+                  </div>
+                  <span class="text-sm text-gray-400 font-medium">{{ task.organization?.name }}</span>
+                </div>
+                <span v-if="task.budget" class="text-xs bg-green-500/10 text-green-400 px-2 py-0.5 rounded border border-green-900">
+                  €{{ task.budget }}
+                </span>
+              </div>
+              <h3 class="text-xl font-bold text-white mb-2">{{ task.title }}</h3>
+              <p class="text-gray-400 text-sm mb-6 line-clamp-4">{{ task.brief }}</p>
+            </div>
+
+            <div class="border-t border-slate-900 pt-4 mt-auto">
+              <div class="flex justify-between text-xs text-gray-500 mb-4">
+                <span>Required Team: {{ task.min_team_size }}-{{ task.max_team_size }} persons</span>
+                <span>Till: {{ task.deadline_at ? new Date(task.deadline_at).toLocaleDateString() : 'N/A' }}</span>
+              </div>
+              <button @click="applyForTask(task.id)" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-medium transition">
+                Apply with Team
+              </button>
+            </div>
+          </div>
+          <div v-if="!tasks.length" class="text-gray-500 italic">No available challenges at the moment.</div>
+        </div>
+      </div>
+
     </div>
-
-    <section class="justify-left mb-24">
-      <div class="section-label-light">Application process</div>
-      <h2 class="text-3xl font-medium mb-10">How does it work?</h2>
-      <div class="flex flex-wrap lg:flex-nowrap gap-6">
-        <div class="flex-1 min-w-62 border-2 border-blue-800 rounded-2xl p-8 bg-slate-950">
-          <div class="text-6xl font-bold text-blue-300">1.</div> 
-          <h3 class="heading-xl">Company Submission</h3>
-          <div class="text-muted">A company defines a real technical problem, budget, and expectations.</div>
-        </div>
-        <div class="flex-1 min-w-62 border-2 border-blue-800 rounded-2xl p-8 bg-slate-950">
-          <div class="text-6xl font-bold text-blue-300">2.</div>
-          <h3 class="heading-xl">Team Matching</h3>
-          <div class="text-muted">NTI assigns or selects student teams based on skills and motivation.</div>
-        </div>
-        <div class="flex-1 min-w-62 border-2 border-blue-800 rounded-2xl p-8 bg-slate-950">
-          <div class="text-6xl font-bold text-blue-300">3.</div> 
-          <h3 class="heading-xl">Execution</h3>
-          <div class="text-muted">Teams work with mentors and Product Owners on real deliverables.</div>
-        </div>
-        <div class="flex-1 min-w-62 border-2 border-blue-800 rounded-2xl p-8 bg-slate-950">
-          <div class="text-6xl font-bold text-blue-300">4.</div> 
-          <h3 class="heading-xl">Delivery</h3>
-          <div class="text-muted">Final solution is reviewed, accepted by company, and archived.</div>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="section-label-light">Attachment</div>
-      <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-        <h2 class="text-3xl font-semibold text-white">Mandatory documentation</h2>
-      </div>
-
-      <div class="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <div class="rounded-4xl border border-slate-800 bg-slate-950 p-6">
-          <p class="text-sm uppercase tracking-[0.24em] text-slate-500">01</p>
-          <h3 class="mt-4 text-xl font-semibold text-white">Executive Summary</h3>
-          <p class="mt-3 text-slate-400">Problem statement, value proposition and go-to-market plan.</p>
-        </div>
-        <div class="rounded-4xl border border-slate-800 bg-slate-950 p-6">
-          <p class="text-sm uppercase tracking-[0.24em] text-slate-500">02</p>
-          <h3 class="mt-4 text-xl font-semibold text-white">Technical Architecture</h3>
-          <p class="mt-3 text-slate-400">Technology stack, module design, and development approach.</p>
-        </div>
-        <div class="rounded-4xl border border-slate-800 bg-slate-950 p-6">
-          <p class="text-sm uppercase tracking-[0.24em] text-slate-500">03</p>
-          <h3 class="mt-4 text-xl font-semibold text-white">Roadmap</h3>
-          <p class="mt-3 text-slate-400">Milestones, timelines, and implementation phases.</p>
-        </div>
-        <div class="rounded-4xl border border-slate-800 bg-slate-950 p-6">
-          <p class="text-sm uppercase tracking-[0.24em] text-slate-500">04</p>
-          <h3 class="mt-4 text-xl font-semibold text-white">Budget Plan</h3>
-          <p class="mt-3 text-slate-400">Planned spending and resource allocation.</p>
-        </div>
-        <div class="rounded-4xl border border-slate-800 bg-slate-950 p-6">
-          <p class="text-sm uppercase tracking-[0.24em] text-slate-500">05</p>
-          <h3 class="mt-4 text-xl font-semibold text-white">Risk Analysis</h3>
-          <p class="mt-3 text-slate-400">Risks, dependencies and mitigation strategy.</p>
-        </div>
-        <div class="rounded-4xl border border-slate-800 bg-slate-950 p-6">
-          <p class="text-sm uppercase tracking-[0.24em] text-slate-500">06</p>
-          <h3 class="mt-4 text-xl font-semibold text-white">Monetization Model</h3>
-          <p class="mt-3 text-slate-400">Revenue strategy and business model.</p>
-        </div>
-      </div>
-    </section>
-
   </div>
 </template>
