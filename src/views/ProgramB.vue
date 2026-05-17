@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import Documentation from '../components/Documentation.vue'
 
 const router = useRouter()
 
@@ -31,25 +32,26 @@ const goToUpload = () => {
     </div>
 
     <section class="justify-left mb-24">
+      <div class="section-label-light">Application process</div>
       <h2 class="text-3xl font-medium mb-10">How does it work?</h2>
       <div class="flex flex-wrap lg:flex-nowrap gap-6">
-        <div class="flex-1 min-w-62 border-2 border-blue-600 rounded-2xl p-8 bg-slate-900/50">
-          <div class="text-6xl font-bold text-blue-500">1.</div> 
+        <div class="flex-1 min-w-62 border-2 border-blue-800 rounded-2xl p-8 bg-slate-950">
+          <div class="text-6xl font-bold text-blue-300">1.</div> 
           <h3 class="heading-xl">Company Submission</h3>
           <div class="text-muted">A company defines a real technical problem, budget, and expectations.</div>
         </div>
-        <div class="flex-1 min-w-62 border-2 border-blue-800 rounded-2xl p-8 bg-slate-900/50">
-          <div class="text-6xl font-bold text-blue-600">2.</div>
+        <div class="flex-1 min-w-62 border-2 border-blue-800 rounded-2xl p-8 bg-slate-950">
+          <div class="text-6xl font-bold text-blue-300">2.</div>
           <h3 class="heading-xl">Team Matching</h3>
           <div class="text-muted">NTI assigns or selects student teams based on skills and motivation.</div>
         </div>
-        <div class="flex-1 min-w-62 border-2 border-blue-600 rounded-2xl p-8 bg-slate-900/50">
-          <div class="text-6xl font-bold text-blue-500">3.</div> 
+        <div class="flex-1 min-w-62 border-2 border-blue-800 rounded-2xl p-8 bg-slate-950">
+          <div class="text-6xl font-bold text-blue-300">3.</div> 
           <h3 class="heading-xl">Execution</h3>
           <div class="text-muted">Teams work with mentors and Product Owners on real deliverables.</div>
         </div>
-        <div class="flex-1 min-w-62 border-2 border-blue-800 rounded-2xl p-8 bg-slate-900/50">
-          <div class="text-6xl font-bold text-blue-600">4.</div> 
+        <div class="flex-1 min-w-62 border-2 border-blue-800 rounded-2xl p-8 bg-slate-950">
+          <div class="text-6xl font-bold text-blue-300">4.</div> 
           <h3 class="heading-xl">Delivery</h3>
           <div class="text-muted">Final solution is reviewed, accepted by company, and archived.</div>
         </div>
@@ -57,46 +59,44 @@ const goToUpload = () => {
     </section>
 
     <section>
-      <h2 class="text-3xl font-medium mb-10">Mandatory Documentation</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div 
-          class="flex gap-5 p-6 rounded-2xl border-2 bg-blue-900/10 border-blue-800 hover:border-blue-600 transition"
-          v-for="document, index in [
-            {
-              name: 'Executive Summary',
-              description: 'Problem description and solution'
-            },
-            {
-              name: 'Technical Architecture',
-              description: 'Description of Technologies and Modules'
-            },
-            {
-              name: 'Roadmap',
-              description: 'Milestones and Implementation Plan'
-            },
-            {
-              name: 'Budget Plan',
-              description: 'Grant Expenditure Plan'
-            },
-            {
-              name: 'Risk Analysis',
-              description: 'Identifying and Mitigating Risks'
-            },
-            {
-              name: 'Monetization Model',
-              description: 'How value and revenue are generated'
-            },
-          ]" 
-          :key="index"
-        >
-          <div class="shrink-0 w-12 h-12 bg-blue-600/20 rounded-lg flex items-center justify-center text-blue-400 font-bold">{{index+1}}</div>
-          <div>
-            <h4 class="font-bold text-lg text-blue-100">{{document["name"]}}</h4>
-            <p class="text-xs text-gray-500 mt-1 uppercase tracking-tighter">{{document["description"]}}</p>
-          </div>
+      <div class="section-label-light">Attachment</div>
+      <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <h2 class="text-3xl font-semibold text-white">Mandatory documentation</h2>
+      </div>
+
+      <div class="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div class="rounded-4xl border border-slate-800 bg-slate-950 p-6">
+          <p class="text-sm uppercase tracking-[0.24em] text-slate-500">01</p>
+          <h3 class="mt-4 text-xl font-semibold text-white">Executive Summary</h3>
+          <p class="mt-3 text-slate-400">Problem statement, value proposition and go-to-market plan.</p>
+        </div>
+        <div class="rounded-4xl border border-slate-800 bg-slate-950 p-6">
+          <p class="text-sm uppercase tracking-[0.24em] text-slate-500">02</p>
+          <h3 class="mt-4 text-xl font-semibold text-white">Technical Architecture</h3>
+          <p class="mt-3 text-slate-400">Technology stack, module design, and development approach.</p>
+        </div>
+        <div class="rounded-4xl border border-slate-800 bg-slate-950 p-6">
+          <p class="text-sm uppercase tracking-[0.24em] text-slate-500">03</p>
+          <h3 class="mt-4 text-xl font-semibold text-white">Roadmap</h3>
+          <p class="mt-3 text-slate-400">Milestones, timelines, and implementation phases.</p>
+        </div>
+        <div class="rounded-4xl border border-slate-800 bg-slate-950 p-6">
+          <p class="text-sm uppercase tracking-[0.24em] text-slate-500">04</p>
+          <h3 class="mt-4 text-xl font-semibold text-white">Budget Plan</h3>
+          <p class="mt-3 text-slate-400">Planned spending and resource allocation.</p>
+        </div>
+        <div class="rounded-4xl border border-slate-800 bg-slate-950 p-6">
+          <p class="text-sm uppercase tracking-[0.24em] text-slate-500">05</p>
+          <h3 class="mt-4 text-xl font-semibold text-white">Risk Analysis</h3>
+          <p class="mt-3 text-slate-400">Risks, dependencies and mitigation strategy.</p>
+        </div>
+        <div class="rounded-4xl border border-slate-800 bg-slate-950 p-6">
+          <p class="text-sm uppercase tracking-[0.24em] text-slate-500">06</p>
+          <h3 class="mt-4 text-xl font-semibold text-white">Monetization Model</h3>
+          <p class="mt-3 text-slate-400">Revenue strategy and business model.</p>
         </div>
       </div>
     </section>
-  
+
   </div>
 </template>
