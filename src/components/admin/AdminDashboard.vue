@@ -7,6 +7,7 @@ import UsersList from './UsersList.vue'
 import UserManagementTable from './UserManagementTable.vue'
 import PendingApprovalsTable from './PendingApprovalTable.vue'
 import AdminLogs from "./AdminLogs.vue"
+import UserManagementPanel from "@/components/admin/UserManagementPanel.vue";
 
 const props = defineProps<{
   userRole?: string
@@ -115,17 +116,12 @@ activeTab === 'logs'
 
     <!-- Users Tab -->
     <div v-show="activeTab === 'users'">
-      <UserManagementTable :users="users" :is-super-admin="isSuperAdmin" @refresh="loadStats" @view-user="viewUserProfile" />
+      <UserManagementPanel :users="users" :is-super-admin="isSuperAdmin" @refresh="loadStats" />
     </div>
 
     <!-- Create Admin Tab -->
     <div v-show="activeTab === 'create-admin' && isSuperAdmin">
       <CreateAdminForm @created="loadStats" />
-    </div>
-
-    <!-- Assign Role Tab -->
-    <div v-show="activeTab === 'assign-role'">
-      <AssignRoleForm :users="users" @assigned="loadStats" />
     </div>
 
     <!-- Pending Approvals Tab -->
