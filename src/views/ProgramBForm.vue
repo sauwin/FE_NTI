@@ -4,7 +4,6 @@ import { useRouter, useRoute } from 'vue-router'
 import api from '../api/axios'
 import { useAuthStore } from '../stores/auth'
 
-// Інтерфейс для збереження структури чернетки
 interface DraftData {
   teamName: string
   teamDescription: string
@@ -31,13 +30,11 @@ const step = ref<number>(1)
 
 const DRAFT_KEY = 'draft_program_b'
 
-// Реактивні текстові змінні
 const teamName = ref<string>('')
 const teamDescription = ref<string>('')
 const projectTitle = ref<string>('')
 const proposedSolution = ref<string>('')
 
-// Сувора типізація сховища файлів
 const files = ref<Record<string, File | null>>({
   cv: null,
   motivation_letter: null,
@@ -50,7 +47,6 @@ const docLabels: Record<string, string> = {
   technical_proposal: 'Technical Proposal / Solution Design',
 }
 
-// Сувора типізація дженерик-функції Debounce в TypeScript
 function debounce<T extends (...args: any[]) => any>(fn: T, delay: number) {
   let timer: ReturnType<typeof setTimeout>
   return (...args: Parameters<T>): void => {
@@ -77,7 +73,6 @@ onMounted(async () => {
   }
 
   try {
-    // Спроба отримати чернетку з сервера
     const res = await api.get<{ data: Partial<DraftData> }>('/drafts/b')
     if (res.data?.data) {
       teamName.value = res.data.data.teamName ?? ''
@@ -86,7 +81,6 @@ onMounted(async () => {
       proposedSolution.value = res.data.data.proposedSolution ?? ''
     }
   } catch {
-    // Якщо сервер лежить — беремо з localStorage
     const saved = localStorage.getItem(DRAFT_KEY)
     if (saved) {
       const draft = JSON.parse(saved) as Partial<DraftData>
@@ -98,7 +92,6 @@ onMounted(async () => {
   }
 })
 
-// Слідкуємо за змінами для автозбереження чернетки
 watch([teamName, teamDescription, projectTitle, proposedSolution], () => {
   const currentData: DraftData = {
     teamName: teamName.value,
@@ -110,9 +103,8 @@ watch([teamName, teamDescription, projectTitle, proposedSolution], () => {
   saveDraftToServer(currentData)
 })
 
-// КРИТИЧНО ДЛЯ TS: Правильна типізація завантаження файлу через Input Event
 function onFileChange(type: string, event: Event): void {
-  const input = event.target as HTMLInputElement // Явне приведення типів
+  const input = event.target as HTMLInputElement
   if (input.files && input.files[0]) {
     files.value[type] = input.files[0]
   }
@@ -131,7 +123,6 @@ async function submit(): Promise<void> {
   error.value = ''
   loading.value = true
 
-  // Перевірка наявності всіх файлів
   for (const key of Object.keys(files.value)) {
     if (!files.value[key]) {
       error.value = `Please upload: ${docLabels[key]}`
@@ -169,7 +160,6 @@ async function submit(): Promise<void> {
       technical_proposal: 'other',
     }
 
-    // Завантаження файлів через FormData
     for (const [type, file] of Object.entries(files.value)) {
       if (!file) continue
       const formData = new FormData()
@@ -224,7 +214,7 @@ async function submit(): Promise<void> {
         </div>
       </div>
 
-      <div v-else id="step === 2">
+      <div v-else-if="step === 2">
         <h2 class="text-2xl font-bold text-white mb-4">Required Documentation</h2>
         <p v-if="error" class="text-red-500 text-sm mb-4 bg-red-500/10 p-2 rounded border border-red-900">{{ error }}</p>
 

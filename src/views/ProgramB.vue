@@ -37,6 +37,7 @@ onMounted(async () => {
       const res = await api.get<CallOrganizationTask[]>('/company/tasks')
       myTasks.value = res.data
     } else {
+      // Студенти повинні бачити тільки published та in_matching статуси
       const res = await api.get<CallOrganizationTask[]>('/programs/b/tasks')
       tasks.value = res.data
     }
@@ -54,10 +55,20 @@ const goToCreateTask = (): void => {
 const applyForTask = (callId: number): void => {
   router.push(`/programs/b/apply/${callId}`)
 }
+
+// Допоміжна функція для кольорів статусів
+const getStatusColor = (status: string) => {
+  switch(status) {
+    case 'draft': return 'bg-gray-800 text-gray-300 border-gray-600'
+    case 'published': return 'bg-blue-950 text-blue-400 border-blue-800'
+    case 'assigned': return 'bg-green-950 text-green-400 border-green-800'
+    default: return 'bg-slate-800 text-slate-300 border-slate-600'
+  }
+}
 </script>
 
 <template>
-  <div class="px-20 py-10">
+  <div class="px-20 py-10 relative overflow-hidden">
     <div class="bg-blue-950 absolute rounded-[100%] h-120 w-120 -z-10 -right-30 -top-10"></div>
 
     <div class="pb-20 mb-12">
@@ -69,7 +80,7 @@ const applyForTask = (callId: number): void => {
 
       <div v-if="auth.isCompany" class="mt-12">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold text-white">Our Published Challenges</h2>
+          <h2 class="text-2xl font-bold text-white">Our Technical Specifications</h2>
           <button @click="goToCreateTask" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition">
             + Create New Task
           </button>
@@ -80,14 +91,14 @@ const applyForTask = (callId: number): void => {
           <div v-for="task in myTasks" :key="task.id" class="border border-blue-900 bg-slate-950 p-6 rounded-2xl">
             <div class="flex justify-between items-start mb-2">
               <h3 class="text-xl font-bold text-blue-300">{{ task.title }}</h3>
-              <span class="text-xs px-2 py-0.5 rounded border border-blue-800 bg-blue-950 text-blue-400 uppercase font-semibold">
+              <span :class="['text-xs px-2 py-0.5 rounded border uppercase font-semibold', getStatusColor(task.status)]">
                 {{ task.status }}
               </span>
             </div>
             <p class="text-gray-400 text-sm mb-4 line-clamp-3">{{ task.brief }}</p>
             <div class="flex justify-between text-xs text-gray-500 border-t border-slate-900 pt-4">
               <span>Budget: {{ task.budget ? `€${task.budget}` : 'Not specified' }}</span>
-              <span>Deadline: {{ task.deadline_at ? new Date(task.deadline_at).toLocaleDateString() : 'N/A' }}</span>
+              <span>Call ID: {{ task.call_id }}</span>
             </div>
           </div>
           <div v-if="!myTasks.length" class="text-gray-500 italic">You haven't added any challenges yet.</div>
@@ -104,9 +115,9 @@ const applyForTask = (callId: number): void => {
               <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 bg-blue-900 rounded-full flex items-center justify-center font-bold text-xs text-white">
-                    {{ task.organization?.name?.substring(0,2).toUpperCase() }}
+                    {{ task.organization?.name?.substring(0,2).toUpperCase() || 'CO' }}
                   </div>
-                  <span class="text-sm text-gray-400 font-medium">{{ task.organization?.name }}</span>
+                  <span class="text-sm text-gray-400 font-medium">{{ task.organization?.name || 'Unknown Company' }}</span>
                 </div>
                 <span v-if="task.budget" class="text-xs bg-green-500/10 text-green-400 px-2 py-0.5 rounded border border-green-900">
                   €{{ task.budget }}
@@ -118,8 +129,7 @@ const applyForTask = (callId: number): void => {
 
             <div class="border-t border-slate-900 pt-4 mt-auto">
               <div class="flex justify-between text-xs text-gray-500 mb-4">
-                <span>Required Team: {{ task.min_team_size }}-{{ task.max_team_size }} persons</span>
-                <span>Till: {{ task.deadline_at ? new Date(task.deadline_at).toLocaleDateString() : 'N/A' }}</span>
+                <span>Required Team: {{ task.min_team_size || 1 }}-{{ task.max_team_size || 5 }} persons</span>
               </div>
               <button @click="applyForTask(task.id)" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-medium transition">
                 Apply with Team
