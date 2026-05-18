@@ -1,33 +1,35 @@
 <script setup lang="ts">
-  import { ref } from 'vue'
-  import { useRouter } from 'vue-router'
-  import api from '../api/axios'
-  import { useAuthStore } from '../stores/auth'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import api from '../api/axios'
+import { useAuthStore } from '../stores/auth'
 
-  const email = ref('')
-  const password = ref('')
-  const error = ref('')
-  const router = useRouter()
-  const auth = useAuthStore()
-  async function submit() {
-    error.value = ''
-    try {
-      const res = await api.post('/auth/login', { email: email.value, password: password.value })
-      auth.login(res.data.token, res.data.user)
-      router.push('/dashboard')
-    } catch (e: any) {
-      if (e.response?.status === 403) {
-        const msg = e.response.data.message
-        if (msg === 'pending_verification') {
-          router.push('/pending-verification')
-        } else if (msg === 'pending_approval') {
-          router.push('/pending-approval')
-        } else {
-          error.value = 'Access denied'
-        }
+const email = ref('')
+const password = ref('')
+const error = ref('')
+const router = useRouter()
+const auth = useAuthStore()
+async function submit() {
+  error.value = ''
+  try {
+    const res = await api.post('/auth/login', { email: email.value, password: password.value })
+    auth.login(res.data.token, res.data.user)
+    router.push('/dashboard')
+  } catch (e: any) {
+    if (e.response?.status === 403) {
+      const msg = e.response.data.message
+      if (msg === 'pending_verification') {
+        router.push('/pending-verification')
+      } else if (msg === 'pending_approval') {
+        router.push('/pending-approval')
+      } else {
+        error.value = 'Access denied'
       }
+    } else {
+      error.value = 'Invalid email or password'
     }
   }
+}
 </script>
 
 <template>
@@ -44,6 +46,9 @@
         <input v-model="password" type="password" class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-100 h-9" />
       </div>
       <input type="submit" class="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white w-100 h-10 mt-4">
+      <div class="text-center mt-4">
+        <router-link class="text-blue-500 hover:text-blue-600 text-sm" to="/auth/forgot-password">Forgot password?</router-link>
+      </div>
       <div class = "text-center mt-4">
         Not registered? <router-link class="text-blue-500 hover:text-blue-600" to="/auth/register">Create an account</router-link>
       </div>

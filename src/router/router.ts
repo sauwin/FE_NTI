@@ -21,8 +21,6 @@ import MentorProfile from '../views/MentorProfile.vue'
 import CompanyProfile from '../views/CompanyProfile.vue'
 import ArticleView from '../views/ArticleView.vue'
 import CompanyTaskForm from '../views/CompanyTaskForm.vue'
-import CallCreate from '../components/admin/CallCreate.vue'
-import CallEdit from '../components/admin/CallEdit.vue'
 
 const routes = [
   {
@@ -51,6 +49,8 @@ const routes = [
     children: [
       { path: 'login', component: Login },
       { path: 'register', component: Register },
+      { path: 'forgot-password', component: () => import('../views/ForgotPassword.vue') },
+      { path: 'reset-password', component: () => import('../views/ResetPassword.vue') },
     ],
   },
   {
@@ -62,12 +62,7 @@ const routes = [
       { path: 'b/apply/:callOrganizationId', component: ProgramBForm, meta: { requiresAuth: true, requiresProfile: true, role: 'student' }},
       { path: 'b/create-task', component: CompanyTaskForm, meta: { requiresAuth: true, role: 'company' }},
     ],
-    
   },
-  
-  { path: '/admin/calls/create', name: 'AdminCallCreate', component: CallCreate, meta: { requiresAuth: true, role: 'admin' } },
-  { path: '/admin/calls/:id/edit', name: 'AdminCallEdit', component: CallEdit, meta: { requiresAuth: true, role: 'admin' } },
-
   { path: '/applications/:id', component: () => import('../views/ApplicationView.vue'), meta: { requiresAuth: true } },
   { path: '/applications/:id/edit', component: () => import('../views/ApplicationEdit.vue'), meta: { requiresAuth: true } },
   { path: '/pending-verification', component: () => import('../views/PendingVerification.vue') },
