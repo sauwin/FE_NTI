@@ -12,7 +12,7 @@ const page = ref(1)
 const total = ref(0)
 const lastPage = ref(1)
 
-const actionTypes = ['approve', 'assign', 'remove', 'block', 'delete', 'create']
+const actionTypes = ['approve', 'assign', 'remove', 'block', 'delete', 'create', 'unblock']
 
 async function fetchLogs() {
   loading.value = true
@@ -49,6 +49,7 @@ const actionColor = (action: string) => {
     block: 'bg-red-900/30 text-red-400',
     delete: 'bg-red-900/30 text-red-400',
     create: 'bg-purple-900/30 text-purple-400',
+    unblock: 'bg-slate-900/30 text-green-400',
   }
   return colors[action] || 'bg-slate-900/30 text-slate-400'
 }
