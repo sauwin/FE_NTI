@@ -3,6 +3,12 @@
   "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
   "exclude": ["src/**/__tests__/*"],
   "compilerOptions": {
+    // Enforce consistent casing across imports and filenames.
+    "forceConsistentCasingInFileNames": true,
+
+    // Base library targets for browser + DOM APIs.
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+
     // Extra safety for array and object lookups, but may have false positives.
     "noUncheckedIndexedAccess": true,
 

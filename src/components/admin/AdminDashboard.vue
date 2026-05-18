@@ -1,94 +1,94 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import api from '../../api/axios'
-import CreateAdminForm from './CreateAdminForm.vue'
-import AssignRoleForm from './AssignRoleForm.vue'
-import UsersList from './UsersList.vue'
-import UserManagementTable from './UserManagementTable.vue'
+import UserManagementPanel from '@/components/admin/UserManagementPanel.vue'
 import PendingApprovalsTable from './PendingApprovalTable.vue'
-import AdminLogs from "./AdminLogs.vue"
-import UserManagementPanel from "@/components/admin/UserManagementPanel.vue";
+import AdminLogs from './AdminLogs.vue'
+import CreateAdminForm from './CreateAdminForm.vue'
+
+// Нові компоненти для ядра Programs + Calls (їх можна винести або рендерити на місці)
+import ProgramCallsManager from '@/components/admin/ProgramCallsManager.vue'
 
 const props = defineProps<{
   userRole?: string
 }>()
 
 const activeTab = ref('overview')
-const stats = ref({ users: 0, activeProjects: 0, pendingApprovals: 0 })
+const error = ref('')
+const loadingStats = ref(true)
+const isSuperAdmin = props.userRole === 'super_admin'
+
+// Оптимізований об'єкт статистики за документацією (модуль Reporting / BI)
+const stats = ref({
+  total_users: 0,
+  active_projects: 0,
+  pending_approvals: 0,
+  open_calls: 0
+})
+
 const users = ref([])
 const pendingUsers = ref([])
-const error = ref('')
-const isSuperAdmin = props.userRole === 'super_admin'
-const selectedUserProfile = ref<any>(null)
-const showUserProfile = ref(false)
 
-async function viewUserProfile(userId: number) {
+// 1. Оптимізоване завантаження агрегованих метрик (без завантаження 10k юзерів)
+async function loadAggregatedStats() {
   try {
-    const res = await api.get(`/admin/users/${userId}`)
-    selectedUserProfile.value = res.data
-    showUserProfile.value = true
+    loadingStats.value = true
+    const res = await api.get('/admin/reporting/dashboard-stats')
+    stats.value = res.data
   } catch (e: any) {
-    error.value = e.response?.data?.message || 'Failed to load user profile'
+    console.error('Failed to load aggregated stats, falling back...', e)
+    // Fallback якщо ендпоінт ще не готовий
+    stats.value.active_projects = 0
+  } finally {
+    loadingStats.value = false
   }
 }
 
-async function loadStats() {
+// 2. Завантаження детальних даних лише тоді, коли відкривається відповідний таб
+async function loadUserData() {
   try {
     const res = await api.get('/admin/users')
     users.value = res.data
-    stats.value.users = res.data.length
-    const appRes = await api.get('/admin/approvals')
-    pendingUsers.value = appRes.data
-    stats.value.pendingApprovals = appRes.data.length
+    stats.value.total_users = res.data.length // коригуємо локально
   } catch (e: any) {
-    error.value = e.response?.data?.message || 'Failed to load data'
+    error.value = e.response?.data?.message || 'Failed to load users'
   }
 }
 
-onMounted(() => loadStats())
+async function loadPendingApprovals() {
+  try {
+    const appRes = await api.get('/admin/approvals')
+    pendingUsers.value = appRes.data
+    stats.value.pending_approvals = appRes.data.length
+  } catch (e: any) {
+    error.value = e.response?.data?.message || 'Failed to load approvals'
+  }
+}
+
+// Слідкуємо за зміною табів, щоб не навантажувати мережу (Lazy Loading даних)
+const handleTabChange = (tab: string) => {
+  activeTab.value = tab
+  if (tab === 'users') loadUserData()
+  if (tab === 'approvals') loadPendingApprovals()
+}
+
+onMounted(() => {
+  loadAggregatedStats()
+})
 </script>
 
 <template>
-  <div>
+  <div class="p-6 bg-slate-950 min-h-screen text-slate-100">
     <div class="mb-8">
-      <h2 class="text-2xl font-bold text-white mb-4">Admin Panel</h2>
-      <div class="flex gap-2 border-b border-slate-800">
-        <button @click="activeTab = 'overview'" :class="[
-'px-4 py-2 text-sm font-medium transition',
-activeTab === 'overview'
-? 'border-b-2 border-blue-500 text-blue-400'
-: 'text-slate-500 hover:text-slate-400'
-]">Overview</button>
-        <button @click="activeTab = 'users'" :class="[
-'px-4 py-2 text-sm font-medium transition',
-activeTab === 'users'
-? 'border-b-2 border-blue-500 text-blue-400'
-: 'text-slate-500 hover:text-slate-400'
-]">Manage Users</button>
-        <button v-if="isSuperAdmin" @click="activeTab = 'create-admin'" :class="[
-'px-4 py-2 text-sm font-medium transition',
-activeTab === 'create-admin'
-? 'border-b-2 border-blue-500 text-blue-400'
-: 'text-slate-500 hover:text-slate-400'
-]">Create Admin</button>
-        <button @click="activeTab = 'assign-role'" :class="[
-'px-4 py-2 text-sm font-medium transition',
-activeTab === 'assign-role'
-? 'border-b-2 border-blue-500 text-blue-400'
-: 'text-slate-500 hover:text-slate-400'
-]">Assign Role</button>
-        <button @click="activeTab = 'approvals'" :class="[
-'px-4 py-2 text-sm font-medium transition',
-activeTab === 'approvals'
-? 'border-b-2 border-blue-500 text-blue-400'
-: 'text-slate-500 hover:text-slate-400'
-]">Pending Approvals</button>
-        <button @click="activeTab = 'logs'" :class="[
-'px-4 py-2 text-sm font-medium transition',
-activeTab === 'logs'
-? 'border-b-2 border-blue-500 text-blue-400'
-: 'text-slate-500 hover:text-slate-400'
-]">Logs</button>
+      <h2 class="text-3xl font-bold text-white mb-4">NTI Central Administration</h2>
+      
+      <div class="flex flex-wrap gap-2 border-b border-slate-800">
+        <button @click="handleTabChange('overview')" :class="[activeTab === 'overview' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Overview</button>
+        <button @click="handleTabChange('programs-calls')" :class="[activeTab === 'programs-calls' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Programs & Calls (Core)</button>
+        <button @click="handleTabChange('users')" :class="[activeTab === 'users' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Manage Users</button>
+        <button @click="handleTabChange('approvals')" :class="[activeTab === 'approvals' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Pending Approvals</button>
+        <button v-if="isSuperAdmin" @click="handleTabChange('create-admin')" :class="[activeTab === 'create-admin' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Create Admin</button>
+        <button @click="handleTabChange('logs')" :class="[activeTab === 'logs' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Audit Logs</button>
       </div>
     </div>
 
@@ -96,95 +96,46 @@ activeTab === 'logs'
       {{ error }}
     </div>
 
-    <!-- Overview Tab -->
     <div v-show="activeTab === 'overview'">
-      <div class="grid grid-cols-3 gap-4 mb-8">
-        <div class="border border-slate-800 rounded-2xl p-6 bg-slate-900/30">
-          <div class="text-xs text-slate-500 mb-1">Total Users</div>
-          <div class="text-2xl font-bold text-white">{{ stats.users }}</div>
+      <div v-if="loadingStats" class="text-slate-400 animate-pulse">Loading dashboard metrics...</div>
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="border border-slate-800 rounded-2xl p-6 bg-slate-900/50">
+          <div class="text-xs text-slate-500 uppercase font-mono mb-1">Total Users</div>
+          <div class="text-3xl font-bold text-white">{{ stats.total_users }}</div>
         </div>
-        <div class="border border-slate-800 rounded-2xl p-6 bg-slate-900/30">
-          <div class="text-xs text-slate-500 mb-1">Active Projects</div>
-          <div class="text-2xl font-bold text-white">{{ stats.activeProjects }}</div>
+        <div class="border border-slate-800 rounded-2xl p-6 bg-slate-900/50">
+          <div class="text-xs text-slate-500 uppercase font-mono mb-1">Active Projects</div>
+          <div class="text-3xl font-bold text-green-400">{{ stats.active_projects }}</div>
         </div>
-        <div class="border border-slate-800 rounded-2xl p-6 bg-slate-900/30">
-          <div class="text-xs text-slate-500 mb-1">Pending Approvals</div>
-          <div class="text-2xl font-bold text-white">{{ stats.pendingApprovals }}</div>
+        <div class="border border-slate-800 rounded-2xl p-6 bg-slate-900/50">
+          <div class="text-xs text-slate-500 uppercase font-mono mb-1">Pending Onboarding</div>
+          <div class="text-3xl font-bold text-yellow-500">{{ stats.pending_approvals }}</div>
+        </div>
+        <div class="border border-slate-800 rounded-2xl p-6 bg-slate-900/50">
+          <div class="text-xs text-slate-500 uppercase font-mono mb-1">Active Open Calls</div>
+          <div class="text-3xl font-bold text-blue-400">{{ stats.open_calls }}</div>
         </div>
       </div>
     </div>
 
-    <!-- Users Tab -->
+    <div v-show="activeTab === 'programs-calls'">
+      <ProgramCallsManager />
+    </div>
+
     <div v-show="activeTab === 'users'">
-      <UserManagementPanel :users="users" :is-super-admin="isSuperAdmin" @refresh="loadStats" />
+      <UserManagementPanel :users="users" :is-super-admin="isSuperAdmin" @refresh="loadUserData" />
     </div>
 
-    <!-- Create Admin Tab -->
-    <div v-show="activeTab === 'create-admin' && isSuperAdmin">
-      <CreateAdminForm @created="loadStats" />
-    </div>
-
-    <!-- Pending Approvals Tab -->
     <div v-show="activeTab === 'approvals'">
-      <PendingApprovalsTable :pending-users="pendingUsers" @refresh="loadStats" />
+      <PendingApprovalsTable :pending-users="pendingUsers" @refresh="loadPendingApprovals" />
     </div>
 
-    <!-- Logs Tab -->
+    <div v-show="activeTab === 'create-admin' && isSuperAdmin">
+      <CreateAdminForm @created="loadAggregatedStats" />
+    </div>
+
     <div v-show="activeTab === 'logs'">
       <AdminLogs :users="users" />
-    </div>
-
-    <!-- User Profile Modal -->
-    <div v-if="showUserProfile" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-        <div class="sticky top-0 bg-slate-900 border-b border-slate-800 p-6 flex justify-between items-center">
-          <h2 class="text-xl font-bold text-white">User Profile</h2>
-          <button @click="showUserProfile = false" class="text-slate-400 hover:text-white text-2xl leading-none">×</button>
-        </div>
-
-        <div v-if="selectedUserProfile" class="p-6 space-y-6">
-          <!-- User Info -->
-          <div class="border border-slate-800 rounded-lg p-4">
-            <div class="text-sm text-slate-500 mb-3">Basic Info</div>
-            <div class="space-y-2 text-sm">
-              <div class="flex justify-between"><span class="text-slate-400">Name:</span> <span class="text-white">{{ selectedUserProfile.user.first_name }} {{ selectedUserProfile.user.last_name }}</span></div>
-              <div class="flex justify-between"><span class="text-slate-400">Email:</span> <span class="text-white">{{ selectedUserProfile.user.email }}</span></div>
-              <div class="flex justify-between"><span class="text-slate-400">Status:</span> <span class="text-white">{{ selectedUserProfile.user.status }}</span></div>
-              <div class="flex justify-between"><span class="text-slate-400">Created:</span> <span class="text-white">{{ new Date(selectedUserProfile.user.created_at).toLocaleDateString() }}</span></div>
-              <div class="flex justify-between items-start"><span class="text-slate-400">Roles:</span>
-                <div class="flex gap-1 flex-wrap justify-end">
-                  <span v-for="role in selectedUserProfile.user.roles" :key="role.id" class="text-xs bg-blue-600/30 border border-blue-700 text-blue-300 px-2 py-1 rounded">{{ role.slug }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Student Profile -->
-          <div v-if="selectedUserProfile.student_profile" class="border border-slate-800 rounded-lg p-4">
-            <div class="text-sm text-slate-500 mb-3">Student Profile</div>
-            <div class="space-y-2 text-sm">
-              <div class="flex justify-between"><span class="text-slate-400">Program:</span> <span class="text-white">{{ selectedUserProfile.student_profile.study_program }}</span></div>
-              <div class="flex justify-between"><span class="text-slate-400">Year:</span> <span class="text-white">{{ selectedUserProfile.student_profile.year_of_study }}</span></div>
-              <div class="flex justify-between"><span class="text-slate-400">University:</span> <span class="text-white">{{ selectedUserProfile.student_profile.university || '—' }}</span></div>
-            </div>
-          </div>
-
-          <!-- Mentor Profile -->
-          <div v-if="selectedUserProfile.mentor_profile" class="border border-slate-800 rounded-lg p-4">
-            <div class="text-sm text-slate-500 mb-3">Mentor Profile</div>
-            <div class="text-sm text-white">{{ selectedUserProfile.mentor_profile.bio || 'No bio' }}</div>
-          </div>
-
-          <!-- Company Profile -->
-          <div v-if="selectedUserProfile.company_profile" class="border border-slate-800 rounded-lg p-4">
-            <div class="text-sm text-slate-500 mb-3">Company Profile</div>
-            <div class="space-y-2 text-sm">
-              <div class="flex justify-between"><span class="text-slate-400">Name:</span> <span class="text-white">{{ selectedUserProfile.company_profile.name }}</span></div>
-              <div class="flex justify-between"><span class="text-slate-400">ICO:</span> <span class="text-white">{{ selectedUserProfile.company_profile.ico || '—' }}</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
