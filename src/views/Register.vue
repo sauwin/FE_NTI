@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api/axios'
 import { useAuthStore } from '../stores/auth'
@@ -10,23 +10,35 @@ const email = ref('')
 const password = ref('')
 const passwordConfirm = ref('')
 const role = ref('student')
+const companyType = ref('owner')
+const registrationNumber = ref('')
 const agreed = ref(false)
 const error = ref('')
 const router = useRouter()
 const auth = useAuthStore()
+const isCompany = computed(() => role.value === 'company')
 
 async function submit() {
   error.value = ''
   if (!agreed.value) { error.value = 'You must agree to Terms'; return }
   try {
-    const res = await api.post('/auth/register', {
+    const payload: Record<string, any> = {
       first_name: firstName.value,
       last_name: lastName.value,
       email: email.value,
       password: password.value,
       password_confirmation: passwordConfirm.value,
       role: role.value,
-    })
+    }
+
+    if (isCompany.value) {
+      payload.company_type = companyType.value
+      if (companyType.value === 'member' && registrationNumber.value.trim()) {
+        payload.registration_number = parseInt(registrationNumber.value)
+      }
+    }
+
+    const res = await api.post('/auth/register', payload)
     auth.login(res.data.token, res.data.user)
     router.push('/pending-verification')  // was /dashboard
   } catch (e: any) {
@@ -74,6 +86,22 @@ async function submit() {
           <option value="company" class="bg-slate-800">Company</option>
           <option value="mentor" class="bg-slate-800">Mentor</option>
         </select>
+      </div>
+
+      <div v-if="isCompany" class="space-y-4">
+        <div>
+          <label class="block text-white">Company registration type</label>
+          <select v-model="companyType" class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-100 h-9">
+            <option value="owner" class="bg-slate-800">Company Owner</option>
+            <option value="member" class="bg-slate-800">Company Member</option>
+          </select>
+        </div>
+
+        <div v-if="companyType === 'member'">
+          <label class="block text-white">Organization registration number</label>
+          <input v-model="registrationNumber" type="text" placeholder="Enter your company organization ID"
+            class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-100 h-9" />
+        </div>
       </div>
 
       <div class="mt-2">

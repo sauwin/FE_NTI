@@ -68,11 +68,11 @@ async function rejectRole(userId: number, roleSlug: string) {
 <template>
   <div>
     <div v-if="message" :class="[
-'p-3 rounded-lg text-sm mb-4',
-success
-? 'bg-green-900/20 border border-green-800 text-green-400'
-: 'bg-red-900/20 border border-red-800 text-red-400'
-]">
+      'p-3 rounded-lg text-sm mb-4',
+      success
+      ? 'bg-green-900/20 border border-green-800 text-green-400'
+      : 'bg-red-900/20 border border-red-800 text-red-400'
+      ]">
       {{ message }}
     </div>
 
@@ -96,9 +96,9 @@ success
           <td class="py-3 px-4">{{ user.first_name }} {{ user.last_name }}</td>
           <td class="py-3 px-4 text-slate-500">{{ user.email }}</td>
           <td class="py-3 px-4">
-<span class="text-xs bg-yellow-600/30 border border-yellow-700 text-yellow-300 px-2 py-1 rounded">
-{{ user.role_slug }}
-</span>
+            <span class="text-xs bg-yellow-600/30 border border-yellow-700 text-yellow-300 px-2 py-1 rounded">
+            {{ user.role_slug }}
+            </span>
           </td>
           <td class="py-3 px-4 text-xs text-slate-400">
             {{ new Date(user.created_at).toLocaleDateString() }}

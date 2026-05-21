@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import AdminDashboard from '../components/admin/AdminDashboard.vue'
+import CompanyDashboard from '../components/company/CompanyDashboard.vue'
 import api from '../api/axios'
 
 const router = useRouter()
@@ -165,7 +166,7 @@ onMounted(() => { fetchData() })
       </section>-->
 
       <!-- Applications -->
-      <section v-if="!['super_admin', 'nti_admin'].includes(userObj?.role_slug ?? '')">
+      <section v-if="!['super_admin', 'nti_admin', 'company'].includes(userObj?.role_slug ?? '')">
         <div class="section-label">My Applications</div>
         <div v-if="applications.length === 0" class="border border-slate-800 rounded-2xl p-12 text-center bg-slate-900/30">
           <p class="text-slate-500 text-sm">No applications yet.</p>
@@ -193,6 +194,7 @@ onMounted(() => { fetchData() })
           </div>
         </div>
       </section>
+
       <!-- ── STUDENT ── -->
       <div v-if="userObj?.role_slug === 'student'">
         <section class="section-divider-md">
@@ -242,22 +244,15 @@ onMounted(() => { fetchData() })
       </div>
 
       <!-- ── COMPANY ── -->
-      <div v-else-if="userObj?.role_slug === 'company'">
-        <section class="section-divider-md">
+      <CompanyDashboard v-if="userObj?.role_slug === 'company'"/>
+      <!-- <div v-else-if="userObj?.role_slug === 'company'">
+        <section class="section-divider-md mt-8">
           <div class="section-label">Quick actions</div>
           <div class="flex gap-4 flex-wrap">
-            <router-link to="/programs/b/upload"
-                         class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
-              Submit Project Task
-            </router-link>
             <router-link to="/company-profile"
                          class="border border-slate-700 hover:border-blue-700 text-gray-400 hover:text-white px-6 py-3 rounded-lg text-sm font-medium transition">
               Company Profile
             </router-link>
-            <button @click="logout"
-                    class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition ml-auto">
-              Log out
-            </button>
           </div>
         </section>
         <section>
@@ -266,19 +261,10 @@ onMounted(() => { fetchData() })
             <p class="text-slate-500 text-sm">No tasks submitted yet.</p>
           </div>
         </section>
-      </div>
+      </div> -->
 
       <!-- ── ADMIN ── -->
       <AdminDashboard v-if="userObj?.role_slug === 'nti_admin' || userObj?.role_slug === 'super_admin'" :user-role="userObj?.role_slug" />
-
-      <!-- Fallback -->
-      <div v-else>
-        <button @click="logout"
-                class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition">
-          Log out
-        </button>
-      </div>
-
     </div>
   </div>
 </template>

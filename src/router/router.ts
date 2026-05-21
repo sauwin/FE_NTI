@@ -18,7 +18,6 @@ import ProgramAForm from '../views/ProgramAForm.vue'
 import ProgramBForm from '../views/ProgramBForm.vue'
 import StudentProfile from '../views/StudentProfile.vue'
 import MentorProfile from '../views/MentorProfile.vue'
-import CompanyProfile from '../views/CompanyProfile.vue'
 import ArticleView from '../views/ArticleView.vue'
 import CompanyTaskForm from '../views/CompanyTaskForm.vue'
 
@@ -40,7 +39,6 @@ const routes = [
       { path: 'article/:id', component: ArticleView },
       { path: 'profile', component: StudentProfile, meta: { requiresAuth: true, role: 'student' }},
       { path: 'mentor-profile', component: MentorProfile, meta: { requiresAuth: true, role: 'mentor' }},
-      { path: 'company-profile', component: CompanyProfile, meta: { requiresAuth: true, role: 'company' }},
     ],
   },
   {
