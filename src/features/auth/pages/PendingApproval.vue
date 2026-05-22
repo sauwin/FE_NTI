@@ -13,13 +13,13 @@
       <div class="border border-slate-800 bg-slate-900/50 rounded-xl p-6 text-left mb-8">
         <div class="flex flex-col gap-3">
           <div class="flex items-center gap-3">
-            <div class="w-5 h-5 rounded-full border border-yellow-600 flex items-center justify-center flex-shrink-0">
+            <div class="w-5 h-5 rounded-full border border-yellow-600 flex items-center justify-center shrink-0">
               <span class="text-yellow-400 text-xs">⋯</span>
             </div>
             <span class="text-sm text-slate-400">Waiting for email verification</span>
           </div>
           <div class="flex items-center gap-3">
-            <div class="w-5 h-5 rounded-full border border-slate-700 flex-shrink-0"></div>
+            <div class="w-5 h-5 rounded-full border border-slate-700 shrink-0"></div>
             <span class="text-sm text-slate-600">Account activated</span>
           </div>
         </div>

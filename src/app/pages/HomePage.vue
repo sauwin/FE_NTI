@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import Articles from '@/features/articles/components/Articles.vue'
+  import Articles from '@/features/articles/components/Articles.vue'
+  import CallToAction from '@/shared/components/CallToAction.vue'
 </script>
 
 <template>
@@ -102,16 +103,7 @@ import Articles from '@/features/articles/components/Articles.vue'
     </section>
 
     <!-- CTA -->
-    <div class="card-cta">
-      <div>
-        <h3 class="text-xl font-semibold text-white mb-1">Ready to start?</h3>
-        <p class="text-sm text-slate-500">Create your account and apply for the next open call</p>
-      </div>
-      <router-link to="/auth/register"
-        class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-lg font-medium transition text-sm whitespace-nowrap">
-        Create Account
-      </router-link>
-    </div>
+    <CallToAction />
 
   </div>
 </template>
