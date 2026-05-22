@@ -2,9 +2,13 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import AdminDashboard from '../components/admin/AdminDashboard.vue'
-import CompanyDashboard from '../components/company/CompanyDashboard.vue'
+import TeamForm from '../components/student/TeamForm.vue'
+import TeamsList from '../components/student/TeamsList.vue'
 import api from '../api/axios'
+
+import StudentDashboard from '../components/student/StudentDashboard.vue'
+import CompanyDashboard from '../components/company/CompanyDashboard.vue'
+import AdminDashboard from '../components/admin/AdminDashboard.vue'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -12,6 +16,8 @@ const isAuthentified = ref(false)
 const userObj = ref<User | null>(null)
 const profileComplete = ref(true)
 const roleApproved = ref(true)
+const showTeamForm = ref(false)
+const success = ref('')
 
 type User = {
   email: string
@@ -64,6 +70,13 @@ async function logout() {
   } catch {
     error.value = 'Unable to log out'
   }
+}
+
+function onTeamCreated(team: any) {
+  success.value = 'Team created successfully.'
+  showTeamForm.value = false
+  fetchData()
+  setTimeout(() => (success.value = ''), 4500)
 }
 
 const profileRoute: Record<string, string> = {
@@ -119,6 +132,11 @@ onMounted(() => { fetchData() })
         <button @click="error = ''" class="text-red-400 hover:text-red-300">×</button>
       </div>
 
+      <div v-if="success" class="border border-green-800/50 bg-green-900/10 rounded-xl px-6 py-4 mb-8 flex items-center justify-between gap-4">
+        <div class="text-sm text-green-400">{{ success }}</div>
+        <button @click="success = ''" class="text-green-400 hover:text-green-300">×</button>
+      </div>
+
       <!-- Role not approved banner -->
       <div v-if="!roleApproved"
            class="border border-orange-800/50 bg-orange-900/10 rounded-xl px-6 py-4 flex items-center justify-between gap-4 mb-8">
@@ -166,7 +184,7 @@ onMounted(() => { fetchData() })
       </section>-->
 
       <!-- Applications -->
-      <section v-if="!['super_admin', 'nti_admin', 'company'].includes(userObj?.role_slug ?? '')">
+      <section v-if="!['super_admin', 'nti_admin', 'company', 'student'].includes(userObj?.role_slug ?? '')">
         <div class="section-label">My Applications</div>
         <div v-if="applications.length === 0" class="border border-slate-800 rounded-2xl p-12 text-center bg-slate-900/30">
           <p class="text-slate-500 text-sm">No applications yet.</p>
@@ -196,29 +214,7 @@ onMounted(() => { fetchData() })
       </section>
 
       <!-- ── STUDENT ── -->
-      <div v-if="userObj?.role_slug === 'student'">
-        <section class="section-divider-md">
-          <div class="section-label">Quick actions</div>
-          <div class="flex gap-4 flex-wrap">
-            <router-link to="/programs/a/upload"
-                         class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
-              Apply to Program A
-            </router-link>
-            <router-link to="/programs/b/upload"
-                         class="border border-slate-700 hover:border-blue-700 text-gray-400 hover:text-white px-6 py-3 rounded-lg text-sm font-medium transition">
-              Apply to Program B
-            </router-link>
-            <router-link to="/profile"
-                         class="border border-slate-700 hover:border-blue-700 text-gray-400 hover:text-white px-6 py-3 rounded-lg text-sm font-medium transition">
-              My Profile
-            </router-link>
-            <button @click="logout"
-                    class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition ml-auto">
-              Log out
-            </button>
-          </div>
-        </section>
-      </div>
+      <StudentDashboard v-if="userObj?.role_slug === 'student'"/>
 
       <!-- ── MENTOR ── -->
       <div v-else-if="userObj?.role_slug === 'mentor'">
