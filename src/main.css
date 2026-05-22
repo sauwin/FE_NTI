@@ -1,5 +1,28 @@
 @import "tailwindcss";
 
+@theme {
+  /* surfaces */
+  --color-background: #020617;
+  --color-surface: #0f172a;
+  --color-surface-soft: #111827;
+
+  /* borders */
+  --color-main-border: #1e293b;
+  --color-strong-border: #1d4ed8;
+
+  /* text */
+  --color-gray-primary: #ffffff;
+  --color-gray-secondary: #cbd5e1;
+  --color-muted: #64748b;
+
+  /* brand */
+  --color-primary: #2563eb;
+  --color-primary-hover: #3b82f6;
+
+  /* status */
+  --color-danger: #f87171;
+}
+
 /* BASE */
 body {
   background-color: theme('colors.slate.950');

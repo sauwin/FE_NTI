@@ -7,6 +7,10 @@ import Articles from '../components/Articles.vue'
     <div class="bg-blue-950 absolute rounded-full h-120 w-120 -z-10 -right-30 -top-10 blur-sm"></div>
     <div class="bg-blue-950/30 absolute rounded-full h-64 w-64 -z-10 right-40 top-60 blur-lg"></div>
 
+    <div class="bg-surface">
+      Test div
+    </div>
+
     <!-- HERO -->
     <div class="section-divider">
       <div class="inline-flex items-center bg-blue-600/15 border border-blue-800 text-blue-400 text-xs font-bold tracking-widest uppercase py-1.5 px-4 rounded-full mb-6">
