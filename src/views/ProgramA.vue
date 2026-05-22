@@ -11,12 +11,14 @@ interface DocumentRequirement {
 
 interface ActiveCall {
   id: number
-  title: string
+  name: string
+  label: string
   status: 'draft' | 'open' | 'closed'
   deadline_at: string | null
   min_team_size: number
   max_team_size: number | null
-  form_config: string // Отримуємо як рядок JSON з сервера
+  required_documents: DocumentRequirement[] 
+  evaluation_criteria: any[]
 }
 
 const router = useRouter()
@@ -26,23 +28,16 @@ const loading = ref(true)
 
 onMounted(async () => {
   try {
-    // Отримуємо активний та відкритий виклик для Програми А з бекенду
-    const res = await api.get<ActiveCall[]>('/calls/active?program=a')
-    if (res.data && res.data.length > 0) {
-      const firstActiveCall = res.data[0]
-      if (firstActiveCall) {
-        activeCall.value = firstActiveCall
+    const res = await api.get<ActiveCall>('/calls/active?program=a')
+    
+    if (res.data && res.data.id) {
+      activeCall.value = res.data
 
-        // Розбір JSON schema конфігурації документів, заданих адміном
-        if (activeCall.value.form_config) {
-          try {
-            parsedDocuments.value = JSON.parse(activeCall.value.form_config) as DocumentRequirement[]
-          } catch {
-            parsedDocuments.value = []
-          }
-        }
-      }
+      parsedDocuments.value = res.data.required_documents || []
     }
+  } catch (error) {
+    console.error('Помилка завантаження виклику:', error)
+    parsedDocuments.value = []
   } finally {
     loading.value = false
   }
@@ -83,7 +78,7 @@ const formatDate = (dateStr: string | null) => {
       <div v-else-if="activeCall && activeCall.status === 'open'" class="space-y-4">
         <div class="text-sm text-green-400 flex items-center gap-2 font-mono">
           <span class="w-2 py-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-          Výzva "{{ activeCall.title }}" je otvorená do: <span class="font-bold text-white">{{ formatDate(activeCall.deadline_at) }}</span>
+          Výzva "{{ activeCall.name }}" je otvorená do: <span class="font-bold text-white">{{ formatDate(activeCall.deadline_at) }}</span>
         </div>
         <div class="flex gap-4">
           <button @click="goToUpload" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition shadow-lg shadow-blue-900/30">
