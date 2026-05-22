@@ -27,7 +27,6 @@ onMounted(async () => {
   if (!auth.isLoggedIn) { router.push('/auth/login'); return }
   try {
     const res = await api.get('/company-profile')
-    console.log(res)
     if (res.data) {
       profile.value = {
         name: res.data.name ?? '',

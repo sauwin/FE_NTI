@@ -41,8 +41,7 @@ onMounted(async () => {
       const res = await api.get<CallOrganizationTask[]>('/programs/b/tasks')
       tasks.value = res.data
     }
-  } catch (err) {
-    console.error('Error fetching tasks data:', err)
+  } catch {
   } finally {
     loading.value = false
   }

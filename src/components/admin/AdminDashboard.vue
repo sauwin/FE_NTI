@@ -5,9 +5,17 @@ import UserManagementPanel from '@/components/admin/UserManagementPanel.vue'
 import PendingApprovalsTable from './PendingApprovalTable.vue'
 import AdminLogs from './AdminLogs.vue'
 import CreateAdminForm from './CreateAdminForm.vue'
+import AdminDocumentManager from '@/components/admin/AdminDocumentManager.vue'
 
 // Нові компоненти для ядра Programs + Calls (їх можна винести або рендерити на місці)
 import ProgramCallsManager from '@/components/admin/ProgramCallsManager.vue'
+
+interface DashboardStats {
+  total_users: number
+  active_projects: number
+  pending_approvals: number
+  open_calls: number
+}
 
 const props = defineProps<{
   userRole?: string
@@ -19,11 +27,11 @@ const loadingStats = ref(true)
 const isSuperAdmin = props.userRole === 'super_admin'
 
 // Оптимізований об'єкт статистики за документацією (модуль Reporting / BI)
-const stats = ref({
+const stats = ref<DashboardStats>({
   total_users: 0,
   active_projects: 0,
   pending_approvals: 0,
-  open_calls: 0
+  open_calls: 0,
 })
 
 const users = ref([])
@@ -34,11 +42,15 @@ async function loadAggregatedStats() {
   try {
     loadingStats.value = true
     const res = await api.get('/admin/reporting/dashboard-stats')
-    stats.value = res.data
+    stats.value = {
+      total_users: Number(res.data.total_users ?? 0),
+      active_projects: Number(res.data.active_projects ?? 0),
+      pending_approvals: Number(res.data.pending_approvals ?? 0),
+      open_calls: Number(res.data.open_calls ?? 0),
+    }
+    error.value = ''
   } catch (e: any) {
-    console.error('Failed to load aggregated stats, falling back...', e)
-    // Fallback якщо ендпоінт ще не готовий
-    stats.value.active_projects = 0
+    error.value = e.response?.data?.message || 'Failed to load dashboard metrics'
   } finally {
     loadingStats.value = false
   }
@@ -49,7 +61,6 @@ async function loadUserData() {
   try {
     const res = await api.get('/admin/users')
     users.value = res.data
-    stats.value.total_users = res.data.length // коригуємо локально
   } catch (e: any) {
     error.value = e.response?.data?.message || 'Failed to load users'
   }
@@ -59,7 +70,6 @@ async function loadPendingApprovals() {
   try {
     const appRes = await api.get('/admin/approvals')
     pendingUsers.value = appRes.data
-    stats.value.pending_approvals = appRes.data.length
   } catch (e: any) {
     error.value = e.response?.data?.message || 'Failed to load approvals'
   }
@@ -87,6 +97,7 @@ onMounted(() => {
         <button @click="handleTabChange('programs-calls')" :class="[activeTab === 'programs-calls' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Programs & Calls (Core)</button>
         <button @click="handleTabChange('users')" :class="[activeTab === 'users' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Manage Users</button>
         <button @click="handleTabChange('approvals')" :class="[activeTab === 'approvals' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Pending Approvals</button>
+        <button @click="handleTabChange('documents')" :class="[activeTab === 'documents' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Documents</button>
         <button v-if="isSuperAdmin" @click="handleTabChange('create-admin')" :class="[activeTab === 'create-admin' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Create Admin</button>
         <button @click="handleTabChange('logs')" :class="[activeTab === 'logs' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Audit Logs</button>
       </div>
@@ -97,7 +108,12 @@ onMounted(() => {
     </div>
 
     <div v-show="activeTab === 'overview'">
-      <div v-if="loadingStats" class="text-slate-400 animate-pulse">Loading dashboard metrics...</div>
+      <div v-if="loadingStats" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div v-for="n in 4" :key="n" class="border border-slate-800 rounded-2xl p-6 bg-slate-900/50 animate-pulse">
+          <div class="h-4 w-28 bg-slate-700 rounded mb-5"></div>
+          <div class="h-12 w-24 bg-slate-800 rounded"></div>
+        </div>
+      </div>
       <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div class="border border-slate-800 rounded-2xl p-6 bg-slate-900/50">
           <div class="text-xs text-slate-500 uppercase font-mono mb-1">Total Users</div>
@@ -108,7 +124,7 @@ onMounted(() => {
           <div class="text-3xl font-bold text-green-400">{{ stats.active_projects }}</div>
         </div>
         <div class="border border-slate-800 rounded-2xl p-6 bg-slate-900/50">
-          <div class="text-xs text-slate-500 uppercase font-mono mb-1">Pending Onboarding</div>
+          <div class="text-xs text-slate-500 uppercase font-mono mb-1">Pending Approvals</div>
           <div class="text-3xl font-bold text-yellow-500">{{ stats.pending_approvals }}</div>
         </div>
         <div class="border border-slate-800 rounded-2xl p-6 bg-slate-900/50">
@@ -128,6 +144,10 @@ onMounted(() => {
 
     <div v-show="activeTab === 'approvals'">
       <PendingApprovalsTable :pending-users="pendingUsers" @refresh="loadPendingApprovals" />
+    </div>
+
+    <div v-show="activeTab === 'documents'">
+      <AdminDocumentManager />
     </div>
 
     <div v-show="activeTab === 'create-admin' && isSuperAdmin">

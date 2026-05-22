@@ -21,7 +21,18 @@ interface Call {
   form_config: string // Зберігається як JSON-string у БД
 }
 
-type CallPayload = Omit<Call, 'id'>
+interface CallPayload {
+  program_type: 'a' | 'b'
+  title: string
+  status: 'draft' | 'open' | 'closed' | 'archived'
+  opens_at: string | null
+  deadline_at: string | null
+  min_team_size: number
+  max_team_size: number | null
+  evaluation_criteria: unknown[]
+  required_documents: unknown[]
+  form_config: string
+}
 
 const programs = ref<Program[]>([])
 const calls = ref<Call[]>([])
@@ -29,13 +40,15 @@ const isSubmitting = ref(false)
 
 // Стан форми створення виклику (Call)
 const newCall = ref<CallPayload>({
-  program_id: 1,
+  program_type: 'a',
   title: '',
   status: 'draft',
   opens_at: '',
   deadline_at: '',
   min_team_size: 1,
   max_team_size: 5,
+  evaluation_criteria: [],
+  required_documents: [],
   form_config: JSON.stringify([
     { document_name: 'Executive Summary', is_mandatory: true, max_size_mb: 10 },
     { document_name: 'Technical Architecture', is_mandatory: true, max_size_mb: 15 },
@@ -49,13 +62,12 @@ async function loadData() {
     programs.value = progRes.data
     const firstProgram = programs.value[0]
     if (firstProgram) {
-      newCall.value.program_id = firstProgram.id
+      newCall.value.program_type = firstProgram.code === 'program_b' ? 'b' : 'a'
     }
 
     const callRes = await api.get<Call[]>('/admin/calls')
     calls.value = callRes.data
-  } catch (err) {
-    console.error('Error fetching Core Doména rows:', err)
+  } catch {
   }
 }
 
@@ -94,8 +106,8 @@ onMounted(() => loadData())
       <form @submit.prevent="handleCreateCall" class="space-y-4">
         <div>
           <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Target Program</label>
-          <select v-model="newCall.program_id" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white">
-            <option v-for="p in programs" :key="p.id" :value="p.id">{{ p.title }} ({{ p.code }})</option>
+          <select v-model="newCall.program_type" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white">
+            <option v-for="p in programs" :key="p.id" :value="p.code === 'program_b' ? 'b' : 'a'">{{ p.title }} ({{ p.code }})</option>
           </select>
         </div>
 

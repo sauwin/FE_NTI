@@ -25,18 +25,40 @@ See [Vite Configuration Reference](https://vite.dev/config/).
 
 ## Project Setup
 
+This repository contains two folders:
+
+- `BE_NTI` — Laravel backend
+- `FE_NTI` — Vue 3 frontend
+
+### Frontend setup
+
 ```sh
+cd FE_NTI
 npm install
+npm run dev
 ```
+
+### Backend setup
+
+```sh
+cd BE_NTI
+composer install
+php artisan key:generate
+php artisan serve --host=127.0.0.1 --port=8000
+```
+
+The frontend expects the backend API at `http://localhost:8000/api`.
 
 ### Compile and Hot-Reload for Development
 
 ```sh
+cd FE_NTI
 npm run dev
 ```
 
 ### Type-Check, Compile and Minify for Production
 
 ```sh
+cd FE_NTI
 npm run build
 ```
