@@ -62,9 +62,7 @@ async function deleteArticle(id: Number) {
   try {
     await api.delete('/articles/' + id)
     articlesObj.value = articlesObj.value?.filter(article => article.id != id) ?? []
-    console.log('Article deleted successfully')
   } catch(e: any) {
-    console.warn('Error during deletion of article')
   }
 }
 

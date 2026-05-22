@@ -25,8 +25,7 @@ async function fetchLogs() {
     logs.value = res.data.data
     total.value = res.data.total
     lastPage.value = res.data.last_page
-  } catch (e: any) {
-    console.error('Failed to load logs')
+  } catch {
   } finally {
     loading.value = false
   }

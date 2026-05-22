@@ -47,8 +47,7 @@ async function fetchTasks() {
     tasks.value = Array.isArray(response.data)
       ? response.data
       : []
-  } catch (error) {
-    console.error('Failed to load tasks:', error)
+  } catch {
     tasks.value = []
   } finally {
     loading.value = false

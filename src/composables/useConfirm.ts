@@ -9,8 +9,7 @@ dialogRef = ref
 
 export async function useConfirm(options: ConfirmOptions | string): Promise<boolean> {
 if (!dialogRef) {
-console.warn('ConfirmDialog not initialized')
-return false
+  return false
 }
 
 const opts: ConfirmOptions = typeof options === 'string'

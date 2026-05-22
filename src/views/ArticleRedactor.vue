@@ -49,7 +49,6 @@ const handleFile = (event: Event) => {
   if (target.files && target.files.length > 0) {
     file.value = target.files[0] ?? null
   }
-  console.log(file.value)
 }
 
 async function submit() {
@@ -67,22 +66,16 @@ async function submit() {
     formData.append('translations[sk][content]', form.value.translations.sk.content)
     if (file.value) formData.append('image', file.value)
 
-    for (const pair of formData.entries()) console.log(pair[0], pair[1])
-
     if (article_id) {
       await api.put(`/articles/${article_id}`, formData)
-      console.log('Article updated successfully')
       router.push('/')
     } else {
       await api.post('/articles', formData)
-      console.log('Article added successfully')
       router.push('/')
     }
-  } catch (e: any) {
-    error.value = e.response?.data?.message || 'Error'
-    console.log(e.response.data)
+  } catch (e: unknown) {
+    error.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message || 'Error'
   }
-  console.log(article_id)
 }
 
 const mapArticle = (data: ArticleApi): ArticleForm => {

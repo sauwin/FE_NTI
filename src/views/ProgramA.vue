@@ -37,15 +37,12 @@ onMounted(async () => {
         if (activeCall.value.form_config) {
           try {
             parsedDocuments.value = JSON.parse(activeCall.value.form_config) as DocumentRequirement[]
-          } catch (parseError) {
-            console.error('Invalid JSON document config for active call:', parseError)
+          } catch {
             parsedDocuments.value = []
           }
         }
       }
     }
-  } catch (err) {
-    console.error('Error loading active call data for Program A:', err)
   } finally {
     loading.value = false
   }

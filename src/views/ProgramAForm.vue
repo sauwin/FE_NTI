@@ -83,9 +83,7 @@ onMounted(async () => {
   try {
     const res = await api.get('/calls/active/a')
     callId.value = res.data.id
-    console.log('Call Response:', res.data)
   } catch(e: any) {
-    console.error(e.response)
     error.value = 'No active call available'
   }
 

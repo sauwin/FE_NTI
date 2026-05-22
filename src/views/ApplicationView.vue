@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../api/axios'
 import { useConfirm } from '../composables/useConfirm'
+import DocumentActionButtons from '@/components/shared/DocumentActionButtons.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -115,11 +116,16 @@ async function deleteApp() {
           <div v-if="docs.length === 0" class="text-gray-500 text-sm">No documents uploaded.</div>
           <div v-else class="flex flex-col gap-2">
             <div v-for="doc in docs" :key="doc.id"
-                 class="flex items-center justify-between border border-slate-700 rounded-lg px-4 py-2">
+                 class="flex flex-col gap-3 border border-slate-700 rounded-lg px-4 py-3 bg-slate-950/40">
               <div>
                 <p class="text-white text-sm">{{ docLabels[doc.type] ?? doc.type }}</p>
                 <p class="text-gray-500 text-xs">{{ doc.file_name }}</p>
               </div>
+              <DocumentActionButtons
+                :documentId="doc.id"
+                :fileName="doc.file_name"
+                :mimeType="doc.mime_type"
+              />
             </div>
           </div>
         </div>

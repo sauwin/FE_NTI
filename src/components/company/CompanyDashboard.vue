@@ -45,8 +45,7 @@ async function fetchPendingMembers() {
     pendingUsers.value = Array.isArray(response.data)
       ? response.data
       : []
-  } catch (error) {
-    console.error('Failed to load pending members:', error)
+  } catch {
     pendingUsers.value = []
   } finally {
     loadingMembers.value = false
@@ -58,8 +57,7 @@ async function handleApprove(user: PendingUser) {
     await api.post(`/company/members/${user.id}/approve`, {})
 
     await fetchPendingMembers()
-  } catch (error) {
-    console.error('Failed to approve user:', error)
+  } catch {
   }
 }
 
@@ -68,8 +66,7 @@ async function handleReject(user: PendingUser) {
     await api.post(`/company/members/${user.id}/reject`, {})
 
     await fetchPendingMembers()
-  } catch (error) {
-    console.error('Failed to reject user:', error)
+  } catch {
   }
 }
 
