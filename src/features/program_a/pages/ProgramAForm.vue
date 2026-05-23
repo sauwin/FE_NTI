@@ -1,206 +1,170 @@
 <script setup lang="ts">
-import { watch, ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import api from '@/shared/api/axios'
-import { useAuthStore } from '@/features/auth/stores/auth'
-import { useRoute } from 'vue-router'
+  import { watch, ref, onMounted, computed } from 'vue'
+  import { useRouter, useRoute } from 'vue-router'
+  import api from '@/shared/api/axios'
+  import { getTeams } from '@/features/student/api/teams'
+  import { useAuthStore } from '@/features/auth/stores/auth'
 
-const route = useRoute()
-const router = useRouter()
-const error = ref('')
-const loading = ref(false)
-const step = ref(1)
-const auth = useAuthStore()
-const callId = ref<number | null>(null)
+  const route = useRoute()
+  const router = useRouter()
+  const error = ref('')
+  const loading = ref(false)
+  const step = ref(1)
+  const auth = useAuthStore()
+  const callId = ref<number | null>(null)
 
-const editId = ref<number | null>(route.query.edit ? Number(route.query.edit) : null)
-const isEditMode = computed(() => !!editId.value)
-const DRAFT_KEY = 'draft_program_a'
+  const editId = ref<number | null>(route.query.edit ? Number(route.query.edit) : null)
+  const isEditMode = computed(() => !!editId.value)
+  const DRAFT_KEY = 'draft_program_a'
 
-// Step 1 — Team info
-const teamName = ref('')
-const teamDescription = ref('')
-const category = ref('')
-const academicDeclaration = ref(false)
+  const myTeams = ref<any[]>([])            
+  const selectedTeamId = ref<number | null>(null) 
+  const loadingTeams = ref(false)
 
-// Step 2 — Dynamic documents from call
-interface RequiredDoc {
-  document_name: string
-  is_mandatory: boolean
-  max_size_mb: number
-}
+  const category = ref('')
+  const academicDeclaration = ref(false)
 
-const requiredDocuments = ref<RequiredDoc[]>([])
-const files = ref<Record<string, File | null>>({})
-
-const categories = [
-  'Software Development',
-  'AI & Data Technologies',
-  'Web Applications',
-  'Game Development',
-  'IoT & Embedded Systems',
-]
-
-function docKey(name: string): string {
-  return name.toLowerCase().replace(/\s+/g, '_')
-}
-
-function debounce(fn: Function, delay: number) {
-  let timer: ReturnType<typeof setTimeout>
-  return (...args: any[]) => {
-    clearTimeout(timer)
-    timer = setTimeout(() => fn(...args), delay)
+  interface RequiredDoc {
+    document_name: string
+    is_mandatory: boolean
+    max_size_mb: number
   }
-}
+  const requiredDocuments = ref<RequiredDoc[]>([])
+  const files = ref<Record<string, File | null>>({})
 
-const saveDraftToServer = debounce(async (data: object) => {
-  try {
-    await api.post('/drafts', { program_type: 'a', data })
-  } catch {}
-}, 1500)
+  const categories = [
+    'Software Development',
+    'AI & Data Technologies',
+    'Web Applications',
+    'Game Development',
+    'IoT & Embedded Systems',
+  ]
 
-onMounted(async () => {
-  if (!auth.isLoggedIn) {
-    router.push('/auth/login')
-    return
-  }
-  try {
-    await api.get('/auth/me')
-  } catch {
-    auth.logout()
-    router.push('/auth/login')
+  function docKey(name: string): string {
+    return name.toLowerCase().replace(/\s+/g, '_')
   }
 
-  // Load active call — use required_documents directly (cast to array by Laravel)
-  try {
-    const res = await api.get('/calls/active/a')
-    callId.value = res.data.id
-
-    const docs: RequiredDoc[] = res.data.required_documents ?? []
-
-    if (Array.isArray(docs) && docs.length > 0) {
-      requiredDocuments.value = docs
-      docs.forEach(doc => {
-        files.value[docKey(doc.document_name)] = null
+  async function fetchUserTeams() {
+    loadingTeams.value = true
+    try {
+      const res = await getTeams()
+      // Переконуємось, що користувач авторизований перед фільтрацією за його ID
+      const currentUserId = auth.user?.id
+      
+      myTeams.value = res.data.filter((team: any) => {
+        const acceptedCount = team.members?.filter((m: any) => m.pivot?.status === 'accepted').length ?? 0
+        return team.leader_id === currentUserId && acceptedCount >= 3
       })
-    } else {
-      error.value = 'Active call has no required documents configured.'
+    } catch (e) {
+      console.error('Failed to load user teams', e)
+    } finally {
+      loadingTeams.value = false
     }
-  } catch (e: any) {
-    error.value = 'No active call available'
   }
 
-  // Load draft from server
-  try {
-    const res = await api.get('/drafts/a')
-    if (res.data?.data) {
-      teamName.value = res.data.data.teamName ?? ''
-      teamDescription.value = res.data.data.teamDescription ?? ''
-      category.value = res.data.data.category ?? ''
-      academicDeclaration.value = res.data.data.academicDeclaration ?? false
+  onMounted(async () => {
+    if (!auth.isLoggedIn) { router.push('/auth/login'); return }
+
+    await fetchUserTeams()
+
+    try {
+      const res = await api.get('/calls/active/a')
+      callId.value = res.data.id
+      const docs: RequiredDoc[] = res.data.required_documents ?? []
+      if (Array.isArray(docs) && docs.length > 0) {
+        requiredDocuments.value = docs
+        docs.forEach(doc => { files.value[docKey(doc.document_name)] = null })
+      } else {
+        error.value = 'Active call has no required documents configured.'
+      }
+    } catch {
+      error.value = 'No active call available'
     }
-  } catch {
+
     const saved = localStorage.getItem(DRAFT_KEY)
     if (saved) {
       const draft = JSON.parse(saved)
-      teamName.value = draft.teamName ?? ''
-      teamDescription.value = draft.teamDescription ?? ''
+      selectedTeamId.value = draft.selectedTeamId ?? null
       category.value = draft.category ?? ''
       academicDeclaration.value = draft.academicDeclaration ?? false
     }
-  }
-
-  if (editId.value) {
-    try {
-      await api.get(`/applications/${editId.value}`)
-    } catch {
-      error.value = 'Could not load application'
-    }
-  }
-})
-
-watch([teamName, teamDescription, category, academicDeclaration], () => {
-  localStorage.setItem(DRAFT_KEY, JSON.stringify({
-    teamName: teamName.value,
-    teamDescription: teamDescription.value,
-    category: category.value,
-    academicDeclaration: academicDeclaration.value,
-  }))
-  saveDraftToServer({
-    teamName: teamName.value,
-    teamDescription: teamDescription.value,
-    category: category.value,
-    academicDeclaration: academicDeclaration.value,
   })
-})
 
-function onFileChange(key: string, event: Event) {
-  const input = event.target as HTMLInputElement
-  if (input.files && input.files[0]) {
-    files.value[key] = input.files[0]
-  }
-}
+  watch([selectedTeamId, category, academicDeclaration], () => {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({
+      selectedTeamId: selectedTeamId.value,
+      category: category.value,
+      academicDeclaration: academicDeclaration.value,
+    }))
+  })
 
-function nextStep() {
-  error.value = ''
-  if (!teamName.value.trim()) { error.value = 'Team name is required'; return }
-  if (!category.value) { error.value = 'Please select a category'; return }
-  if (!academicDeclaration.value) { error.value = 'You must confirm the academic declaration'; return }
-  step.value = 2
-}
-
-async function submit() {
-  if (!callId.value) { error.value = 'No active call available'; return }
-  error.value = ''
-  loading.value = true
-
-  try {
-    let applicationId: number
-
-    if (isEditMode.value) {
-      await api.patch(`/applications/${editId.value}`, {
-        applicant_type: 'team', program_type: 'a',
-      })
-      applicationId = editId.value!
-    } else {
-      const appRes = await api.post('/applications', {
-        applicant_type: 'team', program_type: 'a',
-      })
-      applicationId = appRes.data.application_id
+  function onFileChange(key: string, event: Event) {
+    const input = event.target as HTMLInputElement
+    if (input.files && input.files[0]) {
+      files.value[key] = input.files[0]
     }
+  }
 
-    for (const doc of requiredDocuments.value) {
-      const key = docKey(doc.document_name)
-      const file = files.value[key]
+  function nextStep() {
+    error.value = ''
+    if (!selectedTeamId.value) { error.value = 'Please select a qualified team'; return }
+    if (!category.value) { error.value = 'Please select a category'; return }
+    if (!academicDeclaration.value) { error.value = 'You must confirm the academic declaration'; return }
+    step.value = 2
+  }
 
-      if (!file && doc.is_mandatory) {
-        error.value = `Missing required document: ${doc.document_name}`
-        loading.value = false
-        return
+  async function submit() {
+    if (!callId.value) { error.value = 'No active call available'; return }
+    error.value = ''
+    loading.value = true
+
+    try {
+      let applicationId: number
+
+      const payload = {
+        applicant_type: 'team',
+        program_type: 'a',
+        team_id: selectedTeamId.value,
+        category: category.value,
       }
-      if (!file) continue
 
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('type', key)
-      formData.append('classification', 'confidential')
-      formData.append('application_id', String(applicationId))
+      if (isEditMode.value) {
+        await api.patch(`/applications/${editId.value}`, payload)
+        applicationId = editId.value!
+      } else {
+        const appRes = await api.post('/applications', payload)
+        applicationId = appRes.data.application_id
+      }
 
-      await api.post('/documents/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
+      for (const doc of requiredDocuments.value) {
+        const key = docKey(doc.document_name)
+        const file = files.value[key]
+        if (!file && doc.is_mandatory) {
+          error.value = `Missing required document: ${doc.document_name}`
+          loading.value = false
+          return
+        }
+        if (!file) continue
+
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('type', key)
+        formData.append('classification', 'confidential')
+        formData.append('application_id', String(applicationId))
+
+        await api.post('/documents/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
+      }
+
+      localStorage.removeItem(DRAFT_KEY)
+      step.value = 3
+    } catch (e: any) {
+      error.value = e?.response?.data?.message || 'Something went wrong.'
+    } finally {
+      loading.value = false
     }
-
-    localStorage.removeItem(DRAFT_KEY)
-    await api.post('/drafts', { program_type: 'a', data: {} })
-    step.value = 3
-
-  } catch (e: any) {
-    error.value = e?.response?.data?.message || 'Something went wrong. Please try again.'
-  } finally {
-    loading.value = false
   }
-}
 </script>
 
 <template>
@@ -215,7 +179,6 @@ async function submit() {
         <p class="text-gray-400 mt-2 text-sm">Grant incubation program</p>
       </div>
 
-      <!-- Step indicator -->
       <div class="flex items-center mb-8">
         <div class="flex-center">
           <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
@@ -236,7 +199,6 @@ async function submit() {
         </div>
       </div>
 
-      <!-- STEP 3 — Success -->
       <div v-if="step === 3" class="text-center py-12">
         <div class="text-5xl mb-4">✓</div>
         <h2 class="text-2xl font-bold text-white mb-2">Application Submitted</h2>
@@ -247,19 +209,28 @@ async function submit() {
         </button>
       </div>
 
-      <!-- STEP 1 — Team Info -->
       <form v-else-if="step === 1" class="flex-col-gap" @submit.prevent="nextStep">
         <p v-if="error" class="text-error-sm">{{ error }}</p>
 
         <div>
-          <label class="label">Team name <span class="text-error">*</span></label>
-          <input v-model="teamName" type="text" placeholder="e.g. TechVision Team" class="input-mt" />
-        </div>
-
-        <div>
-          <label class="label">Short description</label>
-          <textarea v-model="teamDescription" rows="3" placeholder="Briefly describe your project idea..."
-            class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"></textarea>
+          <label class="label">Select Your Team <span class="text-error">*</span></label>
+          <div v-if="loadingTeams" class="text-xs text-slate-500 mt-1">Loading your teams...</div>
+          
+          <select 
+            v-else
+            v-model="selectedTeamId"
+            class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white focus:outline-none focus:border-blue-500"
+          >
+            <option :value="null" disabled class="bg-dark">Choose a team ready for Program A</option>
+            <option v-for="team in myTeams" :key="team.id" :value="team.id" class="bg-dark">
+              {{ team.name }} ({{ team.members?.length ?? 0 }} members)
+            </option>
+          </select>
+          
+          <p v-if="myTeams.length === 0 && !loadingTeams" class="text-[11px] text-amber-500/90 mt-1.5">
+            ⚠️ You don't have any teams where you are the leader AND that have at least 3 accepted members. 
+            Go to "My Teams" to manage your team setup first.
+          </p>
         </div>
 
         <div>
@@ -280,15 +251,15 @@ async function submit() {
           </label>
         </div>
 
-        <p v-if="teamName || teamDescription || category" class="text-muted-sm">Draft auto-saved</p>
-
-        <button type="submit"
-          class="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white w-full h-10 mt-2 rounded-md text-sm font-medium">
+        <button 
+          type="submit"
+          :disabled="myTeams.length === 0"
+          class="bg-blue-600 hover:bg-blue-700 disabled:opacity-40 cursor-pointer text-white w-full h-10 mt-2 rounded-md text-sm font-medium transition"
+        >
           Continue to Documents →
         </button>
       </form>
 
-      <!-- STEP 2 — Documents (dynamic from call) -->
       <form v-else-if="step === 2" class="flex-col-gap" @submit.prevent="submit">
         <p v-if="error" class="text-error-sm">{{ error }}</p>
 
