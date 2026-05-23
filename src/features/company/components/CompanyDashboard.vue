@@ -105,7 +105,6 @@ onMounted(() => {
         <button @click="handleTabChange('project-tasks')" :class="[activeTab === 'project-tasks' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Project Tasks</button>
         <button @click="handleTabChange('approvals')" :class="[activeTab === 'approvals' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Manage Pending Approvals</button>
         <button @click="handleTabChange('members')" :class="[activeTab === 'members' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Manage Company Members</button>
-        <button @click="handleTabChange('applications')" :class="[activeTab === 'applications' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Applications</button>
       </div>
     </div>
 
@@ -132,10 +131,6 @@ onMounted(() => {
         :loading="loadingMembers"
         @kick="handleKick"
       />
-    </div>
-
-    <div v-show="activeTab === 'applications'">
-      No applications yet
     </div>
   </div>
 </template>
