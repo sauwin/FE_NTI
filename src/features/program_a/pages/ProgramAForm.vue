@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {watch, ref, onMounted, computed} from 'vue'
+import { watch, ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/shared/api/axios'
 import { useAuthStore } from '@/features/auth/stores/auth'
@@ -23,24 +23,15 @@ const teamDescription = ref('')
 const category = ref('')
 const academicDeclaration = ref(false)
 
-// Step 2 — Documents
-const files = ref<Record<string, File | null>>({
-  executive_summary: null,
-  technical_architecture: null,
-  roadmap: null,
-  budget: null,
-  risk_analysis: null,
-  monetization: null,
-})
-
-const docLabels: Record<string, string> = {
-  executive_summary: 'Executive Summary',
-  technical_architecture: 'Technical Architecture',
-  roadmap: 'Roadmap',
-  budget: 'Budget',
-  risk_analysis: 'Risk Analysis',
-  monetization: 'Monetization Model',
+// Step 2 — Dynamic documents from call
+interface RequiredDoc {
+  document_name: string
+  is_mandatory: boolean
+  max_size_mb: number
 }
+
+const requiredDocuments = ref<RequiredDoc[]>([])
+const files = ref<Record<string, File | null>>({})
 
 const categories = [
   'Software Development',
@@ -49,6 +40,10 @@ const categories = [
   'Game Development',
   'IoT & Embedded Systems',
 ]
+
+function docKey(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, '_')
+}
 
 function debounce(fn: Function, delay: number) {
   let timer: ReturnType<typeof setTimeout>
@@ -60,14 +55,10 @@ function debounce(fn: Function, delay: number) {
 
 const saveDraftToServer = debounce(async (data: object) => {
   try {
-    await api.post('/drafts', {
-      program_type: 'a',
-      data: data,
-    })
+    await api.post('/drafts', { program_type: 'a', data })
   } catch {}
 }, 1500)
 
-// Auth guard + draft
 onMounted(async () => {
   if (!auth.isLoggedIn) {
     router.push('/auth/login')
@@ -80,16 +71,29 @@ onMounted(async () => {
     router.push('/auth/login')
   }
 
+  // Load active call — use required_documents directly (cast to array by Laravel)
   try {
     const res = await api.get('/calls/active/a')
     callId.value = res.data.id
-  } catch(e: any) {
+
+    const docs: RequiredDoc[] = res.data.required_documents ?? []
+
+    if (Array.isArray(docs) && docs.length > 0) {
+      requiredDocuments.value = docs
+      docs.forEach(doc => {
+        files.value[docKey(doc.document_name)] = null
+      })
+    } else {
+      error.value = 'Active call has no required documents configured.'
+    }
+  } catch (e: any) {
     error.value = 'No active call available'
   }
 
+  // Load draft from server
   try {
     const res = await api.get('/drafts/a')
-    if (res.data) {
+    if (res.data?.data) {
       teamName.value = res.data.data.teamName ?? ''
       teamDescription.value = res.data.data.teamDescription ?? ''
       category.value = res.data.data.category ?? ''
@@ -108,14 +112,13 @@ onMounted(async () => {
 
   if (editId.value) {
     try {
-      const res = await api.get(`/applications/${editId.value}`)
+      await api.get(`/applications/${editId.value}`)
     } catch {
       error.value = 'Could not load application'
     }
   }
 })
 
-// Зберігати при кожній зміні
 watch([teamName, teamDescription, category, academicDeclaration], () => {
   localStorage.setItem(DRAFT_KEY, JSON.stringify({
     teamName: teamName.value,
@@ -123,19 +126,18 @@ watch([teamName, teamDescription, category, academicDeclaration], () => {
     category: category.value,
     academicDeclaration: academicDeclaration.value,
   }))
-
   saveDraftToServer({
-  teamName: teamName.value,
-  teamDescription: teamDescription.value,
-  category: category.value,
-  academicDeclaration: academicDeclaration.value,
-})
+    teamName: teamName.value,
+    teamDescription: teamDescription.value,
+    category: category.value,
+    academicDeclaration: academicDeclaration.value,
+  })
 })
 
-function onFileChange(type: string, event: Event) {
+function onFileChange(key: string, event: Event) {
   const input = event.target as HTMLInputElement
   if (input.files && input.files[0]) {
-    files.value[type] = input.files[0]
+    files.value[key] = input.files[0]
   }
 }
 
@@ -152,15 +154,6 @@ async function submit() {
   error.value = ''
   loading.value = true
 
-  const typeMap: Record<string, string> = {
-    executive_summary: 'executive_summary',
-    technical_architecture: 'technical_architecture',
-    roadmap: 'roadmap',
-    budget: 'budget',
-    risk_analysis: 'risk_analysis',
-    monetization: 'monetization',
-  }
-
   try {
     let applicationId: number
 
@@ -176,12 +169,20 @@ async function submit() {
       applicationId = appRes.data.application_id
     }
 
-    for (const [type, file] of Object.entries(files.value)) {
-      if (!file) { error.value = `Missing: ${docLabels[type]}`; loading.value = false; return }
+    for (const doc of requiredDocuments.value) {
+      const key = docKey(doc.document_name)
+      const file = files.value[key]
+
+      if (!file && doc.is_mandatory) {
+        error.value = `Missing required document: ${doc.document_name}`
+        loading.value = false
+        return
+      }
+      if (!file) continue
 
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('type', typeMap[type] ?? type)
+      formData.append('type', key)
       formData.append('classification', 'confidential')
       formData.append('application_id', String(applicationId))
 
@@ -221,17 +222,13 @@ async function submit() {
             step >= 1 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">1</div>
           <span class="text-xs mt-1.5" :class="step >= 1 ? 'text-blue-400' : 'text-gray-600'">Info</span>
         </div>
-
         <div class="flex-1 h-px mx-2 mb-4" :class="step >= 2 ? 'bg-blue-600' : 'bg-blue-900'"></div>
-
         <div class="flex-center">
           <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
             step >= 2 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">2</div>
           <span class="text-xs mt-1.5" :class="step >= 2 ? 'text-blue-400' : 'text-gray-600'">Documents</span>
         </div>
-
         <div class="flex-1 h-px mx-2 mb-4" :class="step >= 3 ? 'bg-blue-600' : 'bg-blue-900'"></div>
-
         <div class="flex-center">
           <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
             step >= 3 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">3</div>
@@ -239,6 +236,7 @@ async function submit() {
         </div>
       </div>
 
+      <!-- STEP 3 — Success -->
       <div v-if="step === 3" class="text-center py-12">
         <div class="text-5xl mb-4">✓</div>
         <h2 class="text-2xl font-bold text-white mb-2">Application Submitted</h2>
@@ -255,8 +253,7 @@ async function submit() {
 
         <div>
           <label class="label">Team name <span class="text-error">*</span></label>
-          <input v-model="teamName" type="text" placeholder="e.g. TechVision Team"
-            class="input-mt" />
+          <input v-model="teamName" type="text" placeholder="e.g. TechVision Team" class="input-mt" />
         </div>
 
         <div>
@@ -291,36 +288,58 @@ async function submit() {
         </button>
       </form>
 
-      <!-- STEP 2 — Documents -->
+      <!-- STEP 2 — Documents (dynamic from call) -->
       <form v-else-if="step === 2" class="flex-col-gap" @submit.prevent="submit">
         <p v-if="error" class="text-error-sm">{{ error }}</p>
 
-        <p class="text-gray-400 text-sm">Upload all 6 required documents before submitting.</p>
-
-        <div v-for="(label, type) in docLabels" :key="type">
-          <label class="label">
-            {{ label }} <span class="text-error">*</span>
-          </label>
-          <div class="relative">
-            <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx"
-              @change="onFileChange(type, $event)"
-              class="hidden" :id="`file-${type}`" />
-            <label :for="`file-${type}`"
-              class="flex items-center justify-between bg-blue-600/10 border border-blue-900 hover:border-blue-600 rounded-md px-3 h-9 cursor-pointer transition-colors">
-              <span class="text-sm" :class="files[type] ? 'text-white' : 'text-gray-600'">
-                {{ files[type] ? files[type]!.name : 'Choose file...' }}
-              </span>
-              <span class="text-xs text-blue-400">Browse</span>
-            </label>
-          </div>
+        <div v-if="requiredDocuments.length === 0" class="text-gray-500 text-sm italic text-center py-4">
+          Loading required documents...
         </div>
+
+        <template v-else>
+          <p class="text-gray-400 text-sm">
+            Upload all required documents before submitting.
+            <span class="text-blue-400">{{ requiredDocuments.filter(d => d.is_mandatory).length }} required</span>
+            <span v-if="requiredDocuments.filter(d => !d.is_mandatory).length > 0" class="text-gray-500">
+              , {{ requiredDocuments.filter(d => !d.is_mandatory).length }} optional
+            </span>
+          </p>
+
+          <div v-for="doc in requiredDocuments" :key="doc.document_name">
+            <label class="label">
+              {{ doc.document_name }}
+              <span v-if="doc.is_mandatory" class="text-error">*</span>
+              <span v-else class="text-gray-600 text-xs ml-1">(optional)</span>
+              <span class="text-gray-600 text-xs ml-1">· max {{ doc.max_size_mb }}MB</span>
+            </label>
+            <div class="relative">
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx,.ppt,.pptx"
+                @change="onFileChange(docKey(doc.document_name), $event)"
+                class="hidden"
+                :id="`file-${docKey(doc.document_name)}`"
+              />
+              <label
+                :for="`file-${docKey(doc.document_name)}`"
+                class="flex items-center justify-between bg-blue-600/10 border border-blue-900 hover:border-blue-600 rounded-md px-3 h-9 cursor-pointer transition-colors"
+                :class="{ 'border-blue-500': files[docKey(doc.document_name)] }"
+              >
+                <span class="text-sm truncate pr-2" :class="files[docKey(doc.document_name)] ? 'text-white' : 'text-gray-600'">
+                  {{ files[docKey(doc.document_name)]?.name ?? 'Choose file...' }}
+                </span>
+                <span class="text-xs text-blue-400 flex-shrink-0">Browse</span>
+              </label>
+            </div>
+          </div>
+        </template>
 
         <div class="flex gap-3 mt-2">
           <button type="button" @click="step = 1"
             class="border border-blue-900 hover:border-blue-600 text-gray-400 hover:text-white w-1/3 h-10 rounded-md text-sm cursor-pointer transition-colors">
             ← Back
           </button>
-          <button type="submit" :disabled="loading"
+          <button type="submit" :disabled="loading || requiredDocuments.length === 0"
             class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 cursor-pointer text-white flex-1 h-10 rounded-md text-sm font-medium">
             {{ loading ? 'Submitting...' : 'Submit Application' }}
           </button>

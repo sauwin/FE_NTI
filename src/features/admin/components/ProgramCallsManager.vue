@@ -44,7 +44,10 @@ const newCall = ref({
   required_documents: [
     { document_name: 'Executive Summary', is_mandatory: true, max_size_mb: 10 },
     { document_name: 'Technical Architecture', is_mandatory: true, max_size_mb: 15 },
-    { document_name: 'Roadmap', is_mandatory: true, max_size_mb: 5 }
+    { document_name: 'Roadmap', is_mandatory: true, max_size_mb: 5 },
+    { document_name: 'Budget', is_mandatory: true, max_size_mb: 15 },
+    { document_name: 'Risk Analysis', is_mandatory: true, max_size_mb: 15 },
+    { document_name: 'Monetization Model', is_mandatory: true, max_size_mb: 15 }
   ] as RequiredDocument[]
 })
 
@@ -85,11 +88,11 @@ async function handleCreateCall() {
       form_config: JSON.stringify(newCall.value.required_documents)
     }
     await api.post('/admin/calls', payload)
-    alert('Výzva bola úspešne vytvorená!')
+    alert('Call created successfully!')
     newCall.value.title = ''
     loadData()
   } catch (e) {
-    alert('Chyba pri vytváraní výzvy.')
+    alert('Error creating call.')
   } finally {
     isSubmitting.value = false
   }
@@ -105,12 +108,12 @@ async function updateCallStatus(id: number, status: string) {
 }
 
 async function handleDeleteCall(id: number) {
-  if (!confirm('Naozaj chcete vymazať túto výzvu?')) return
+  if (!confirm('Are you sure you want to delete this call?')) return
   try {
     await api.delete(`/admin/calls/${id}`)
     loadData()
   } catch {
-    alert('Výzvu nie je možné vymazať (iba Draft).')
+    alert('Call cannot be deleted (only Draft).')
   }
 }
 
@@ -130,8 +133,8 @@ async function downloadCallsExport(format: 'csv' | 'xlsx' = 'xlsx') {
     link.click()
     document.body.removeChild(link)
   } catch (error) {
-    console.error(`Chyba pri exporte výziev do ${format.toUpperCase()}`, error)
-    alert('Nepodarilo sa stiahnuť export.')
+    console.error(`Error exporting calls to ${format.toUpperCase()}`, error)
+    alert('Failed to download export.')
   }
 }
 
@@ -141,7 +144,7 @@ onMounted(() => loadData())
 <template>
   <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
     <div class="xl:col-span-1 border border-slate-800 bg-slate-900/40 rounded-2xl p-6">
-      <h3 class="text-xl font-bold text-white mb-6">Novú Výzvu</h3>
+      <h3 class="text-xl font-bold text-white mb-6">New Call</h3>
       <form @submit.prevent="handleCreateCall" class="space-y-4">
         <div>
           <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Target Program</label>
@@ -185,13 +188,13 @@ onMounted(() => loadData())
         </div>
 
         <div>
-          <label class="block text-xs font-mono uppercase text-slate-400 mb-2">Požadované dokumenty</label>
+          <label class="block text-xs font-mono uppercase text-slate-400 mb-2">Required Documents</label>
           <div class="space-y-3">
             <div v-for="(doc, index) in newCall.required_documents" :key="index" class="bg-slate-950 p-4 rounded-xl border border-slate-800">
-              <input v-model="doc.document_name" placeholder="Názov dokumentu" class="w-full bg-transparent border-b border-slate-700 mb-3 text-sm text-white focus:outline-none focus:border-blue-500" />
+              <input v-model="doc.document_name" placeholder="Document Name" class="w-full bg-transparent border-b border-slate-700 mb-3 text-sm text-white focus:outline-none focus:border-blue-500" />
               <div class="flex items-center justify-between">
                 <label class="flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
-                  <input type="checkbox" v-model="doc.is_mandatory" class="rounded bg-slate-900 border-slate-700 text-blue-600" /> Povinné
+                  <input type="checkbox" v-model="doc.is_mandatory" class="rounded bg-slate-900 border-slate-700 text-blue-600" /> Required
                 </label>
                 <div class="flex items-center gap-2">
                   <input v-model.number="doc.max_size_mb" type="number" class="w-12 bg-slate-800 rounded px-1 py-0.5 text-center text-xs text-white" />
@@ -201,13 +204,13 @@ onMounted(() => loadData())
               </div>
             </div>
             <button type="button" @click="addDocument" class="w-full py-2 text-xs border border-dashed border-slate-700 rounded-lg text-slate-400 hover:text-white hover:border-slate-500 transition">
-              + Pridať dokument
+              + Add Document
             </button>
           </div>
         </div>
 
         <button type="submit" :disabled="isSubmitting" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition">
-          {{ isSubmitting ? 'Ukladám...' : 'Vytvoriť Výzvu' }}
+          {{ isSubmitting ? 'Saving...' : 'Create Call' }}
         </button>
       </form>
     </div>
@@ -215,15 +218,15 @@ onMounted(() => loadData())
     <div class="xl:col-span-2 space-y-6">
       <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6">
         <div class="flex justify-between items-center mb-6">
-          <h3 class="text-xl font-bold text-white">Aktívne a uložené Výzvy</h3>
-          <input v-model="searchQuery" placeholder="Hľadať výzvu..." class="w-full sm:w-64 bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none transition-all"/>
+          <h3 class="text-xl font-bold text-white">Active and Saved Calls</h3>
+          <input v-model="searchQuery" placeholder="Search call..." class="w-full sm:w-64 bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none transition-all"/>
           <div class="ml-4 flex-shrink-0 gap-2 flex">
             <button @click="downloadCallsExport('csv')" class="text-xs bg-green-900/40 hover:bg-green-900/60 px-3 py-1.5 rounded text-green-400 border border-green-800 transition-all font-mono">Export CSV</button>
             <button @click="downloadCallsExport('xlsx')" class="text-xs bg-blue-900/40 hover:bg-blue-900/60 px-3 py-1.5 rounded text-blue-400 border border-blue-800 transition-all font-mono">Export XLSX</button>
           </div>
         </div>
         
-        <div v-if="!filteredCalls.length" class="text-slate-500 italic text-sm">Žiadne výzvy neboli nájdené.</div>
+        <div v-if="!filteredCalls.length" class="text-slate-500 italic text-sm">No calls found.</div>
         <div v-else class="space-y-4">
           <div v-for="c in filteredCalls" :key="c.id" class="border border-slate-800 bg-slate-950 p-5 rounded-xl flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex-grow">
@@ -235,15 +238,15 @@ onMounted(() => loadData())
                   'text-[10px] px-2 py-0.5 rounded border font-mono uppercase'
                 ]">{{ c.status }}</span>
               </div>
-              <p class="text-xs text-slate-400">Tím: {{ c.min_team_size }} - {{ c.max_team_size || '∞' }} osôb</p>
+              <p class="text-xs text-slate-400">Team: {{ c.min_team_size }} - {{ c.max_team_size || '∞' }} people</p>
             </div>
             <div class="flex gap-2">
-              <button @click="emit('view-applications', c.id)" class="text-xs bg-blue-900/20 hover:bg-blue-900/50 px-3 py-1.5 rounded border border-blue-800 text-blue-400 transition-all font-mono">Prihlášky</button>
+              <button @click="emit('view-applications', c.id)" class="text-xs bg-blue-900/20 hover:bg-blue-900/50 px-3 py-1.5 rounded border border-blue-800 text-blue-400 transition-all font-mono">Applications</button>
 
               <button v-if="c.status !== 'draft'" @click="updateCallStatus(c.id, 'draft')" class="text-xs bg-slate-800 px-3 py-1.5 rounded text-slate-300">Draft</button>
               <button v-if="c.status !== 'open'" @click="updateCallStatus(c.id, 'open')" class="text-xs bg-green-900/40 px-3 py-1.5 rounded text-green-400 border border-green-800">Open</button>
               <button v-if="c.status !== 'closed'" @click="updateCallStatus(c.id, 'closed')" class="text-xs bg-red-900/40 px-3 py-1.5 rounded text-red-400 border border-red-800">Close</button>
-              <button @click="handleDeleteCall(c.id)" class="text-xs bg-red-950/30 hover:bg-red-950/60 px-3 py-1.5 rounded border border-red-900/50 text-red-400 transition-all font-mono">Vymazať</button>
+              <button @click="handleDeleteCall(c.id)" class="text-xs bg-red-950/30 hover:bg-red-950/60 px-3 py-1.5 rounded border border-red-900/50 text-red-400 transition-all font-mono">Delete</button>
             </div>
           </div>
         </div>
