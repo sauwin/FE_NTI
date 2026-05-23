@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import api from '../shared/api/axios'
+import api from '@/shared/api/axios'
 
 const sent = ref(false)
 const error = ref('')

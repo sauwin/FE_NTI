@@ -85,7 +85,7 @@ onMounted(() => {
     <!-- Article cards -->
     <div
       v-for="article in articlesObj?.slice(0, 2)" :key="article.id"
-      class="border-2 border-blue-800 hover:border-blue-600 bg-slate-900/50 rounded-2xl flex flex-col overflow-hidden transition">
+      class="card-glowing flex flex-col overflow-hidden transition">
 
       <!-- Image — taller -->
       <img

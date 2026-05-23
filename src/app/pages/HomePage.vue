@@ -1,26 +1,25 @@
 <script setup lang="ts">
+  import PageHero from '@/shared/ui/PageHero.vue'
+  import PageSection from '@/shared/ui/PageSection.vue'
+
   import Articles from '@/features/articles/components/Articles.vue'
   import CallToAction from '@/shared/components/CallToAction.vue'
 </script>
 
 <template>
   <div class="container-main">
-    <div class="bg-blue-950 absolute rounded-full h-120 w-120 -z-10 -right-30 -top-10 blur-sm"></div>
-    <div class="bg-blue-950/30 absolute rounded-full h-64 w-64 -z-10 right-40 top-60 blur-lg"></div>
+    <div class="bg-blue-950 absolute rounded-full h-120 w-120 -z-10 -right-30 -top-10"></div>
 
     <!-- HERO -->
-    <div class="section-divider">
-      <div class="inline-flex items-center bg-blue-600/15 border border-blue-800 text-blue-400 text-xs font-bold tracking-widest uppercase py-1.5 px-4 rounded-full mb-6">
-        Nitrianský technologický inkubátor
-      </div>
-      <h1 class="font-bold text-6xl leading-tight mb-5">
-        Zanechaj svoju stopu<br>
-        v <span class="text-blue-400">technologickej budúcnosti</span>
-      </h1>
-      <p class="text-blue-300 font-semibold text-xl mb-10">
-        Nitrianského regiónu
-      </p>
-      <div class="flex gap-4">
+    <PageHero
+      badge="Nitrianský technologický inkubátor"
+      title="Zanechaj svoju stopu v"
+      highlight="technologickej budúcnosti"
+      description="
+        A prispej k rozvoju nitrianského regiónu
+      "
+    >
+      <div class="flex gap-4 mt-6">
         <router-link to="/programs/a"
           class="btn-primary">
           Explore Programs
@@ -30,14 +29,13 @@
           About NTI
         </router-link>
       </div>
-    </div>
+    </PageHero>
 
     <!-- PROGRAMS -->
-    <section class="section-divider">
-      <div class="section-label-light">Programs</div>
-      <h2 class="text-3xl font-semibold mb-10">Two paths, one goal</h2>
+    <PageSection label="Programs" title="Two paths, one goal">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="card-program">
+
+        <div class="card-glowing p-8">
           <div class="inline-block bg-blue-600/15 border border-blue-800 text-blue-400 text-xs font-bold tracking-widest uppercase py-1 px-3 rounded-full mb-5">
             Program A
           </div>
@@ -65,7 +63,7 @@
           </router-link>
         </div>
 
-        <div class="card-program">
+        <div class="card-glowing p-8">
           <div class="inline-block bg-blue-600/15 border border-blue-800 text-blue-400 text-xs font-bold tracking-widest uppercase py-1 px-3 rounded-full mb-5">
             Program B
           </div>
@@ -92,15 +90,14 @@
             Learn more →
           </router-link>
         </div>
+
       </div>
-    </section>
+    </PageSection>
 
     <!-- ARTICLES -->
-    <section class="section-divider">
-      <div class="section-label-light">News</div>
-      <h2 class="text-3xl font-semibold mb-10">Články</h2>
+    <PageSection label="News" title="Articles">
       <Articles />
-    </section>
+    </PageSection>
 
     <!-- CTA -->
     <CallToAction />

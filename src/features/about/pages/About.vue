@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import PageHero from '@/shared/components/PageHero.vue';
+  import PageHero from '@/shared/ui/PageHero.vue';
   import AboutMission from '../components/AboutMission.vue';
   import AboutOpportunities from '../components/AboutOpportunities.vue';
   import CallToAction from '@/shared/components/CallToAction.vue';

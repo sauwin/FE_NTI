@@ -1,2 +1,3 @@
 <template>
+  Test tab
 </template>

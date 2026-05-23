@@ -1,8 +1,8 @@
 <script setup lang="ts">
   import { ref } from 'vue'
-  import StudentInvitations from './StudentInvitations.vue'
-  import StudentTeam from './StudentTeam.vue'
-  import StudentAplications from './StudentAplications.vue'
+  import StudentInvitations from '@/features/student/components/StudentInvitations.vue'
+  import StudentTeam from '@/features/student/components/StudentTeam.vue'
+  import StudentAplications from '@/features/student/components/StudentAplications.vue'
 
   const props = defineProps<{
     userRole?: string

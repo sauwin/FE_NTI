@@ -14,7 +14,6 @@ const programType = ref('')
 const teamName = ref('')
 const teamDescription = ref('')
 const category = ref('')
-const academicDeclaration = ref(false)
 
 // Program B fields
 const projectTitle = ref('')
