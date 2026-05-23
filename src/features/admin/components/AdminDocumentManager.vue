@@ -195,7 +195,7 @@ onMounted(() => {
           <tr v-else v-for="document in documents" :key="document.id" class="border-t border-slate-800 hover:bg-slate-900/40">
             <td class="px-5 py-4 font-medium text-slate-100">{{ document.file_name }}</td>
             <td class="px-5 py-4 text-slate-400">{{ formatFileSize(document.file_size_bytes) }}</td>
-            <td class="px-5 py-4 text-slate-400">{{ new Date(document.created_at).toLocaleDateString() }}</td>
+            <td class="px-5 py-4 text-slate-400">{{ new Date(document.created_at).toLocaleString() }}</td>
             <td class="px-5 py-4">
               <div class="flex flex-wrap gap-2">
                 <button
