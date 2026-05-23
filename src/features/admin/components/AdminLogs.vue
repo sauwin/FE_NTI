@@ -15,11 +15,14 @@ const logs = ref<any[]>([])
 const loading = ref(false)
 const filterActionType = ref('')
 const filterUserId = ref('')
+const filterStartDate = ref('')
+const filterEndDate = ref('')
 const page = ref(1)
 const total = ref(0)
 const lastPage = ref(1)
 const exportLoading = ref<string | null>(null)
 const adminUsers = ref<any[]>([])
+
 
 const actionOptions = [
   { value: 'approve', label: 'Approve User' },
@@ -40,6 +43,8 @@ async function fetchLogs() {
     const params: Record<string, any> = { page: page.value }
     if (filterActionType.value) params.action_type = filterActionType.value
     if (filterUserId.value) params.user_id = filterUserId.value
+    if (filterStartDate.value) params.date_from = filterStartDate.value;
+    if (filterEndDate.value) params.date_to = filterEndDate.value;
 
     const res = await api.get('/admin/logs', { params })
     logs.value = res.data.data
@@ -55,6 +60,8 @@ async function fetchLogs() {
 function resetFilters() {
   filterActionType.value = ''
   filterUserId.value = ''
+  filterStartDate.value = ''
+  filterEndDate.value = ''
   page.value = 1
   fetchLogs()
 }
@@ -62,11 +69,16 @@ function resetFilters() {
 // ─── Export helpers ────────────────────────────────────────────────────────
 
 async function fetchAllLogsForExport(): Promise<any[]> {
-  const params: Record<string, any> = { page: 1, per_page: 99999 }
+  const params: Record<string, any> = { export: 1 } 
+  
   if (filterActionType.value) params.action_type = filterActionType.value
   if (filterUserId.value) params.user_id = filterUserId.value
+  if (filterStartDate.value) params.date_from = filterStartDate.value
+  if (filterEndDate.value) params.date_to = filterEndDate.value
+
   const res = await api.get('/admin/logs', { params })
-  return (res.data.data ?? res.data) as any[]
+  
+  return res.data as any[] 
 }
 
 function buildExportRows(rawLogs: any[]): Record<string, string>[] {
@@ -351,6 +363,27 @@ onMounted(async () => {
           </select>
         </div>
 
+        <div class="flex gap-2 min-w-[300px]">
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-slate-300 mb-2">From</label>
+            <input 
+              type="date" 
+              v-model="filterStartDate"
+              @change="() => { page = 1; fetchLogs() }"
+              class="w-full bg-[#0B1120] border border-slate-800 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500 outline-none"
+            />
+          </div>
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-slate-300 mb-2">To</label>
+            <input 
+              type="date" 
+              v-model="filterEndDate"
+              @change="() => { page = 1; fetchLogs() }"
+              class="w-full bg-[#0B1120] border border-slate-800 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500 outline-none"
+            />
+          </div>
+        </div>
+
         <button
           @click="resetFilters"
           class="px-5 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-sm rounded-lg transition-all"
@@ -358,7 +391,7 @@ onMounted(async () => {
 
         <!-- Export buttons -->
         <div class="flex items-center gap-2 ml-auto">
-          <span class="text-xs text-slate-500 font-mono uppercase tracking-widest mr-1">Export</span>
+          <span class="text-xs text-slate-500 font-mono uppercase tracking-widest mr-1">Export:</span>
 
           <button @click="exportCSV" :disabled="!!exportLoading"
             class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition-all disabled:opacity-50 disabled:cursor-wait">
