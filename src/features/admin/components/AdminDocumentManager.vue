@@ -11,13 +11,13 @@ interface DocumentItem {
   uploaded_by: number
 }
 
-const search = ref('')
-const date = ref('')
+const search = ref<string>('')
+const date = ref<string>('')
 const documents = ref<DocumentItem[]>([])
-const loading = ref(false)
-const error = ref('')
-const page = ref(1)
-const totalPages = ref(1)
+const loading = ref<boolean>(false)
+const error = ref<string>('')
+const page = ref<number>(1)
+const totalPages = ref<number>(1)
 
 const pageInfo = computed(() => `${page.value} / ${totalPages.value}`)
 
@@ -25,7 +25,6 @@ const formatFileSize = (bytes: number) => {
   if (bytes >= 1024 * 1024) {
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`
   }
-
   return `${(bytes / 1024).toFixed(1)} KB`
 }
 
@@ -56,6 +55,11 @@ const fetchDocuments = async () => {
 const resetFilters = () => {
   search.value = ''
   date.value = ''
+  page.value = 1
+  fetchDocuments()
+}
+
+const handleSearch = () => {
   page.value = 1
   fetchDocuments()
 }
@@ -133,7 +137,7 @@ onMounted(() => {
         <label class="block text-xs font-semibold uppercase tracking-[0.24em] text-slate-400 mb-2">Search documents</label>
         <input
           v-model="search"
-          @keyup.enter="() => { page.value = 1; fetchDocuments() }"
+          @keyup.enter="handleSearch"
           placeholder="Search by file name"
           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder:text-slate-600 focus:border-blue-500 focus:outline-none"
         />
@@ -144,7 +148,7 @@ onMounted(() => {
         <input
           v-model="date"
           type="date"
-          @change="() => { page.value = 1; fetchDocuments() }"
+          @change="handleSearch"
           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 focus:border-blue-500 focus:outline-none"
         />
       </div>
@@ -152,7 +156,7 @@ onMounted(() => {
       <div class="flex flex-wrap items-center gap-3">
         <button
           type="button"
-          @click="() => { page.value = 1; fetchDocuments() }"
+          @click="handleSearch"
           class="inline-flex items-center justify-center rounded-full border border-slate-700 bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-500"
         >
           Apply
@@ -183,10 +187,10 @@ onMounted(() => {
         </thead>
         <tbody>
           <tr v-if="loading" class="animate-pulse">
-            <td colspan="4" class="px-5 py-6 text-slate-500">Loading documents…</td>
+            <td colspan="4" class="px-5 py-6 text-slate-500 text-center">Loading documents…</td>
           </tr>
           <tr v-else-if="documents.length === 0">
-            <td colspan="4" class="px-5 py-6 text-slate-500">No documents found for the current filters.</td>
+            <td colspan="4" class="px-5 py-6 text-slate-500 text-center">No documents found for the current filters.</td>
           </tr>
           <tr v-else v-for="document in documents" :key="document.id" class="border-t border-slate-800 hover:bg-slate-900/40">
             <td class="px-5 py-4 font-medium text-slate-100">{{ document.file_name }}</td>
