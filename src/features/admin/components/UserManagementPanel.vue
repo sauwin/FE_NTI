@@ -3,6 +3,11 @@ import { ref, computed } from 'vue'
 import api from '../../../shared/api/axios'
 import { useConfirm } from '../../../shared/composables/useConfirm'
 
+interface Role {
+  id: number
+  slug: string
+}
+
 const USERS_PER_PAGE = 25
 
 const props = defineProps<{
@@ -41,7 +46,7 @@ const filtered = computed(() => {
   let result = props.users
 
   if (!props.isSuperAdmin) {
-    result = result.filter(u => !u.roles?.some(r => ['nti_admin', 'super_admin'].includes(r.slug)))
+    result = result.filter(u => !u.roles?.some((r: Role) => ['nti_admin', 'super_admin'].includes(r.slug)))
   }
 
   if (searchQuery.value) {
@@ -54,7 +59,7 @@ const filtered = computed(() => {
 
   if (selectedRole.value) {
     result = result.filter(u =>
-        u.roles?.some(r => r.slug === selectedRole.value)
+        u.roles?.some((r: Role) => r.slug === selectedRole.value)
     )
   }
 
@@ -69,12 +74,12 @@ const visibleUsers = computed(() => {
 })
 
 function canManage(user: any) {
-  const hasAdminRole = user.roles?.some(r => ['nti_admin', 'super_admin'].includes(r.slug))
+  const hasAdminRole = user.roles?.some((r: Role) => ['nti_admin', 'super_admin'].includes(r.slug))
   return !hasAdminRole || props.isSuperAdmin
 }
 
 function getAvailableRolesToAssign(user: any) {
-  const userRoles = user.roles?.map(r => r.slug) || []
+  const userRoles = user.roles?.map((r: Role) => r.slug) || []
   return availableRoles.filter(r => !userRoles.includes(r))
 }
 
@@ -198,26 +203,57 @@ async function assignRole(userId: number, roleSlug: string) {
     loading.value = false
   }
 }
+
+async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
+  loading.value = true
+  message.value = ''
+  try {
+    const response = await api.get('/admin/export/users', {
+      params: {
+        search: searchQuery.value || undefined,
+        role: selectedRole.value || undefined,
+        format
+      },
+      responseType: 'blob'
+    })
+    
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `users_export_${new Date().toISOString().split('T')[0]}.${format}`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    
+    success.value = true
+    message.value = `Export successful (${format.toUpperCase()})`
+    setTimeout(() => success.value = false, 3000)
+  } catch (e: any) {
+    success.value = false
+    message.value = e.response?.data?.message || `Failed to export users as ${format.toUpperCase()}`
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
   <div>
     <div v-if="message" :class="[
-'p-3 rounded-lg text-sm mb-4',
-success
-? 'bg-green-900/20 border border-green-800 text-green-400'
-: 'bg-red-900/20 border border-red-800 text-red-400'
-]">
+      'p-3 rounded-lg text-sm mb-4',
+      success ? 'bg-green-900/20 border border-green-800 text-green-400' : 'bg-red-900/20 border border-red-800 text-red-400'
+    ]">
       {{ message }}
     </div>
 
-    <div class="mb-6 space-y-4">
-      <div>
+    <div class="mb-6 flex flex-col md:flex-row md:items-end gap-4">
+      <div class="flex-1">
         <label class="text-sm text-slate-400 mb-2 block">Search by name or email</label>
         <input v-model="searchQuery" type="text" placeholder="Type name or email..." class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
       </div>
 
-      <div>
+      <div class="flex-1">
         <label class="text-sm text-slate-400 mb-2 block">Filter by role</label>
         <select v-model="selectedRole" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
           <option value="">All roles</option>
@@ -225,6 +261,14 @@ success
             {{ role }}
           </option>
         </select>
+      </div>
+      <div class="ml-4 flex-shrink-0 gap-2 flex">
+        <button @click="exportUsers('csv')" :disabled="loading" class="text-xs bg-green-900/40 hover:bg-green-900/60 px-3 py-1.5 rounded text-green-400 border border-green-800 transition-all font-mono">
+          Export CSV
+        </button>
+        <button @click="exportUsers('xlsx')" :disabled="loading" class="text-xs bg-blue-900/40 hover:bg-blue-900/60 px-3 py-1.5 rounded text-blue-400 border border-blue-800 transition-all font-mono">
+          Export XLSX
+        </button>
       </div>
     </div>
 
@@ -245,17 +289,18 @@ success
           <td class="py-3 px-4 text-slate-500">{{ user.email }}</td>
           <td class="py-3 px-4">
             <div class="flex gap-1 flex-wrap items-center">
-<span v-for="role in user.roles" :key="role.id" class="text-xs bg-blue-600/30 border border-blue-700 text-blue-300 px-2 py-1 rounded">
-{{ role.slug }}
-<button v-if="!['nti_admin', 'super_admin'].includes(role.slug) && isSuperAdmin" @click="removeRole(user.id, role.slug)" class="ml-1 hover:text-red-400" title="Remove role">×</button>
-</span>
+              <span v-for="role in user.roles" :key="role.id" class="text-xs bg-blue-600/30 border border-blue-700 text-blue-300 px-2 py-1 rounded">
+              {{ role.slug }}
+              <button v-if="!['nti_admin', 'super_admin'].includes(role.slug) && isSuperAdmin" @click="removeRole(user.id, role.slug)" class="ml-1 hover:text-red-400" title="Remove role">×</button>
+              </span>
             </div>
           </td>
           <td class="py-3 px-4">
-<span :class="[
-'text-xs px-2 py-1 rounded',
-user.status === 'active' ? 'bg-green-900/30 text-green-400' : 'bg-yellow-900/30 text-yellow-400'
-]">{{ user.status }}</span>
+            <span :class="[
+              'text-xs px-2 py-1 rounded',
+              user.status === 'active' ? 'bg-green-900/30 text-green-400' : 'bg-yellow-900/30 text-yellow-400'
+              ]">{{ user.status }}
+            </span>
           </td>
           <td class="py-3 px-4">
             <div class="flex gap-2 flex-wrap">
