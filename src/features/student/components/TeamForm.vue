@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { createTeam } from '../../../shared/api/teams'
+import { createTeam } from '../api/teams'
 
 const emits = defineEmits(['created', 'cancel'])
 
