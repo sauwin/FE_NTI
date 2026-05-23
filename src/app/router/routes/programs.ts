@@ -7,6 +7,16 @@ export const programRoutes: RouteRecordRaw = {
 
   children: [
     {
+      path: 'a',
+      component: () => import('@/features/program_a/pages/ProgramA.vue'),
+    },
+
+    {
+      path: 'b',
+      component: () => import('@/features/program_b/pages/ProgramB.vue'),
+    },
+
+    {
       path: 'a/upload',
       component: () => import('@/features/program_a/pages/ProgramAForm.vue'),
 
