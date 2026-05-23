@@ -62,6 +62,8 @@ function removeDocument(index: number) {
   newCall.value.required_documents.splice(index, 1)
 }
 
+const emit = defineEmits(['view-applications'])
+
 async function loadData() {
   try {
     const [progRes, callRes] = await Promise.all([
@@ -69,7 +71,7 @@ async function loadData() {
       api.get<Call[]>('/admin/calls')
     ])
     programs.value = progRes.data
-    calls.value = callRes.data // Повернули назад запис викликів
+    calls.value = callRes.data
   } catch (e) {
     console.error("Error loading data", e)
   }
@@ -112,6 +114,27 @@ async function handleDeleteCall(id: number) {
   }
 }
 
+async function downloadCallsExport(format: 'csv' | 'xlsx' = 'xlsx') {
+  try {
+    const params = { format }
+    const response = await api.get('/admin/export/calls', {
+      params,
+      responseType: 'blob'
+    })
+    
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `calls.${format}`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  } catch (error) {
+    console.error(`Chyba pri exporte výziev do ${format.toUpperCase()}`, error)
+    alert('Nepodarilo sa stiahnuť export.')
+  }
+}
+
 onMounted(() => loadData())
 </script>
 
@@ -129,7 +152,6 @@ onMounted(() => loadData())
               :value="p.code === 'program_b' ? 'b' : 'a'" 
               class="bg-slate-950 text-white"
             >
-              <!-- Фолбеки для виведення назв програм за замовчуванням -->
               {{ p.title || p.name || (p.code === 'program_a' ? 'Program A' : 'Program B') }}
             </option>
           </select>
@@ -195,6 +217,10 @@ onMounted(() => loadData())
         <div class="flex justify-between items-center mb-6">
           <h3 class="text-xl font-bold text-white">Aktívne a uložené Výzvy</h3>
           <input v-model="searchQuery" placeholder="Hľadať výzvu..." class="w-full sm:w-64 bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none transition-all"/>
+          <div class="ml-4 flex-shrink-0 gap-2 flex">
+            <button @click="downloadCallsExport('csv')" class="text-xs bg-green-900/40 hover:bg-green-900/60 px-3 py-1.5 rounded text-green-400 border border-green-800 transition-all font-mono">Export CSV</button>
+            <button @click="downloadCallsExport('xlsx')" class="text-xs bg-blue-900/40 hover:bg-blue-900/60 px-3 py-1.5 rounded text-blue-400 border border-blue-800 transition-all font-mono">Export XLSX</button>
+          </div>
         </div>
         
         <div v-if="!filteredCalls.length" class="text-slate-500 italic text-sm">Žiadne výzvy neboli nájdené.</div>
@@ -212,6 +238,8 @@ onMounted(() => loadData())
               <p class="text-xs text-slate-400">Tím: {{ c.min_team_size }} - {{ c.max_team_size || '∞' }} osôb</p>
             </div>
             <div class="flex gap-2">
+              <button @click="emit('view-applications', c.id)" class="text-xs bg-blue-900/20 hover:bg-blue-900/50 px-3 py-1.5 rounded border border-blue-800 text-blue-400 transition-all font-mono">Prihlášky</button>
+
               <button v-if="c.status !== 'draft'" @click="updateCallStatus(c.id, 'draft')" class="text-xs bg-slate-800 px-3 py-1.5 rounded text-slate-300">Draft</button>
               <button v-if="c.status !== 'open'" @click="updateCallStatus(c.id, 'open')" class="text-xs bg-green-900/40 px-3 py-1.5 rounded text-green-400 border border-green-800">Open</button>
               <button v-if="c.status !== 'closed'" @click="updateCallStatus(c.id, 'closed')" class="text-xs bg-red-900/40 px-3 py-1.5 rounded text-red-400 border border-red-800">Close</button>

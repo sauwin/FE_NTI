@@ -6,9 +6,8 @@ import PendingApprovalsTable from './PendingApprovalTable.vue'
 import AdminLogs from './AdminLogs.vue'
 import CreateAdminForm from './CreateAdminForm.vue'
 import AdminDocumentManager from '@/features/admin/components/AdminDocumentManager.vue'
-
-// Нові компоненти для ядра Programs + Calls (їх можна винести або рендерити на місці)
 import ProgramCallsManager from '@/features/admin/components/ProgramCallsManager.vue'
+import ApplicationsManager from '@/features/admin/components/ApplicationsManager.vue'
 
 interface DashboardStats {
   total_users: number
@@ -26,7 +25,8 @@ const error = ref('')
 const loadingStats = ref(true)
 const isSuperAdmin = props.userRole === 'super_admin'
 
-// Оптимізований об'єкт статистики за документацією (модуль Reporting / BI)
+const selectedCallIdForApps = ref<number | null>(null)
+
 const stats = ref<DashboardStats>({
   total_users: 0,
   active_projects: 0,
@@ -37,7 +37,6 @@ const stats = ref<DashboardStats>({
 const users = ref([])
 const pendingUsers = ref([])
 
-// 1. Оптимізоване завантаження агрегованих метрик (без завантаження 10k юзерів)
 async function loadAggregatedStats() {
   try {
     loadingStats.value = true
@@ -56,7 +55,6 @@ async function loadAggregatedStats() {
   }
 }
 
-// 2. Завантаження детальних даних лише тоді, коли відкривається відповідний таб
 async function loadUserData() {
   try {
     const res = await api.get('/admin/users')
@@ -75,12 +73,22 @@ async function loadPendingApprovals() {
   }
 }
 
-// Слідкуємо за зміною табів, щоб не навантажувати мережу (Lazy Loading даних)
 const handleTabChange = (tab: string) => {
   activeTab.value = tab
   if (tab === 'users') loadUserData()
   if (tab === 'approvals') loadPendingApprovals()
+
+  if (tab !== 'applications') {
+    selectedCallIdForApps.value = null
+  }
 }
+
+const handleViewApplications = (callId: number) => {
+  selectedCallIdForApps.value = callId
+  activeTab.value = 'applications'
+}
+
+
 
 onMounted(() => {
   loadAggregatedStats()
@@ -95,6 +103,7 @@ onMounted(() => {
       <div class="flex flex-wrap gap-2 border-b border-slate-800">
         <button @click="handleTabChange('overview')" :class="[activeTab === 'overview' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Overview</button>
         <button @click="handleTabChange('programs-calls')" :class="[activeTab === 'programs-calls' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Programs & Calls (Core)</button>
+        <button @click="handleTabChange('applications')" :class="[activeTab === 'applications' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Applications</button>
         <button @click="handleTabChange('users')" :class="[activeTab === 'users' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Manage Users</button>
         <button @click="handleTabChange('approvals')" :class="[activeTab === 'approvals' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Pending Approvals</button>
         <button @click="handleTabChange('documents')" :class="[activeTab === 'documents' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Documents</button>
@@ -135,7 +144,14 @@ onMounted(() => {
     </div>
 
     <div v-show="activeTab === 'programs-calls'">
-      <ProgramCallsManager />
+      <ProgramCallsManager @view-applications="handleViewApplications" />
+    </div>
+
+    <div v-show="activeTab === 'applications'">
+      <ApplicationsManager 
+        :filter-call-id="selectedCallIdForApps" 
+        @clear-filter="selectedCallIdForApps = null"
+      />
     </div>
 
     <div v-show="activeTab === 'users'">
