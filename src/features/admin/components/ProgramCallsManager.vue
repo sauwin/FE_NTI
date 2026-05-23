@@ -19,6 +19,7 @@ interface Call {
   deadline_at: string | null
   min_team_size: number
   max_team_size: number | null
+  form_config?: string
 }
 
 interface RequiredDocument {
@@ -32,7 +33,9 @@ const programs = ref<Program[]>([])
 const calls = ref<Call[]>([])
 const isSubmitting = ref(false)
 
-const newCall = ref({
+const editingCallId = ref<number | null>(null)
+
+const defaultCallState = {
   program_type: 'a',
   title: '',
   status: 'draft',
@@ -49,7 +52,10 @@ const newCall = ref({
     { document_name: 'Risk Analysis', is_mandatory: true, max_size_mb: 15 },
     { document_name: 'Monetization Model', is_mandatory: true, max_size_mb: 15 }
   ] as RequiredDocument[]
-})
+}
+
+type CallState = typeof defaultCallState
+const newCall = ref<CallState>(JSON.parse(JSON.stringify(defaultCallState)))
 
 const filteredCalls = computed(() => {
   return calls.value.filter(c => 
@@ -80,19 +86,59 @@ async function loadData() {
   }
 }
 
-async function handleCreateCall() {
+function editCall(call: Call) {
+  editingCallId.value = call.id
+  const program = programs.value.find(p => p.id === call.program_id)
+  
+  let parsedDocs = defaultCallState.required_documents
+  if (call.form_config) {
+    try {
+      parsedDocs = JSON.parse(call.form_config)
+    } catch (e) {
+      console.error('Failed to parse form_config', e)
+    }
+  }
+
+  newCall.value = {
+    program_type: program?.code === 'program_b' ? 'b' : 'a',
+    title: call.name,
+    status: call.status,
+    opens_at: call.opens_at ? call.opens_at.substring(0, 10) : '',
+    deadline_at: call.deadline_at ? call.deadline_at.substring(0, 10) : '',
+    min_team_size: call.min_team_size,
+    max_team_size: call.max_team_size || 5,
+    evaluation_criteria: [],
+    required_documents: parsedDocs
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function cancelEdit() {
+  editingCallId.value = null
+  newCall.value = JSON.parse(JSON.stringify(defaultCallState))
+}
+
+async function handleSubmitCall() {
   try {
     isSubmitting.value = true
     const payload = {
       ...newCall.value,
       form_config: JSON.stringify(newCall.value.required_documents)
     }
-    await api.post('/admin/calls', payload)
-    alert('Call created successfully!')
-    newCall.value.title = ''
+
+    if (editingCallId.value) {
+      await api.put(`/admin/calls/${editingCallId.value}`, payload)
+      alert('Call updated successfully!')
+    } else {
+      await api.post('/admin/calls', payload)
+      alert('Call created successfully!')
+    }
+    
+    cancelEdit()
     loadData()
   } catch (e) {
-    alert('Error creating call.')
+    alert(editingCallId.value ? 'Error updating call.' : 'Error creating call.')
   } finally {
     isSubmitting.value = false
   }
@@ -129,9 +175,9 @@ async function downloadCallsExport(format: 'csv' | 'xlsx' = 'xlsx') {
     const link = document.createElement('a')
     link.href = url
     link.setAttribute('download', `calls.${format}`)
-    document.body.appendChild(link)
+    document.body?.appendChild(link)
     link.click()
-    document.body.removeChild(link)
+    document.body?.removeChild(link)
   } catch (error) {
     console.error(`Error exporting calls to ${format.toUpperCase()}`, error)
     alert('Failed to download export.')
@@ -144,8 +190,10 @@ onMounted(() => loadData())
 <template>
   <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
     <div class="xl:col-span-1 border border-slate-800 bg-slate-900/40 rounded-2xl p-6">
-      <h3 class="text-xl font-bold text-white mb-6">New Call</h3>
-      <form @submit.prevent="handleCreateCall" class="space-y-4">
+      <h3 class="text-xl font-bold text-white mb-6">
+        {{ editingCallId ? 'Edit Call (Draft)' : 'New Call' }}
+      </h3>
+      <form @submit.prevent="handleSubmitCall" class="space-y-4">
         <div>
           <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Target Program</label>
           <select v-model="newCall.program_type" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white focus:border-blue-600 outline-none">
@@ -209,9 +257,14 @@ onMounted(() => loadData())
           </div>
         </div>
 
-        <button type="submit" :disabled="isSubmitting" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition">
-          {{ isSubmitting ? 'Saving...' : 'Create Call' }}
-        </button>
+        <div class="flex gap-3 pt-2">
+          <button v-if="editingCallId" type="button" @click="cancelEdit" class="w-1/3 bg-slate-800 hover:bg-slate-700 text-white font-medium py-2.5 rounded-lg transition text-sm">
+            Cancel
+          </button>
+          <button type="submit" :disabled="isSubmitting" :class="editingCallId ? 'w-2/3' : 'w-full'" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition text-sm">
+            {{ isSubmitting ? 'Saving...' : (editingCallId ? 'Update Call' : 'Create Call') }}
+          </button>
+        </div>
       </form>
     </div>
 
@@ -242,6 +295,8 @@ onMounted(() => loadData())
             </div>
             <div class="flex gap-2">
               <button @click="emit('view-applications', c.id)" class="text-xs bg-blue-900/20 hover:bg-blue-900/50 px-3 py-1.5 rounded border border-blue-800 text-blue-400 transition-all font-mono">Applications</button>
+
+              <button v-if="c.status === 'draft'" @click="editCall(c)" class="text-xs bg-yellow-900/30 hover:bg-yellow-900/60 px-3 py-1.5 rounded border border-yellow-900/50 text-yellow-500 transition-all">Edit</button>
 
               <button v-if="c.status !== 'draft'" @click="updateCallStatus(c.id, 'draft')" class="text-xs bg-slate-800 px-3 py-1.5 rounded text-slate-300">Draft</button>
               <button v-if="c.status !== 'open'" @click="updateCallStatus(c.id, 'open')" class="text-xs bg-green-900/40 px-3 py-1.5 rounded text-green-400 border border-green-800">Open</button>
