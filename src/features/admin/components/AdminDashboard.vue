@@ -34,7 +34,7 @@ const stats = ref<DashboardStats>({
   open_calls: 0,
 })
 
-const users = ref([])
+const users = ref<any[]>([])
 const pendingUsers = ref([])
 
 async function loadAggregatedStats() {
@@ -92,6 +92,7 @@ const handleViewApplications = (callId: number) => {
 
 onMounted(() => {
   loadAggregatedStats()
+  loadUserData() 
 })
 </script>
 
@@ -171,7 +172,7 @@ onMounted(() => {
     </div>
 
     <div v-show="activeTab === 'logs'">
-      <AdminLogs :users="users" />
+      <AdminLogs :users="users.filter(u => u.roles?.some((r: any) => ['nti_admin','super_admin','evaluator','content_editor'].includes(r.slug)))" />
     </div>
   </div>
 </template>
