@@ -10,55 +10,107 @@ interface ActiveCall {
 
 const router = useRouter()
 
-// Сувора типізація полів форми
-const activeCalls = ref<ActiveCall[]>([])
-const selectedCallId = ref<number | null>(null)
-const title = ref<string>('') // Додано обов'язкове поле Title
-const brief = ref<string>('')
-const budget = ref<number | null>(null)
+const step = ref(1)
+const loading = ref(false)
+const error = ref('')
 
-const loading = ref<boolean>(false)
-const error = ref<string>('')
+const activeCalls = ref<ActiveCall[]>([])
+
+const form = ref({
+  call_id: null as number | null,
+
+  title: '',
+  short_description: '',
+
+  project_goal: '',
+  expected_outcome: '',
+
+  detailed_technical_description: '',
+  required_technologies: '',
+  architecture_requirements: '',
+  platforms: '',
+
+  required_skills: '',
+
+  preferred_team_size: null as number | null,
+  budget: null as number | null,
+
+  deadline: '',
+})
+
+const files = ref<Record<string, File | null>>({
+  technical_doc: null,
+  wireframes: null,
+  specifications: null
+})
+
+const docLabels: Record<string, string> = {
+  technical_doc: 'Technical Documentation (PDF)',
+  wireframes: 'Wireframes / Images',
+  specifications: 'PDF Specifications'
+}
 
 onMounted(async () => {
   try {
-    const res = await api.get<ActiveCall[]>('/calls/active?program=b')
-    activeCalls.value = res.data
-    
-    if (res.data.length > 0) {
-      selectedCallId.value = res.data[0]?.id ?? null
+    const res = await api.get('/calls/active?program=b');
+    if (res.data && typeof res.data === 'object' && res.data.id) {
+      activeCalls.value = [res.data]; 
+      form.value.call_id = res.data.id;
+    } else {
+      console.warn('No active calls found');
     }
-  } catch (err) {
-    error.value = 'Failed to load active application periods.'
+  } catch (err: any) {
+    console.error('Error:', err);
+    error.value = 'Failed to load active application periods.';
   }
 })
 
-// Функція приймає статус: зберегти як чернетку або відразу опублікувати
-async function submitTask(targetStatus: 'draft' | 'published'): Promise<void> {
-  if (!selectedCallId.value) {
-    error.value = 'Please select a call period.'
-    return
-  }
-  if (!title.value.trim() || !brief.value.trim()) {
-    error.value = 'Title and project brief are required.'
-    return
-  }
 
+function onFileChange(key: string, event: Event) {
+  const input = event.target as HTMLInputElement
+  files.value[key] = input.files?.[0] ?? null
+}
+
+async function submitTask(targetStatus: 'draft' | 'published') {
   loading.value = true
   error.value = ''
 
   try {
-    // Payload узгоджено з бекендом (Prepojenie na call + status)
-    await api.post('/company/tasks', {
-      call_id: selectedCallId.value,
-      title: title.value,
-      brief: brief.value,
-      budget: budget.value,
-      status: targetStatus
+    const response = await api.post('/company/tasks', {
+      ...form.value,
+
+      status: targetStatus,
+
+      required_technologies: form.value.required_technologies
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean),
+
+      required_skills: form.value.required_skills
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean),
     })
-    router.push('/programs/b')
+
+    const taskId = response.data.id
+
+    for (const [key, file] of Object.entries(files.value)) {
+      if (!file) continue
+
+      const formData = new FormData()
+
+      formData.append('file', file)
+      formData.append('type', key)
+      formData.append('task_id', String(taskId))
+
+      await api.post('/documents/upload', formData)
+    }
+
+    step.value = 3
   } catch (e: any) {
-    error.value = e?.response?.data?.message || 'Server error. Make sure your payload matches the database schema.'
+    error.value =
+      e?.response?.data?.message ||
+      'Error saving challenge.'
   } finally {
     loading.value = false
   }
@@ -66,52 +118,385 @@ async function submitTask(targetStatus: 'draft' | 'published'): Promise<void> {
 </script>
 
 <template>
-  <div class="flex justify-center items-center min-h-screen py-10">
-    <div class="w-full max-w-xl bg-slate-950 p-8 border border-blue-900 rounded-2xl">
-      <div class="mb-6 text-center">
-        <h1 class="font-bold text-3xl text-white">Create Technical Specification</h1>
-        <p class="text-gray-400 text-sm mt-1">Specify brief for student teams (Program B)</p>
+  <div class="flex-center-page">
+    <div class="w-full max-w-3xl">
+
+      <div class="mb-8 text-center">
+        <div
+          class="inline-block text-xs font-semibold tracking-widest uppercase text-blue-400 bg-blue-600/10 border border-blue-900 px-4 py-1.5 rounded-full mb-4"
+        >
+          Program B
+        </div>
+
+        <h1 class="font-bold text-4xl text-white">
+          Create Company Challenge
+        </h1>
+
+        <p class="text-gray-400 mt-2 text-sm">
+          Submit a technical challenge for student teams
+        </p>
       </div>
 
-      <form @submit.prevent class="flex flex-col gap-4">
-        <p v-if="error" class="text-red-500 text-sm bg-red-500/10 p-3 border border-red-900 rounded-md">{{ error }}</p>
+      <div class="flex items-center mb-8">
+
+        <div class="flex-center">
+          <div
+            :class="[
+              'flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
+
+              step >= 1
+                ? 'bg-blue-600 border-blue-600 text-white'
+                : 'border-blue-900 text-gray-500'
+            ]"
+          >
+            1
+          </div>
+
+          <span
+            class="text-xs mt-1.5"
+            :class="step >= 1 ? 'text-blue-400' : 'text-gray-600'"
+          >
+            Challenge
+          </span>
+        </div>
+
+        <div
+          class="flex-1 h-px mx-2 mb-4"
+          :class="step >= 2 ? 'bg-blue-600' : 'bg-blue-900'"
+        ></div>
+
+        <div class="flex-center">
+          <div
+            :class="[
+              'flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
+
+              step >= 2
+                ? 'bg-blue-600 border-blue-600 text-white'
+                : 'border-blue-900 text-gray-500'
+            ]"
+          >
+            2
+          </div>
+
+          <span
+            class="text-xs mt-1.5"
+            :class="step >= 2 ? 'text-blue-400' : 'text-gray-600'"
+          >
+            Documents
+          </span>
+        </div>
+
+        <div
+          class="flex-1 h-px mx-2 mb-4"
+          :class="step >= 3 ? 'bg-blue-600' : 'bg-blue-900'"
+        ></div>
+
+        <div class="flex-center">
+          <div
+            :class="[
+              'flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
+
+              step >= 3
+                ? 'bg-blue-600 border-blue-600 text-white'
+                : 'border-blue-900 text-gray-500'
+            ]"
+          >
+            3
+          </div>
+
+          <span
+            class="text-xs mt-1.5"
+            :class="step >= 3 ? 'text-blue-400' : 'text-gray-600'"
+          >
+            Final
+          </span>
+        </div>
+
+      </div>
+
+      <div
+        v-if="step === 3"
+        class="text-center py-12"
+      >
+        <div class="text-5xl mb-4">
+          ✓
+        </div>
+
+        <h2 class="text-2xl font-bold text-white mb-2">
+          Challenge Published
+        </h2>
+
+        <p class="text-gray-400 text-sm mb-6">
+          Your company challenge has been successfully submitted to Program B.
+          Student teams will be able to apply after review.
+        </p>
+
+        <button
+          @click="router.push('/programs/b')"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-8 h-10 rounded-md text-sm cursor-pointer"
+        >
+          Go to Program B
+        </button>
+      </div>
+
+      <form
+        v-else-if="step === 1"
+        @submit.prevent="step = 2"
+        class="flex-col-gap"
+      >
+        <p v-if="error" class="text-error-sm">
+          {{ error }}
+        </p>
 
         <div>
-          <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Select Active Period (Call) *</label>
-          <select v-model="selectedCallId" class="w-full bg-slate-900 border border-blue-900 rounded-md h-10 px-3 text-white focus:outline-none focus:border-blue-500">
-            <option v-for="call in activeCalls" :key="call.id" :value="call.id">
-              {{ call.name }}
+          <label class="label">
+            Active Call
+            <span class="text-error">*</span>
+          </label>
+
+          <select
+            v-model="form.call_id"
+            class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white focus:outline-none focus:border-blue-500"
+          >
+            <option
+              v-for="c in activeCalls"
+              :key="c.id"
+              :value="c.id"
+              class="bg-dark"
+            >
+              {{ c.name }}
             </option>
           </select>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Challenge Title *</label>
-          <input v-model="title" type="text" placeholder="e.g. AI-driven Supply Chain Optimizer" class="w-full bg-blue-600/10 border border-blue-900 rounded-md h-10 px-3 text-white focus:outline-none focus:border-blue-500" />
+          <label class="label">
+            Project Title
+            <span class="text-error">*</span>
+          </label>
+
+          <input
+            v-model="form.title"
+            required
+            type="text"
+            placeholder="AI Recruitment Platform"
+            class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500"
+          />
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Project Brief / Requirements *</label>
-          <textarea v-model="brief" rows="6" placeholder="Describe requirements, technology stack, goals..." class="w-full bg-blue-600/10 border border-blue-900 rounded-md p-3 text-white focus:outline-none focus:border-blue-500 resize-none"></textarea>
+          <label class="label">
+            Short Description
+            <span class="text-error">*</span>
+          </label>
+
+          <textarea
+            v-model="form.short_description"
+            required
+            placeholder="Brief summary of the challenge..."
+            class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full min-h-[90px] p-3 text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500 resize-none"
+          />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <div>
+            <label class="label">
+              Project Goal
+            </label>
+
+            <textarea
+              v-model="form.project_goal"
+              placeholder="What problem should be solved?"
+              class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full min-h-[100px] p-3 text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500 resize-none"
+            />
+          </div>
+
+          <div>
+            <label class="label">
+              Expected Outcome
+            </label>
+
+            <textarea
+              v-model="form.expected_outcome"
+              placeholder="Expected deliverables..."
+              class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full min-h-[100px] p-3 text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500 resize-none"
+            />
+          </div>
+
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Project Budget (€) (Optional)</label>
-          <input v-model.number="budget" type="number" step="0.01" placeholder="e.g. 2500.00" class="w-full bg-blue-600/10 border border-blue-900 rounded-md h-10 px-3 text-white focus:outline-none focus:border-blue-500" />
+          <label class="label">
+            Technical Description
+          </label>
+
+          <textarea
+            v-model="form.detailed_technical_description"
+            placeholder="Architecture, APIs, integrations, infrastructure..."
+            class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full min-h-[140px] p-3 text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500 resize-none"
+          />
         </div>
 
-        <div class="flex gap-3 mt-4">
-          <button type="button" @click="router.push('/programs/b')" class="px-4 border border-blue-900 hover:border-blue-600 text-gray-400 hover:text-white h-11 rounded-md text-sm transition">Cancel</button>
-          
-          <button type="button" @click="submitTask('draft')" :disabled="loading" class="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white h-11 rounded-md text-sm font-medium transition">
-            Save as Draft
-          </button>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-          <button type="button" @click="submitTask('published')" :disabled="loading" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-11 rounded-md text-sm font-medium transition">
-            Publish Task
-          </button>
+          <div>
+            <label class="label">
+              Required Technologies
+            </label>
+
+            <input
+              v-model="form.required_technologies"
+              placeholder="Laravel, Vue, Docker..."
+              class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label class="label">
+              Required Skills
+            </label>
+
+            <input
+              v-model="form.required_skills"
+              placeholder="Backend, DevOps..."
+              class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500"
+            />
+          </div>
+
         </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+          <div>
+            <label class="label">
+              Team Size
+            </label>
+
+            <input
+              v-model.number="form.preferred_team_size"
+              type="number"
+              placeholder="4"
+              class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label class="label">
+              Budget (€)
+            </label>
+
+            <input
+              v-model.number="form.budget"
+              type="number"
+              placeholder="5000"
+              class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label class="label">
+              Deadline
+            </label>
+
+            <input
+              v-model="form.deadline"
+              type="date"
+              class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white focus:outline-none focus:border-blue-500"
+            />
+          </div>
+
+        </div>
+
+        <button
+          type="submit"
+          class="bg-blue-600 hover:bg-blue-700 text-white w-full h-10 mt-2 rounded-md text-sm font-medium transition cursor-pointer"
+        >
+          Continue to Documents →
+        </button>
+
       </form>
+
+      <div
+        v-else
+        class="flex-col-gap"
+      >
+        <p v-if="error" class="text-error-sm">
+          {{ error }}
+        </p>
+
+        <p class="text-gray-400 text-sm">
+          Upload challenge related documents and technical materials.
+        </p>
+
+        <div
+          v-for="(label, key) in docLabels"
+          :key="key"
+        >
+          <label class="label">
+            {{ label }}
+          </label>
+
+          <div class="relative">
+
+            <input
+              type="file"
+              class="hidden"
+              :id="`file-${key}`"
+              @change="onFileChange(key, $event)"
+            />
+
+            <label
+              :for="`file-${key}`"
+              class="flex items-center justify-between bg-blue-600/10 border border-blue-900 hover:border-blue-600 rounded-md px-3 h-10 cursor-pointer transition-colors"
+              :class="{ 'border-blue-500': files[key] }"
+            >
+              <span
+                class="text-sm truncate pr-2"
+                :class="files[key] ? 'text-white' : 'text-gray-600'"
+              >
+                {{ files[key]?.name ?? 'Choose file...' }}
+              </span>
+
+              <span class="text-xs text-blue-400 shrink-0">
+                Browse
+              </span>
+            </label>
+
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3 mt-2">
+
+          <button
+            type="button"
+            @click="step = 1"
+            class="border border-blue-900 hover:border-blue-600 text-gray-400 hover:text-white w-full sm:w-1/4 h-10 rounded-md text-sm cursor-pointer transition-colors"
+          >
+            ← Back
+          </button>
+
+          <button
+            type="button"
+            @click="submitTask('draft')"
+            :disabled="loading"
+            class="border border-blue-600 text-blue-400 hover:bg-blue-600/10 disabled:opacity-50 cursor-pointer flex-1 h-10 rounded-md text-sm font-medium transition-colors"
+          >
+            {{ loading ? 'Saving...' : 'Save Draft' }}
+          </button>
+
+          <button
+            type="button"
+            @click="submitTask('published')"
+            :disabled="loading"
+            class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 cursor-pointer text-white flex-1 h-10 rounded-md text-sm font-medium transition-colors"
+          >
+            {{ loading ? 'Publishing...' : 'Publish Challenge' }}
+          </button>
+
+        </div>
+      </div>
+
     </div>
   </div>
 </template>

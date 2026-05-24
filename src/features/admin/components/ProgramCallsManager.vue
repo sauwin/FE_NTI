@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import api from '../../../shared/api/axios'
 
 interface Program {
@@ -28,6 +28,24 @@ interface RequiredDocument {
   max_size_mb: number
 }
 
+// 1. Створюємо шаблони документів для кожної з програм
+const programADocs: RequiredDocument[] = [
+  { document_name: 'Executive Summary', is_mandatory: true, max_size_mb: 10 },
+  { document_name: 'Technical Architecture', is_mandatory: true, max_size_mb: 15 },
+  { document_name: 'Roadmap', is_mandatory: true, max_size_mb: 5 },
+  { document_name: 'Budget', is_mandatory: true, max_size_mb: 15 },
+  { document_name: 'Risk Analysis', is_mandatory: true, max_size_mb: 15 },
+  { document_name: 'Monetization Model', is_mandatory: true, max_size_mb: 15 }
+]
+
+const programBDocs: RequiredDocument[] = [
+  { document_name: 'Technical Documentation', is_mandatory: true, max_size_mb: 20 },
+  { document_name: 'Wireframes', is_mandatory: false, max_size_mb: 15 },
+  { document_name: 'PDF Specifications', is_mandatory: true, max_size_mb: 10 },
+  { document_name: 'Images', is_mandatory: false, max_size_mb: 20 },
+  { document_name: 'Presentations', is_mandatory: false, max_size_mb: 20 }
+]
+
 const searchQuery = ref('')
 const programs = ref<Program[]>([])
 const calls = ref<Call[]>([])
@@ -35,6 +53,7 @@ const isSubmitting = ref(false)
 const editingCallId = ref<number | null>(null)
 const openMenuId = ref<number | null>(null)
 
+// 2. Використовуємо шаблон Program A як значення за замовчуванням
 const defaultCallState = {
   program_type: 'a',
   title: '',
@@ -44,18 +63,23 @@ const defaultCallState = {
   min_team_size: 1,
   max_team_size: 5,
   evaluation_criteria: [],
-  required_documents: [
-    { document_name: 'Executive Summary', is_mandatory: true, max_size_mb: 10 },
-    { document_name: 'Technical Architecture', is_mandatory: true, max_size_mb: 15 },
-    { document_name: 'Roadmap', is_mandatory: true, max_size_mb: 5 },
-    { document_name: 'Budget', is_mandatory: true, max_size_mb: 15 },
-    { document_name: 'Risk Analysis', is_mandatory: true, max_size_mb: 15 },
-    { document_name: 'Monetization Model', is_mandatory: true, max_size_mb: 15 }
-  ] as RequiredDocument[]
+  required_documents: JSON.parse(JSON.stringify(programADocs)) as RequiredDocument[]
 }
 
 type CallState = typeof defaultCallState
 const newCall = ref<CallState>(JSON.parse(JSON.stringify(defaultCallState)))
+
+// 3. Додаємо Watcher, який буде змінювати документи при перемиканні програми
+watch(() => newCall.value.program_type, (newType) => {
+  // Змінюємо документи ТІЛЬКИ якщо це створення нового виклику (не редагування)
+  if (!editingCallId.value) {
+    if (newType === 'a') {
+      newCall.value.required_documents = JSON.parse(JSON.stringify(programADocs))
+    } else if (newType === 'b') {
+      newCall.value.required_documents = JSON.parse(JSON.stringify(programBDocs))
+    }
+  }
+})
 
 const filteredCalls = computed(() => {
   return calls.value.filter(c =>
@@ -135,7 +159,8 @@ function cancelEdit() {
 async function handleSubmitCall() {
   try {
     isSubmitting.value = true
-    const payload = { ...newCall.value }
+    // Відправляємо required_documents, бекенд збереже їх як JSON у базу
+    const payload = { ...newCall.value, form_config: JSON.stringify(newCall.value.required_documents) }
 
     if (editingCallId.value) {
       await api.put(`/admin/calls/${editingCallId.value}`, payload)
