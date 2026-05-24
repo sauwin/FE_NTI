@@ -9,6 +9,7 @@ const password = ref('')
 const error = ref('')
 const router = useRouter()
 const auth = useAuthStore()
+
 async function submit() {
   error.value = ''
   try {
@@ -33,25 +34,63 @@ async function submit() {
 </script>
 
 <template>
-  <h1 class="font-bold text-4xl text-center p-4">Login</h1>
-  <div class="flex justify-center">
-    <form class="flex flex-col gap-2 mt-5" @submit.prevent="submit">
-      <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
+  <div class="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-6 bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-2xl p-8 shadow-2xl">
+      
       <div>
-        <label for="email" class="block text-white">Email</label>
-        <input v-model="email" type="email" class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-100 h-9" />
+        <h1 class="font-bold text-3xl text-center text-white tracking-tight">Welcome Back</h1>
+        <p class="mt-2 text-center text-sm text-slate-400">
+          Log in to your NTI account to continue
+        </p>
       </div>
-      <div>
-        <label for="password" class="block text-white">Password</label>
-        <input v-model="password" type="password" class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-100 h-9" />
-      </div>
-      <input type="submit" class="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white w-100 h-10 mt-4">
-      <div class="text-center mt-4">
-        <router-link class="text-blue-500 hover:text-blue-600 text-sm" to="/auth/forgot-password">Forgot password?</router-link>
-      </div>
-      <div class = "text-center mt-4">
-        Not registered? <router-link class="text-blue-500 hover:text-blue-600" to="/auth/register">Create an account</router-link>
-      </div>
-    </form>
+
+      <form class="space-y-4" @submit.prevent="submit">
+        
+        <div v-if="error" class="bg-red-500/10 border border-red-500/30 text-red-400 text-sm p-3 rounded-lg flex items-center">
+          <span>{{ error }}</span>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Email Address</label>
+          <input 
+            v-model="email" 
+            type="email" 
+            required
+            placeholder="john.pork@example.com"
+            class="mt-1 block w-full px-3 py-2 bg-slate-950/50 border border-slate-800/80 rounded-lg text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition text-sm" 
+          />
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center">
+            <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Password</label>
+          </div>
+          <input 
+            v-model="password" 
+            type="password" 
+            required
+            placeholder="••••••••"
+            class="mt-1 block w-full px-3 py-2 bg-slate-950/50 border border-slate-800/80 rounded-lg text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition text-sm" 
+          />
+          <router-link class="mt-1 text-xs text-blue-400 hover:text-blue-300 transition" to="/auth/forgot-password">
+              Forgot password?
+          </router-link>
+        </div>
+
+        <button 
+          type="submit"
+          class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-blue-500 active:bg-blue-700 transition duration-150 ease-in-out mt-6 cursor-pointer"
+        >
+          Sign In
+        </button>
+
+        <div class="text-center text-xs text-slate-400 mt-4">
+          Not registered? 
+          <router-link class="text-blue-400 hover:text-blue-300 font-medium transition" to="/auth/register">
+            Create an account
+          </router-link>
+        </div>
+      </form>
+    </div>
   </div>
 </template>
