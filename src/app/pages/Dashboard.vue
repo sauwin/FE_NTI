@@ -157,9 +157,7 @@ onMounted(() => { fetchData() })
 
       <!-- ── MENTOR ── -->
       <MentorDashboard v-if="userObj?.role_slug === 'mentor'"/>
-      <!-- <div v-else-if="userObj?.role_slug === 'mentor'">
         
-      </div> -->
       <!-- ── EVALUATOR ── -->
       <EvaluatorDashboard v-else-if="userObj?.role_slug === 'evaluator'"/>
 
