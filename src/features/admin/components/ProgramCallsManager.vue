@@ -32,8 +32,8 @@ const searchQuery = ref('')
 const programs = ref<Program[]>([])
 const calls = ref<Call[]>([])
 const isSubmitting = ref(false)
-
 const editingCallId = ref<number | null>(null)
+const openMenuId = ref<number | null>(null)
 
 const defaultCallState = {
   program_type: 'a',
@@ -58,10 +58,18 @@ type CallState = typeof defaultCallState
 const newCall = ref<CallState>(JSON.parse(JSON.stringify(defaultCallState)))
 
 const filteredCalls = computed(() => {
-  return calls.value.filter(c => 
+  return calls.value.filter(c =>
     (c.name || '').toLowerCase().includes(searchQuery.value.toLowerCase())
   )
 })
+
+function getProgramLabel(programId: number): string {
+  const program = programs.value.find(p => p.id === programId)
+  if (!program) return '—'
+  if (program.code === 'program_a') return 'Program A'
+  if (program.code === 'program_b') return 'Program B'
+  return program.title || program.name || '—'
+}
 
 function addDocument() {
   newCall.value.required_documents.push({ document_name: '', is_mandatory: true, max_size_mb: 5 })
@@ -69,6 +77,14 @@ function addDocument() {
 
 function removeDocument(index: number) {
   newCall.value.required_documents.splice(index, 1)
+}
+
+function toggleMenu(id: number) {
+  openMenuId.value = openMenuId.value === id ? null : id
+}
+
+function closeMenu() {
+  openMenuId.value = null
 }
 
 const emit = defineEmits(['view-applications'])
@@ -82,21 +98,18 @@ async function loadData() {
     programs.value = progRes.data
     calls.value = callRes.data
   } catch (e) {
-    console.error("Error loading data", e)
+    console.error('Error loading data', e)
   }
 }
 
 function editCall(call: Call) {
   editingCallId.value = call.id
+  closeMenu()
   const program = programs.value.find(p => p.id === call.program_id)
-  
+
   let parsedDocs = defaultCallState.required_documents
   if (call.form_config) {
-    try {
-      parsedDocs = JSON.parse(call.form_config)
-    } catch (e) {
-      console.error('Failed to parse form_config', e)
-    }
+    try { parsedDocs = JSON.parse(call.form_config) } catch {}
   }
 
   newCall.value = {
@@ -122,10 +135,7 @@ function cancelEdit() {
 async function handleSubmitCall() {
   try {
     isSubmitting.value = true
-    const payload = {
-      ...newCall.value,
-      form_config: JSON.stringify(newCall.value.required_documents)
-    }
+    const payload = { ...newCall.value }
 
     if (editingCallId.value) {
       await api.put(`/admin/calls/${editingCallId.value}`, payload)
@@ -134,7 +144,7 @@ async function handleSubmitCall() {
       await api.post('/admin/calls', payload)
       alert('Call created successfully!')
     }
-    
+
     cancelEdit()
     loadData()
   } catch (e) {
@@ -147,6 +157,7 @@ async function handleSubmitCall() {
 async function updateCallStatus(id: number, status: string) {
   try {
     await api.patch(`/admin/calls/${id}/status`, { status })
+    closeMenu()
     loadData()
   } catch {
     alert('Failed to update status')
@@ -157,6 +168,7 @@ async function handleDeleteCall(id: number) {
   if (!confirm('Are you sure you want to delete this call?')) return
   try {
     await api.delete(`/admin/calls/${id}`)
+    closeMenu()
     loadData()
   } catch {
     alert('Call cannot be deleted (only Draft).')
@@ -165,12 +177,10 @@ async function handleDeleteCall(id: number) {
 
 async function downloadCallsExport(format: 'csv' | 'xlsx' = 'xlsx') {
   try {
-    const params = { format }
     const response = await api.get('/admin/export/calls', {
-      params,
+      params: { format },
       responseType: 'blob'
     })
-    
     const url = window.URL.createObjectURL(new Blob([response.data]))
     const link = document.createElement('a')
     link.href = url
@@ -178,36 +188,34 @@ async function downloadCallsExport(format: 'csv' | 'xlsx' = 'xlsx') {
     document.body?.appendChild(link)
     link.click()
     document.body?.removeChild(link)
-  } catch (error) {
-    console.error(`Error exporting calls to ${format.toUpperCase()}`, error)
+  } catch {
     alert('Failed to download export.')
   }
 }
 
-onMounted(() => loadData())
+onMounted(() => {
+  loadData()
+  document.addEventListener('click', closeMenu)
+})
 </script>
 
 <template>
   <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+    <!-- Left: Form -->
     <div class="xl:col-span-1 border border-slate-800 bg-slate-900/40 rounded-2xl p-6">
       <h3 class="text-xl font-bold text-white mb-6">
-        {{ editingCallId ? 'Edit Call (Draft)' : 'New Call' }}
+        {{ editingCallId ? 'Edit Call' : 'New Call' }}
       </h3>
       <form @submit.prevent="handleSubmitCall" class="space-y-4">
         <div>
           <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Target Program</label>
           <select v-model="newCall.program_type" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white focus:border-blue-600 outline-none">
-            <option 
-              v-for="p in programs" 
-              :key="p.id" 
-              :value="p.code === 'program_b' ? 'b' : 'a'" 
-              class="bg-slate-950 text-white"
-            >
+            <option v-for="p in programs" :key="p.id" :value="p.code === 'program_b' ? 'b' : 'a'" class="bg-slate-950 text-white">
               {{ p.title || p.name || (p.code === 'program_a' ? 'Program A' : 'Program B') }}
             </option>
           </select>
         </div>
-        
+
         <div>
           <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Call Title</label>
           <input type="text" v-model="newCall.title" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white focus:border-blue-600 outline-none" required />
@@ -226,11 +234,11 @@ onMounted(() => loadData())
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Min Team Size</label>
+            <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Min Team</label>
             <input type="number" v-model="newCall.min_team_size" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white focus:border-blue-600 outline-none" />
           </div>
           <div>
-            <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Max Team Size</label>
+            <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Max Team</label>
             <input type="number" v-model="newCall.max_team_size" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white focus:border-blue-600 outline-none" />
           </div>
         </div>
@@ -246,8 +254,8 @@ onMounted(() => loadData())
                 </label>
                 <div class="flex items-center gap-2">
                   <input v-model.number="doc.max_size_mb" type="number" class="w-12 bg-slate-800 rounded px-1 py-0.5 text-center text-xs text-white" />
-                  <span class="text-[10px] text-slate-500">MB</span>
-                  <button type="button" @click="removeDocument(index)" class="text-slate-500 hover:text-red-400 ml-2">✕</button>
+                  <span class="text-xs text-slate-500">MB</span>
+                  <button type="button" @click="removeDocument(index)" class="text-slate-600 hover:text-red-400 ml-2 transition-colors">✕</button>
                 </div>
               </div>
             </div>
@@ -261,52 +269,138 @@ onMounted(() => loadData())
           <button v-if="editingCallId" type="button" @click="cancelEdit" class="w-1/3 bg-slate-800 hover:bg-slate-700 text-white font-medium py-2.5 rounded-lg transition text-sm">
             Cancel
           </button>
-          <button type="submit" :disabled="isSubmitting" :class="editingCallId ? 'w-2/3' : 'w-full'" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition text-sm">
+          <button type="submit" :disabled="isSubmitting" :class="editingCallId ? 'w-2/3' : 'w-full'" class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition text-sm">
             {{ isSubmitting ? 'Saving...' : (editingCallId ? 'Update Call' : 'Create Call') }}
           </button>
         </div>
       </form>
     </div>
 
+    <!-- Right: Calls list -->
     <div class="xl:col-span-2 space-y-6">
       <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6">
-        <div class="flex justify-between items-center mb-6">
-          <h3 class="text-xl font-bold text-white">Active and Saved Calls</h3>
-          <input v-model="searchQuery" placeholder="Search call..." class="w-full sm:w-64 bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none transition-all"/>
-          <div class="ml-4 flex-shrink-0 gap-2 flex">
-            <button @click="downloadCallsExport('csv')" class="text-xs bg-green-900/40 hover:bg-green-900/60 px-3 py-1.5 rounded text-green-400 border border-green-800 transition-all font-mono">Export CSV</button>
-            <button @click="downloadCallsExport('xlsx')" class="text-xs bg-blue-900/40 hover:bg-blue-900/60 px-3 py-1.5 rounded text-blue-400 border border-blue-800 transition-all font-mono">Export XLSX</button>
+        <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
+          <h3 class="text-xl font-bold text-white">Calls</h3>
+          <div class="flex items-center gap-3 flex-wrap">
+            <input v-model="searchQuery" placeholder="Search call..." class="w-52 bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-blue-600 outline-none transition-all" />
+            <button @click="downloadCallsExport('csv')" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded text-slate-300 border border-slate-700 font-mono transition-all">CSV</button>
+            <button @click="downloadCallsExport('xlsx')" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded text-slate-300 border border-slate-700 font-mono transition-all">XLSX</button>
           </div>
         </div>
-        
-        <div v-if="!filteredCalls.length" class="text-slate-500 italic text-sm">No calls found.</div>
-        <div v-else class="space-y-4">
-          <div v-for="c in filteredCalls" :key="c.id" class="border border-slate-800 bg-slate-950 p-5 rounded-xl flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex-grow">
-              <div class="flex items-center gap-3 mb-1">
-                <h4 class="text-lg font-bold text-white">{{ c.name }}</h4>
-                <span :class="[
-                  c.status === 'open' ? 'bg-green-950 text-green-400 border-green-800' : 
-                  c.status === 'closed' ? 'bg-red-950 text-red-400 border-red-900' : 'bg-gray-800 text-gray-400 border-gray-700',
-                  'text-[10px] px-2 py-0.5 rounded border font-mono uppercase'
-                ]">{{ c.status }}</span>
+
+        <div v-if="!filteredCalls.length" class="text-slate-500 italic text-sm py-6 text-center">No calls found.</div>
+
+        <div v-else class="space-y-3">
+          <div
+            v-for="c in filteredCalls"
+            :key="c.id"
+            class="border border-slate-800 bg-slate-950 px-5 py-4 rounded-xl flex items-center justify-between gap-4"
+          >
+            <!-- Left info -->
+            <div class="flex-grow min-w-0">
+              <p class="text-base font-semibold text-white truncate mb-2">{{ c.name }}</p>
+              <div class="flex items-center gap-2 flex-wrap">
+                <!-- Program badge -->
+                <span
+                  class="text-xs font-mono px-2 py-1 rounded border"
+                  :class="getProgramLabel(c.program_id) === 'Program A'
+                    ? 'bg-blue-950/60 text-blue-400 border-blue-900'
+                    : 'bg-slate-800 text-slate-400 border-slate-700'"
+                >
+                  {{ getProgramLabel(c.program_id) }}
+                </span>
+
+                <!-- Status badge -->
+                <span
+                  class="text-xs font-mono px-2 py-1 rounded border uppercase"
+                  :class="{
+                    'bg-emerald-950/60 text-emerald-400 border-emerald-900': c.status === 'open',
+                    'bg-slate-800/80 text-slate-500 border-slate-700': c.status === 'closed',
+                    'bg-slate-900 text-slate-600 border-slate-800': c.status === 'draft',
+                    'bg-amber-950/40 text-amber-500 border-amber-900': c.status === 'archived',
+                  }"
+                >
+                  {{ c.status }}
+                </span>
+
+                <!-- Team size -->
+                <span class="text-xs text-slate-500 font-mono">
+                  {{ c.min_team_size }}–{{ c.max_team_size || '∞' }} members
+                </span>
               </div>
-              <p class="text-xs text-slate-400">Team: {{ c.min_team_size }} - {{ c.max_team_size || '∞' }} people</p>
             </div>
-            <div class="flex gap-2">
-              <button @click="emit('view-applications', c.id)" class="text-xs bg-blue-900/20 hover:bg-blue-900/50 px-3 py-1.5 rounded border border-blue-800 text-blue-400 transition-all font-mono">Applications</button>
 
-              <button v-if="c.status === 'draft'" @click="editCall(c)" class="text-xs bg-yellow-900/30 hover:bg-yellow-900/60 px-3 py-1.5 rounded border border-yellow-900/50 text-yellow-500 transition-all">Edit</button>
+            <!-- Right: Applications + dropdown only -->
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <button
+                @click="emit('view-applications', c.id)"
+                class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded border border-slate-700 text-slate-300 transition-all font-mono whitespace-nowrap"
+              >
+                Applications
+              </button>
 
-              <button v-if="c.status !== 'draft'" @click="updateCallStatus(c.id, 'draft')" class="text-xs bg-slate-800 px-3 py-1.5 rounded text-slate-300">Draft</button>
-              <button v-if="c.status !== 'open'" @click="updateCallStatus(c.id, 'open')" class="text-xs bg-green-900/40 px-3 py-1.5 rounded text-green-400 border border-green-800">Open</button>
-              <button v-if="c.status !== 'closed'" @click="updateCallStatus(c.id, 'closed')" class="text-xs bg-red-900/40 px-3 py-1.5 rounded text-red-400 border border-red-800">Close</button>
-              <button @click="handleDeleteCall(c.id)" class="text-xs bg-red-950/30 hover:bg-red-950/60 px-3 py-1.5 rounded border border-red-900/50 text-red-400 transition-all font-mono">Delete</button>
+              <!-- Dropdown -->
+              <div class="relative" @click.stop>
+                <button
+                  @click="toggleMenu(c.id)"
+                  class="flex items-center justify-center w-8 h-8 rounded-md border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-all text-sm leading-none"
+                >
+                  ···
+                </button>
+
+                <div
+                  v-if="openMenuId === c.id"
+                  class="absolute right-0 top-full mt-1.5 z-50 w-44 bg-slate-900 border border-slate-700/80 rounded-xl shadow-2xl overflow-hidden"
+                >
+                  <div class="py-1">
+                    <!-- Edit — draft only, inside dropdown -->
+                    <button
+                      v-if="c.status === 'draft'"
+                      @click="editCall(c)"
+                      class="w-full text-left px-4 py-2.5 text-sm text-slate-200 hover:bg-slate-800 transition"
+                    >
+                      Edit
+                    </button>
+
+                    <div v-if="c.status === 'draft'" class="my-1 border-t border-slate-800"></div>
+
+                    <button
+                      v-if="c.status !== 'draft'"
+                      @click="updateCallStatus(c.id, 'draft')"
+                      class="w-full text-left px-4 py-2.5 text-sm text-slate-400 hover:bg-slate-800 transition"
+                    >
+                      Set Draft
+                    </button>
+                    <button
+                      v-if="c.status !== 'open'"
+                      @click="updateCallStatus(c.id, 'open')"
+                      class="w-full text-left px-4 py-2.5 text-sm text-emerald-400 hover:bg-slate-800 transition"
+                    >
+                      Open
+                    </button>
+                    <button
+                      v-if="c.status !== 'closed'"
+                      @click="updateCallStatus(c.id, 'closed')"
+                      class="w-full text-left px-4 py-2.5 text-sm text-slate-400 hover:bg-slate-800 transition"
+                    >
+                      Close
+                    </button>
+
+                    <div class="my-1 border-t border-slate-800"></div>
+
+                    <button
+                      @click="handleDeleteCall(c.id)"
+                      class="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-slate-800 transition"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    
   </div>
 </template>
