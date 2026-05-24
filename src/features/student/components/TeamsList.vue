@@ -4,7 +4,6 @@ import { getTeams, deleteTeam, updateTeam } from '../api/teams'
 import TeamForm from './TeamForm.vue'
 import TeamMembersManager from './TeamMembersManager.vue'
 
-// 1. ОПИС ТИПІВ ДЛЯ TYPESCRIPT
 interface PivotData {
   status: 'pending' | 'accepted' | 'rejected'
   joined_at?: string | null
@@ -22,6 +21,7 @@ interface Team {
   name: string
   description: string | null
   leader_id: number
+  status: 'forming' | 'ready'
   members_count?: number
   members?: TeamMember[]
 }
@@ -65,6 +65,7 @@ function toggleExpand(teamId: number) {
 }
 
 function startEdit(team: Team) {
+  if (team.status !== 'forming') return
   editingTeamId.value = team.id
   editName.value = team.name
   editDescription.value = team.description ?? ''
@@ -157,6 +158,7 @@ onMounted(() => { fetchTeams() })
           v-for="team in teams" 
           :key="team.id" 
           class="border border-slate-800 rounded-xl p-5 bg-slate-900/40 transition flex flex-col justify-between"
+          :class="{ 'opacity-85': team.status === 'ready' }"
         >
           <div v-if="editingTeamId === team.id" class="space-y-3 bg-slate-950/40 p-3 rounded-lg border border-slate-800/80 mb-3">
             <div>
@@ -197,6 +199,10 @@ onMounted(() => { fetchTeams() })
               <div class="flex items-center gap-2">
                 <div class="text-white font-semibold text-base">{{ team.name }}</div>
                 
+                <span v-if="team.status === 'ready'" class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700 font-normal">
+                  🔒 Locked (Ready)
+                </span>
+
                 <span 
                   class="text-xs text-slate-500 inline-block transition-transform duration-200" 
                   :class="{ 'rotate-90 text-blue-400': expandedTeamId === team.id }"
@@ -219,7 +225,7 @@ onMounted(() => { fetchTeams() })
                 Ready for Prog A
               </span>
               <span 
-                v-else 
+                v-if="getAcceptedMembersCount(team) < 3" 
                 class="text-[10px] bg-amber-950/50 text-amber-500 px-2 py-0.5 rounded border border-amber-900/30"
               >
                 Needs people for Prog A
@@ -228,7 +234,7 @@ onMounted(() => { fetchTeams() })
           </div>
 
           <div v-if="expandedTeamId === team.id" class="mt-4">
-            <div v-if="team.leader_id === currentUserId" class="flex justify-end gap-2 mb-3 pb-3 border-b border-slate-800/60">
+            <div v-if="team.leader_id === currentUserId && team.status === 'forming'" class="flex justify-end gap-2 mb-3 pb-3 border-b border-slate-800/60">
               <button 
                 @click="startEdit(team)"
                 class="text-xs border border-slate-800 bg-slate-900/30 text-slate-400 hover:text-white hover:border-slate-700 px-2.5 py-1 rounded transition"
@@ -242,10 +248,14 @@ onMounted(() => { fetchTeams() })
                 🗑️ Delete Team
               </button>
             </div>
+            
+            <div v-else-if="team.leader_id === currentUserId && team.status === 'ready'" class="text-xs text-amber-500/80 bg-amber-950/20 border border-amber-900/30 px-3 py-2 rounded-lg mb-3">
+              ℹ️ The data for this command has been frozen because it has already been submitted or approved in the program (Status: Ready). 
+            </div>
 
             <TeamMembersManager 
               :team="team" 
-              :is-leader="team.leader_id === currentUserId" 
+              :is-leader="team.leader_id === currentUserId && team.status === 'forming'" 
               @refresh="fetchTeams" 
             />
           </div>
