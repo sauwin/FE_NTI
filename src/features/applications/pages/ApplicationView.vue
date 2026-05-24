@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import api from '@/shared/api/axios'
 import { useConfirm } from '@/shared/composables/useConfirm'
 import DocumentActionButtons from '@/shared/components/DocumentActionButtons.vue'
 
+import { 
+  getApplicationById, 
+  getApplicationDocuments, 
+  deleteApplication 
+} from '@/features/applications/api/applications'
+
 const route = useRoute()
 const router = useRouter()
-const id = route.params.id
+const id = route.params.id as string
 const app = ref<any>(null)
 const docs = ref<any[]>([])
 const error = ref('')
@@ -16,8 +21,8 @@ const deleting = ref(false)
 onMounted(async () => {
   try {
     const [appRes, docsRes] = await Promise.all([
-      api.get(`/applications/${id}`),
-      api.get(`/applications/${id}/documents`),
+      getApplicationById(id),
+      getApplicationDocuments(id),
     ])
     app.value = appRes.data
     docs.value = docsRes.data
@@ -56,7 +61,7 @@ async function deleteApp() {
 
   deleting.value = true
   try {
-    await api.delete(`/applications/${id}`)
+    await deleteApplication(id)
     router.push('/dashboard')
   } catch (e: any) {
     error.value = e.response?.data?.message ?? 'Could not delete application'

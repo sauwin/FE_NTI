@@ -12,6 +12,16 @@ export const publicRoutes: RouteRecordRaw = {
     },
 
     {
+      path: 'programs/a',
+      component: () => import('@/features/program_a/pages/ProgramA.vue'),
+    },
+
+    {
+      path: 'programs/b',
+      component: () => import('@/features/program_b/pages/ProgramB.vue'),
+    },
+
+    {
       path: 'about',
       component: () => import('@/features/about/pages/About.vue'),
     },
