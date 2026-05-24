@@ -7,6 +7,7 @@ import { authRoutes } from './routes/auth'
 import { programRoutes } from './routes/programs'
 import { applicationRoutes } from './routes/applications'
 import { profileRoutes } from './routes/profile'
+import { evaluationRoutes } from './routes/evaluations'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -18,6 +19,7 @@ const router = createRouter({
 
     ...applicationRoutes,
     ...profileRoutes,
+    ...evaluationRoutes,
 
     {
       path: '/pending-verification',

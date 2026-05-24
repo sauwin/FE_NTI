@@ -8,6 +8,7 @@ import CreateAdminForm from './CreateAdminForm.vue'
 import AdminDocumentManager from '@/features/admin/components/AdminDocumentManager.vue'
 import ProgramCallsManager from '@/features/admin/components/ProgramCallsManager.vue'
 import ApplicationsManager from '@/features/admin/components/ApplicationsManager.vue'
+import CallEvaluatorsManager from '@/features/admin/components/CallEvaluatorsManager.vue'
 
 interface DashboardStats {
   total_users: number
@@ -105,6 +106,7 @@ onMounted(() => {
         <button @click="handleTabChange('overview')" :class="[activeTab === 'overview' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Overview</button>
         <button @click="handleTabChange('programs-calls')" :class="[activeTab === 'programs-calls' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Programs & Calls (Core)</button>
         <button @click="handleTabChange('applications')" :class="[activeTab === 'applications' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Applications</button>
+        <button @click="handleTabChange('evaluators')" :class="[activeTab === 'evaluators' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Evaluators</button>
         <button @click="handleTabChange('users')" :class="[activeTab === 'users' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Manage Users</button>
         <button @click="handleTabChange('approvals')" :class="[activeTab === 'approvals' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Pending Approvals</button>
         <button @click="handleTabChange('documents')" :class="[activeTab === 'documents' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Documents</button>
@@ -153,6 +155,10 @@ onMounted(() => {
         :filter-call-id="selectedCallIdForApps" 
         @clear-filter="selectedCallIdForApps = null"
       />
+    </div>
+
+    <div v-show="activeTab === 'evaluators'">
+      <CallEvaluatorsManager />
     </div>
 
     <div v-show="activeTab === 'users'">

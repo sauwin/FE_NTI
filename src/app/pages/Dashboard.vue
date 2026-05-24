@@ -7,6 +7,7 @@ import api from '@/shared/api/axios'
 import StudentDashboard from '@/features/student/components/StudentDashboard.vue'
 import CompanyDashboard from '@/features/company/components/CompanyDashboard.vue'
 import AdminDashboard from '@/features/admin/components/AdminDashboard.vue'
+import EvaluatorDashboard from '@/features/evaluation/components/EvaluatorDashboard.vue'
 import MentorDashboard from '@/features/mentor/components/MentorDashboard.vue'
 
 const router = useRouter()
@@ -159,6 +160,8 @@ onMounted(() => { fetchData() })
       <!-- <div v-else-if="userObj?.role_slug === 'mentor'">
         
       </div> -->
+      <!-- ── EVALUATOR ── -->
+      <EvaluatorDashboard v-else-if="userObj?.role_slug === 'evaluator'"/>
 
       <!-- ── COMPANY ── -->
       <CompanyDashboard v-if="userObj?.role_slug === 'company'"/>
