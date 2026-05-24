@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import type { ConfirmOptions } from '@/components/ConfirmDialog.vue'
+import type { ConfirmOptions } from '@/shared/components/ConfirmDialog.vue'
 
 let dialogRef: any = null
 

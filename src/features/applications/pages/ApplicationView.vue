@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useConfirm } from '@/shared/composables/useConfirm'
 import DocumentActionButtons from '@/shared/components/DocumentActionButtons.vue'
+import MilestonesPanel from '@/features/milestones/components/MilestonesPanel.vue'
 
 import { 
   getApplicationById, 
@@ -134,6 +135,9 @@ async function deleteApp() {
             </div>
           </div>
         </div>
+
+        <!-- Milestones -->
+        <MilestonesPanel v-if="app" :application-id="id" />
 
         <!-- Edit button -->
         <div v-if="app.status === 'draft' || app.status === 'pending_revision'" class="flex gap-3">
