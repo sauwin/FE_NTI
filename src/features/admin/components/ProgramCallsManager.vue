@@ -306,11 +306,14 @@ onMounted(() => {
       <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6">
         <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
           <h3 class="text-xl font-bold text-white">Calls</h3>
-          <div class="flex items-center gap-3 flex-wrap">
-            <input v-model="searchQuery" placeholder="Search call..." class="w-52 bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-blue-600 outline-none transition-all" />
-            <button @click="downloadCallsExport('csv')" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded text-slate-300 border border-slate-700 font-mono transition-all">CSV</button>
-            <button @click="downloadCallsExport('xlsx')" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded text-slate-300 border border-slate-700 font-mono transition-all">XLSX</button>
-          </div>
+          <div class="ml-4 flex-shrink-0 gap-2 flex">
+          <button @click="downloadCallsExport('csv')" :disabled="isSubmitting" class="text-xs bg-green-900/40 hover:bg-green-900/60 px-3 py-1.5 rounded text-green-400 border border-green-800 transition-all font-mono">
+            Export CSV
+          </button>
+          <button @click="downloadCallsExport('xlsx')" :disabled="isSubmitting" class="text-xs bg-blue-900/40 hover:bg-blue-900/60 px-3 py-1.5 rounded text-blue-400 border border-blue-800 transition-all font-mono">
+            Export XLSX
+          </button>
+        </div>
         </div>
 
         <div v-if="!filteredCalls.length" class="text-slate-500 italic text-sm py-6 text-center">No calls found.</div>
