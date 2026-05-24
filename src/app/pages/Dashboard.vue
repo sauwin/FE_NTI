@@ -2,13 +2,12 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/features/auth/stores/auth'
-import TeamForm from '@/features/student/components/TeamForm.vue'
-import TeamsList from '@/features/student/components/TeamsList.vue'
 import api from '@/shared/api/axios'
 
 import StudentDashboard from '@/features/student/components/StudentDashboard.vue'
 import CompanyDashboard from '@/features/company/components/CompanyDashboard.vue'
 import AdminDashboard from '@/features/admin/components/AdminDashboard.vue'
+import MentorDashboard from '@/features/mentor/components/MentorDashboard.vue'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -70,13 +69,6 @@ async function logout() {
   } catch {
     error.value = 'Unable to log out'
   }
-}
-
-function onTeamCreated(team: any) {
-  success.value = 'Team created successfully.'
-  showTeamForm.value = false
-  fetchData()
-  setTimeout(() => (success.value = ''), 4500)
 }
 
 const profileRoute: Record<string, string> = {
@@ -159,105 +151,17 @@ onMounted(() => { fetchData() })
         </router-link>
       </div>
 
-      <!-- Quick actions --><!--
-      <section class="section-divider-md">
-        <div class="section-label">Quick actions</div>
-        <div class="flex gap-4 flex-wrap">
-          <router-link
-            v-if="userObj?.role_slug === 'student'"
-            to="/programs/a/upload"
-            class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
-            Apply to Program A
-          </router-link>
-          <router-link
-            v-if="userObj?.role_slug === 'student'"
-            to="/programs/b/upload"
-            class="border border-slate-700 hover:border-blue-700 text-gray-400 hover:text-white px-6 py-3 rounded-lg text-sm font-medium transition">
-            Apply to Program B
-          </router-link>
-          <button
-            @click="logout"
-            class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition ml-auto">
-            Log out
-          </button>
-        </div>
-      </section>-->
-
-      <!-- Applications -->
-      <section v-if="!['super_admin', 'nti_admin', 'company', 'student'].includes(userObj?.role_slug ?? '')">
-        <div class="section-label">My Applications</div>
-        <div v-if="applications.length === 0" class="border border-slate-800 rounded-2xl p-12 text-center bg-slate-900/30">
-          <p class="text-slate-500 text-sm">No applications yet.</p>
-          <p class="text-slate-600 text-xs mt-1">Submit your first application to get started.</p>
-        </div>
-        <div v-else class="flex flex-col gap-3">
-          <div v-for="app in applications" :key="app.id"
-               class="border border-slate-800 rounded-xl px-6 py-4 bg-slate-900/30 flex items-center justify-between">
-            <div>
-              <span class="text-white text-sm font-medium">Program {{ app.program_type.toUpperCase() }}</span>
-              <span class="text-slate-600 text-xs ml-3">#{{ app.id }}</span>
-              <p class="text-slate-500 text-xs mt-1">{{ new Date(app.created_at).toLocaleDateString() }}</p>
-            </div>
-            <div class="flex items-center gap-3">
-            <span :class="[
-              'text-xs px-2.5 py-0.5 rounded-full border capitalize',
-              app.status === 'approved' ? 'bg-green-900/30 border-green-800 text-green-400' :
-              app.status === 'rejected' ? 'bg-red-900/30 border-red-800 text-red-400' :
-              'bg-blue-900/30 border-blue-800 text-blue-400'
-            ]">{{ app.status }}</span>
-              <router-link :to="`/applications/${app.id}`" class="text-white text-sm font-medium hover:text-blue-400 transition">
-                Program {{ app.program_type.toUpperCase() }} #{{ app.id }}
-              </router-link>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <!-- ── STUDENT ── -->
       <StudentDashboard v-if="userObj?.role_slug === 'student'"/>
 
       <!-- ── MENTOR ── -->
-      <div v-else-if="userObj?.role_slug === 'mentor'">
-        <section class="section-divider-md">
-          <div class="section-label">Quick actions</div>
-          <div class="flex gap-4 flex-wrap">
-            <router-link to="/mentor-profile"
-                         class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
-              My Profile
-            </router-link>
-            <button @click="logout"
-                    class="border border-slate-700 hover:border-red-900 text-gray-400 hover:text-red-400 px-6 py-3 rounded-lg text-sm font-medium transition ml-auto">
-              Log out
-            </button>
-          </div>
-        </section>
-        <section>
-          <div class="section-label">My Projects</div>
-          <div class="border border-slate-800 rounded-2xl p-12 text-center bg-slate-900/30">
-            <p class="text-slate-500 text-sm">No projects assigned yet.</p>
-          </div>
-        </section>
-      </div>
+      <MentorDashboard v-if="userObj?.role_slug === 'mentor'"/>
+      <!-- <div v-else-if="userObj?.role_slug === 'mentor'">
+        
+      </div> -->
 
       <!-- ── COMPANY ── -->
       <CompanyDashboard v-if="userObj?.role_slug === 'company'"/>
-      <!-- <div v-else-if="userObj?.role_slug === 'company'">
-        <section class="section-divider-md mt-8">
-          <div class="section-label">Quick actions</div>
-          <div class="flex gap-4 flex-wrap">
-            <router-link to="/company-profile"
-                         class="border border-slate-700 hover:border-blue-700 text-gray-400 hover:text-white px-6 py-3 rounded-lg text-sm font-medium transition">
-              Company Profile
-            </router-link>
-          </div>
-        </section>
-        <section>
-          <div class="section-label">My Tasks</div>
-          <div class="border border-slate-800 rounded-2xl p-12 text-center bg-slate-900/30">
-            <p class="text-slate-500 text-sm">No tasks submitted yet.</p>
-          </div>
-        </section>
-      </div> -->
 
       <!-- ── ADMIN ── -->
       <AdminDashboard v-if="userObj?.role_slug === 'nti_admin' || userObj?.role_slug === 'super_admin'" :user-role="userObj?.role_slug" />
