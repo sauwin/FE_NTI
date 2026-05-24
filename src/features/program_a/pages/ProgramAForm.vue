@@ -1,9 +1,15 @@
 <script setup lang="ts">
   import { watch, ref, onMounted, computed } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
-  import api from '@/shared/api/axios'
   import { getTeams } from '@/features/student/api/teams'
   import { useAuthStore } from '@/features/auth/stores/auth'
+
+  import { 
+    getActiveCall, 
+    createApplication, 
+    updateApplication, 
+    uploadApplicationDocument 
+  } from '@/features/applications/api/applications'
 
   const route = useRoute()
   const router = useRouter()
@@ -48,7 +54,6 @@
     loadingTeams.value = true
     try {
       const res = await getTeams()
-      // Переконуємось, що користувач авторизований перед фільтрацією за його ID
       const currentUserId = auth.user?.id
       
       myTeams.value = res.data.filter((team: any) => {
@@ -68,7 +73,7 @@
     await fetchUserTeams()
 
     try {
-      const res = await api.get('/calls/active/a')
+      const res = await getActiveCall('a')
       callId.value = res.data.id
       const docs: RequiredDoc[] = res.data.required_documents ?? []
       if (Array.isArray(docs) && docs.length > 0) {
@@ -113,7 +118,7 @@
     step.value = 2
   }
 
-  async function submit() {
+  async function submit(mode: 'draft' | 'final' = 'final') {
     if (!callId.value) { error.value = 'No active call available'; return }
     error.value = ''
     loading.value = true
@@ -122,24 +127,25 @@
       let applicationId: number
 
       const payload = {
-        applicant_type: 'team',
-        program_type: 'a',
+        applicant_type: 'team' as const,
+        program_type: 'a' as const,
         team_id: selectedTeamId.value,
         category: category.value,
+        submit_type: mode
       }
 
       if (isEditMode.value) {
-        await api.patch(`/applications/${editId.value}`, payload)
+        await updateApplication(editId.value!, payload)
         applicationId = editId.value!
       } else {
-        const appRes = await api.post('/applications', payload)
+        const appRes = await createApplication(payload)
         applicationId = appRes.data.application_id
       }
 
       for (const doc of requiredDocuments.value) {
         const key = docKey(doc.document_name)
         const file = files.value[key]
-        if (!file && doc.is_mandatory) {
+        if (mode === 'final' && !file && doc.is_mandatory) {
           error.value = `Missing required document: ${doc.document_name}`
           loading.value = false
           return
@@ -152,13 +158,16 @@
         formData.append('classification', 'confidential')
         formData.append('application_id', String(applicationId))
 
-        await api.post('/documents/upload', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        })
+        await uploadApplicationDocument(formData)
       }
 
       localStorage.removeItem(DRAFT_KEY)
-      step.value = 3
+      
+      if (mode === 'draft') {
+        router.push('/dashboard')
+      } else {
+        step.value = 3
+      }
     } catch (e: any) {
       error.value = e?.response?.data?.message || 'Something went wrong.'
     } finally {
@@ -260,7 +269,7 @@
         </button>
       </form>
 
-      <form v-else-if="step === 2" class="flex-col-gap" @submit.prevent="submit">
+      <form v-else-if="step === 2" class="flex-col-gap" @submit.prevent="submit('final')">
         <p v-if="error" class="text-error-sm">{{ error }}</p>
 
         <div v-if="requiredDocuments.length === 0" class="text-gray-500 text-sm italic text-center py-4">
@@ -299,19 +308,25 @@
                 <span class="text-sm truncate pr-2" :class="files[docKey(doc.document_name)] ? 'text-white' : 'text-gray-600'">
                   {{ files[docKey(doc.document_name)]?.name ?? 'Choose file...' }}
                 </span>
-                <span class="text-xs text-blue-400 flex-shrink-0">Browse</span>
+                <span class="text-xs text-blue-400 shrink-0">Browse</span>
               </label>
             </div>
           </div>
         </template>
 
-        <div class="flex gap-3 mt-2">
+        <div class="flex flex-wrap gap-3 mt-2">
           <button type="button" @click="step = 1"
-            class="border border-blue-900 hover:border-blue-600 text-gray-400 hover:text-white w-1/3 h-10 rounded-md text-sm cursor-pointer transition-colors">
+            class="border border-blue-900 hover:border-blue-600 text-gray-400 hover:text-white w-full sm:w-1/4 h-10 rounded-md text-sm cursor-pointer transition-colors">
             ← Back
           </button>
+          
+          <button type="button" @click="submit('draft')" :disabled="loading || requiredDocuments.length === 0"
+            class="border border-blue-600 text-blue-400 hover:bg-blue-600/10 disabled:opacity-50 cursor-pointer flex-1 h-10 rounded-md text-sm font-medium transition-colors">
+            {{ loading ? 'Saving...' : 'Save Draft' }}
+          </button>
+
           <button type="submit" :disabled="loading || requiredDocuments.length === 0"
-            class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 cursor-pointer text-white flex-1 h-10 rounded-md text-sm font-medium">
+            class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 cursor-pointer text-white flex-1 h-10 rounded-md text-sm font-medium transition-colors">
             {{ loading ? 'Submitting...' : 'Submit Application' }}
           </button>
         </div>

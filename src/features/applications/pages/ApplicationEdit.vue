@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import api from '@/shared/api/axios'
+
+import { 
+  getApplicationById, 
+  getApplicationDocuments, 
+  updateApplication, 
+  uploadApplicationDocument 
+} from '@/features/applications/api/applications'
 
 const route = useRoute()
 const router = useRouter()
-const id = route.params.id
+const id = route.params.id as string
 const error = ref('')
 const loading = ref(false)
 const programType = ref('')
@@ -43,13 +49,12 @@ const DRAFT_KEY = `draft_edit_${id}`
 onMounted(async () => {
   try {
     const [appRes, docsRes] = await Promise.all([
-      api.get(`/applications/${id}`),
-      api.get(`/applications/${id}/documents`),
+      getApplicationById(id),
+      getApplicationDocuments(id),
     ])
     programType.value = appRes.data.program_type
     existingDocs.value = docsRes.data
 
-    // load draft if exists
     const saved = localStorage.getItem(DRAFT_KEY)
     if (saved) {
       const d = JSON.parse(saved)
@@ -73,9 +78,9 @@ async function submit() {
   error.value = ''
   loading.value = true
   try {
-    await api.patch(`/applications/${id}`, {
+    await updateApplication(id, {
       applicant_type: 'team',
-      program_type: programType.value,
+      program_type: programType.value as 'a' | 'b',
     })
 
     for (const [type, file] of Object.entries(files.value)) {
@@ -85,9 +90,8 @@ async function submit() {
       formData.append('type', type)
       formData.append('classification', 'confidential')
       formData.append('application_id', String(id))
-      await api.post('/documents/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
+      
+      await uploadApplicationDocument(formData)
     }
 
     localStorage.removeItem(DRAFT_KEY)

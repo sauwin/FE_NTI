@@ -2,8 +2,18 @@
 import { ref, onMounted } from 'vue'
 import { getMyInvitations, respondToInvitation } from '../api/teams'
 
+interface Invitation {
+  id: number
+  name: string
+  status: 'forming' | 'ready'
+  leader?: {
+    name: string
+    email: string
+  }
+}
+
 const loading = ref(false)
-const invitations = ref<any[]>([])
+const invitations = ref<Invitation[]>([])
 const error = ref('')
 
 async function fetchInvitations() {
@@ -25,6 +35,7 @@ async function respond(teamId: number, status: 'accepted' | 'rejected') {
     invitations.value = invitations.value.filter(inv => inv.id !== teamId)
   } catch (e: any) {
     alert(e?.response?.data?.message ?? 'Action failed.')
+    await fetchInvitations()
   }
 }
 
@@ -53,24 +64,40 @@ onMounted(() => { fetchInvitations() })
           v-for="invite in invitations" 
           :key="invite.id" 
           class="border border-slate-800 bg-slate-900/40 p-4 rounded-xl flex items-center justify-between"
+          :class="{ 'opacity-75 border-dashed': invite.status === 'ready' }"
         >
           <div>
-            <div class="text-white font-semibold text-sm">{{ invite.name }}</div>
+            <div class="flex items-center gap-2">
+              <div class="text-white font-semibold text-sm">{{ invite.name }}</div>
+              
+              <span 
+                v-if="invite.status === 'ready'" 
+                class="text-[10px] bg-red-950/40 text-red-400 border border-red-900/30 px-1.5 py-0.5 rounded"
+              >
+                🔒 Closed (Ready)
+              </span>
+            </div>
             <div class="text-slate-400 text-xs mt-1">Leader: {{ invite.leader?.name }} ({{ invite.leader?.email }})</div>
+            
+            <p v-if="invite.status === 'ready'" class="text-[11px] text-amber-500/80 mt-1">
+              ⚠️ You cannot join this team because it is already locked for applications.
+            </p>
           </div>
 
           <div class="flex gap-2">
             <button 
               @click="respond(invite.id, 'accepted')"
-              class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-md font-medium transition"
+              :disabled="invite.status === 'ready'"
+              class="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-20 disabled:hover:bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-md font-medium transition"
             >
               Accept
             </button>
+            
             <button 
               @click="respond(invite.id, 'rejected')"
               class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-md font-medium transition border border-slate-700"
             >
-              Decline
+              {{ invite.status === 'ready' ? 'Dismiss' : 'Decline' }}
             </button>
           </div>
         </div>
