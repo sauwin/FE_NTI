@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import api from '../../../shared/api/axios'
 import { useConfirm } from '../../../shared/composables/useConfirm'
 
@@ -18,6 +18,7 @@ const emit = defineEmits(['refresh'])
 
 const searchQuery = ref('')
 const selectedRole = ref('')
+const selectedStatus = ref('') // Новий фільтр статусу
 const loading = ref(false)
 const message = ref('')
 const success = ref(false)
@@ -42,6 +43,11 @@ const filterRoles = [
   'super_admin'
 ]
 
+// Скидаємо сторінку на першу при зміні будь-якого фільтра
+watch([searchQuery, selectedRole, selectedStatus], () => {
+  currentPage.value = 1
+})
+
 const filtered = computed(() => {
   let result = props.users
 
@@ -61,6 +67,11 @@ const filtered = computed(() => {
     result = result.filter(u =>
         u.roles?.some((r: Role) => r.slug === selectedRole.value)
     )
+  }
+
+  // Логіка клієнтської фільтрації за статусом
+  if (selectedStatus.value) {
+    result = result.filter(u => u.status === selectedStatus.value)
   }
 
   return result
@@ -204,6 +215,7 @@ async function assignRole(userId: number, roleSlug: string) {
   }
 }
 
+// Функція скачування (експорту) з урахуванням усіх вибраних фільтрів
 async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
   loading.value = true
   message.value = ''
@@ -212,6 +224,7 @@ async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
       params: {
         search: searchQuery.value || undefined,
         role: selectedRole.value || undefined,
+        status: selectedStatus.value || undefined, // Передача фільтра статусу на сервер
         format
       },
       responseType: 'blob'
@@ -239,109 +252,240 @@ async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
 </script>
 
 <template>
-  <div>
+  <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6">
+    
     <div v-if="message" :class="[
-      'p-3 rounded-lg text-sm mb-4',
-      success ? 'bg-green-900/20 border border-green-800 text-green-400' : 'bg-red-900/20 border border-red-800 text-red-400'
+      'p-3 rounded-lg text-sm mb-6 border',
+      success
+        ? 'bg-green-900/20 border-green-800 text-green-400'
+        : 'bg-red-900/20 border-red-800 text-red-400'
     ]">
       {{ message }}
     </div>
 
-    <div class="mb-6 flex flex-col md:flex-row md:items-end gap-4">
-      <div class="flex-1">
-        <label class="text-sm text-slate-400 mb-2 block">Search by name or email</label>
-        <input v-model="searchQuery" type="text" placeholder="Type name or email..." class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
+    <div class="flex flex-col gap-4 mb-6">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h3 class="text-xl font-bold text-white">Users Management</h3>
+          <p class="text-sm text-slate-500 mt-1">
+            Manage platform users, permissions and access.
+          </p>
+        </div>
+
+        <div class="flex-shrink-0 gap-2 flex">
+          <button
+            @click="exportUsers('csv')"
+            :disabled="loading"
+            class="text-xs bg-green-900/40 hover:bg-green-900/60 px-3 py-1.5 rounded text-green-400 border border-green-800 transition-all font-mono"
+          >
+            Export CSV
+          </button>
+
+          <button
+            @click="exportUsers('xlsx')"
+            :disabled="loading"
+            class="text-xs bg-blue-900/40 hover:bg-blue-900/60 px-3 py-1.5 rounded text-blue-400 border border-blue-800 transition-all font-mono"
+          >
+            Export XLSX
+          </button>
+        </div>
       </div>
 
-      <div class="flex-1">
-        <label class="text-sm text-slate-400 mb-2 block">Filter by role</label>
-        <select v-model="selectedRole" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
-          <option value="">All roles</option>
-          <option v-for="role in filterRoles" :key="role" :value="role">
-            {{ role }}
-          </option>
-        </select>
-      </div>
-      <div class="ml-4 flex-shrink-0 gap-2 flex">
-        <button @click="exportUsers('csv')" :disabled="loading" class="text-xs bg-green-900/40 hover:bg-green-900/60 px-3 py-1.5 rounded text-green-400 border border-green-800 transition-all font-mono">
-          Export CSV
-        </button>
-        <button @click="exportUsers('xlsx')" :disabled="loading" class="text-xs bg-blue-900/40 hover:bg-blue-900/60 px-3 py-1.5 rounded text-blue-400 border border-blue-800 transition-all font-mono">
-          Export XLSX
-        </button>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center w-full">
+        <div class="sm:col-span-1">
+          <input
+            v-model="searchQuery"
+            placeholder="Search by name or email..."
+            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none transition-all"
+          />
+        </div>
+
+        <div>
+          <select
+            v-model="selectedRole"
+            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-300 focus:border-blue-600 outline-none transition-all cursor-pointer"
+          >
+            <option value="">All Roles</option>
+            <option
+              v-for="role in filterRoles"
+              :key="role"
+              :value="role"
+            >
+              {{ role }}
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <select
+            v-model="selectedStatus"
+            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-300 focus:border-blue-600 outline-none transition-all cursor-pointer"
+          >
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="blocked">Blocked</option>
+          </select>
+        </div>
       </div>
     </div>
 
-    <div class="overflow-x-auto">
-      <table v-if="visibleUsers.length > 0" class="w-full text-sm">
-        <thead class="border-b border-slate-800">
-        <tr class="text-left text-slate-400">
-          <th class="py-2 px-4">Name</th>
-          <th class="py-2 px-4">Email</th>
-          <th class="py-2 px-4">Roles</th>
-          <th class="py-2 px-4">Status</th>
-          <th class="py-2 px-4">Actions</th>
-        </tr>
-        </thead>
-        <tbody class="text-slate-300">
-        <tr v-for="user in visibleUsers" :key="user.id" class="border-b border-slate-800 hover:bg-slate-800/30">
-          <td class="py-3 px-4">{{ user.first_name }} {{ user.last_name }}</td>
-          <td class="py-3 px-4 text-slate-500">{{ user.email }}</td>
-          <td class="py-3 px-4">
-            <div class="flex gap-1 flex-wrap items-center">
-              <span v-for="role in user.roles" :key="role.id" class="text-xs bg-blue-600/30 border border-blue-700 text-blue-300 px-2 py-1 rounded">
-              {{ role.slug }}
-              <button v-if="!['nti_admin', 'super_admin'].includes(role.slug) && isSuperAdmin" @click="removeRole(user.id, role.slug)" class="ml-1 hover:text-red-400" title="Remove role">×</button>
-              </span>
-            </div>
-          </td>
-          <td class="py-3 px-4">
-            <span :class="[
-              'text-xs px-2 py-1 rounded',
-              user.status === 'active' ? 'bg-green-900/30 text-green-400' : 'bg-yellow-900/30 text-yellow-400'
-              ]">{{ user.status }}
-            </span>
-          </td>
-          <td class="py-3 px-4">
-            <div class="flex gap-2 flex-wrap">
-              <button v-if="user.status === 'active' && canManage(user)" @click="blockUser(user.id)" :disabled="loading" class="text-xs bg-yellow-600/30 hover:bg-yellow-600/50 disabled:opacity-50 text-yellow-400 px-2 py-1 rounded transition">
-                Block
-              </button>
-              <button v-if="user.status === 'blocked' && canManage(user)" @click="unblockUser(user.id)" :disabled="loading" class="text-xs bg-green-600/30 hover:bg-green-600/50 disabled:opacity-50 text-green-400 px-2 py-1 rounded transition">
-                Unblock
-              </button>
-              <button v-if="isSuperAdmin" @click="deleteUser(user.id)" :disabled="loading" class="text-xs bg-red-600/30 hover:bg-red-600/50 disabled:opacity-50 text-red-400 px-2 py-1 rounded transition">
-                Delete
-              </button>
+    <div v-if="loading" class="text-slate-500 animate-pulse py-4 font-mono text-sm">
+      Loading users...
+    </div>
 
-              <div v-if="getAvailableRolesToAssign(user).length > 0" class="relative">
-                <button @click="showRoleMenu = showRoleMenu === user.id ? null : user.id" class="text-xs bg-purple-600/30 hover:bg-purple-600/50 text-purple-400 px-2 py-1 rounded transition">
-                  + Role
-                </button>
-                <div v-if="showRoleMenu === user.id" class="absolute right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-20 min-w-max">
-                  <button v-for="role in getAvailableRolesToAssign(user)" :key="role" @click="assignRole(user.id, role)" :disabled="loading" class="w-full text-left px-4 py-2 hover:bg-slate-700 text-slate-300 text-xs border-b border-slate-700 last:border-b-0 transition disabled:opacity-50">
-                    {{ role }}
-                  </button>
-                </div>
+    <div v-else class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-slate-300">
+        <thead class="text-xs text-slate-400 uppercase bg-slate-900/50 font-mono">
+          <tr>
+            <th class="px-4 py-3 rounded-tl-lg">User</th>
+            <th class="px-4 py-3">Roles</th>
+            <th class="px-4 py-3">Status</th>
+            <th class="px-4 py-3 rounded-tr-lg text-right">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr
+            v-for="user in visibleUsers"
+            :key="user.id"
+            class="border-b border-slate-800 hover:bg-slate-800/30 transition"
+          >
+            <td class="px-4 py-4">
+              <div class="font-semibold text-white">
+                {{ user.first_name }} {{ user.last_name }}
               </div>
-            </div>
-          </td>
-        </tr>
+
+              <div class="text-xs text-slate-500 font-mono">
+                {{ user.email }}
+              </div>
+            </td>
+
+            <td class="px-4 py-4">
+              <div class="flex gap-1 flex-wrap items-center">
+                <span
+                  v-for="role in user.roles"
+                  :key="role.id"
+                  class="text-[10px] px-2 py-1 rounded border font-mono uppercase
+                  bg-blue-900/40 text-blue-400 border-blue-800"
+                >
+                  {{ role.slug }}
+
+                  <button
+                    v-if="!['nti_admin', 'super_admin'].includes(role.slug) && isSuperAdmin"
+                    @click="removeRole(user.id, role.slug)"
+                    class="ml-1 hover:text-red-400 transition cursor-pointer"
+                  >
+                    ×
+                  </button>
+                </span>
+              </div>
+            </td>
+
+            <td class="px-4 py-4">
+              <span
+                :class="user.status === 'active'
+                  ? 'bg-emerald-900/40 text-emerald-400 border-emerald-800'
+                  : 'bg-yellow-900/40 text-yellow-400 border-yellow-800'"
+                class="text-[10px] px-2 py-1 rounded border font-mono uppercase whitespace-nowrap"
+              >
+                {{ user.status }}
+              </span>
+            </td>
+
+            <td class="px-4 py-4 text-right whitespace-nowrap">
+              <div class="flex items-center justify-end gap-2 flex-wrap">
+
+                <button
+                  v-if="user.status === 'active' && canManage(user)"
+                  @click="blockUser(user.id)"
+                  :disabled="loading"
+                  class="text-xs bg-yellow-900/40 hover:bg-yellow-900/60 px-3 py-1.5 rounded text-yellow-400 border border-yellow-800 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  Block
+                </button>
+
+                <button
+                  v-if="user.status === 'blocked' && canManage(user)"
+                  @click="unblockUser(user.id)"
+                  :disabled="loading"
+                  class="text-xs bg-green-900/40 hover:bg-green-900/60 px-3 py-1.5 rounded text-green-400 border border-green-800 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  Unblock
+                </button>
+
+                <button
+                  v-if="isSuperAdmin"
+                  @click="deleteUser(user.id)"
+                  :disabled="loading"
+                  class="text-xs bg-red-900/40 hover:bg-red-900/60 px-3 py-1.5 rounded text-red-400 border border-red-800 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  Delete
+                </button>
+
+                <div
+                  v-if="getAvailableRolesToAssign(user).length > 0"
+                  class="relative"
+                >
+                  <button
+                    @click="showRoleMenu = showRoleMenu === user.id ? null : user.id"
+                    class="text-xs bg-purple-900/40 hover:bg-purple-900/60 px-3 py-1.5 rounded text-purple-400 border border-purple-800 transition-all cursor-pointer"
+                  >
+                    + Role
+                  </button>
+
+                  <div
+                    v-if="showRoleMenu === user.id"
+                    class="absolute right-0 top-full mt-2 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-20 min-w-[180px] overflow-hidden"
+                  >
+                    <button
+                      v-for="role in getAvailableRolesToAssign(user)"
+                      :key="role"
+                      @click="assignRole(user.id, role)"
+                      :disabled="loading"
+                      class="w-full text-left px-4 py-2 hover:bg-slate-800 text-slate-300 text-xs border-b border-slate-800 last:border-b-0 transition disabled:opacity-50"
+                    >
+                      {{ role }}
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </td>
+          </tr>
+
+          <tr v-if="visibleUsers.length === 0">
+            <td colspan="4" class="px-4 py-10 text-center text-slate-500 italic text-sm">
+              No users found.
+            </td>
+          </tr>
         </tbody>
       </table>
-      <div v-else class="text-center py-8 text-slate-500 text-sm">
-        No users found
-      </div>
     </div>
 
-    <div v-if="totalPages > 1" class="mt-6 flex items-center justify-center gap-2">
-      <button v-if="currentPage > 1" @click="currentPage--" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-white text-sm rounded transition">
+    <div
+      v-if="totalPages > 1"
+      class="mt-6 flex items-center justify-center gap-3"
+    >
+      <button
+        v-if="currentPage > 1"
+        @click="currentPage--"
+        class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-sm rounded border border-slate-700 transition cursor-pointer"
+      >
         ← Prev
       </button>
-      <div class="text-sm text-slate-400">
-        Page {{ currentPage }} of {{ totalPages }} ({{ filtered.length }} users)
-      </div>
-      <button v-if="currentPage < totalPages" @click="currentPage++" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-white text-sm rounded transition">
+
+      <span class="text-sm text-slate-400 font-mono">
+        {{ currentPage }} / {{ totalPages }}
+        <span class="text-slate-600 ml-1">
+          ({{ filtered.length }})
+        </span>
+      </span>
+
+      <button
+        v-if="currentPage < totalPages"
+        @click="currentPage++"
+        class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-sm rounded border border-slate-700 transition cursor-pointer"
+      >
         Next →
       </button>
     </div>

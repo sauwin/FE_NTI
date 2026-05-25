@@ -47,6 +47,10 @@ const programBDocs: RequiredDocument[] = [
 ]
 
 const searchQuery = ref('')
+// Нові змінні для фільтрації списку викликів
+const filterStatus = ref('')
+const filterProgramType = ref('')
+
 const programs = ref<Program[]>([])
 const calls = ref<Call[]>([])
 const isSubmitting = ref(false)
@@ -71,7 +75,6 @@ const newCall = ref<CallState>(JSON.parse(JSON.stringify(defaultCallState)))
 
 // 3. Додаємо Watcher, який буде змінювати документи при перемиканні програми
 watch(() => newCall.value.program_type, (newType) => {
-  // Змінюємо документи ТІЛЬКИ якщо це створення нового виклику (не редагування)
   if (!editingCallId.value) {
     if (newType === 'a') {
       newCall.value.required_documents = JSON.parse(JSON.stringify(programADocs))
@@ -81,10 +84,22 @@ watch(() => newCall.value.program_type, (newType) => {
   }
 })
 
+// Оновлена фільтрація на фронтенді (додано статус та тип програми)
 const filteredCalls = computed(() => {
-  return calls.value.filter(c =>
-    (c.name || '').toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
+  return calls.value.filter(c => {
+    // 1. Пошук за назвою
+    const matchesSearch = (c.name || '').toLowerCase().includes(searchQuery.value.toLowerCase())
+    
+    // 2. Фільтр за статусом
+    const matchesStatus = !filterStatus.value || c.status === filterStatus.value
+
+    // 3. Фільтр за типом програми
+    const program = programs.value.find(p => p.id === c.program_id)
+    const currentCallType = program?.code === 'program_b' ? 'b' : 'a'
+    const matchesProgramType = !filterProgramType.value || currentCallType === filterProgramType.value
+
+    return matchesSearch && matchesStatus && matchesProgramType;
+  })
 })
 
 function getProgramLabel(programId: number): string {
@@ -159,7 +174,6 @@ function cancelEdit() {
 async function handleSubmitCall() {
   try {
     isSubmitting.value = true
-    // Відправляємо required_documents, бекенд збереже їх як JSON у базу
     const payload = { ...newCall.value, form_config: JSON.stringify(newCall.value.required_documents) }
 
     if (editingCallId.value) {
@@ -200,16 +214,21 @@ async function handleDeleteCall(id: number) {
   }
 }
 
+// Оновлена функція скачування з урахуванням обраних фільтрів
 async function downloadCallsExport(format: 'csv' | 'xlsx' = 'xlsx') {
   try {
     const response = await api.get('/admin/export/calls', {
-      params: { format },
+      params: { 
+        format,
+        status: filterStatus.value || undefined,
+        program_type: filterProgramType.value || undefined
+      },
       responseType: 'blob'
     })
     const url = window.URL.createObjectURL(new Blob([response.data]))
     const link = document.createElement('a')
     link.href = url
-    link.setAttribute('download', `calls.${format}`)
+    link.setAttribute('download', `calls_${filterStatus.value || 'all'}_type_${filterProgramType.value || 'all'}.${format}`)
     document.body?.appendChild(link)
     link.click()
     document.body?.removeChild(link)
@@ -226,7 +245,6 @@ onMounted(() => {
 
 <template>
   <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-    <!-- Left: Form -->
     <div class="xl:col-span-1 border border-slate-800 bg-slate-900/40 rounded-2xl p-6">
       <h3 class="text-xl font-bold text-white mb-6">
         {{ editingCallId ? 'Edit Call' : 'New Call' }}
@@ -301,19 +319,51 @@ onMounted(() => {
       </form>
     </div>
 
-    <!-- Right: Calls list -->
     <div class="xl:col-span-2 space-y-6">
       <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6">
         <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
           <h3 class="text-xl font-bold text-white">Calls</h3>
           <div class="ml-4 flex-shrink-0 gap-2 flex">
-          <button @click="downloadCallsExport('csv')" :disabled="isSubmitting" class="text-xs bg-green-900/40 hover:bg-green-900/60 px-3 py-1.5 rounded text-green-400 border border-green-800 transition-all font-mono">
-            Export CSV
-          </button>
-          <button @click="downloadCallsExport('xlsx')" :disabled="isSubmitting" class="text-xs bg-blue-900/40 hover:bg-blue-900/60 px-3 py-1.5 rounded text-blue-400 border border-blue-800 transition-all font-mono">
-            Export XLSX
-          </button>
+            <button @click="downloadCallsExport('csv')" :disabled="isSubmitting" class="text-xs bg-green-900/40 hover:bg-green-900/60 px-3 py-1.5 rounded text-green-400 border border-green-800 transition-all font-mono">
+              Export CSV
+            </button>
+            <button @click="downloadCallsExport('xlsx')" :disabled="isSubmitting" class="text-xs bg-blue-900/40 hover:bg-blue-900/60 px-3 py-1.5 rounded text-blue-400 border border-blue-800 transition-all font-mono">
+              Export XLSX
+            </button>
+          </div>
         </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+          <div>
+            <input 
+              type="text" 
+              v-model="searchQuery" 
+              placeholder="Search by title..." 
+              class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white focus:border-blue-600 outline-none"
+            />
+          </div>
+          <div>
+            <select 
+              v-model="filterStatus" 
+              class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white focus:border-blue-600 outline-none"
+            >
+              <option value="">All Statuses</option>
+              <option value="draft">Draft</option>
+              <option value="open">Open</option>
+              <option value="closed">Closed</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+          <div>
+            <select 
+              v-model="filterProgramType" 
+              class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white focus:border-blue-600 outline-none"
+            >
+              <option value="">All Program Types</option>
+              <option value="a">Program A</option>
+              <option value="b">Program B</option>
+            </select>
+          </div>
         </div>
 
         <div v-if="!filteredCalls.length" class="text-slate-500 italic text-sm py-6 text-center">No calls found.</div>
@@ -324,11 +374,9 @@ onMounted(() => {
             :key="c.id"
             class="border border-slate-800 bg-slate-950 px-5 py-4 rounded-xl flex items-center justify-between gap-4"
           >
-            <!-- Left info -->
             <div class="flex-grow min-w-0">
               <p class="text-base font-semibold text-white truncate mb-2">{{ c.name }}</p>
               <div class="flex items-center gap-2 flex-wrap">
-                <!-- Program badge -->
                 <span
                   class="text-xs font-mono px-2 py-1 rounded border"
                   :class="getProgramLabel(c.program_id) === 'Program A'
@@ -338,7 +386,6 @@ onMounted(() => {
                   {{ getProgramLabel(c.program_id) }}
                 </span>
 
-                <!-- Status badge -->
                 <span
                   class="text-xs font-mono px-2 py-1 rounded border uppercase"
                   :class="{
@@ -351,14 +398,12 @@ onMounted(() => {
                   {{ c.status }}
                 </span>
 
-                <!-- Team size -->
                 <span class="text-xs text-slate-500 font-mono">
                   {{ c.min_team_size }}–{{ c.max_team_size || '∞' }} members
                 </span>
               </div>
             </div>
 
-            <!-- Right: Applications + dropdown only -->
             <div class="flex items-center gap-2 flex-shrink-0">
               <button
                 @click="emit('view-applications', c.id)"
@@ -367,7 +412,6 @@ onMounted(() => {
                 Applications
               </button>
 
-              <!-- Dropdown -->
               <div class="relative" @click.stop>
                 <button
                   @click="toggleMenu(c.id)"
@@ -381,7 +425,6 @@ onMounted(() => {
                   class="absolute right-0 top-full mt-1.5 z-50 w-44 bg-slate-900 border border-slate-700/80 rounded-xl shadow-2xl overflow-hidden"
                 >
                   <div class="py-1">
-                    <!-- Edit — draft only, inside dropdown -->
                     <button
                       v-if="c.status === 'draft'"
                       @click="editCall(c)"
