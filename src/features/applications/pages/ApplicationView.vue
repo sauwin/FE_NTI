@@ -39,15 +39,15 @@ const statusColor = (status: string) => {
 }
 
 const docLabels: Record<string, string> = {
-  executive_summary:      'Executive Summary',
+  executive_summary: 'Executive Summary',
   technical_architecture: 'Technical Architecture',
-  roadmap:                'Roadmap',
-  budget:                 'Budget',
-  risk_analysis:          'Risk Analysis',
-  monetization:           'Monetization Model',
-  cv:                     'CV',
-  motivation_letter:      'Motivation Letter',
-  technical_proposal:     'Technical Proposal',
+  roadmap: 'Roadmap',
+  budget: 'Budget',
+  risk_analysis: 'Risk Analysis',
+  monetization: 'Monetization Model',
+  cv: 'CV',
+  motivation_letter: 'Motivation Letter',
+  technical_proposal: 'Technical Proposal',
 }
 
 async function deleteApp() {
