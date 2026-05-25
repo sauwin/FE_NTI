@@ -10,6 +10,7 @@ import ProgramCallsManager from '@/features/admin/components/ProgramCallsManager
 import ApplicationsManager from '@/features/admin/components/ApplicationsManager.vue'
 import CallEvaluatorsManager from '@/features/admin/components/CallEvaluatorsManager.vue'
 import ApplicationMentorsManager from '@/features/admin/components/ApplicationMentorsManager.vue'
+import BulkNotificationPanel from './BulkNotificationPanel.vue'
 
 interface DashboardStats {
   total_users: number
@@ -114,6 +115,7 @@ onMounted(() => {
         <button @click="handleTabChange('documents')" :class="[activeTab === 'documents' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Documents</button>
         <button v-if="isSuperAdmin" @click="handleTabChange('create-admin')" :class="[activeTab === 'create-admin' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Create Admin</button>
         <button @click="handleTabChange('logs')" :class="[activeTab === 'logs' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Audit Logs</button>
+        <button @click="handleTabChange('broadcast-notification')" :class="[activeTab === 'broadcast-notification' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Broadcast Notification</button>
       </div>
     </div>
 
@@ -185,6 +187,10 @@ onMounted(() => {
 
     <div v-show="activeTab === 'logs'">
       <AdminLogs :users="users.filter(u => u.roles?.some((r: any) => ['nti_admin','super_admin','evaluator','content_editor'].includes(r.slug)))" />
+    </div>
+
+    <div v-show="activeTab === 'broadcast-notification'">
+      <BulkNotificationPanel />
     </div>
   </div>
 </template>
