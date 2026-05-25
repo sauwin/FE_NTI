@@ -28,7 +28,6 @@ interface RequiredDocument {
   max_size_mb: number
 }
 
-// 1. Створюємо шаблони документів для кожної з програм
 const programADocs: RequiredDocument[] = [
   { document_name: 'Executive Summary', is_mandatory: true, max_size_mb: 10 },
   { document_name: 'Technical Architecture', is_mandatory: true, max_size_mb: 15 },
@@ -47,17 +46,14 @@ const programBDocs: RequiredDocument[] = [
 ]
 
 const searchQuery = ref('')
-// Нові змінні для фільтрації списку викликів
 const filterStatus = ref('')
 const filterProgramType = ref('')
-
 const programs = ref<Program[]>([])
 const calls = ref<Call[]>([])
 const isSubmitting = ref(false)
 const editingCallId = ref<number | null>(null)
 const openMenuId = ref<number | null>(null)
 
-// 2. Використовуємо шаблон Program A як значення за замовчуванням
 const defaultCallState = {
   program_type: 'a',
   title: '',
@@ -73,7 +69,6 @@ const defaultCallState = {
 type CallState = typeof defaultCallState
 const newCall = ref<CallState>(JSON.parse(JSON.stringify(defaultCallState)))
 
-// 3. Додаємо Watcher, який буде змінювати документи при перемиканні програми
 watch(() => newCall.value.program_type, (newType) => {
   if (!editingCallId.value) {
     if (newType === 'a') {
@@ -84,16 +79,10 @@ watch(() => newCall.value.program_type, (newType) => {
   }
 })
 
-// Оновлена фільтрація на фронтенді (додано статус та тип програми)
 const filteredCalls = computed(() => {
   return calls.value.filter(c => {
-    // 1. Пошук за назвою
     const matchesSearch = (c.name || '').toLowerCase().includes(searchQuery.value.toLowerCase())
-    
-    // 2. Фільтр за статусом
     const matchesStatus = !filterStatus.value || c.status === filterStatus.value
-
-    // 3. Фільтр за типом програми
     const program = programs.value.find(p => p.id === c.program_id)
     const currentCallType = program?.code === 'program_b' ? 'b' : 'a'
     const matchesProgramType = !filterProgramType.value || currentCallType === filterProgramType.value
@@ -214,7 +203,6 @@ async function handleDeleteCall(id: number) {
   }
 }
 
-// Оновлена функція скачування з урахуванням обраних фільтрів
 async function downloadCallsExport(format: 'csv' | 'xlsx' = 'xlsx') {
   try {
     const response = await api.get('/admin/export/calls', {
