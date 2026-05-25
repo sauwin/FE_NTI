@@ -139,7 +139,7 @@ async function submitChallenge(targetStatus: 'draft' | 'published') {
 
     step.value = 6
   } catch (e: any) {
-    error.value = e?.response?.data?.message || 'Помилка при збереженні завдання.'
+    error.value = e?.response?.data?.message || 'Error while saving the task.'
   } finally {
     loading.value = false
   }
