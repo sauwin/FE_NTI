@@ -36,7 +36,7 @@ const requiredDocuments = ref<DocumentRequirement[]>([
 
 onMounted(async () => {
   try {
-    const res = await api.get<Program[]>('/admin/programs')
+    const res = await api.get<Program[]>('/programs')
     programs.value = res.data.filter(p => p.is_active)
     const firstProgram = programs.value[0]
     if (firstProgram) {
