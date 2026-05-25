@@ -21,20 +21,14 @@ const emit = defineEmits(['refresh'])
 
 const searchQuery = ref('')
 const selectedRole = ref('')
-const selectedStatus = ref('') // Новий фільтр статусу
+const selectedStatus = ref('')
 const loading = ref(false)
 const message = ref('')
 const success = ref(false)
-const showRoleMenu = ref<number | null>(null)
 const currentPage = ref(1)
 
-const availableRoles = [
-  'student',
-  'company',
-  'mentor',
-  'evaluator',
-  'content_editor'
-]
+const availableRoles = ['student', 'company', 'mentor']
+const superAdminRoles = ['student', 'company', 'mentor', 'evaluator', 'content_editor']
 
 const filterRoles = [
   'student',
@@ -46,7 +40,6 @@ const filterRoles = [
   'super_admin'
 ]
 
-// Скидаємо сторінку на першу при зміні будь-якого фільтра
 watch([searchQuery, selectedRole, selectedStatus], () => {
   currentPage.value = 1
 })
@@ -72,7 +65,6 @@ const filtered = computed(() => {
     )
   }
 
-  // Логіка клієнтської фільтрації за статусом
   if (selectedStatus.value) {
     result = result.filter(u => u.status === selectedStatus.value)
   }
@@ -87,14 +79,19 @@ const visibleUsers = computed(() => {
   return filtered.value.slice(start, start + USERS_PER_PAGE)
 })
 
+function onRoleSelect(userId: number, roleSlug: string) {
+  if (!roleSlug) return
+  assignRole(userId, roleSlug)
+}
+
 function canManage(user: any) {
-  const hasAdminRole = user.roles?.some((r: AdminRole) => ['nti_admin', 'super_admin'].includes(r.slug))
+  const adminOnlyRoles = ['nti_admin', 'super_admin', 'evaluator', 'content_editor']
+  const hasAdminRole = user.roles?.some((r: AdminRole) => adminOnlyRoles.includes(r.slug))
   return !hasAdminRole || props.isSuperAdmin
 }
 
 function getAvailableRolesToAssign(user: any) {
-  const userRoles = user.roles?.map((r: AdminRole) => r.slug) || []
-  return availableRoles.filter(r => !userRoles.includes(r))
+  return props.isSuperAdmin ? superAdminRoles : availableRoles
 }
 
 async function blockUser(userId: number) {
@@ -200,10 +197,18 @@ async function removeRole(userId: number, roleSlug: string) {
 async function assignRole(userId: number, roleSlug: string) {
   loading.value = true
   try {
+    const user = props.users.find(u => u.id === userId)
+    const currentRoles = user?.roles?.map((r: AdminRole) => r.slug) || []
+    const replaceableRoles = props.isSuperAdmin ? superAdminRoles : availableRoles
+    const rolesToRemove = currentRoles.filter((r: string) => replaceableRoles.includes(r))
+
+    for (const role of rolesToRemove) {
+      await removeUserRole(userId, role)
+    }
+
     await addUserRole(userId, roleSlug)
     success.value = true
     message.value = `Role "${roleSlug}" assigned`
-    showRoleMenu.value = null
     emit('refresh')
     setTimeout(() => success.value = false, 3000)
   } catch (e: any) {
@@ -214,7 +219,6 @@ async function assignRole(userId: number, roleSlug: string) {
   }
 }
 
-// Функція скачування (експорту) з урахуванням усіх вибраних фільтрів
 async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
   loading.value = true
   message.value = ''
@@ -346,30 +350,27 @@ async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
             :key="user.id"
             class="border-b border-slate-800 hover:bg-slate-800/30 transition"
           >
-            <td class="px-4 py-4">
-              <div class="font-semibold text-white">
+            <td class="px-4 py-3">
+              <div class="font-semibold text-white text-sm">
                 {{ user.first_name }} {{ user.last_name }}
               </div>
-
-              <div class="text-xs text-slate-500 font-mono">
+              <div class="text-xs text-slate-500 font-mono mt-0.5">
                 {{ user.email }}
               </div>
             </td>
 
-            <td class="px-4 py-4">
+            <td class="px-4 py-3">
               <div class="flex gap-1 flex-wrap items-center">
                 <span
                   v-for="role in user.roles"
                   :key="role.id"
-                  class="text-[10px] px-2 py-1 rounded border font-mono uppercase
-                  bg-blue-900/40 text-blue-400 border-blue-800"
+                  class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded border font-mono uppercase bg-blue-900/40 text-blue-400 border-blue-800"
                 >
                   {{ role.slug }}
-
                   <button
-                    v-if="!['nti_admin', 'super_admin'].includes(role.slug) && isSuperAdmin"
+                    v-if="!['nti_admin', 'super_admin'].includes(role.slug) && canManage(user)"
                     @click="removeRole(user.id, role.slug)"
-                    class="ml-1 hover:text-red-400 transition cursor-pointer"
+                    class="hover:text-red-400 transition cursor-pointer leading-none"
                   >
                     ×
                   </button>
@@ -377,25 +378,24 @@ async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
               </div>
             </td>
 
-            <td class="px-4 py-4">
+            <td class="px-4 py-3">
               <span
                 :class="user.status === 'active'
                   ? 'bg-emerald-900/40 text-emerald-400 border-emerald-800'
                   : 'bg-yellow-900/40 text-yellow-400 border-yellow-800'"
-                class="text-[10px] px-2 py-1 rounded border font-mono uppercase whitespace-nowrap"
+                class="text-xs px-2 py-1 rounded border font-mono uppercase whitespace-nowrap"
               >
                 {{ user.status }}
               </span>
             </td>
 
-            <td class="px-4 py-4 text-right whitespace-nowrap">
-              <div class="flex items-center justify-end gap-2 flex-wrap">
-
+            <td class="px-4 py-3 text-right whitespace-nowrap">
+              <div class="flex items-center justify-end gap-2">
                 <button
                   v-if="user.status === 'active' && canManage(user)"
                   @click="blockUser(user.id)"
                   :disabled="loading"
-                  class="text-xs bg-yellow-900/40 hover:bg-yellow-900/60 px-3 py-1.5 rounded text-yellow-400 border border-yellow-800 transition-all disabled:opacity-50 cursor-pointer"
+                  class="text-xs px-3 py-1 rounded border bg-red-900/40 hover:bg-red-900/60 text-red-400 border-red-800 transition disabled:opacity-50 cursor-pointer"
                 >
                   Block
                 </button>
@@ -404,7 +404,7 @@ async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
                   v-if="user.status === 'blocked' && canManage(user)"
                   @click="unblockUser(user.id)"
                   :disabled="loading"
-                  class="text-xs bg-green-900/40 hover:bg-green-900/60 px-3 py-1.5 rounded text-green-400 border border-green-800 transition-all disabled:opacity-50 cursor-pointer"
+                  class="text-xs px-3 py-1 rounded border bg-green-900/40 hover:bg-green-900/60 text-green-400 border-green-800 transition disabled:opacity-50 cursor-pointer"
                 >
                   Unblock
                 </button>
@@ -413,38 +413,28 @@ async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
                   v-if="isSuperAdmin"
                   @click="deleteUser(user.id)"
                   :disabled="loading"
-                  class="text-xs bg-red-900/40 hover:bg-red-900/60 px-3 py-1.5 rounded text-red-400 border border-red-800 transition-all disabled:opacity-50 cursor-pointer"
+                  class="text-xs px-3 py-1 rounded border bg-red-900/40 hover:bg-red-900/60 text-red-400 border-red-800 transition disabled:opacity-50 cursor-pointer"
                 >
                   Delete
                 </button>
 
-                <div
-                  v-if="getAvailableRolesToAssign(user).length > 0"
-                  class="relative"
+                <select
+                  v-if="canManage(user)"
+                  value=""
+                  @change="onRoleSelect(user.id, ($event.target as HTMLSelectElement).value)"
+                  :disabled="loading"
+                  class="text-xs px-3 py-1 rounded border bg-blue-900/40 hover:bg-blue-900/60 text-blue-400 border-blue-800 cursor-pointer outline-none transition disabled:opacity-50"
                 >
-                  <button
-                    @click="showRoleMenu = showRoleMenu === user.id ? null : user.id"
-                    class="text-xs bg-purple-900/40 hover:bg-purple-900/60 px-3 py-1.5 rounded text-purple-400 border border-purple-800 transition-all cursor-pointer"
+                  <option value="" disabled selected class="bg-slate-900 text-slate-300">Assign Role</option>
+                  <option
+                    v-for="role in getAvailableRolesToAssign(user)"
+                    :key="role"
+                    :value="role"
+                    class="bg-slate-900 text-slate-300"
                   >
-                    + Role
-                  </button>
-
-                  <div
-                    v-if="showRoleMenu === user.id"
-                    class="absolute right-0 top-full mt-2 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-20 min-w-[180px] overflow-hidden"
-                  >
-                    <button
-                      v-for="role in getAvailableRolesToAssign(user)"
-                      :key="role"
-                      @click="assignRole(user.id, role)"
-                      :disabled="loading"
-                      class="w-full text-left px-4 py-2 hover:bg-slate-800 text-slate-300 text-xs border-b border-slate-800 last:border-b-0 transition disabled:opacity-50"
-                    >
-                      {{ role }}
-                    </button>
-                  </div>
-                </div>
-
+                    {{ role }}
+                  </option>
+                </select>
               </div>
             </td>
           </tr>
