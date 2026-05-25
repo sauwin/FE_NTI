@@ -19,7 +19,7 @@ export const programRoutes: RouteRecordRaw = {
     },
 
     {
-      path: 'b/upload',
+      path: 'b/apply/:id',
       component: () => import('@/features/program_b/pages/ProgramBForm.vue'),
 
       meta: {
@@ -36,6 +36,15 @@ export const programRoutes: RouteRecordRaw = {
       meta: {
         requiresAuth: true,
         role: 'company',
+      },
+    },
+
+    {
+      path: 'b/tasks/:id',
+      component: () => import('@/features/tasks/pages/TaskDetailsView.vue'),
+
+      meta: {
+        requiresAuth: true,
       },
     },
   ],

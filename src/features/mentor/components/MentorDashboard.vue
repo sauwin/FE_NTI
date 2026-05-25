@@ -53,7 +53,7 @@ onMounted(() => {
           @click="activeTab = 'overview'"
           :class="[activeTab === 'overview' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']"
         >
-          Overview
+          Quick Actions
         </button>
         <button
           @click="activeTab = 'mentorships'; fetchMentorships()"
@@ -65,7 +65,7 @@ onMounted(() => {
           v-if="activeTab === 'project-detail'"
           class="border-b-2 border-emerald-500 text-emerald-400 px-4 py-2 text-sm font-medium"
         >
-          Деталі: {{ selectedMentorship?.application?.team?.name }}
+          Application details: {{ selectedMentorship?.application?.team?.name }}
         </button>
       </div>
     </div>
@@ -77,7 +77,7 @@ onMounted(() => {
           My Profile
         </router-link>
         <button @click="activeTab = 'mentorships'; fetchMentorships()" class="bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
-          Show
+          Show Mentorships
         </button>
       </div>
     </div>

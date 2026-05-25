@@ -29,5 +29,5 @@ export function getMyInvitations() {
 }
 
 export function respondToInvitation(teamId: number, status: 'accepted' | 'rejected') {
-  return api.post(`/user/invitations/${teamId}`, { status })
+  return api.post(`/teams/${teamId}/invitation/respond`, { status })
 }

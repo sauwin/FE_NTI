@@ -10,38 +10,56 @@ interface Organization {
   logo_path: string | null
 }
 
-interface CallOrganizationTask {
+interface CallData {
+  id: number
+  name: string
+  status: 'draft' | 'open' | 'closed' | 'archived'
+  opens_at: string | null
+  deadline_at: string | null
+  min_team_size: number
+  max_team_size: number | null
+  required_documents?: any
+}
+
+// Головна структура, яку повертає TaskController
+interface TaskWithCall {
   id: number
   call_id: number
   organization_id: number
-  budget: string | null
-  brief: string
-  status: 'draft' | 'published' | 'in_matching' | 'assigned' | 'in_progress' | 'closed'
   title: string 
-  deadline_at: string | null
-  min_team_size: number
-  max_team_size: number
+  short_description: string | null
+  brief: string | null
+  budget: string | null
+  status: 'draft' | 'published' | 'in_matching' | 'assigned' | 'in_progress' | 'closed'
+  deadline: string | null
+  required_technologies?: string[]
+  required_skills?: string[]
+  
+  // Вкладені реляції (Eager loading з Laravel)
+  call?: CallData 
   organization?: Organization
 }
 
 const router = useRouter()
 const auth = useAuthStore()
 
-const tasks = ref<CallOrganizationTask[]>([])
-const myTasks = ref<CallOrganizationTask[]>([])
+const tasks = ref<TaskWithCall[]>([])
+const myTasks = ref<TaskWithCall[]>([])
 const loading = ref<boolean>(true)
 
 onMounted(async () => {
   try {
     if (auth.isCompany) {
-      const res = await api.get<CallOrganizationTask[]>('/company/tasks')
+      // Компанія бачить свої створені таски TaskController@index
+      const res = await api.get<TaskWithCall[]>('/company/tasks')
       myTasks.value = res.data
     } else {
-      // Студенти повинні бачити тільки published та in_matching статуси
-      const res = await api.get<CallOrganizationTask[]>('/programs/b/tasks')
+      // Студенти бачать публічний список опублікованих тасок TaskController@publicTasks
+      const res = await api.get<TaskWithCall[]>('/programs/b/tasks')
       tasks.value = res.data
     }
-  } catch {
+  } catch (err) {
+    console.error('Error fetching tasks catalog:', err)
   } finally {
     loading.value = false
   }
@@ -51,16 +69,28 @@ const goToCreateTask = (): void => {
   router.push('/programs/b/create-task')
 }
 
-const applyForTask = (callId: number): void => {
-  router.push(`/programs/b/apply/${callId}`)
+// Перехід на окрему сторінку деталей завдання за його ID
+const goToTaskDetails = (taskId: number): void => {
+  router.push(`/programs/b/tasks/${taskId}`)
 }
 
-// Допоміжна функція для кольорів статусів
+// Форматування дати
+const formatDate = (dateString: string | null | undefined): string => {
+  if (!dateString) return 'No deadline'
+  return new Date(dateString).toLocaleDateString('uk-UA', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })
+}
+
+// Кольори статусів
 const getStatusColor = (status: string) => {
   switch(status) {
     case 'draft': return 'bg-gray-800 text-gray-300 border-gray-600'
     case 'published': return 'bg-blue-950 text-blue-400 border-blue-800'
     case 'assigned': return 'bg-green-950 text-green-400 border-green-800'
+    case 'in_matching': return 'bg-purple-950 text-purple-400 border-purple-800'
     default: return 'bg-slate-800 text-slate-300 border-slate-600'
   }
 }
@@ -85,19 +115,32 @@ const getStatusColor = (status: string) => {
           </button>
         </div>
 
-        <div v-if="loading" class="text-gray-400">Loading tasks...</div>
+        <div v-if="loading" class="text-gray-400">Loading your challenges...</div>
         <div v-else class="grid gap-6 md:grid-cols-2">
-          <div v-for="task in myTasks" :key="task.id" class="border border-blue-900 bg-slate-950 p-6 rounded-2xl">
-            <div class="flex justify-between items-start mb-2">
-              <h3 class="text-xl font-bold text-blue-300">{{ task.title }}</h3>
-              <span :class="['text-xs px-2 py-0.5 rounded border uppercase font-semibold', getStatusColor(task.status)]">
-                {{ task.status }}
-              </span>
+          <div v-for="task in myTasks" :key="task.id" class="border border-blue-900 bg-slate-950 p-6 rounded-2xl flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="text-xl font-bold text-blue-300">{{ task.title }}</h3>
+                <span :class="['text-xs px-2 py-0.5 rounded border uppercase font-semibold', getStatusColor(task.status)]">
+                  {{ task.status }}
+                </span>
+              </div>
+              <p class="text-gray-400 text-sm mb-4 line-clamp-3">
+                {{ task.short_description || task.brief || 'No description provided.' }}
+              </p>
             </div>
-            <p class="text-gray-400 text-sm mb-4 line-clamp-3">{{ task.brief }}</p>
-            <div class="flex justify-between text-xs text-gray-500 border-t border-slate-900 pt-4">
-              <span>Budget: {{ task.budget ? `€${task.budget}` : 'Not specified' }}</span>
-              <span>Call ID: {{ task.call_id }}</span>
+            
+            <div class="border-t border-slate-900 pt-4 mt-4">
+              <div class="flex justify-between text-xs text-gray-500 mb-4">
+                <span>Budget: {{ task.budget ? `€${task.budget}` : 'Not specified' }}</span>
+                <span>Apply Deadline: {{ formatDate(task.call?.deadline_at || task.deadline) }}</span>
+              </div>
+              <button 
+                @click="goToTaskDetails(task.id)" 
+                class="w-full bg-slate-900 hover:bg-slate-800 text-blue-400 py-2 rounded-lg text-sm font-medium transition border border-blue-900/40"
+              >
+                View & Edit Details
+              </button>
             </div>
           </div>
           <div v-if="!myTasks.length" class="text-gray-500 italic">You haven't added any challenges yet.</div>
@@ -123,15 +166,22 @@ const getStatusColor = (status: string) => {
                 </span>
               </div>
               <h3 class="text-xl font-bold text-white mb-2">{{ task.title }}</h3>
-              <p class="text-gray-400 text-sm mb-6 line-clamp-4">{{ task.brief }}</p>
+              <p class="text-gray-400 text-sm mb-6 line-clamp-4">
+                {{ task.short_description || task.brief || 'No description available.' }}
+              </p>
             </div>
 
             <div class="border-t border-slate-900 pt-4 mt-auto">
               <div class="flex justify-between text-xs text-gray-500 mb-4">
-                <span>Required Team: {{ task.min_team_size || 1 }}-{{ task.max_team_size || 5 }} persons</span>
+                <span>Required Team: {{ task.call?.min_team_size || 3 }}-{{ task.call?.max_team_size || '∞' }} persons</span>
+                <span class="text-amber-400 font-medium">Apply before: {{ formatDate(task.call?.deadline_at) }}</span>
               </div>
-              <button @click="applyForTask(task.id)" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-medium transition">
-                Apply with Team
+              
+              <button 
+                @click="goToTaskDetails(task.id)" 
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-medium transition"
+              >
+                View Detailed Specifications
               </button>
             </div>
           </div>
