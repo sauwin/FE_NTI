@@ -17,3 +17,11 @@ export function getMentorshipById(id: number | string) {
 export function createConsultation(mentorshipId: number | string, payload: CreateConsultationPayload) {
   return api.post<{ data: Consultation }>(`/mentorships/${mentorshipId}/consultations`, payload)
 }
+
+export function updateApplicationStatusByMentor(applicationId: number | string, status: string) {
+  return api.patch(`/applications/${applicationId}/status`, { status })
+}
+
+export function deleteMentorshipByMentor(mentorshipId: number | string) {
+  return api.delete(`/mentorships/${mentorshipId}`)
+}

@@ -82,7 +82,7 @@ export function getAdminApplicationById(id: number | string) {
 }
 
 export function updateAdminApplicationStatus(id: number | string, status: string) {
-  return api.patch(`/admin/applications/${id}/status`, { status })
+  return api.patch(`/applications/${id}/status`, { status })
 }
 
 export function exportApplications(params: Record<string, unknown>) {

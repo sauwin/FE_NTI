@@ -2,12 +2,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useConfirm } from '@/shared/composables/useConfirm'
-import { getApplications, deleteApplication } from '@/features/applications/api/applications'
+import { getApplications, deleteApplication, submitApplication } from '@/features/applications/api/applications'
 import type { StudentApplication } from '@/features/applications/types/applications'
 
 const router = useRouter()
 
 const loading = ref(false)
+const submittingId = ref<number | string | null>(null)
 const applications = ref<StudentApplication[]>([])
 const error = ref('')
 
@@ -43,6 +44,7 @@ const statusConfig: Record<string, { text: string; class: string }> = {
 }
 
 function formatDate(dateString: string): string {
+  if (!dateString) return '—'
   return new Date(dateString).toLocaleDateString('sk-SK', {
     year: 'numeric',
     month: '2-digit',
@@ -66,6 +68,28 @@ function editApplication(id: number) {
   router.push(`/applications/${id}/edit`)
 }
 
+async function submitApp(id: number | string) {
+  const confirmed = await useConfirm({
+    title: 'Submit Application',
+    message: 'Are you sure you want to finalize and submit this application? You will not be able to edit it until review.',
+    confirmText: 'Submit Now',
+    cancelText: 'Cancel',
+    danger: false,
+  })
+  if (!confirmed) return
+
+  submittingId.value = id
+  error.value = ''
+  try {
+    await submitApplication(id)
+    await fetchApplications()
+  } catch (e: any) {
+    error.value = e.response?.data?.message ?? 'Could not submit application.'
+  } finally {
+    submittingId.value = null
+  }
+}
+
 async function deleteApp(id: number | string) {
   const confirmed = await useConfirm({
     title: 'Delete Application',
@@ -78,6 +102,7 @@ async function deleteApp(id: number | string) {
 
   try {
     await deleteApplication(id)
+    await fetchApplications()
   } catch (e: any) {
     error.value = e.response?.data?.message ?? 'Could not delete application'
   }
@@ -140,7 +165,7 @@ onMounted(() => {
       </div>
 
       <div v-if="filteredApplications.length === 0" class="border border-slate-800 border-dashed rounded-2xl p-12 text-center bg-slate-900/10">
-        <p class="text-slate-400 text-base font-medium">Nenašli tiredness žiadne prihlášky.</p>
+        <p class="text-slate-400 text-base font-medium">Nenašli sa žiadne prihlášky.</p>
         <p class="text-slate-600 text-xs mt-1">Zatiaľ ste si nevytvorili koncept ani nepodali žiadnu oficiálnu prihlášku.</p>
       </div>
 
@@ -181,7 +206,7 @@ onMounted(() => {
               </td>
 
               <td class="py-3.5 px-4 text-xs text-slate-400">
-                {{ formatDate(app.created_at) }}
+                {{ formatDate(app.created_at ?? '') }}
               </td>
 
               <td class="py-3.5 px-4 text-center">
@@ -194,11 +219,22 @@ onMounted(() => {
               </td>
 
               <td class="py-3.5 pr-4 pl-0 text-right text-xs">
-                <div class="flex justify-end gap-2">
+                <div class="flex justify-end gap-2 items-center">
+                  
+                  <button 
+                    v-if="['draft', 'pending_revision'].includes(app.status)"
+                    @click="submitApp(app.id)"
+                    :disabled="submittingId === app.id"
+                    class="border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 cursor-pointer"
+                  >
+                    {{ submittingId === app.id ? '...' : '🚀 Submit' }}
+                  </button>
+
                   <button 
                     v-if="['draft', 'pending_revision'].includes(app.status)"
                     @click="editApplication(app.id)"
-                    class="border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1"
+                    :disabled="submittingId === app.id"
+                    class="border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 cursor-pointer"
                   >
                     ✏️ Edit
                   </button>
@@ -206,14 +242,16 @@ onMounted(() => {
                   <button 
                     v-if="['draft', 'pending_revision'].includes(app.status)"
                     @click="deleteApp(app.id)"
-                    class="border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1"
+                    :disabled="submittingId === app.id"
+                    class="border border-slate-700 text-slate-300 hover:text-red-400 hover:bg-slate-800 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 cursor-pointer"
                   >
                     🗑 Delete
                   </button>
 
                   <button 
                     @click="viewDetails(app.id)"
-                    class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-2.5 py-1.5 rounded-lg transition"
+                    :disabled="submittingId === app.id"
+                    class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-2.5 py-1.5 rounded-lg transition cursor-pointer"
                   >
                     Detail
                   </button>

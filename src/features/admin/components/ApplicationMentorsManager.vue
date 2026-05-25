@@ -3,11 +3,12 @@ import { ref, onMounted } from 'vue'
 import {
   getAdminApplications,
   getAdminUsers,
-  getAdminApplicationById,
   getAdminMentorships,
   assignMentorship,
   deleteMentorship,
+  updateAdminApplicationStatus,
 } from '@/features/admin/api/admin'
+import { getApplicationById } from '@/features/applications/api/applications'
 
 const applications = ref<any[]>([])
 const selectedApplicationId = ref<number | null>(null)
@@ -18,6 +19,8 @@ const loading = ref(false)
 const error = ref('')
 const success = ref('')
 
+const mentorshipStatusList = ['approved', 'onboarding', 'active', 'suspended']
+
 onMounted(async () => {
   try {
     const [appsRes, usersRes] = await Promise.all([
@@ -25,11 +28,9 @@ onMounted(async () => {
       getAdminUsers(),
     ])
     
-    // Handle paginated response
     let appsList = appsRes.data?.data ?? appsRes.data ?? []
-    applications.value = appsList.filter((app: any) => app.status === 'approved')
+    applications.value = appsList.filter((app: any) => mentorshipStatusList.includes(app.status))
     
-    // Handle paginated response
     let usersList = usersRes.data?.data ?? usersRes.data ?? []
     allUsers.value = usersList.filter((u: any) =>
       u.roles?.some((r: any) => r.slug === 'mentor')
@@ -44,10 +45,7 @@ async function loadMentors() {
   loading.value = true
   try {
     const res = await getAdminMentorships({ application_id: selectedApplicationId.value })
-    
     let mentorsList = res.data?.data ?? res.data ?? []
-    
-    // Filter for mentorships of the selected application
     mentors.value = mentorsList.filter((m: any) => m.application?.id === selectedApplicationId.value)
   } catch {
     error.value = 'Could not load mentors'
@@ -59,6 +57,8 @@ async function loadMentors() {
 async function assign() {
   if (!selectedApplicationId.value || !selectedUserId.value) return
   error.value = ''
+  success.value = ''
+  
   try {
     const app = applications.value.find(a => a.id === selectedApplicationId.value)
     if (!app) {
@@ -66,9 +66,9 @@ async function assign() {
       return
     }
 
-    // Fetch application details to get user_id
-    const appDetailsRes = await getAdminApplicationById(selectedApplicationId.value)
-    const student_id = appDetailsRes.data?.application?.student_profile.user_id
+    const appDetailsRes = await getApplicationById(selectedApplicationId.value)
+    const student_id = appDetailsRes.data?.student_profile?.user_id
+    const currentStatus = appDetailsRes.data?.status
 
     if (!student_id) {
       error.value = 'Could not determine student for this application'
@@ -80,10 +80,20 @@ async function assign() {
       mentor_id: selectedUserId.value,
       student_id: student_id,
     })
-    success.value = 'Mentor assigned.'
+
+    let statusChangedNotice = ''
+
+    if (currentStatus === 'approved') {
+      await updateAdminApplicationStatus(selectedApplicationId.value, 'onboarding')
+      
+      app.status = 'onboarding'
+      statusChangedNotice = ' and status moved to Onboarding'
+    }
+
+    success.value = `Mentor assigned${statusChangedNotice}.`
     selectedUserId.value = null
     await loadMentors()
-    setTimeout(() => (success.value = ''), 3000)
+    setTimeout(() => (success.value = ''), 4000)
   } catch (e: any) {
     error.value = e.response?.data?.message ?? 'Could not assign mentor'
   }
@@ -92,12 +102,28 @@ async function assign() {
 async function remove(mentorshipId: number) {
   if (!selectedApplicationId.value) return
   error.value = ''
+  success.value = ''
+  
   try {
-    // Note: You may need to create a delete endpoint for mentorships
     await deleteMentorship(mentorshipId)
+    
     mentors.value = mentors.value.filter(m => m.id !== mentorshipId)
-    success.value = 'Mentor removed.'
-    setTimeout(() => (success.value = ''), 3000)
+    
+    let statusChangedNotice = ''
+
+    if (mentors.value.length === 0) {
+      const app = applications.value.find(a => a.id === selectedApplicationId.value)
+      
+      if (app && app.status === 'onboarding') {
+        await updateAdminApplicationStatus(selectedApplicationId.value, 'active')
+        
+        app.status = 'active'
+        statusChangedNotice = ' and status reverted to Active'
+      }
+    }
+
+    success.value = `Mentor removed${statusChangedNotice}.`
+    setTimeout(() => (success.value = ''), 4000)
   } catch (e: any) {
     error.value = e.response?.data?.message ?? 'Could not remove mentor'
   }

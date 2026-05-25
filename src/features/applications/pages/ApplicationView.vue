@@ -75,7 +75,7 @@ async function deleteApp() {
 <template>
   <div class="flex-center-page">
     <div class="w-full max-w-2xl">
-      <button @click="router.push('/dashboard')" class="text-gray-500 hover:text-white text-sm mb-6">← Back to Dashboard</button>
+      <button @click="router.back()" class="text-gray-500 hover:text-white text-sm mb-6">← Back to Dashboard</button>
 
       <p v-if="error" class="text-error">{{ error }}</p>
 
@@ -98,8 +98,8 @@ async function deleteApp() {
           <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-4">Details</div>
           <div class="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <p class="text-gray-500">Applicant type</p>
-              <p class="text-white capitalize">{{ app.applicant_type }}</p>
+              <p class="text-gray-500">Category</p>
+              <p class="text-white capitalize">{{ app.category }}</p>
             </div>
             <div>
               <p class="text-gray-500">Program</p>

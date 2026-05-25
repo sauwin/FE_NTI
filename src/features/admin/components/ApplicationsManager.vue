@@ -3,12 +3,14 @@ import { ref, onMounted, watch } from 'vue'
 import { getAdminApplications, updateAdminApplicationStatus, exportApplications } from '@/features/admin/api/admin'
 import api from '@/shared/api/axios' 
 import type { AdminApplicationListItem } from '@/features/admin/types/admin'
+import { useRouter } from 'vue-router'
 
 const props = defineProps<{
   filterCallId?: number | null
 }>()
 
-const emit = defineEmits(['clear-filter', 'view-detail'])
+const emit = defineEmits(['clear-filter'])
+const router = useRouter()
 
 const ALL_STATUSES = [
   { value: 'draft', label: 'Draft', color: 'text-slate-400' },
@@ -143,7 +145,7 @@ async function submitRevision() {
 }
 
 function viewDetail(id: number) {
-  emit('view-detail', id)
+  router.push(`/applications/${id}`)
 }
 
 async function downloadExport(format: 'csv' | 'xlsx' = 'xlsx') {
