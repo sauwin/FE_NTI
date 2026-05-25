@@ -18,6 +18,14 @@ interface CallData {
   deadline_at: string | null
 }
 
+// Інтерфейс для прикріплених компанією документів
+interface AttachedDocument {
+  id: number
+  file_name: string
+  file_path: string
+  type?: string
+}
+
 interface TaskDetails {
   id: number
   call_id: number
@@ -43,6 +51,7 @@ interface TaskDetails {
   
   call?: CallData
   organization?: Organization
+  documents?: AttachedDocument[] // Додаємо поле документів, які прикріпив власник таски
 }
 
 const route = useRoute()
@@ -52,6 +61,7 @@ const auth = useAuthStore()
 const task = ref<TaskDetails | null>(null)
 const loading = ref<boolean>(true)
 const error = ref<string>('')
+const downloadLoadingId = ref<number | null>(null) // Для індикації завантаження конкретного файлу
 
 onMounted(async () => {
   const taskId = route.params.id
@@ -65,6 +75,28 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+const downloadDocument = async (doc: AttachedDocument) => {
+  downloadLoadingId.value = doc.id
+  try {
+    const response = await api.get(`/documents/${doc.id}/download`, {
+      responseType: 'blob'
+    })
+    
+    const blob = new Blob([response.data])
+    const link = document.createElement('a')
+    link.href = window.URL.createObjectURL(blob)
+    // Використовуємо реальне поле з бази даних
+    link.download = doc.file_name || `document-${doc.id}.pdf`
+    link.click()
+    
+    window.URL.revokeObjectURL(link.href)
+  } catch (err) {
+    console.error('Помилка при завантаженні файлу:', err)
+  } finally {
+    downloadLoadingId.value = null
+  }
+}
 
 const handleApply = () => {
   if (!task.value?.call_id) {
@@ -140,6 +172,44 @@ const formatDate = (dateString: string | null | undefined): string => {
           <h2 class="text-xl font-bold text-white">Detailed technical description</h2>
           <div class="text-gray-400 text-sm whitespace-pre-line bg-slate-950 border border-slate-900 p-6 rounded-2xl leading-relaxed">
             {{ task.detailed_technical_description }}
+          </div>
+        </div>
+
+        <div class="bg-slate-900/20 border border-slate-900 p-6 rounded-2xl space-y-4">
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <span class="w-1.5 h-4 bg-blue-500 rounded-sm"></span> Attached Specifications & Materials
+          </h2>
+          
+          <div v-if="task.documents && task.documents.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div 
+              v-for="doc in task.documents" 
+              :key="doc.id" 
+              class="flex items-center justify-between p-3.5 bg-slate-950 border border-slate-800/80 rounded-xl hover:border-blue-900/60 transition group"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-9 h-9 bg-red-950/40 border border-red-900/30 rounded-lg flex items-center justify-center shrink-0 text-red-400 font-bold text-xs uppercase">
+                  pdf
+                </div>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-gray-200 truncate pr-2" :title="doc.file_name">
+                    {{ doc.file_name }}
+                  </p>
+                  <span class="text-[10px] text-gray-500 uppercase tracking-wider block">Attached file</span>
+                </div>
+              </div>
+
+              <button 
+                @click="downloadDocument(doc)"
+                :disabled="downloadLoadingId === doc.id"
+                class="bg-blue-950/40 hover:bg-blue-600 text-blue-400 hover:text-white px-3 py-1.5 border border-blue-900/40 hover:border-blue-600 rounded-lg text-xs font-semibold transition cursor-pointer shrink-0"
+              >
+                {{ downloadLoadingId === doc.id ? 'Loading...' : 'Download' }}
+              </button>
+            </div>
+          </div>
+
+          <div v-else class="text-sm text-slate-500 italic p-2">
+            The organization has not attached any external technical documents to this template.
           </div>
         </div>
 
