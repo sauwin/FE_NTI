@@ -92,7 +92,9 @@ watch(() => props.mentorship.id, () => {
       <div class="lg:col-span-2 bg-slate-900 p-6 rounded-xl border border-slate-800 space-y-6">
         <div class="flex justify-between items-center">
           <h4 class="text-lg font-semibold text-white">Consultation journal</h4>
+          
           <button 
+            v-if="mentorship.application?.status !== 'onboarding'"
             @click="showLogForm = !showLogForm"
             class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-medium transition"
           >
@@ -100,45 +102,27 @@ watch(() => props.mentorship.id, () => {
           </button>
         </div>
 
-        <div v-if="formSuccess" class="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm rounded">
-          {{ formSuccess }}
+        <div v-if="mentorship.application?.status === 'onboarding'" class="p-4 bg-slate-950 rounded-lg border border-slate-850 text-center text-slate-500 text-sm italic">
+          You must accept this mentorship request from the list first to start planning and logging consultations.
         </div>
 
-        <form v-if="showLogForm" @submit.prevent="submitConsultation" class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Date</label>
-              <input v-model="formDate" type="date" required class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"/>
-            </div>
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Duration (in minutes)</label>
-              <input v-model="formDuration" type="number" min="5" max="480" required class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"/>
-            </div>
+        <template v-else>
+          <div v-if="formSuccess" class="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm rounded">
+            {{ formSuccess }}
           </div>
-          <div>
-            <label class="block text-xs text-slate-400 mb-1">Short content / summary</label>
-            <textarea v-model="formSummary" rows="4" required placeholder="Describe what was discussed, what tasks were assigned to the team..." class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"></textarea>
-          </div>
-          <div class="text-right">
-            <button :disabled="formSubmitting" type="submit" class="bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white px-4 py-2 rounded text-xs font-medium transition">
-              {{ formSubmitting ? 'Saving...' : 'Save' }}
-            </button>
-          </div>
-        </form>
 
-        <div v-if="loadingDetail" class="text-slate-500 text-sm">Loading history...</div>
-        <div v-else-if="consultations.length === 0" class="text-sm text-slate-500 italic">
-          No consultations have been scheduled for this project yet.
-        </div>
-        <div v-else class="space-y-4">
-          <div v-for="c in consultations" :key="c.id" class="bg-slate-950 p-4 rounded-lg border border-slate-850 space-y-2">
-            <div class="flex justify-between items-center border-b border-slate-900 pb-2 text-xs text-slate-400">
-              <span class="font-semibold text-slate-300">📅 {{ new Date(c.date).toLocaleDateString() }}</span>
-              <span>⏱ {{ c.duration_minutes }} min</span>
-            </div>
-            <p class="text-sm text-slate-300 whitespace-pre-line">{{ c.summary }}</p>
+          <form v-if="showLogForm" @submit.prevent="submitConsultation" class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-4">
+            </form>
+
+          <div v-if="loadingDetail" class="text-slate-500 text-sm">Loading history...</div>
+          <div v-else-if="consultations.length === 0" class="text-sm text-slate-500 italic">
+            No consultations have been scheduled for this project yet.
           </div>
-        </div>
+          <div v-else class="space-y-4">
+            <div v-for="c in consultations" :key="c.id" class="bg-slate-950 p-4 rounded-lg border border-slate-850 space-y-2">
+              </div>
+          </div>
+        </template>
       </div>
     </div>
   </div>

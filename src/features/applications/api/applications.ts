@@ -32,3 +32,7 @@ export function updateApplicationStatus(id: number | string, status: string) {
 export function deleteApplication(id: number | string) {
   return api.delete(`/applications/${id}`)
 }
+
+export function submitApplication(id: number | string) {
+  return api.post(`/applications/${id}/submit`)
+}
