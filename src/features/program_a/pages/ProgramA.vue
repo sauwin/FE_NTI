@@ -1,25 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '@/shared/api/axios'
-
-interface DocumentRequirement {
-  document_name: string
-  is_mandatory: boolean
-  max_size_mb: number
-}
-
-interface ActiveCall {
-  id: number
-  name: string
-  label: string
-  status: 'draft' | 'open' | 'closed'
-  deadline_at: string | null
-  min_team_size: number
-  max_team_size: number | null
-  required_documents: DocumentRequirement[] 
-  evaluation_criteria: any[]
-}
+import { getActiveCallQuery } from '@/shared/api/calls'
+import type { ActiveCall, DocumentRequirement } from '@/shared/types/calls'
 
 const router = useRouter()
 const activeCall = ref<ActiveCall | null>(null)
@@ -28,7 +11,7 @@ const loading = ref(true)
 
 onMounted(async () => {
   try {
-    const res = await api.get<ActiveCall>('/calls/active?program=a')
+    const res = await getActiveCallQuery('a')
     
     if (res.data && res.data.id) {
       activeCall.value = res.data

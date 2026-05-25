@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import api from '@/shared/api/axios'
+import { getDashboardStats, getAdminUsers, getPendingApprovals } from '@/features/admin/api/admin'
+import type { DashboardStats } from '@/features/admin/types/admin'
 import BulkNotificationPanel from '@/features/admin/components/BulkNotificationPanel.vue'
 import UserManagementPanel from '@/features/admin/components/UserManagementPanel.vue'
 import PendingApprovalsTable from './PendingApprovalTable.vue'
@@ -11,22 +12,6 @@ import ProgramCallsManager from '@/features/admin/components/ProgramCallsManager
 import ApplicationsManager from '@/features/admin/components/ApplicationsManager.vue'
 import CallEvaluatorsManager from '@/features/admin/components/CallEvaluatorsManager.vue'
 import ApplicationMentorsManager from '@/features/admin/components/ApplicationMentorsManager.vue'
-
-interface DashboardStats {
-  total_users: number
-  active_projects: number
-  pending_approvals: number
-  open_calls: number
-
-  blocked_users?: number
-  evaluators?: number
-  mentors?: number
-  admins?: number
-  draft_calls?: number
-  closed_calls?: number
-  archived_calls?: number
-  applications_total?: number
-}
 
 const props = defineProps<{
   userRole?: string
@@ -108,7 +93,7 @@ async function loadAggregatedStats() {
   try {
     loadingStats.value = true
 
-    const res = await api.get('/admin/reporting/dashboard-stats')
+    const res = await getDashboardStats()
 
     stats.value = {
       total_users: Number(res.data.total_users ?? 0),
@@ -139,7 +124,7 @@ async function loadAggregatedStats() {
 
 async function loadUserData() {
   try {
-    const res = await api.get('/admin/users')
+    const res = await getAdminUsers()
     users.value = res.data
   } catch (e: any) {
     error.value = e.response?.data?.message || 'Failed to load users'
@@ -148,7 +133,7 @@ async function loadUserData() {
 
 async function loadPendingApprovals() {
   try {
-    const appRes = await api.get('/admin/approvals')
+    const appRes = await getPendingApprovals()
     pendingUsers.value = appRes.data
   } catch (e: any) {
     error.value = e.response?.data?.message || 'Failed to load approvals'

@@ -1,14 +1,5 @@
 import api from '@/shared/api/axios'
-
-export interface ApplicationPayload {
-  applicant_type: 'student' | 'team'
-  program_type: 'a' | 'b'
-  team_id?: number | null
-  category?: string
-  submit_type?: 'draft' | 'final'
-  project_title?: string
-  proposed_solution?: string
-}
+import type { ApplicationPayload } from '@/features/applications/types/applications'
 
 export function getApplications() {
   return api.get('/applications')
@@ -30,7 +21,7 @@ export function createApplication(payload: ApplicationPayload) {
   return api.post('/applications', payload)
 }
 
-export function updateApplication(id: number | string, payload: Partial<ApplicationPayload>) {
+export function updateApplication(id: number | string, payload: Partial<ApplicationPayload> & Record<string, unknown>) {
   return api.patch(`/applications/${id}`, payload)
 }
 
@@ -40,10 +31,4 @@ export function updateApplicationStatus(id: number | string, status: string) {
 
 export function deleteApplication(id: number | string) {
   return api.delete(`/applications/${id}`)
-}
-
-export function uploadApplicationDocument(formData: FormData) {
-  return api.post('/documents/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  })
 }

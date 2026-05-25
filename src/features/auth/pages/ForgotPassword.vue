@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '../../../shared/api/axios'
+import { forgotPassword } from '@/features/auth/api/auth'
 
 const email = ref('')
 const error = ref('')
@@ -15,7 +15,7 @@ async function submit() {
   loading.value = true
 
   try {
-    await api.post('/auth/forgot-password', { email: email.value })
+    await forgotPassword(email.value)
     success.value = 'Reset link sent to your email. Check your inbox.'
     email.value = ''
     setTimeout(() => router.push('/auth/login'), 3000)

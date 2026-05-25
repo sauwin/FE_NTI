@@ -1,15 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import api from '@/shared/api/axios'
-
-interface DocumentItem {
-  id: number
-  file_name: string
-  mime_type: string
-  file_size_bytes: number
-  created_at: string
-  uploaded_by: number
-}
+import { getAdminDocuments } from '@/features/admin/api/admin'
+import { downloadDocumentBlob } from '@/shared/api/documents'
+import type { DocumentItem } from '@/features/admin/types/admin'
 
 const search = ref<string>('')
 const date = ref<string>('')
@@ -35,12 +28,10 @@ const fetchDocuments = async () => {
   error.value = ''
 
   try {
-    const response = await api.get('/admin/documents', {
-      params: {
-        search: search.value || undefined,
-        date: date.value || undefined,
-        page: page.value,
-      },
+    const response = await getAdminDocuments({
+      search: search.value || undefined,
+      date: date.value || undefined,
+      page: page.value,
     })
 
     documents.value = response.data.data ?? response.data
@@ -79,7 +70,7 @@ const nextPage = () => {
 }
 
 const fetchBlob = async (url: string) => {
-  const response = await api.get(url, { responseType: 'blob' })
+  const response = await downloadDocumentBlob(url)
   return response.data as Blob
 }
 

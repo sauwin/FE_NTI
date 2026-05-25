@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import type { Mentorship } from '../api/mentorships'
+  import type { Mentorship } from '../types/mentorships'
 
   defineProps<{
     mentorships: Mentorship[]

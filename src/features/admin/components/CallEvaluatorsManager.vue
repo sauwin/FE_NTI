@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import api from '@/shared/api/axios.ts'
-import { getCallEvaluators, assignEvaluator, removeEvaluator } from '@/features/evaluation/api/evaluations.ts'
+import { getAdminCalls, getAdminUsers } from '@/features/admin/api/admin'
+import { getCallEvaluators, assignEvaluator, removeEvaluator } from '@/features/evaluation/api/evaluations'
 
 const calls = ref<any[]>([])
 const selectedCallId = ref<number | null>(null)
@@ -15,10 +15,10 @@ const success = ref('')
 onMounted(async () => {
   try {
     const [callsRes, usersRes] = await Promise.all([
-      api.get('/admin/calls'),
-      api.get('/admin/users'),
+      getAdminCalls(),
+      getAdminUsers(),
     ])
-    calls.value = callsRes.data?.data ?? callsRes.data ?? []
+    calls.value = Array.isArray(callsRes.data) ? callsRes.data : (callsRes.data as { data?: unknown[] })?.data ?? []
     allUsers.value = (usersRes.data ?? []).filter((u: any) =>
         u.roles?.some((r: any) => r.slug === 'evaluator')
     )

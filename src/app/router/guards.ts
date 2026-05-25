@@ -1,12 +1,11 @@
 import type { RouteLocationNormalized } from 'vue-router'
 import { useAuthStore } from '@/features/auth/stores/auth'
+import { getStudentProfile } from '@/features/student/api/profile'
 import type { AppRouteMeta } from './types'
 
 async function hasStudentProfile() {
   try {
-    const { default: api } = await import('@/shared/api/axios')
-
-    const res = await api.get('/profile/student')
+    const res = await getStudentProfile()
 
     return Boolean(res.data)
   } catch {

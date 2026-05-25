@@ -1,28 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import api from '@/shared/api/axios'
 import { useAuthStore } from '@/features/auth/stores/auth'
-
-interface Team {
-  id: number
-  name: string
-  description: string | null
-  leader_id: number
-  status: string
-}
-
-interface CallShortInfo {
-  id: number
-  name: string
-  task_id?: number
-  required_documents?: string[] | Record<string, string> | null
-  task?: {
-    id: number
-    title: string
-    organization?: { name: string }
-  } | null
-}
+import { createApplication } from '@/features/applications/api/applications'
+import { getCallById } from '@/shared/api/calls'
+import type { CallShortInfo } from '@/shared/types/calls'
+import { uploadDocument } from '@/shared/api/documents'
+import { getTeams } from '@/features/student/api/teams'
+import type { Team } from '@/features/student/types/teams'
 
 const route = useRoute()
 const router = useRouter()
@@ -122,7 +107,7 @@ onMounted(async () => {
 
   // 1. Fetch Student Teams
   try {
-    const teamsRes = await api.get<Team[]>('/teams')
+    const teamsRes = await getTeams()
     myTeams.value = Array.isArray(teamsRes.data) ? teamsRes.data : []
     if (myTeams.value[0]) {
       selectedTeamId.value = myTeams.value[0].id
@@ -133,7 +118,7 @@ onMounted(async () => {
 
   // 2. Fetch Call Details Directly Using Call ID
   try {
-    const callRes = await api.get<CallShortInfo>(`/calls/${urlId.value}`)
+    const callRes = await getCallById(urlId.value)
     currentCall.value = callRes.data
     resolvedCallId.value = callRes.data.id
     
@@ -179,15 +164,15 @@ async function submit(): Promise<void> {
 
   try {
     const applicationPayload = {
-      applicant_type: 'team', 
-      program_type: 'b',
+      applicant_type: 'team' as const,
+      program_type: 'b' as const,
       call_id: resolvedCallId.value,
       team_id: selectedTeamId.value, 
       project_title: projectTitle.value,
       proposed_solution: proposedSolution.value
     }
 
-    const appRes = await api.post<{ id?: number; application_id?: number }>('/applications', applicationPayload)
+    const appRes = await createApplication(applicationPayload)
     const applicationId = appRes.data.application_id || appRes.data.id || 0
 
     for (const [type, file] of Object.entries(files.value)) {
@@ -198,9 +183,7 @@ async function submit(): Promise<void> {
       formData.append('classification', 'confidential')
       formData.append('application_id', String(applicationId))
 
-      await api.post('/documents/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
+      await uploadDocument(formData)
     }
 
     step.value = 3

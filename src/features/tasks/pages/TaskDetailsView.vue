@@ -2,57 +2,9 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/features/auth/stores/auth'
-import api from '@/shared/api/axios'
-
-interface Organization {
-  id: number
-  name: string
-  logo_path: string | null
-}
-
-interface CallData {
-  id: number
-  name: string
-  min_team_size: number
-  max_team_size: number | null
-  deadline_at: string | null
-}
-
-// Інтерфейс для прикріплених компанією документів
-interface AttachedDocument {
-  id: number
-  file_name: string
-  file_path: string
-  type?: string
-}
-
-interface TaskDetails {
-  id: number
-  call_id: number
-  organization_id: number
-  title: string
-  brief: string | null
-  short_description: string | null
-  budget: string | null
-  status: string
-  project_goal: string | null
-  expected_outcome: string | null
-  detailed_technical_description: string | null
-  required_technologies: string[] | null
-  architecture_requirements: string | null
-  integrations_apis: string | null
-  platforms: string | null
-  required_skills: string[] | null
-  preferred_team_size: number | null
-  required_experience: string | null
-  expected_duration: string | null
-  milestones: string | null
-  deadline: string | null
-  
-  call?: CallData
-  organization?: Organization
-  documents?: AttachedDocument[] // Додаємо поле документів, які прикріпив власник таски
-}
+import { getTaskById } from '@/features/tasks/api/tasks'
+import { downloadDocument as downloadDocumentFile } from '@/shared/api/documents'
+import type { AttachedDocument, TaskDetails } from '@/features/tasks/types/tasks'
 
 const route = useRoute()
 const router = useRouter()
@@ -66,7 +18,7 @@ const downloadLoadingId = ref<number | null>(null) // Для індикації 
 onMounted(async () => {
   const taskId = route.params.id
   try {
-    const res = await api.get<TaskDetails>(`/tasks/${taskId}`)
+    const res = await getTaskById(taskId)
     task.value = res.data
   } catch (err) {
     console.error(err)
@@ -79,9 +31,7 @@ onMounted(async () => {
 const downloadDocument = async (doc: AttachedDocument) => {
   downloadLoadingId.value = doc.id
   try {
-    const response = await api.get(`/documents/${doc.id}/download`, {
-      responseType: 'blob'
-    })
+    const response = await downloadDocumentFile(doc.id)
     
     const blob = new Blob([response.data])
     const link = document.createElement('a')

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import api from '../../../shared/api/axios'
+import { verifyResetToken, resetPassword } from '@/features/auth/api/auth'
 
 const route = useRoute()
 const router = useRouter()
@@ -21,7 +21,7 @@ onMounted(async () => {
   }
 
   try {
-    const res = await api.post('/auth/verify-reset-token', { token: token.value })
+    const res = await verifyResetToken(token.value)
     tokenValid.value = res.data.valid
     if (!tokenValid.value) {
       error.value = 'Reset link expired or invalid'
@@ -50,7 +50,7 @@ async function submit() {
   loading.value = true
 
   try {
-    await api.post('/auth/reset-password', {
+    await resetPassword({
       token: token.value,
       password: password.value,
       password_confirmation: passwordConfirm.value

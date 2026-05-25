@@ -2,49 +2,26 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/features/auth/stores/auth'
-import api from '@/shared/api/axios'
-
-interface Team {
-  id: number
-  name: string
-  description: string | null
-  leader_id: number
-  status: string
-  members?: any[]
-}
-
-interface CallShortInfo {
-  id: number
-  name: string
-  required_documents?: string[] | Record<string, string> | null
-  task?: {
-    id: number
-    title: string
-    organization?: { name: string }
-  } | null
-}
-
-interface ApplicationData {
-  id: number
-  call_id: number
-  team_id: number | null
-  program_type: string
-  category: string | null
-  academic_declaration: boolean | number
-  project_title: string | null
-  proposed_solution: string | null
-}
-
-interface ExistingDocument {
-  id: number
-  file_name: string
-  type: string
-}
+import {
+  getApplicationById,
+  getApplicationDocuments,
+  updateApplication,
+} from '@/features/applications/api/applications'
+import type { ApplicationData, ExistingDocument } from '@/features/applications/types/applications'
+import { getCallById } from '@/shared/api/calls'
+import type { CallShortInfo } from '@/shared/types/calls'
+import { uploadDocument } from '@/shared/api/documents'
+import { getTeams } from '@/features/student/api/teams'
+import type { Team } from '@/features/student/types/teams'
 
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
-const applicationId = route.params.id
+
+const props = defineProps<{
+  id: string
+}>()
+const applicationId = props.id
 
 const loading = ref<boolean>(true)
 const error = ref<string>('')
@@ -123,11 +100,11 @@ onMounted(async () => {
 
   try {
     const [appRes, teamsRes] = await Promise.all([
-      api.get<ApplicationData>(`/applications/${applicationId}`),
-      api.get<Team[]>('/teams')
+      getApplicationById(applicationId),
+      getTeams(),
     ])
 
-    const appData = appRes.data
+    const appData = appRes.data as ApplicationData
     console.log(appData)
     programType.value = appData.program_type
     myTeams.value = Array.isArray(teamsRes.data) ? teamsRes.data : []
@@ -139,8 +116,8 @@ onMounted(async () => {
     proposedSolution.value = appData.proposed_solution || ''
 
     const [callRes, docsRes] = await Promise.all([
-      api.get<CallShortInfo>(`/calls/${appData.call_id}`),
-      api.get<ExistingDocument[]>(`/applications/${applicationId}/documents`) 
+      getCallById(appData.call_id),
+      getApplicationDocuments(applicationId),
     ])
 
     currentCall.value = callRes.data
@@ -198,7 +175,7 @@ async function submit(): Promise<void> {
       payload.proposed_solution = proposedSolution.value
     }
 
-    await api.patch(`/applications/${applicationId}`, payload)
+    await updateApplication(applicationId, payload)
 
     for (const [type, file] of Object.entries(files.value)) {
       if (!file) continue
@@ -208,9 +185,7 @@ async function submit(): Promise<void> {
       formData.append('classification', 'confidential')
       formData.append('application_id', String(applicationId))
 
-      await api.post('/documents/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
+      await uploadDocument(formData)
     }
 
     router.push(`/applications/${applicationId}`)

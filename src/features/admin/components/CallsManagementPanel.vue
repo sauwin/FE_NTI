@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import api from '../../../shared/api/axios'
+import { getAdminCalls, deleteAdminCall } from '@/features/admin/api/admin'
 
 const calls = ref<any[]>([])
 
 const loadCalls = async () => {
-  const res = await api.get('/admin/calls')
+  const res = await getAdminCalls()
   calls.value = res.data
 }
 
 const deleteCall = async (id: number) => {
   if (!confirm('Are you sure you want to delete this draft call?')) return
   try {
-    await api.delete(`/admin/calls/${id}`)
+    await deleteAdminCall(id)
     await loadCalls()
   } catch (e: any) {
     alert(e.response?.data?.message || 'Error deleting call')

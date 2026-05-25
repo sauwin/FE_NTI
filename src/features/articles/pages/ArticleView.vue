@@ -1,33 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import api from '@/shared/api/axios'
+import { getArticleById } from '@/features/articles/api/articles'
+import type { Article } from '@/features/articles/types/articles'
 import { useAuthStore } from '@/features/auth/stores/auth'
-
-type Translation = {
-  id: number
-  language: string
-  title: string
-  excerpt: string
-  content: string
-}
-
-type Article = {
-  id: number
-  slug: string
-  is_published: boolean
-  published_at: string
-  created_at: string
-  updated_at: string
-  translations: Translation[]
-  cover_image?: {
-    image_path: string
-  }
-}
-
-type ApiResponse<T> = {
-  data: T
-}
 
 const route = useRoute()
 const router = useRouter()
@@ -41,7 +17,7 @@ const articleId = route.params.id as string
 async function fetchArticle() {
   try {
     loading.value = true
-    const res = await api.get<ApiResponse<Article>>(`/articles/${articleId}`)
+    const res = await getArticleById(articleId)
     article.value = res.data.data
   } catch (e: any) {
     error.value = e.response?.data?.message || 'Failed to load article'

@@ -3,21 +3,12 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useConfirm } from '@/shared/composables/useConfirm'
 import { getApplications, deleteApplication } from '@/features/applications/api/applications'
-
-interface Application {
-  id: number
-  call_id: number
-  applicant_type: 'student' | 'team'
-  program_type: 'a' | 'b'
-  team_id: number | null
-  status: 'draft' | 'submitted' | 'formal_check' | 'formally_verified' | 'under_evaluation' | 'pending_revision' | 'approved' | 'rejected' | 'onboarding' | 'active' | 'suspended' | 'closed'
-  created_at: string
-}
+import type { StudentApplication } from '@/features/applications/types/applications'
 
 const router = useRouter()
 
 const loading = ref(false)
-const applications = ref<Application[]>([])
+const applications = ref<StudentApplication[]>([])
 const error = ref('')
 
 const filterProgram = ref<string>('all')
@@ -36,7 +27,7 @@ async function fetchApplications() {
   }
 }
 
-const statusConfig: Record<Application['status'], { text: string; class: string }> = {
+const statusConfig: Record<string, { text: string; class: string }> = {
   draft: { text: 'Draft', class: 'bg-slate-800 text-slate-300 border-slate-700' },
   submitted: { text: 'Submitted', class: 'bg-blue-950 text-blue-400 border-blue-900/50' },
   formal_check: { text: 'Formal Check', class: 'bg-indigo-950 text-indigo-400 border-indigo-900/50' },

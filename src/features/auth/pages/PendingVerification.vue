@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import api from '@/shared/api/axios'
+import { resendVerificationEmail } from '@/features/auth/api/auth'
 
 const sent = ref(false)
 const error = ref('')
 
 async function resend() {
   try {
-    await api.post('/email/resend')
+    await resendVerificationEmail()
     sent.value = true
   } catch {
     error.value = 'Could not resend. Try again later.'

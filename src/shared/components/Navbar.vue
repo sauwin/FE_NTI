@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../features/auth/stores/auth'
-import api from '../api/axios'
+import { getNotifications, markNotificationRead, markAllNotificationsRead } from '@/shared/api/notifications'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -16,7 +16,7 @@ onMounted(async () => {
   isLoggedIn.value = !!localStorage.getItem('token')
   if (isLoggedIn.value) {
     try {
-      const res = await api.get('/notifications')
+      const res = await getNotifications()
       unread.value = res.data.unread_count
       notifications.value = res.data.notifications
     } catch {}
@@ -24,13 +24,13 @@ onMounted(async () => {
 })
 async function markRead(n: any) {
   if (n.status === 'queued') {
-    await api.patch(`/notifications/${n.id}/read`)
+    await markNotificationRead(n.id)
     n.status = 'sent'
     unread.value = Math.max(0, unread.value - 1)
   }
 }
 async function markAllRead() {
-  await api.patch('/notifications/read-all')
+  await markAllNotificationsRead()
   unread.value = 0
   notifications.value = notifications.value.map(n => ({ ...n, status: 'sent' }))
 }

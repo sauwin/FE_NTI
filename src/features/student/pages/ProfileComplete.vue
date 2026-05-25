@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '../../../shared/api/axios'
+import { completeStudentProfile } from '@/features/student/api/profile'
 import { useAuthStore } from '../../auth/stores/auth'
 
 const router = useRouter()
@@ -24,12 +24,12 @@ async function submit() {
   }
   loading.value = true
   try {
-    await api.post('/profile/student', {
-      study_program:                  studyProgram.value,
-      year_of_study:                  yearOfStudy.value,
-      university:                     university.value,
-      bio:                            bio.value,
-      github_url:                     githubUrl.value,
+    await completeStudentProfile({
+      study_program: studyProgram.value,
+      year_of_study: yearOfStudy.value,
+      university: university.value,
+      bio: bio.value,
+      github_url: githubUrl.value,
       academic_declaration_confirmed: academicDeclaration.value,
     })
     router.push('/dashboard')

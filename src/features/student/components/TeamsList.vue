@@ -1,30 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getTeams, deleteTeam, updateTeam } from '../api/teams'
+import type { Team } from '../types/teams'
 import TeamForm from './TeamForm.vue'
 import TeamMembersManager from './TeamMembersManager.vue'
-
-interface PivotData {
-  status: 'pending' | 'accepted' | 'rejected'
-  joined_at?: string | null
-}
-
-interface TeamMember {
-  id: number
-  name: string
-  email: string
-  pivot?: PivotData
-}
-
-interface Team {
-  id: number
-  name: string
-  description: string | null
-  leader_id: number
-  status: 'forming' | 'ready'
-  members_count?: number
-  members?: TeamMember[]
-}
 
 const props = defineProps<{
   currentUserId?: number

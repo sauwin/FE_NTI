@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import api from '../../../shared/api/axios'
+import { createAdmin as createAdminUser } from '@/features/admin/api/admin'
 
 const emit = defineEmits(['created'])
 
@@ -30,12 +30,12 @@ async function createAdmin() {
 
   loading.value = true
   try {
-    await api.post('/admin/create-admin', {
+    await createAdminUser({
       first_name: form.value.first_name,
       last_name: form.value.last_name,
       email: form.value.email,
       password: form.value.password,
-      role: form.value.role
+      role: form.value.role,
     })
     success.value = true
     message.value = 'Admin created successfully'

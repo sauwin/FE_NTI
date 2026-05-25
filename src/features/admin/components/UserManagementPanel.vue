@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import api from '../../../shared/api/axios'
-import { useConfirm } from '../../../shared/composables/useConfirm'
-
-interface Role {
-  id: number
-  slug: string
-}
+import {
+  blockUser as blockUserApi,
+  unblockUser as unblockUserApi,
+  deleteAdminUser,
+  removeUserRole,
+  addUserRole,
+  exportUsers as exportUsersApi,
+} from '@/features/admin/api/admin'
+import type { AdminRole } from '@/features/admin/types/admin'
+import { useConfirm } from '@/shared/composables/useConfirm'
 
 const USERS_PER_PAGE = 25
 
@@ -52,7 +55,7 @@ const filtered = computed(() => {
   let result = props.users
 
   if (!props.isSuperAdmin) {
-    result = result.filter(u => !u.roles?.some((r: Role) => ['nti_admin', 'super_admin'].includes(r.slug)))
+    result = result.filter(u => !u.roles?.some((r: AdminRole) => ['nti_admin', 'super_admin'].includes(r.slug)))
   }
 
   if (searchQuery.value) {
@@ -65,7 +68,7 @@ const filtered = computed(() => {
 
   if (selectedRole.value) {
     result = result.filter(u =>
-        u.roles?.some((r: Role) => r.slug === selectedRole.value)
+        u.roles?.some((r: AdminRole) => r.slug === selectedRole.value)
     )
   }
 
@@ -85,12 +88,12 @@ const visibleUsers = computed(() => {
 })
 
 function canManage(user: any) {
-  const hasAdminRole = user.roles?.some((r: Role) => ['nti_admin', 'super_admin'].includes(r.slug))
+  const hasAdminRole = user.roles?.some((r: AdminRole) => ['nti_admin', 'super_admin'].includes(r.slug))
   return !hasAdminRole || props.isSuperAdmin
 }
 
 function getAvailableRolesToAssign(user: any) {
-  const userRoles = user.roles?.map((r: Role) => r.slug) || []
+  const userRoles = user.roles?.map((r: AdminRole) => r.slug) || []
   return availableRoles.filter(r => !userRoles.includes(r))
 }
 
@@ -106,7 +109,7 @@ async function blockUser(userId: number) {
 
   loading.value = true
   try {
-    await api.post(`/admin/block/${userId}`)
+    await blockUserApi(userId)
     success.value = true
     message.value = 'User blocked'
     emit('refresh')
@@ -131,7 +134,7 @@ async function unblockUser(userId: number) {
 
   loading.value = true
   try {
-    await api.post(`/admin/unblock/${userId}`)
+    await unblockUserApi(userId)
     success.value = true
     message.value = 'User unblocked'
     emit('refresh')
@@ -156,7 +159,7 @@ async function deleteUser(userId: number) {
 
   loading.value = true
   try {
-    await api.delete(`/admin/users/${userId}`)
+    await deleteAdminUser(userId)
     success.value = true
     message.value = 'User deleted'
     emit('refresh')
@@ -181,9 +184,7 @@ async function removeRole(userId: number, roleSlug: string) {
 
   loading.value = true
   try {
-    await api.delete(`/admin/users/${userId}/roles`, {
-      data: { role: roleSlug }
-    })
+    await removeUserRole(userId, roleSlug)
     success.value = true
     message.value = 'Role removed'
     emit('refresh')
@@ -199,9 +200,7 @@ async function removeRole(userId: number, roleSlug: string) {
 async function assignRole(userId: number, roleSlug: string) {
   loading.value = true
   try {
-    await api.post(`/admin/users/${userId}/roles`, {
-      role: roleSlug
-    })
+    await addUserRole(userId, roleSlug)
     success.value = true
     message.value = `Role "${roleSlug}" assigned`
     showRoleMenu.value = null
@@ -220,14 +219,11 @@ async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
   loading.value = true
   message.value = ''
   try {
-    const response = await api.get('/admin/export/users', {
-      params: {
-        search: searchQuery.value || undefined,
-        role: selectedRole.value || undefined,
-        status: selectedStatus.value || undefined, // Передача фільтра статусу на сервер
-        format
-      },
-      responseType: 'blob'
+    const response = await exportUsersApi({
+      search: searchQuery.value || undefined,
+      role: selectedRole.value || undefined,
+      status: selectedStatus.value || undefined,
+      format,
     })
     
     const url = window.URL.createObjectURL(new Blob([response.data]))

@@ -2,7 +2,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../auth/stores/auth'
-import api from '../../../shared/api/axios'
+import { getCompanyProfile, updateCompanyProfile } from '@/features/company/api/company'
+import type { CompanyProfile } from '@/features/company/types/company'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -13,20 +14,12 @@ const success = ref(false)
 const editMode = ref(false)
 const isNew = ref(false)
 
-type Profile = {
-  name: string
-  registration_number: string
-  sector: string
-  description: string
-  website: string
-}
-
-const profile = ref<Profile>({ name: '', registration_number: '', sector: '', description: '', website: '' })
+const profile = ref<CompanyProfile>({ name: '', registration_number: '', sector: '', description: '', website: '' })
 
 onMounted(async () => {
   if (!auth.isLoggedIn) { router.push('/auth/login'); return }
   try {
-    const res = await api.get('/company-profile')
+    const res = await getCompanyProfile()
     if (res.data) {
       profile.value = {
         name: res.data.name ?? '',
@@ -50,7 +43,7 @@ async function save() {
   if (!profile.value.name.trim()) { error.value = 'Company name is required'; return }
   saving.value = true
   try {
-    await api.put('/company-profile', profile.value)
+    await updateCompanyProfile(profile.value)
     success.value = true
     editMode.value = false
     isNew.value = false

@@ -2,7 +2,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/features/auth/stores/auth'
-import api from '@/shared/api/axios'
+import { getMentorProfile, updateMentorProfile } from '@/features/mentor/api/profile'
+import type { MentorProfile } from '@/features/mentor/types/profile'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -14,18 +15,12 @@ const editMode = ref(false)
 const isNew = ref(false)
 const newExpertise = ref('')
 
-type Profile = {
-  bio: string
-  expertise_areas: string[]
-  available: boolean
-}
-
-const profile = ref<Profile>({ bio: '', expertise_areas: [], available: true })
+const profile = ref<MentorProfile>({ bio: '', expertise_areas: [], available: true })
 
 onMounted(async () => {
   if (!auth.isLoggedIn) { router.push('/auth/login'); return }
   try {
-    const res = await api.get('/mentor-profile')
+    const res = await getMentorProfile()
     if (res.data) {
       profile.value = {
         bio: res.data.bio ?? '',
@@ -58,7 +53,7 @@ async function save() {
   error.value = ''
   saving.value = true
   try {
-    await api.put('/mentor-profile', {
+    await updateMentorProfile({
       bio: profile.value.bio,
       expertise_areas: profile.value.expertise_areas,
       available: profile.value.available,

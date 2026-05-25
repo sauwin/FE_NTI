@@ -2,7 +2,12 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/features/auth/stores/auth'
-import api from '@/shared/api/axios'
+import { getMe, getRoleStatus, logout as authLogout } from '@/features/auth/api/auth'
+import { getApplications } from '@/features/applications/api/applications'
+import { getProfile, getStudentProfile } from '@/features/student/api/profile'
+import { getMentorProfile } from '@/features/mentor/api/profile'
+import { getCompanyProfile } from '@/features/company/api/company'
+import type { AuthUser } from '@/features/auth/types/auth'
 
 import StudentDashboard from '@/features/student/components/StudentDashboard.vue'
 import CompanyDashboard from '@/features/company/components/CompanyDashboard.vue'
@@ -13,47 +18,38 @@ import MentorDashboard from '@/features/mentor/components/MentorDashboard.vue'
 const router = useRouter()
 const auth = useAuthStore()
 const isAuthentified = ref(false)
-const userObj = ref<User | null>(null)
+const userObj = ref<AuthUser | null>(null)
 const profileComplete = ref(true)
 const roleApproved = ref(true)
 const showTeamForm = ref(false)
 const success = ref('')
 
-type User = {
-  email: string
-  first_name?: string
-  last_name?: string
-  role_slug?: string
-  status?: string
-}
 const applications = ref<any[]>([])
 const error = ref('')
 
 async function fetchData() {
   try {
-    const res = await api.get('/auth/me')
+    const res = await getMe()
     userObj.value = res.data
     isAuthentified.value = true
-    const appRes = await api.get('/applications')
+    const appRes = await getApplications()
     applications.value = appRes.data
-    // Check if role is approved (granted_by != null)
-    const roleRes = await api.get('/auth/role-status')
+    const roleRes = await getRoleStatus()
     roleApproved.value = roleRes.data.approved
 
-    // Check profile completeness per role
     if (res.data.role_slug === 'student') {
       try {
-        const p = await api.get('/profile')
+        const p = await getProfile()
         profileComplete.value = !!p.data
       } catch { profileComplete.value = false }
     } else if (res.data.role_slug === 'mentor') {
       try {
-        const p = await api.get('/mentor-profile')
+        const p = await getMentorProfile()
         profileComplete.value = !!p.data
       } catch { profileComplete.value = false }
     } else if (res.data.role_slug === 'company') {
       try {
-        const p = await api.get('/company-profile')
+        const p = await getCompanyProfile()
         profileComplete.value = !!p.data
       } catch { profileComplete.value = false }
     }
@@ -64,7 +60,7 @@ async function fetchData() {
 
 async function logout() {
   try {
-    await api.post('/auth/logout')
+    await authLogout()
     auth.logout()
     router.push('/auth/login')
   } catch {

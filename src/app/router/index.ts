@@ -44,6 +44,12 @@ const router = createRouter({
       component: () =>
         import('@/features/auth/pages/Verified.vue'),
     },
+
+    {
+      path: '/:pathMatch(.*)*',
+      component: () =>
+        import('@/app/pages/NotFoundPage.vue'),
+    },
   ],
 })
 

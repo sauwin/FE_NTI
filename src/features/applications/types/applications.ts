@@ -1,0 +1,40 @@
+export interface ApplicationPayload {
+  applicant_type: 'student' | 'team'
+  program_type: 'a' | 'b'
+  call_id?: number
+  team_id?: number | null
+  category?: string
+  submit_type?: 'draft' | 'final'
+  project_title?: string
+  proposed_solution?: string
+  academic_declaration?: boolean | number
+}
+
+export interface ApplicationData {
+  id: number
+  call_id: number
+  team_id: number | null
+  program_type: string
+  category: string | null
+  academic_declaration: boolean | number
+  project_title: string | null
+  proposed_solution: string | null
+}
+
+export interface ExistingDocument {
+  id: number
+  file_name: string
+  type: string
+}
+
+export interface StudentApplication {
+  id: number
+  call_id?: number
+  team_id?: number | null
+  status: string
+  program_type: string
+  applicant_type: string
+  created_at?: string
+  call?: { name?: string; deadline_at?: string }
+  team?: { name: string }
+}

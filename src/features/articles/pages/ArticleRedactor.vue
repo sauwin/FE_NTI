@@ -1,30 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import api from '@/shared/api/axios'
-
-type Lang = 'en' | 'sk'
-
-type Translation = {
-  id?: number
-  language: string
-  title: string
-  excerpt: string
-  content: string
-}
-
-type ArticleApi = {
-  slug: string
-  translations: Translation[]
-}
+import { createArticle, updateArticle, getArticleForEdit } from '@/features/articles/api/articles'
+import type { ArticleApi, ArticleLang, ArticleTranslation } from '@/features/articles/types/articles'
 
 type ArticleForm = {
   slug: string
-  translations: Record<Lang, Translation>
-}
-
-type ApiResponse<T> = {
-  data: T
+  translations: Record<ArticleLang, ArticleTranslation & { id?: number }>
 }
 
 const route = useRoute()
@@ -67,10 +49,10 @@ async function submit() {
     if (file.value) formData.append('image', file.value)
 
     if (article_id) {
-      await api.put(`/articles/${article_id}`, formData)
+      await updateArticle(article_id, formData)
       router.push('/')
     } else {
-      await api.post('/articles', formData)
+      await createArticle(formData)
       router.push('/')
     }
   } catch (e: unknown) {
@@ -92,7 +74,7 @@ const mapArticle = (data: ArticleApi): ArticleForm => {
 
 onMounted(async () => {
   if (article_id) {
-    const res = await api.get<ApiResponse<ArticleApi>>(`/articles/${article_id}`)
+    const res = await getArticleForEdit(article_id)
     form.value = mapArticle(res.data.data)
   }
 })

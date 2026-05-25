@@ -1,16 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { inviteMember, removeMember } from '../api/teams'
-
-interface TeamMember {
-  id: number
-  name: string
-  email: string
-  pivot?: {
-    status: 'pending' | 'accepted' | 'rejected'
-    joined_at?: string | null
-  }
-}
+import type { TeamMember } from '../types/teams'
 
 const props = defineProps<{
   team: {

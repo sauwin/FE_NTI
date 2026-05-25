@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import api from '@/shared/api/axios'
+import { getAdminCalls, getNotificationHistory, sendBulkNotification } from '@/features/admin/api/admin'
 
 const viewMode = ref('all') 
 const selectedCallId = ref('') 
@@ -28,7 +28,7 @@ onMounted(() => {
 
 async function fetchCalls() {
   try {
-    const res = await api.get('/admin/calls')
+    const res = await getAdminCalls()
     calls.value = Array.isArray(res.data) ? res.data : (res.data.data || [])
   } catch (e) {
     console.warn('Failed to load active calls:', e.message)
@@ -38,7 +38,7 @@ async function fetchCalls() {
 async function fetchHistory() {
   loadingHistory.value = true
   try {
-    const res = await api.get('/admin/notifications/history')
+    const res = await getNotificationHistory()
     history.value = Array.isArray(res.data) ? res.data : (res.data.data || [])
   } catch (e) {
     console.warn('History failed to fetch:', e.message)
@@ -71,7 +71,7 @@ async function send() {
   status.value = null
 
   try {
-    const res = await api.post('/admin/notifications/bulk', {
+    const res = await sendBulkNotification({
       recipient_group: computedGroupValue,
       subject: subject.value,
       message: message.value,

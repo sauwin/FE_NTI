@@ -2,7 +2,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/features/auth/stores/auth'
-import api from '@/shared/api/axios'
+import { getStudentProfile, updateProfile } from '@/features/student/api/profile'
+import type { Skill, StudentProfile } from '@/features/student/types/profile'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -12,18 +13,7 @@ const error = ref('')
 const success = ref(false)
 const editMode = ref(false)
 
-type Skill = { skill: string; level: 'beginner' | 'intermediate' | 'advanced' }
-type Profile = {
-  university: string
-  study_program: string
-  year_of_study: number | null
-  bio: string
-  github_url: string
-  academic_declaration_confirmed: boolean
-  skills: Skill[]
-}
-
-const profile = ref<Profile>({
+const profile = ref<StudentProfile>({
   university: '', study_program: '', year_of_study: null,
   bio: '', github_url: '', academic_declaration_confirmed: false, skills: [],
 })
@@ -33,7 +23,7 @@ const isNew = ref(false)
 onMounted(async () => {
   if (!auth.isLoggedIn) { router.push('/auth/login'); return }
   try {
-    const res = await api.get('/profile/student')
+    const res = await getStudentProfile()
     if (res.data) {
       profile.value = { ...res.data, skills: res.data.skills ?? [] }
     } else {
@@ -63,14 +53,9 @@ async function save() {
 
   saving.value = true
   try {
-    await api.put('/profile', {
-      university: profile.value.university,
-      study_program: profile.value.study_program,
-      year_of_study: profile.value.year_of_study,
-      bio: profile.value.bio,
-      github_url: profile.value.github_url,
-      academic_declaration_confirmed: profile.value.academic_declaration_confirmed,
-      skills: profile.value.skills.filter(s => s.skill.trim()),
+    await updateProfile({
+      ...profile.value,
+      skills: profile.value.skills?.filter(s => s.skill.trim()) ?? [],
     })
     success.value = true
     editMode.value = false

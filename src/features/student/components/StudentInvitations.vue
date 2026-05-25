@@ -1,16 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getMyInvitations, respondToInvitation } from '../api/teams'
-
-interface Invitation {
-  id: number
-  name: string
-  status: 'forming' | 'ready'
-  leader?: {
-    name: string
-    email: string
-  }
-}
+import type { Invitation } from '../types/teams'
 
 const loading = ref(false)
 const invitations = ref<Invitation[]>([])

@@ -1,32 +1,15 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
-import api from '../../../shared/api/axios'
-
-interface Program {
-  id: number
-  title?: string
-  name?: string
-  code: 'program_a' | 'program_b'
-  description: string
-}
-
-interface Call {
-  id: number
-  program_id: number
-  name: string
-  status: 'draft' | 'open' | 'closed' | 'archived'
-  opens_at: string | null
-  deadline_at: string | null
-  min_team_size: number
-  max_team_size: number | null
-  form_config?: string
-}
-
-interface RequiredDocument {
-  document_name: string
-  is_mandatory: boolean
-  max_size_mb: number
-}
+import {
+  getAdminPrograms,
+  getAdminCalls,
+  createAdminCall,
+  updateAdminCall,
+  updateAdminCallStatus,
+  deleteAdminCall,
+  exportCalls,
+} from '@/features/admin/api/admin'
+import type { AdminCall, AdminProgram, RequiredDocument } from '@/features/admin/types/admin'
 
 const programADocs: RequiredDocument[] = [
   { document_name: 'Executive Summary', is_mandatory: true, max_size_mb: 10 },
@@ -48,8 +31,8 @@ const programBDocs: RequiredDocument[] = [
 const searchQuery = ref('')
 const filterStatus = ref('')
 const filterProgramType = ref('')
-const programs = ref<Program[]>([])
-const calls = ref<Call[]>([])
+const programs = ref<AdminProgram[]>([])
+const calls = ref<AdminCall[]>([])
 const isSubmitting = ref(false)
 const editingCallId = ref<number | null>(null)
 const openMenuId = ref<number | null>(null)
@@ -120,8 +103,8 @@ const emit = defineEmits(['view-applications'])
 async function loadData() {
   try {
     const [progRes, callRes] = await Promise.all([
-      api.get<Program[]>('/admin/programs'),
-      api.get<Call[]>('/admin/calls')
+      getAdminPrograms(),
+      getAdminCalls(),
     ])
     programs.value = progRes.data
     calls.value = callRes.data
@@ -130,7 +113,7 @@ async function loadData() {
   }
 }
 
-function editCall(call: Call) {
+function editCall(call: AdminCall) {
   editingCallId.value = call.id
   closeMenu()
   const program = programs.value.find(p => p.id === call.program_id)
@@ -166,10 +149,10 @@ async function handleSubmitCall() {
     const payload = { ...newCall.value, form_config: JSON.stringify(newCall.value.required_documents) }
 
     if (editingCallId.value) {
-      await api.put(`/admin/calls/${editingCallId.value}`, payload)
+      await updateAdminCall(editingCallId.value, payload)
       alert('Call updated successfully!')
     } else {
-      await api.post('/admin/calls', payload)
+      await createAdminCall(payload)
       alert('Call created successfully!')
     }
 
@@ -184,7 +167,7 @@ async function handleSubmitCall() {
 
 async function updateCallStatus(id: number, status: string) {
   try {
-    await api.patch(`/admin/calls/${id}/status`, { status })
+    await updateAdminCallStatus(id, status)
     closeMenu()
     loadData()
   } catch {
@@ -195,7 +178,7 @@ async function updateCallStatus(id: number, status: string) {
 async function handleDeleteCall(id: number) {
   if (!confirm('Are you sure you want to delete this call?')) return
   try {
-    await api.delete(`/admin/calls/${id}`)
+    await deleteAdminCall(id)
     closeMenu()
     loadData()
   } catch {
@@ -205,13 +188,10 @@ async function handleDeleteCall(id: number) {
 
 async function downloadCallsExport(format: 'csv' | 'xlsx' = 'xlsx') {
   try {
-    const response = await api.get('/admin/export/calls', {
-      params: { 
-        format,
-        status: filterStatus.value || undefined,
-        program_type: filterProgramType.value || undefined
-      },
-      responseType: 'blob'
+    const response = await exportCalls({
+      format,
+      status: filterStatus.value || undefined,
+      program_type: filterProgramType.value || undefined,
     })
     const url = window.URL.createObjectURL(new Blob([response.data]))
     const link = document.createElement('a')

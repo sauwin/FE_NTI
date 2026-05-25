@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useAuthStore } from '@/features/auth/stores/auth'
 import { setConfirmDialogRef } from '@/shared/composables/useConfirm'
 import ConfirmDialog from '@/shared/components/ConfirmDialog.vue'
-import api from '@/shared/api/axios'
+import { getMe } from '@/features/auth/api/auth'
 
 const auth = useAuthStore()
 const confirmDialogRef = ref()
@@ -13,7 +13,7 @@ onMounted(async () => {
 
   if (auth.token) {
     try {
-      const res = await api.get('/auth/me')
+      const res = await getMe()
       auth.login(auth.token, res.data)
     } catch {
       auth.logout()

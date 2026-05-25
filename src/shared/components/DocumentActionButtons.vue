@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import api from '@/shared/api/axios'
+import { downloadDocumentBlob } from '@/shared/api/documents'
 
 interface Props {
   documentId: number
@@ -26,7 +26,7 @@ const downloadBlob = (blob: Blob) => {
 }
 
 const fetchBlob = async (endpoint: string) => {
-  const response = await api.get(endpoint, { responseType: 'blob' })
+  const response = await downloadDocumentBlob(endpoint)
   if (!response.data) {
     throw new Error('Empty response from file server')
   }

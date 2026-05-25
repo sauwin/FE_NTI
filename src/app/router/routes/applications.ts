@@ -10,6 +10,7 @@ export const applicationRoutes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
     },
+    props: true
   },
 
   {
@@ -21,5 +22,6 @@ export const applicationRoutes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
     },
+    props: true
   },
 ]

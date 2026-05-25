@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import api from '@/shared/api/axios'
+import { getAdminLogs, getAdminUsersList } from '@/features/admin/api/admin'
 import * as XLSX from 'xlsx'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
@@ -46,7 +46,7 @@ async function fetchLogs() {
     if (filterStartDate.value) params.date_from = filterStartDate.value;
     if (filterEndDate.value) params.date_to = filterEndDate.value;
 
-    const res = await api.get('/admin/logs', { params })
+    const res = await getAdminLogs(params)
     logs.value = res.data.data
     total.value = res.data.total
     lastPage.value = res.data.last_page
@@ -76,7 +76,7 @@ async function fetchAllLogsForExport(): Promise<any[]> {
   if (filterStartDate.value) params.date_from = filterStartDate.value
   if (filterEndDate.value) params.date_to = filterEndDate.value
 
-  const res = await api.get('/admin/logs', { params })
+  const res = await getAdminLogs(params)
   
   return res.data as any[] 
 }
@@ -323,7 +323,7 @@ const flattenDetails = (details: any) => {
 const formatKey = (key: string) => key.replace(/_/g, ' ')
 
 onMounted(async () => {
-  const res = await api.get('/admin/admin-users')
+  const res = await getAdminUsersList()
   adminUsers.value = res.data
   fetchLogs()
 })

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import api from '../../../shared/api/axios'
-import { useConfirm } from '../../../shared/composables/useConfirm'
+import { approveUser, removeUserRole } from '@/features/admin/api/admin'
+import { useConfirm } from '@/shared/composables/useConfirm'
 
 const props = defineProps<{
   pendingUsers: any[]
@@ -24,7 +24,7 @@ async function approveRole(userId: number, roleName: string) {
 
   loading.value = true
   try {
-    await api.post(`/admin/approve/${userId}`)
+    await approveUser(userId)
     success.value = true
     message.value = `Role approved for ${roleName}`
     emit('refresh')
@@ -49,9 +49,7 @@ async function rejectRole(userId: number, roleSlug: string) {
 
   loading.value = true
   try {
-    await api.delete(`/admin/users/${userId}/roles`, {
-      data: { role: roleSlug }
-    })
+    await removeUserRole(userId, roleSlug)
     success.value = true
     message.value = 'Role removed'
     emit('refresh')

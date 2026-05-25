@@ -2,43 +2,9 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/features/auth/stores/auth'
-import api from '@/shared/api/axios'
-
-interface Organization {
-  id: number
-  name: string
-  logo_path: string | null
-}
-
-interface CallData {
-  id: number
-  name: string
-  status: 'draft' | 'open' | 'closed' | 'archived'
-  opens_at: string | null
-  deadline_at: string | null
-  min_team_size: number
-  max_team_size: number | null
-  required_documents?: any
-}
-
-// Головна структура, яку повертає TaskController
-interface TaskWithCall {
-  id: number
-  call_id: number
-  organization_id: number
-  title: string 
-  short_description: string | null
-  brief: string | null
-  budget: string | null
-  status: 'draft' | 'published' | 'in_matching' | 'assigned' | 'in_progress' | 'closed'
-  deadline: string | null
-  required_technologies?: string[]
-  required_skills?: string[]
-  
-  // Вкладені реляції (Eager loading з Laravel)
-  call?: CallData 
-  organization?: Organization
-}
+import { getCompanyTasks } from '@/features/company/api/company'
+import { getProgramBTasks } from '@/features/tasks/api/tasks'
+import type { TaskWithCall } from '@/features/company/types/company'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -51,11 +17,10 @@ onMounted(async () => {
   try {
     if (auth.isCompany) {
       // Компанія бачить свої створені таски TaskController@index
-      const res = await api.get<TaskWithCall[]>('/company/tasks')
+      const res = await getCompanyTasks()
       myTasks.value = res.data
     } else {
-      // Студенти бачать публічний список опублікованих тасок TaskController@publicTasks
-      const res = await api.get<TaskWithCall[]>('/programs/b/tasks')
+      const res = await getProgramBTasks()
       tasks.value = res.data
     }
   } catch (err) {

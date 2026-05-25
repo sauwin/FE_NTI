@@ -3,11 +3,9 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getTeams } from '@/features/student/api/teams'
 import { useAuthStore } from '@/features/auth/stores/auth'
-import { 
-  getActiveCall, 
-  createApplication, 
-  uploadApplicationDocument 
-} from '@/features/applications/api/applications'
+import { getActiveCall, createApplication } from '@/features/applications/api/applications'
+import { uploadDocument } from '@/shared/api/documents'
+import type { DocumentRequirement } from '@/shared/types/calls'
 
 const router = useRouter()
 const error = ref('')
@@ -23,12 +21,7 @@ const loadingTeams = ref(false)
 const category = ref('')
 const academicDeclaration = ref(false)
 
-interface RequiredDoc {
-  document_name: string
-  is_mandatory: boolean
-  max_size_mb: number
-}
-const requiredDocuments = ref<RequiredDoc[]>([])
+const requiredDocuments = ref<DocumentRequirement[]>([])
 const files = ref<Record<string, File | null>>({})
 
 const categories = [
@@ -159,7 +152,7 @@ async function submit(mode: 'draft' | 'final' = 'final') {
       formData.append('classification', 'confidential')
       formData.append('application_id', String(applicationId))
 
-      await uploadApplicationDocument(formData)
+      await uploadDocument(formData)
     }
 
     if (mode === 'draft') {

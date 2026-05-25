@@ -1,20 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '../../../shared/api/axios'
+import { createAdminCall } from '@/features/admin/api/admin'
+import { getPrograms } from '@/shared/api/programs'
+import type { Program } from '@/shared/types/programs'
+import type { RequiredDocument } from '@/features/admin/types/admin'
 
-interface Program {
-  id: number
-  code: 'program_a' | 'program_b'
-  type: 'grant' | 'live_practice'
-  is_active: boolean
-}
-
-interface DocumentRequirement {
+interface CallDocumentRequirement extends RequiredDocument {
   id: string
-  document_name: string
-  is_mandatory: boolean
-  max_size_mb: number
 }
 
 const router = useRouter()
@@ -30,13 +23,13 @@ const opensAt = ref<string>('')
 const deadlineAt = ref<string>('')
 const minTeamSize = ref<number>(3)
 const maxTeamSize = ref<number | null>(null)
-const requiredDocuments = ref<DocumentRequirement[]>([
+const requiredDocuments = ref<CallDocumentRequirement[]>([
     { id: '1', document_name: 'Team Project Pitch (PDF)', is_mandatory: true, max_size_mb: 10 }
 ])
 
 onMounted(async () => {
   try {
-    const res = await api.get<Program[]>('/programs')
+    const res = await getPrograms()
     programs.value = res.data.filter(p => p.is_active)
     const firstProgram = programs.value[0]
     if (firstProgram) {
@@ -77,15 +70,15 @@ async function submitCall() {
 
   try {
     // Формуємо точний payload під міграцію структури calls
-    await api.post('/admin/calls', {
+    await createAdminCall({
       program_id: programId.value,
       status: status.value,
       opens_at: opensAt.value ? new Date(opensAt.value).toISOString() : null,
       deadline_at: deadlineAt.value ? new Date(deadlineAt.value).toISOString() : null,
       min_team_size: minTeamSize.value,
       max_team_size: maxTeamSize.value,
-      evaluation_criteria: {}, // Можна розширити за потреби
-      required_documents: requiredDocuments.value // Передається як JSON-масив
+      evaluation_criteria: {},
+      required_documents: requiredDocuments.value,
     })
 
     router.push('/admin/calls')

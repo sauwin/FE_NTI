@@ -1,16 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '@/shared/api/axios'
+import { getPrograms } from '@/shared/api/programs'
+import { createCallWithTask } from '@/features/tasks/api/tasks'
+import type { Program } from '@/shared/types/programs'
 
-interface Program {
-  id: number
-  code: 'program_a' | 'program_b'
-  type: 'grant' | 'live_practice'
-  is_active: boolean
-}
-
-interface DocumentRequirement {
+interface TaskDocumentRequirement {
   id: string
   document_name: string
   is_mandatory: boolean
@@ -46,7 +41,7 @@ const callForm = ref({
   max_team_size: null as number | null,
   required_documents: [
     { id: Date.now().toString(), document_name: 'Team Project Pitch (PDF)', is_mandatory: true, max_size_mb: 10 }
-  ] as DocumentRequirement[]
+  ] as TaskDocumentRequirement[]
 })
 
 const files = ref<Record<string, File | null>>({
@@ -63,7 +58,7 @@ const docLabels: Record<string, string> = {
 
 onMounted(async () => {
   try {
-    const res = await api.get<Program[]>('/programs')
+    const res = await getPrograms()
     const progB = res.data.find((p: Program) => p.code === 'program_b')
     if (progB) {
       programBId.value = progB.id
@@ -133,9 +128,7 @@ async function submitChallenge(targetStatus: 'draft' | 'published') {
       }
     }
 
-    await api.post('/calls-with-tasks', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
+    await createCallWithTask(formData)
 
     step.value = 6
   } catch (e: any) {

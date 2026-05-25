@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { mentorshipsApi, type Mentorship, type Consultation } from '../api/mentorships'
+import { getMentorshipById, createConsultation } from '../api/mentorships'
+import type { Mentorship, Consultation } from '../types/mentorships'
 
 const props = defineProps<{
   mentorship: Mentorship
@@ -24,8 +25,8 @@ const fetchConsultations = async () => {
   loadingDetail.value = true
   formSuccess.value = ''
   try {
-    const data = await mentorshipsApi.getMentorshipDetails(props.mentorship.id)
-    consultations.value = data.consultations || []
+    const res = await getMentorshipById(props.mentorship.id)
+    consultations.value = res.data.consultations || []
   } catch (err) {
     console.error('Error while loading consultation details', err)
   } finally {
@@ -37,13 +38,13 @@ const submitConsultation = async () => {
   formSubmitting.value = true
   formSuccess.value = ''
   try {
-    const result = await mentorshipsApi.createConsultation(props.mentorship.id, {
+    const result = await createConsultation(props.mentorship.id, {
       date: formDate.value,
       duration_minutes: formDuration.value,
-      summary: formSummary.value
+      summary: formSummary.value,
     })
     
-    consultations.value.unshift(result.data)
+    consultations.value.unshift(result.data.data)
     formSummary.value = ''
     showLogForm.value = false
     formSuccess.value = 'The consultation has been successfully saved!'

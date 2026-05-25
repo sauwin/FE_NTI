@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import api from '@/shared/api/axios.ts'
+import {
+  getAdminApplications,
+  getAdminUsers,
+  getAdminApplicationById,
+  getAdminMentorships,
+  assignMentorship,
+  deleteMentorship,
+} from '@/features/admin/api/admin'
 
 const applications = ref<any[]>([])
 const selectedApplicationId = ref<number | null>(null)
@@ -14,8 +21,8 @@ const success = ref('')
 onMounted(async () => {
   try {
     const [appsRes, usersRes] = await Promise.all([
-      api.get('/admin/applications', { params: { per_page: 1000 } }),
-      api.get('/admin/users'),
+      getAdminApplications({ per_page: 1000 }),
+      getAdminUsers(),
     ])
     
     // Handle paginated response
@@ -36,7 +43,7 @@ async function loadMentors() {
   if (!selectedApplicationId.value) return
   loading.value = true
   try {
-    const res = await api.get('/admin/mentorships', { params: { application_id: selectedApplicationId.value } })
+    const res = await getAdminMentorships({ application_id: selectedApplicationId.value })
     
     let mentorsList = res.data?.data ?? res.data ?? []
     
@@ -60,7 +67,7 @@ async function assign() {
     }
 
     // Fetch application details to get user_id
-    const appDetailsRes = await api.get(`/admin/applications/${selectedApplicationId.value}`)
+    const appDetailsRes = await getAdminApplicationById(selectedApplicationId.value)
     const student_id = appDetailsRes.data?.application?.student_profile.user_id
 
     if (!student_id) {
@@ -68,10 +75,10 @@ async function assign() {
       return
     }
 
-    await api.post('/mentorships/assign', {
+    await assignMentorship({
       application_id: selectedApplicationId.value,
       mentor_id: selectedUserId.value,
-      student_id: student_id
+      student_id: student_id,
     })
     success.value = 'Mentor assigned.'
     selectedUserId.value = null
@@ -87,7 +94,7 @@ async function remove(mentorshipId: number) {
   error.value = ''
   try {
     // Note: You may need to create a delete endpoint for mentorships
-    await api.delete(`/mentorships/${mentorshipId}`)
+    await deleteMentorship(mentorshipId)
     mentors.value = mentors.value.filter(m => m.id !== mentorshipId)
     success.value = 'Mentor removed.'
     setTimeout(() => (success.value = ''), 3000)

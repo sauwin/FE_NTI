@@ -1,36 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '../../../shared/api/axios'
-
-interface Program {
-  id: number
-  code: string
-}
-
-interface Call {
-  id: number
-  program?: Program | null
-}
-
-type TaskStatus =
-  | 'draft'
-  | 'published'
-  | 'in_matching'
-  | 'assigned'
-  | 'in_progress'
-  | 'closed'
-
-interface CompanyTask {
-  id: number
-  title: string
-  brief: string | null
-  short_description: string | null
-  budget?: string | number | null
-  status: TaskStatus
-  created_at: string
-  call?: Call | null
-}
+import { getCompanyTasks } from '@/features/company/api/company'
+import type { CompanyTask, TaskStatus } from '@/features/company/types/company'
 
 const router = useRouter()
 const tasks = ref<CompanyTask[]>([])
@@ -43,7 +15,7 @@ onMounted(async () => {
 async function fetchTasks() {
   loading.value = true
   try {
-    const response = await api.get<CompanyTask[]>('/company/tasks')
+    const response = await getCompanyTasks()
     tasks.value = Array.isArray(response.data) ? response.data : []
   } catch {
     tasks.value = []

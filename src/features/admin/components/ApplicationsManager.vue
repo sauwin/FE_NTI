@@ -1,23 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import api from '@/shared/api/axios'
+import { getAdminApplications, updateAdminApplicationStatus, exportApplications } from '@/features/admin/api/admin'
+import type { AdminApplicationListItem } from '@/features/admin/types/admin'
 
 const props = defineProps<{
   filterCallId?: number | null
 }>()
 
 const emit = defineEmits(['clear-filter', 'view-detail'])
-
-interface Application {
-  id: number
-  applicant_name: string
-  applicant_email: string
-  program: string
-  program_type: string
-  call_name: string
-  datum: string
-  status: string
-}
 
 const ALL_STATUSES = [
   { value: 'draft', label: 'Draft',  color: 'text-slate-400' },
@@ -38,7 +28,7 @@ const PROGRAM_TYPES = [
   { value: 'b', label: 'Program B' }
 ]
 
-const applications = ref<Application[]>([])
+const applications = ref<AdminApplicationListItem[]>([])
 const loading = ref(false)
 const currentPage = ref(1)
 const totalPages = ref(1)
@@ -58,7 +48,7 @@ async function loadApplications() {
     if (filterProgramType.value) params.program_type = filterProgramType.value
     if (filterStatus.value) params.status = filterStatus.value
 
-    const res = await api.get('/admin/applications', { params })
+    const res = await getAdminApplications(params)
 
     if (res.data && res.data.data) {
       applications.value = res.data.data
@@ -96,7 +86,7 @@ function changePage(page: number) {
 async function changeStatus(id: number, newStatus: string) {
   changingStatusId.value = id
   try {
-    await api.patch(`/admin/applications/${id}/status`, { status: newStatus })
+    await updateAdminApplicationStatus(id, newStatus)
     const app = applications.value.find(a => a.id === id)
     if (app) app.status = newStatus
   } catch {
@@ -119,10 +109,7 @@ async function downloadExport(format: 'csv' | 'xlsx' = 'xlsx') {
     if (filterProgramType.value) params.program_type = filterProgramType.value
     if (filterStatus.value) params.status = filterStatus.value
 
-    const response = await api.get('/admin/export/applications', {
-      params,
-      responseType: 'blob'
-    })
+    const response = await exportApplications(params)
 
     const url = window.URL.createObjectURL(new Blob([response.data]))
     const link = document.createElement('a')

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '@/shared/api/axios'
+import { login } from '@/features/auth/api/auth'
 import { useAuthStore } from '../stores/auth'
 
 const email = ref('')
@@ -13,7 +13,7 @@ const auth = useAuthStore()
 async function submit() {
   error.value = ''
   try {
-    const res = await api.post('/auth/login', { email: email.value, password: password.value })
+    const res = await login({ email: email.value, password: password.value })
     auth.login(res.data.token, res.data.user)
     router.push('/dashboard')
   } catch (e: any) {

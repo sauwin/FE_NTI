@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '../../../shared/api/axios'
+import { register } from '@/features/auth/api/auth'
 import { useAuthStore } from '../stores/auth'
 
 const firstName = ref('')
@@ -43,7 +43,7 @@ async function submit() {
       }
     }
 
-    const res = await api.post('/auth/register', payload)
+    const res = await register(payload as import('@/features/auth/types/auth').RegisterPayload)
     auth.login(res.data.token, res.data.user)
     router.push('/pending-verification')
   } catch (e: any) {

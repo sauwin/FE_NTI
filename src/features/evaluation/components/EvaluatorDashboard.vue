@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '@/shared/api/axios'
+import { getApplications } from '@/features/applications/api/applications'
 import { getEvaluations } from '@/features/evaluation/api/evaluations'
 
 const router = useRouter()
@@ -13,7 +13,7 @@ const error = ref('')
 onMounted(async () => {
   try {
     const [appsRes, evalsRes] = await Promise.all([
-      api.get('/applications'),
+      getApplications(),
       getEvaluations(),
     ])
     applications.value = appsRes.data?.data ?? appsRes.data ?? []

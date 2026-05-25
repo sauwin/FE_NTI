@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { mentorshipsApi, type Mentorship } from '../api/mentorships'
+import { getMentorships } from '../api/mentorships'
+import type { Mentorship } from '../types/mentorships'
 
 import MentorshipsTable from './MentorshipsTable.vue'
 import ProjectDetail from './ProjectDetail.vue'
@@ -16,7 +17,8 @@ const fetchMentorships = async () => {
   loading.value = true
   error.value = ''
   try {
-    mentorships.value = await mentorshipsApi.getMentorships()
+    const res = await getMentorships()
+    mentorships.value = res.data
   } catch (err: any) {
     error.value = 'Unable to load projects.'
     console.error(err)

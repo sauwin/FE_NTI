@@ -1,16 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
-import api from '../../../shared/api/axios'
-import { useAuthStore } from '../../auth/stores/auth'
-
-type FaqItem = {
-  id: number
-  page_context: string
-  order_position: number
-  is_active: boolean
-  question: string
-  answer: string
-}
+import { getFaqItems, createFaqItem, updateFaqItem, deleteFaqItem } from '@/features/faq/api/faq'
+import type { FaqItem } from '@/features/faq/types/faq'
+import { useAuthStore } from '@/features/auth/stores/auth'
 
 const auth = useAuthStore()
 const isAdmin = computed(() => auth.isAdmin)
@@ -64,9 +56,7 @@ function editFaq(faq: FaqItem) {
 
 async function fetchFaqs() {
   try {
-    const res = await api.get('/faq-items', {
-      params: { page_context: 'general' },
-    })
+    const res = await getFaqItems({ page_context: 'general' })
     faqItems.value = res.data.data ?? res.data
   } catch {
     error.value = 'Unable to load FAQ items.'
@@ -80,7 +70,7 @@ async function saveFaq() {
 
   try {
     if (editingId.value) {
-      await api.put(`/faq-items/${editingId.value}`, {
+      await updateFaqItem(editingId.value, {
         page_context: formState.page_context,
         question: formState.question,
         answer: formState.answer,
@@ -89,7 +79,7 @@ async function saveFaq() {
       })
       success.value = 'FAQ updated successfully.'
     } else {
-      await api.post('/faq-items', {
+      await createFaqItem({
         page_context: formState.page_context,
         question: formState.question,
         answer: formState.answer,
@@ -116,7 +106,7 @@ async function deleteFaq(id: number) {
   success.value = null
 
   try {
-    await api.delete(`/faq-items/${id}`)
+    await deleteFaqItem(id)
     success.value = 'FAQ deleted successfully.'
     await fetchFaqs()
   } catch {

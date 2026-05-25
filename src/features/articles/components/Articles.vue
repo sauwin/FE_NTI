@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '@/shared/api/axios'
+import { getArticles, deleteArticle as deleteArticleApi } from '@/features/articles/api/articles'
+import type { Article } from '@/features/articles/types/articles'
 import { useAuthStore } from '@/features/auth/stores/auth'
 
 const router = useRouter()
@@ -9,48 +10,9 @@ const store = useAuthStore()
 const articlesObj = ref<Article[] | null>(null)
 const fetchSuccessfull = ref<boolean | null>(null)
 
-type Translation = {
-  id: number
-  article_id: number
-  language: string
-  title: string
-  excerpt: string
-  content: string
-  created_at: string
-  updated_at: string
-}
-
-type Article = {
-  id: number
-  slug: string
-  author_id: number
-  is_published: boolean
-  published_at: string
-  created_at: string
-  updated_at: string
-  translations: Translation[]
-  cover_image?: Image
-}
-
-type Image = {
-  image_path: string
-}
-
-type PaginationMeta = {
-  current_page: number
-  last_page: number
-  per_page: number
-  total: number
-}
-
-type ArticlesResponse = {
-  data: Article[]
-  meta: PaginationMeta
-}
-
 async function fetchData() {
   try {
-    const res = await api.get('/articles')
+    const res = await getArticles()
     articlesObj.value = res.data.data
     fetchSuccessfull.value = true
   } catch(e: any) {
@@ -60,7 +22,7 @@ async function fetchData() {
 
 async function deleteArticle(id: Number) {
   try {
-    await api.delete('/articles/' + id)
+    await deleteArticleApi(id)
     articlesObj.value = articlesObj.value?.filter(article => article.id != id) ?? []
   } catch(e: any) {
   }

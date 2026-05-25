@@ -4,7 +4,14 @@ import CompanyProfile from './CompanyProfile.vue'
 import CompanyTasks from './CompanyTasks.vue'
 import ActiveMembersTable from './ActiveMembersTable.vue'
 import PendingApprovalsTable from './PendingApprovalsTable.vue'
-import api from '../../../shared/api/axios'
+import {
+  getPendingMembers,
+  getActiveMembers,
+  approveMember,
+  rejectMember,
+  kickMember,
+} from '@/features/company/api/company'
+import type { CompanyUser } from '@/features/company/types/company'
 import { useConfirm } from '../../../shared/composables/useConfirm'
 
 type AdminTab =
@@ -13,16 +20,6 @@ type AdminTab =
   | 'members'
   | 'approvals'
   | 'applications'
-
-interface CompanyUser {
-  id: number
-  first_name: string
-  last_name: string
-  email: string
-  status?: string
-  roles?: any[]
-  role_slug?: string
-}
 
 const activeTab = ref<AdminTab>('company-info')
 const pendingUsers = ref<CompanyUser[]>([])
@@ -42,8 +39,8 @@ async function fetchMembersData() {
   loadingMembers.value = true
   try {
     const [pendingRes, activeRes] = await Promise.all([
-      api.get<CompanyUser[]>('/company/members/pending'),
-      api.get<CompanyUser[]>('/company/members/active')
+      getPendingMembers(),
+      getActiveMembers(),
     ])
 
     pendingUsers.value = Array.isArray(pendingRes.data) ? pendingRes.data : []
@@ -57,14 +54,14 @@ async function fetchMembersData() {
 
 async function handleApprove(user: CompanyUser) {
   try {
-    await api.post(`/company/members/${user.id}/approve`, {})
+    await approveMember(user.id)
     await fetchMembersData()
   } catch {}
 }
 
 async function handleReject(user: CompanyUser) {
   try {
-    await api.post(`/company/members/${user.id}/reject`, {})
+    await rejectMember(user.id)
     await fetchMembersData()
   } catch {}
 }
@@ -81,7 +78,7 @@ async function handleKick(user: CompanyUser) {
   if (!confirmed) return
 
   try {
-    await api.delete(`/company/members/${user.id}/kick`)
+    await kickMember(user.id)
     await fetchMembersData()
   } catch (error) {
     console.error('Failed to kick member', error)

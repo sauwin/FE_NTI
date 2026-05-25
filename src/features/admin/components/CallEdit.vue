@@ -1,27 +1,18 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import api from '../../../shared/api/axios'
+import { getAdminPrograms, getAdminCallById, updateAdminCall } from '@/features/admin/api/admin'
+import type { AdminProgram, RequiredDocument } from '@/features/admin/types/admin'
 
-interface Program {
-  id: number
-  code: 'program_a' | 'program_b'
-  type: 'grant' | 'live_practice'
-  is_active: boolean
-}
-
-interface DocumentRequirement {
+interface CallDocumentRequirement extends RequiredDocument {
   id: string
-  document_name: string
-  is_mandatory: boolean
-  max_size_mb: number
 }
 
 const router = useRouter()
 const route = useRoute()
 const callId = route.params.id
 
-const programs = ref<Program[]>([])
+const programs = ref<AdminProgram[]>([])
 const loading = ref<boolean>(false)
 const error = ref<string>('')
 
@@ -31,7 +22,7 @@ const opensAt = ref<string>('')
 const deadlineAt = ref<string>('')
 const minTeamSize = ref<number>(3)
 const maxTeamSize = ref<number | null>(null)
-const requiredDocuments = ref<DocumentRequirement[]>([])
+const requiredDocuments = ref<CallDocumentRequirement[]>([])
 
 const formatDateTime = (isoString: string | null) => {
   if (!isoString) return ''
@@ -42,10 +33,10 @@ const formatDateTime = (isoString: string | null) => {
 onMounted(async () => {
   loading.value = true
   try {
-    const progRes = await api.get<Program[]>('/admin/programs')
+    const progRes = await getAdminPrograms()
     programs.value = progRes.data
 
-    const callRes = await api.get(`/admin/calls/${callId}`)
+    const callRes = await getAdminCallById(callId)
     const call = callRes.data
 
     programId.value = call.program_id
@@ -85,13 +76,13 @@ async function updateCall() {
   error.value = ''
 
   try {
-    await api.put(`/admin/calls/${callId}`, {
+    await updateAdminCall(callId, {
       status: status.value,
       opens_at: opensAt.value ? new Date(opensAt.value).toISOString() : null,
       deadline_at: deadlineAt.value ? new Date(deadlineAt.value).toISOString() : null,
       min_team_size: minTeamSize.value,
       max_team_size: maxTeamSize.value,
-      required_documents: requiredDocuments.value
+      required_documents: requiredDocuments.value,
     })
 
     router.push('/admin/dashboard') // або туди, де у тебе список викликів
