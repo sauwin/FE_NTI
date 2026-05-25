@@ -93,6 +93,10 @@ export function exportUsers(params: Record<string, unknown>) {
   return api.get('/admin/export/users', { params, responseType: 'blob' })
 }
 
+export function exportNotifications(params: Record<string, unknown>) {
+  return api.get('/admin/export/notifications', { params, responseType: 'blob' })
+}
+
 export function getNotificationHistory() {
   return api.get('/admin/notifications/history')
 }
