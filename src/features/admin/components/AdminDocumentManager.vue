@@ -184,9 +184,12 @@ onMounted(() => {
             <td colspan="4" class="px-5 py-6 text-slate-500 text-center">No documents found for the current filters.</td>
           </tr>
           <tr v-else v-for="document in documents" :key="document.id" class="border-t border-slate-800 hover:bg-slate-900/40">
-            <td class="px-5 py-4 font-medium text-slate-100">{{ document.file_name }}</td>
-            <td class="px-5 py-4 text-slate-400">{{ formatFileSize(document.file_size_bytes) }}</td>
-            <td class="px-5 py-4 text-slate-400">{{ new Date(document.created_at).toLocaleString() }}</td>
+            <td class="px-5 py-4">
+              <div class="font-medium text-slate-100">{{ document.file_name }}</div>
+              <div v-if="document.application_name" class="mt-0.5 text-xs text-slate-500">{{ document.application_name }}</div>
+            </td>
+            <td class="px-5 py-4 text-slate-400">{{ formatFileSize(document.file_size_bytes ?? 0) }}</td>
+            <td class="px-5 py-4 text-slate-400">{{ document.created_at ? new Date(document.created_at).toLocaleString() : '-' }}</td>
             <td class="px-5 py-4">
               <div class="flex flex-wrap gap-2">
                 <button
@@ -198,9 +201,9 @@ onMounted(() => {
                   Download
                 </button>
                 <button
-                  v-if="isPdf(document.mime_type)"
+                  v-if="document.mime_type && isPdf(document.mime_type)"
                   type="button"
-                  @click="previewFile(document.id, document.mime_type)"
+                  @click="previewFile(document.id, document.mime_type ?? '')"
                   :disabled="loading"
                   class="inline-flex items-center justify-center rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:bg-slate-800 disabled:opacity-50"
                 >

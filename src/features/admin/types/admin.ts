@@ -82,6 +82,7 @@ export interface DocumentItem {
   type?: string
   classification?: string
   application_id?: number
+  application_name?: string | null
   uploaded_by?: number
   created_at?: string
 }
