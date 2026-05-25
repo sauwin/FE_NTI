@@ -6,7 +6,7 @@ const props = defineProps<{
   filterCallId?: number | null
 }>()
 
-defineEmits(['clear-filter'])
+const emit = defineEmits(['clear-filter', 'view-detail'])
 
 interface Application {
   id: number
@@ -20,17 +20,22 @@ interface Application {
 }
 
 const ALL_STATUSES = [
-  { value: 'draft',              label: 'Draft',              color: 'text-slate-400' },
-  { value: 'submitted',          label: 'Submitted',          color: 'text-blue-400' },
-  { value: 'formally_verified',  label: 'Formally Verified',  color: 'text-yellow-400' },
-  { value: 'under_evaluation',   label: 'Under Evaluation',   color: 'text-indigo-400' },
-  { value: 'pending_revision',   label: 'Pending Revision',   color: 'text-purple-400' },
-  { value: 'approved',           label: 'Approved',           color: 'text-green-400' },
-  { value: 'rejected',           label: 'Rejected',           color: 'text-red-400' },
-  { value: 'onboarding',         label: 'Onboarding',         color: 'text-orange-400' },
-  { value: 'active',             label: 'Active',             color: 'text-emerald-400' },
-  { value: 'suspended',          label: 'Suspended',          color: 'text-rose-400' },
-  { value: 'closed',             label: 'Closed',             color: 'text-rose-600' },
+  { value: 'draft', label: 'Draft',  color: 'text-slate-400' },
+  { value: 'submitted', label: 'Submitted', color: 'text-blue-400' },
+  { value: 'formally_verified', label: 'Formally Verified', color: 'text-yellow-400' },
+  { value: 'under_evaluation', label: 'Under Evaluation', color: 'text-indigo-400' },
+  { value: 'pending_revision', label: 'Pending Revision', color: 'text-purple-400' },
+  { value: 'approved', label: 'Approved', color: 'text-green-400' },
+  { value: 'rejected', label: 'Rejected', color: 'text-red-400' },
+  { value: 'onboarding', label: 'Onboarding', color: 'text-orange-400' },
+  { value: 'active', label: 'Active', color: 'text-emerald-400' },
+  { value: 'suspended', label: 'Suspended', color: 'text-rose-400' },
+  { value: 'closed', label: 'Closed', color: 'text-rose-600' },
+]
+
+const PROGRAM_TYPES = [
+  { value: 'a', label: 'Program A' },
+  { value: 'b', label: 'Program B' }
 ]
 
 const applications = ref<Application[]>([])
@@ -39,6 +44,9 @@ const currentPage = ref(1)
 const totalPages = ref(1)
 const totalItems = ref(0)
 const searchQuery = ref('')
+const filterProgramType = ref('')
+const filterStatus = ref('')
+
 const changingStatusId = ref<number | null>(null)
 
 async function loadApplications() {
@@ -47,6 +55,8 @@ async function loadApplications() {
     const params: any = { page: currentPage.value }
     if (props.filterCallId) params.call_id = props.filterCallId
     if (searchQuery.value.trim()) params.search = searchQuery.value.trim()
+    if (filterProgramType.value) params.program_type = filterProgramType.value
+    if (filterStatus.value) params.status = filterStatus.value
 
     const res = await api.get('/admin/applications', { params })
 
@@ -72,12 +82,16 @@ function handleSearch() {
   loadApplications()
 }
 
+function handleFilterChange() {
+  currentPage.value = 1
+  loadApplications()
+}
+
 function changePage(page: number) {
   if (page < 1 || page > totalPages.value) return
   currentPage.value = page
   loadApplications()
 }
-
 
 async function changeStatus(id: number, newStatus: string) {
   changingStatusId.value = id
@@ -86,17 +100,24 @@ async function changeStatus(id: number, newStatus: string) {
     const app = applications.value.find(a => a.id === id)
     if (app) app.status = newStatus
   } catch {
-    alert('Chyba pri zmene statusu')
+    alert('Error while changing status')
   } finally {
     changingStatusId.value = null
   }
 }
 
+function viewDetail(id: number) {
+  emit('view-detail', id)
+}
+
 async function downloadExport(format: 'csv' | 'xlsx' = 'xlsx') {
   try {
     const params: any = { format }
-    if (searchQuery.value) params.search = searchQuery.value
+    
+    if (searchQuery.value && searchQuery.value.trim() !== '') params.search = searchQuery.value.trim()
     if (props.filterCallId) params.call_id = props.filterCallId
+    if (filterProgramType.value) params.program_type = filterProgramType.value
+    if (filterStatus.value) params.status = filterStatus.value
 
     const response = await api.get('/admin/export/applications', {
       params,
@@ -111,27 +132,28 @@ async function downloadExport(format: 'csv' | 'xlsx' = 'xlsx') {
     link.click()
     document.body.removeChild(link)
     window.URL.revokeObjectURL(url)
-  } catch {
-    alert('Nepodarilo sa stiahnuť export.')
+  } catch (error) {
+    console.error('Export error:', error)
+    alert('Failed to download export.')
   }
 }
 
 function statusColor(status: string): string {
   const map: Record<string, string> = {
-    draft:             'bg-slate-800 text-slate-400 border-slate-700',
-    submitted:         'bg-blue-900/40 text-blue-400 border-blue-800',
-    formal_check:      'bg-yellow-900/40 text-yellow-400 border-yellow-800',
+    draft: 'bg-slate-800 text-slate-400 border-slate-700',
+    submitted: 'bg-blue-900/40 text-blue-400 border-blue-800',
+    formal_check: 'bg-yellow-900/40 text-yellow-400 border-yellow-800',
     formally_verified: 'bg-yellow-900/40 text-yellow-400 border-yellow-800',
-    evaluation:        'bg-indigo-900/40 text-indigo-400 border-indigo-800',
-    under_evaluation:  'bg-indigo-900/40 text-indigo-400 border-indigo-800',
-    approved:          'bg-green-900/40 text-green-400 border-green-800',
-    active:            'bg-emerald-900/40 text-emerald-400 border-emerald-800',
-    rejected:          'bg-red-900/40 text-red-400 border-red-800',
-    needs_info:        'bg-purple-900/40 text-purple-400 border-purple-800',
-    pending_revision:  'bg-purple-900/40 text-purple-400 border-purple-800',
-    onboarding:        'bg-orange-900/40 text-orange-400 border-orange-800',
-    suspended:         'bg-rose-900/40 text-rose-400 border-rose-800',
-    closed:            'bg-rose-900/40 text-rose-600 border-rose-900',
+    evaluation: 'bg-indigo-900/40 text-indigo-400 border-indigo-800',
+    under_evaluation: 'bg-indigo-900/40 text-indigo-400 border-indigo-800',
+    approved: 'bg-green-900/40 text-green-400 border-green-800',
+    active: 'bg-emerald-900/40 text-emerald-400 border-emerald-800',
+    rejected: 'bg-red-900/40 text-red-400 border-red-800',
+    needs_info: 'bg-purple-900/40 text-purple-400 border-purple-800',
+    pending_revision: 'bg-purple-900/40 text-purple-400 border-purple-800',
+    onboarding: 'bg-orange-900/40 text-orange-400 border-orange-800',
+    suspended: 'bg-rose-900/40 text-rose-400 border-rose-800',
+    closed: 'bg-rose-900/40 text-rose-600 border-rose-900',
   }
   return map[status] ?? 'bg-slate-800 text-slate-400 border-slate-700'
 }
@@ -148,23 +170,17 @@ watch(() => props.filterCallId, () => {
 
 <template>
   <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-      <div>
-        <h3 class="text-xl font-bold text-white">Správa Prihlášok</h3>
-        <p v-if="filterCallId" class="text-sm text-blue-400 mt-1 flex items-center gap-2">
-          <span>Filtrované pre Výzvu ID: {{ filterCallId }}</span>
-          <button @click="$emit('clear-filter')" class="text-slate-500 hover:text-slate-300 underline text-xs cursor-pointer">Zrušiť filter</button>
-        </p>
-      </div>
-      <div class="flex items-center gap-3 w-full sm:w-auto">
-        <input
-          v-model="searchQuery"
-          @input="handleSearch"
-          placeholder="Hľadať podľa mena alebo emailu..."
-          class="w-full sm:w-64 bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none transition-all"
-        />
-        <div class="ml-4 flex-shrink-0 gap-2 flex">
+    <div class="flex flex-col gap-4 mb-6">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h3 class="text-xl font-bold text-white">Applications Management</h3>
+          <p v-if="filterCallId" class="text-sm text-blue-400 mt-1 flex items-center gap-2">
+            <span>Filtered for Call ID: {{ filterCallId }}</span>
+            <button @click="$emit('clear-filter')" class="text-slate-500 hover:text-slate-300 underline text-xs cursor-pointer">Clear filter</button>
+          </p>
+        </div>
+        
+        <div class="flex-shrink-0 gap-2 flex">
           <button @click="downloadExport('csv')" :disabled="loading" class="text-xs bg-green-900/40 hover:bg-green-900/60 px-3 py-1.5 rounded text-green-400 border border-green-800 transition-all font-mono">
             Export CSV
           </button>
@@ -173,20 +189,56 @@ watch(() => props.filterCallId, () => {
           </button>
         </div>
       </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-center w-full">
+        <div class="sm:col-span-2">
+          <input
+            v-model="searchQuery"
+            @input="handleSearch"
+            placeholder="Search by name or email..."
+            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none transition-all"
+          />
+        </div>
+
+        <div>
+          <select
+            v-model="filterProgramType"
+            @change="handleFilterChange"
+            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-300 focus:border-blue-600 outline-none transition-all cursor-pointer"
+          >
+            <option value="">All Programs</option>
+            <option v-for="type in PROGRAM_TYPES" :key="type.value" :value="type.value">
+              {{ type.label }}
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <select
+            v-model="filterStatus"
+            @change="handleFilterChange"
+            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-300 focus:border-blue-600 outline-none transition-all cursor-pointer"
+          >
+            <option value="">All Statuses</option>
+            <option v-for="s in ALL_STATUSES" :key="s.value" :value="s.value">
+              {{ s.label }}
+            </option>
+          </select>
+        </div>
+      </div>
     </div>
 
-    <!-- Table -->
-    <div v-if="loading" class="text-slate-500 animate-pulse py-4 font-mono text-sm">Načítavam dáta...</div>
+    <div v-if="loading" class="text-slate-500 animate-pulse py-4 font-mono text-sm">Loading data...</div>
 
     <div v-else class="overflow-x-auto">
       <table class="w-full text-left text-sm text-slate-300">
         <thead class="text-xs text-slate-400 uppercase bg-slate-900/50 font-mono">
           <tr>
             <th class="px-4 py-3 rounded-tl-lg">ID</th>
-            <th class="px-4 py-3">Uchádzač</th>
-            <th class="px-4 py-3">Program / Výzva</th>
+            <th class="px-4 py-3">Applicant</th>
+            <th class="px-4 py-3">Program / Call</th>
             <th class="px-4 py-3">Status</th>
-            <th class="px-4 py-3 rounded-tr-lg text-right">Akcie</th>
+            <th class="px-4 py-3 rounded-tr-lg text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -225,12 +277,13 @@ watch(() => props.filterCallId, () => {
 
             <td class="px-4 py-4 text-right whitespace-nowrap">
               <div class="flex items-center justify-end gap-2">
-                <!-- Detail button -->
-                <button class="text-sm bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded border border-slate-700 text-slate-300 transition cursor-pointer">
-                  Detail
+                <button 
+                  @click="viewDetail(app.id)"
+                  class="text-sm bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded border border-slate-700 text-slate-300 transition cursor-pointer"
+                >
+                  View
                 </button>
 
-                <!-- Status select inline -->
                 <select
                   :value="app.status"
                   @change="changeStatus(app.id, ($event.target as HTMLSelectElement).value)"
@@ -247,14 +300,13 @@ watch(() => props.filterCallId, () => {
 
           <tr v-if="applications.length === 0">
             <td colspan="5" class="px-4 py-10 text-center text-slate-500 italic text-sm">
-              Žiadne prihlášky neboli nájdené.
+              No applications found.
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Pagination -->
     <div v-if="totalPages > 1" class="mt-6 flex items-center justify-center gap-3">
       <button
         v-if="currentPage > 1"
