@@ -1,336 +1,300 @@
 <script setup lang="ts">
-  import { watch, ref, onMounted, computed } from 'vue'
-  import { useRouter, useRoute } from 'vue-router'
-  import { getTeams } from '@/features/student/api/teams'
-  import { useAuthStore } from '@/features/auth/stores/auth'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { getTeams } from '@/features/student/api/teams'
+import { useAuthStore } from '@/features/auth/stores/auth'
+import { 
+  getActiveCall, 
+  createApplication, 
+  uploadApplicationDocument 
+} from '@/features/applications/api/applications'
 
-  import { 
-    getActiveCall, 
-    createApplication, 
-    updateApplication, 
-    uploadApplicationDocument 
-  } from '@/features/applications/api/applications'
+const router = useRouter()
+const error = ref('')
+const loading = ref(false)
+const step = ref(1)
+const auth = useAuthStore()
+const callId = ref<number | null>(null)
 
-  const route = useRoute()
-  const router = useRouter()
-  const error = ref('')
-  const loading = ref(false)
-  const step = ref(1)
-  const auth = useAuthStore()
-  const callId = ref<number | null>(null)
+const myTeams = ref<any[]>([])            
+const selectedTeamId = ref<number | null>(null) 
+const loadingTeams = ref(false)
 
-  const editId = ref<number | null>(route.query.edit ? Number(route.query.edit) : null)
-  const isEditMode = computed(() => !!editId.value)
-  const DRAFT_KEY = 'draft_program_a'
+const category = ref('')
+const academicDeclaration = ref(false)
 
-  const myTeams = ref<any[]>([])            
-  const selectedTeamId = ref<number | null>(null) 
-  const loadingTeams = ref(false)
+interface RequiredDoc {
+  document_name: string
+  is_mandatory: boolean
+  max_size_mb: number
+}
+const requiredDocuments = ref<RequiredDoc[]>([])
+const files = ref<Record<string, File | null>>({})
 
-  const category = ref('')
-  const academicDeclaration = ref(false)
+const categories = [
+  'Software Development',
+  'AI & Data Technologies',
+  'Web Applications',
+  'Game Development',
+  'IoT & Embedded Systems',
+]
 
-  interface RequiredDoc {
-    document_name: string
-    is_mandatory: boolean
-    max_size_mb: number
+function docKey(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, '_')
+}
+
+function onFileChange(key: string, event: Event) {
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files[0]) {
+    files.value[key] = input.files[0]
   }
-  const requiredDocuments = ref<RequiredDoc[]>([])
-  const files = ref<Record<string, File | null>>({})
+}
 
-  const categories = [
-    'Software Development',
-    'AI & Data Technologies',
-    'Web Applications',
-    'Game Development',
-    'IoT & Embedded Systems',
-  ]
-
-  function docKey(name: string): string {
-    return name.toLowerCase().replace(/\s+/g, '_')
+async function fetchUserTeams() {
+  loadingTeams.value = true
+  try {
+    const res = await getTeams()
+    const currentUserId = auth.user?.id
+    
+    myTeams.value = res.data.filter((team: any) => {
+      const acceptedCount = team.members?.filter((m: any) => m.pivot?.status === 'accepted').length ?? 0
+      return team.leader_id === currentUserId && acceptedCount >= 3
+    })
+  } catch (e) {
+    console.error('Failed to load user teams', e)
+  } finally {
+    loadingTeams.value = false
   }
+}
 
-  async function fetchUserTeams() {
-    loadingTeams.value = true
-    try {
-      const res = await getTeams()
-      const currentUserId = auth.user?.id
-      
-      myTeams.value = res.data.filter((team: any) => {
-        const acceptedCount = team.members?.filter((m: any) => m.pivot?.status === 'accepted').length ?? 0
-        return team.leader_id === currentUserId && acceptedCount >= 3
-      })
-    } catch (e) {
-      console.error('Failed to load user teams', e)
-    } finally {
-      loadingTeams.value = false
-    }
-  }
-
-  onMounted(async () => {
-    if (!auth.isLoggedIn) { router.push('/auth/login'); return }
-
-    await fetchUserTeams()
-
-    try {
-      const res = await getActiveCall('a')
-      callId.value = res.data.id
-      const docs: RequiredDoc[] = res.data.required_documents ?? []
-      if (Array.isArray(docs) && docs.length > 0) {
-        requiredDocuments.value = docs
-        docs.forEach(doc => { files.value[docKey(doc.document_name)] = null })
-      } else {
-        error.value = 'Active call has no required documents configured.'
-      }
-    } catch {
-      error.value = 'No active call available'
-    }
-
-    const saved = localStorage.getItem(DRAFT_KEY)
-    if (saved) {
-      const draft = JSON.parse(saved)
-      selectedTeamId.value = draft.selectedTeamId ?? null
-      category.value = draft.category ?? ''
-      academicDeclaration.value = draft.academicDeclaration ?? false
-    }
-  })
-
-  watch([selectedTeamId, category, academicDeclaration], () => {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify({
-      selectedTeamId: selectedTeamId.value,
-      category: category.value,
-      academicDeclaration: academicDeclaration.value,
-    }))
-  })
-
-  function onFileChange(key: string, event: Event) {
-    const input = event.target as HTMLInputElement
-    if (input.files && input.files[0]) {
-      files.value[key] = input.files[0]
-    }
+onMounted(async () => {
+  if (!auth.isLoggedIn) {
+    router.push('/auth/login')
+    return
   }
 
-  function nextStep() {
-    error.value = ''
-    if (!selectedTeamId.value) { error.value = 'Please select a qualified team'; return }
-    if (!category.value) { error.value = 'Please select a category'; return }
-    if (!academicDeclaration.value) { error.value = 'You must confirm the academic declaration'; return }
-    step.value = 2
-  }
+  loading.value = true
+  
+  await fetchUserTeams()
 
-  async function submit(mode: 'draft' | 'final' = 'final') {
-    if (!callId.value) { error.value = 'No active call available'; return }
-    error.value = ''
-    loading.value = true
-
-    try {
-      let applicationId: number
-
-      const payload = {
-        applicant_type: 'team' as const,
-        program_type: 'a' as const,
-        team_id: selectedTeamId.value,
-        category: category.value,
-        submit_type: mode
-      }
-
-      if (isEditMode.value) {
-        await updateApplication(editId.value!, payload)
-        applicationId = editId.value!
-      } else {
-        const appRes = await createApplication(payload)
-        applicationId = appRes.data.application_id
-      }
-
-      for (const doc of requiredDocuments.value) {
-        const key = docKey(doc.document_name)
-        const file = files.value[key]
-        if (mode === 'final' && !file && doc.is_mandatory) {
-          error.value = `Missing required document: ${doc.document_name}`
-          loading.value = false
-          return
+  try {
+    const res = await getActiveCall('a')
+    callId.value = res.data.id
+    
+    const docs = res.data.required_documents ?? []
+    if (Array.isArray(docs) && docs.length > 0) {
+      requiredDocuments.value = docs.map((doc: any) => {
+        if (typeof doc === 'string') {
+          return {
+            document_name: doc.replace(/_/g, ' ').toUpperCase(),
+            is_mandatory: true,
+            max_size_mb: 10
+          }
         }
-        if (!file) continue
+        return doc
+      })
 
-        const formData = new FormData()
-        formData.append('file', file)
-        formData.append('type', key)
-        formData.append('classification', 'confidential')
-        formData.append('application_id', String(applicationId))
-
-        await uploadApplicationDocument(formData)
-      }
-
-      localStorage.removeItem(DRAFT_KEY)
-      
-      if (mode === 'draft') {
-        router.push('/dashboard')
-      } else {
-        step.value = 3
-      }
-    } catch (e: any) {
-      error.value = e?.response?.data?.message || 'Something went wrong.'
-    } finally {
-      loading.value = false
+      requiredDocuments.value.forEach(doc => { 
+        files.value[docKey(doc.document_name)] = null 
+      })
+    } else {
+      error.value = 'Active call has no required documents configured.'
     }
+  } catch (e) {
+    error.value = 'No active call available.'
+  } finally {
+    loading.value = false
   }
+})
+
+function nextStep() {
+  error.value = ''
+  if (!selectedTeamId.value) {
+    error.value = 'Please select a qualified team.'
+    return
+  }
+  if (!category.value) {
+    error.value = 'Please select a focus category.'
+    return
+  }
+  if (!academicDeclaration.value) {
+    error.value = 'You must confirm the academic status declaration.'
+    return
+  }
+  step.value = 2
+}
+
+async function submit(mode: 'draft' | 'final' = 'final') {
+  if (!callId.value) { error.value = 'No active call available'; return }
+  error.value = ''
+  loading.value = true
+
+  try {
+    const payload = {
+      applicant_type: 'team' as const,
+      program_type: 'a' as const,
+      team_id: selectedTeamId.value,
+      category: category.value,
+      submit_type: mode
+    }
+
+    const appRes = await createApplication(payload)
+    const applicationId = appRes.data.application_id
+
+    for (const doc of requiredDocuments.value) {
+      const key = docKey(doc.document_name)
+      const file = files.value[key]
+
+      if (mode === 'final' && !file && doc.is_mandatory) {
+        error.value = `Missing required document: ${doc.document_name}`
+        loading.value = false
+        return
+      }
+
+      if (!file) continue
+
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('type', key)
+      formData.append('classification', 'confidential')
+      formData.append('application_id', String(applicationId))
+
+      await uploadApplicationDocument(formData)
+    }
+
+    if (mode === 'draft') {
+      router.push('/dashboard')
+    } else {
+      step.value = 3
+    }
+  } catch (e: any) {
+    error.value = e?.response?.data?.message || 'Something went wrong.'
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
-  <div class="flex-center-page">
-    <div class="w-full max-w-xl">
-
-      <div class="mb-8 text-center">
-        <div class="inline-block text-xs font-semibold tracking-widest uppercase text-blue-400 bg-blue-600/10 border border-blue-900 px-4 py-1.5 rounded-full mb-4">
-          Program A
-        </div>
-        <h1 class="font-bold text-4xl text-white">Submit Application</h1>
-        <p class="text-gray-400 mt-2 text-sm">Grant incubation program</p>
+  <div class="flex flex-col justify-center items-center min-h-screen py-10 px-4 bg-slate-950 text-gray-300">
+    <div class="w-full max-w-xl bg-slate-900/40 p-8 border border-slate-900 rounded-2xl relative backdrop-blur-md">
+      
+      <div v-if="loading && step === 1 && myTeams.length === 0" class="text-center py-10 text-sm text-slate-400">
+        Loading program parameters...
       </div>
 
-      <div class="flex items-center mb-8">
-        <div class="flex-center">
-          <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
-            step >= 1 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">1</div>
-          <span class="text-xs mt-1.5" :class="step >= 1 ? 'text-blue-400' : 'text-gray-600'">Info</span>
+      <div v-else>
+        <div class="mb-8">
+          <span class="text-[10px] uppercase font-bold tracking-wider text-blue-400 block mb-1">New Application</span>
+          <h2 class="text-2xl font-bold text-white">Program A: Incubation</h2>
+          <p class="text-xs text-slate-500 mt-1">Step {{ step }} of 2: Team setup & verification</p>
         </div>
-        <div class="flex-1 h-px mx-2 mb-4" :class="step >= 2 ? 'bg-blue-600' : 'bg-blue-900'"></div>
-        <div class="flex-center">
-          <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
-            step >= 2 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">2</div>
-          <span class="text-xs mt-1.5" :class="step >= 2 ? 'text-blue-400' : 'text-gray-600'">Documents</span>
+
+        <div class="flex items-center mb-8" v-if="step < 3">
+          <div class="flex flex-col items-center cursor-pointer" @click="step = 1">
+            <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border transition',
+              step >= 1 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">1</div>
+            <span class="text-[10px] mt-1.5 font-medium" :class="step >= 1 ? 'text-blue-400' : 'text-gray-600'">Team Info</span>
+          </div>
+          <div class="flex-1 h-px mx-4 mb-4 transition-colors duration-300" :class="step >= 2 ? 'bg-blue-600' : 'bg-blue-900'"></div>
+          <div class="flex flex-col items-center">
+            <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border transition',
+              step >= 2 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">2</div>
+            <span class="text-[10px] mt-1.5 font-medium" :class="step >= 2 ? 'text-blue-400' : 'text-gray-600'">Documents</span>
+          </div>
         </div>
-        <div class="flex-1 h-px mx-2 mb-4" :class="step >= 3 ? 'bg-blue-600' : 'bg-blue-900'"></div>
-        <div class="flex-center">
-          <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border',
-            step >= 3 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">3</div>
-          <span class="text-xs mt-1.5" :class="step >= 3 ? 'text-blue-400' : 'text-gray-600'">Final</span>
-        </div>
-      </div>
 
-      <div v-if="step === 3" class="text-center py-12">
-        <div class="text-5xl mb-4">✓</div>
-        <h2 class="text-2xl font-bold text-white mb-2">Application Submitted</h2>
-        <p class="text-gray-400 text-sm mb-6">Your application is under review. We'll notify you by email.</p>
-        <button @click="router.push('/dashboard')"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-8 h-10 rounded-md text-sm cursor-pointer">
-          Go to Dashboard
-        </button>
-      </div>
+        <p v-if="error" class="text-red-400 text-sm mb-4 bg-red-950/60 p-3 rounded-xl border border-red-900/50">{{ error }}</p>
 
-      <form v-else-if="step === 1" class="flex-col-gap" @submit.prevent="nextStep">
-        <p v-if="error" class="text-error-sm">{{ error }}</p>
-
-        <div>
-          <label class="label">Select Your Team <span class="text-error">*</span></label>
-          <div v-if="loadingTeams" class="text-xs text-slate-500 mt-1">Loading your teams...</div>
+        <form @submit.prevent="submit('final')" class="space-y-5">
           
-          <select 
-            v-else
-            v-model="selectedTeamId"
-            class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white focus:outline-none focus:border-blue-500"
-          >
-            <option :value="null" disabled class="bg-dark">Choose a team ready for Program A</option>
-            <option v-for="team in myTeams" :key="team.id" :value="team.id" class="bg-dark">
-              {{ team.name }} ({{ team.members?.length ?? 0 }} members)
-            </option>
-          </select>
-          
-          <p v-if="myTeams.length === 0 && !loadingTeams" class="text-[11px] text-amber-500/90 mt-1.5">
-            ⚠️ You don't have any teams where you are the leader AND that have at least 3 accepted members. 
-            Go to "My Teams" to manage your team setup first.
-          </p>
-        </div>
+          <template v-if="step === 1">
+            <div>
+              <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">Select Your Team *</label>
+              <select v-model="selectedTeamId" class="w-full bg-slate-950 border border-slate-800 h-11 px-3 rounded-lg text-white focus:border-blue-600 transition outline-none text-sm cursor-pointer">
+                <option value="" disabled selected>Choose a team...</option>
+                <option v-for="team in myTeams" :key="team.id" :value="team.id">
+                  {{ team.name }}
+                </option>
+              </select>
+              <p v-if="myTeams.length === 0 && !loadingTeams" class="text-[11px] text-amber-500 mt-1.5 leading-normal">
+                ⚠️ No eligible teams found. You must be the team leader, and at least 3 members must have already accepted your invitation.
+              </p>
+            </div>
 
-        <div>
-          <label class="label">Category <span class="text-error">*</span></label>
-          <select v-model="category"
-            class="bg-blue-600/10 border border-blue-900 rounded-md mt-1 w-full h-9 px-3 text-white focus:outline-none focus:border-blue-500">
-            <option value="" disabled class="bg-dark">Select a category</option>
-            <option v-for="cat in categories" :key="cat" :value="cat" class="bg-dark">{{ cat }}</option>
-          </select>
-        </div>
+            <div>
+              <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">Focus Category *</label>
+              <select v-model="category" class="w-full bg-slate-950 border border-slate-800 h-11 px-3 rounded-lg text-white focus:border-blue-600 transition outline-none text-sm cursor-pointer">
+                <option value="" disabled selected>Select category...</option>
+                <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+              </select>
+            </div>
 
-        <div class="bg-blue-600/10 border border-blue-900 rounded-md p-4">
-          <label class="flex items-start gap-3 cursor-pointer">
-            <input v-model="academicDeclaration" type="checkbox" class="mt-0.5 accent-blue-500" />
-            <span class="text-sm text-gray-300">
-              I declare that I have no carried-over courses and my average grade of core courses meets the required threshold. I understand this will be verified by the committee.
-            </span>
-          </label>
-        </div>
-
-        <button 
-          type="submit"
-          :disabled="myTeams.length === 0"
-          class="bg-blue-600 hover:bg-blue-700 disabled:opacity-40 cursor-pointer text-white w-full h-10 mt-2 rounded-md text-sm font-medium transition"
-        >
-          Continue to Documents →
-        </button>
-      </form>
-
-      <form v-else-if="step === 2" class="flex-col-gap" @submit.prevent="submit('final')">
-        <p v-if="error" class="text-error-sm">{{ error }}</p>
-
-        <div v-if="requiredDocuments.length === 0" class="text-gray-500 text-sm italic text-center py-4">
-          Loading required documents...
-        </div>
-
-        <template v-else>
-          <p class="text-gray-400 text-sm">
-            Upload all required documents before submitting.
-            <span class="text-blue-400">{{ requiredDocuments.filter(d => d.is_mandatory).length }} required</span>
-            <span v-if="requiredDocuments.filter(d => !d.is_mandatory).length > 0" class="text-gray-500">
-              , {{ requiredDocuments.filter(d => !d.is_mandatory).length }} optional
-            </span>
-          </p>
-
-          <div v-for="doc in requiredDocuments" :key="doc.document_name">
-            <label class="label">
-              {{ doc.document_name }}
-              <span v-if="doc.is_mandatory" class="text-error">*</span>
-              <span v-else class="text-gray-600 text-xs ml-1">(optional)</span>
-              <span class="text-gray-600 text-xs ml-1">· max {{ doc.max_size_mb }}MB</span>
-            </label>
-            <div class="relative">
-              <input
-                type="file"
-                accept=".pdf,.doc,.docx,.ppt,.pptx"
-                @change="onFileChange(docKey(doc.document_name), $event)"
-                class="hidden"
-                :id="`file-${docKey(doc.document_name)}`"
-              />
-              <label
-                :for="`file-${docKey(doc.document_name)}`"
-                class="flex items-center justify-between bg-blue-600/10 border border-blue-900 hover:border-blue-600 rounded-md px-3 h-9 cursor-pointer transition-colors"
-                :class="{ 'border-blue-500': files[docKey(doc.document_name)] }"
-              >
-                <span class="text-sm truncate pr-2" :class="files[docKey(doc.document_name)] ? 'text-white' : 'text-gray-600'">
-                  {{ files[docKey(doc.document_name)]?.name ?? 'Choose file...' }}
+            <div class="p-4 bg-blue-950/20 border border-blue-900/50 rounded-xl mt-2">
+              <label class="flex items-start gap-3 cursor-pointer select-none">
+                <input v-model="academicDeclaration" type="checkbox" class="mt-1 accent-blue-500 rounded" />
+                <span class="text-xs text-gray-400 leading-normal">
+                  I declare that I have no carried-over courses and my average grade of core courses meets the required threshold. I understand this will be verified by the committee. *
                 </span>
-                <span class="text-xs text-blue-400 shrink-0">Browse</span>
               </label>
             </div>
-          </div>
-        </template>
 
-        <div class="flex flex-wrap gap-3 mt-2">
-          <button type="button" @click="step = 1"
-            class="border border-blue-900 hover:border-blue-600 text-gray-400 hover:text-white w-full sm:w-1/4 h-10 rounded-md text-sm cursor-pointer transition-colors">
-            ← Back
-          </button>
-          
-          <button type="button" @click="submit('draft')" :disabled="loading || requiredDocuments.length === 0"
-            class="border border-blue-600 text-blue-400 hover:bg-blue-600/10 disabled:opacity-50 cursor-pointer flex-1 h-10 rounded-md text-sm font-medium transition-colors">
-            {{ loading ? 'Saving...' : 'Save Draft' }}
-          </button>
+            <div class="flex gap-3 pt-2">
+              <button type="button" @click="router.back()" class="w-1/3 border border-slate-800 text-slate-400 h-11 rounded-lg hover:text-white transition text-sm font-medium">Cancel</button>
+              <button type="button" @click="nextStep" class="flex-1 bg-blue-600 text-white h-11 rounded-lg font-medium hover:bg-blue-700 transition text-sm">
+                Continue to Documents →
+              </button>
+            </div>
+          </template>
 
-          <button type="submit" :disabled="loading || requiredDocuments.length === 0"
-            class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 cursor-pointer text-white flex-1 h-10 rounded-md text-sm font-medium transition-colors">
-            {{ loading ? 'Submitting...' : 'Submit Application' }}
-          </button>
-        </div>
-      </form>
+          <template v-if="step === 2">
+            <div class="space-y-4">
+              <div v-for="doc in requiredDocuments" :key="doc.document_name" class="border border-slate-950 p-4 rounded-xl bg-slate-950/60">
+                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                  {{ doc.document_name }} <span v-if="doc.is_mandatory" class="text-red-500">*</span>
+                </label>
+                
+                <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx" class="hidden" :id="`file-${docKey(doc.document_name)}`" @change="onFileChange(docKey(doc.document_name), $event)" />
+                
+                <label :for="`file-${docKey(doc.document_name)}`" class="flex items-center justify-between bg-blue-600/5 border border-blue-900/50 hover:border-blue-600 rounded-xl px-4 h-11 cursor-pointer transition-colors">
+                  <span class="text-sm truncate pr-2" :class="files[docKey(doc.document_name)] ? 'text-white' : 'text-gray-600'">
+                    {{ files[docKey(doc.document_name)]?.name ?? 'Choose file...' }}
+                  </span>
+                  <span class="text-xs text-blue-400 shrink-0">Browse</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-3 mt-2">
+              <button type="button" @click="step = 1" class="border border-blue-900 hover:border-blue-600 text-gray-400 hover:text-white w-full sm:w-1/4 h-10 rounded-md text-sm cursor-pointer transition-colors">
+                ← Back
+              </button>
+              
+              <button type="button" @click="submit('draft')" :disabled="loading || requiredDocuments.length === 0" class="border border-blue-600 text-blue-400 hover:bg-blue-600/10 disabled:opacity-50 cursor-pointer flex-1 h-10 rounded-md text-sm font-medium transition-colors">
+                {{ loading ? 'Saving...' : 'Save Draft' }}
+              </button>
+
+              <button type="submit" :disabled="loading || requiredDocuments.length === 0" class="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 cursor-pointer flex-1 h-10 rounded-md text-sm font-medium transition-colors">
+                {{ loading ? 'Submitting...' : 'Submit Final' }}
+              </button>
+            </div>
+          </template>
+
+          <template v-if="step === 3">
+            <div class="text-center py-6">
+              <div class="text-5xl mb-4">🎉</div>
+              <h2 class="text-2xl font-bold text-white mb-2">Application Successfully Submitted!</h2>
+              <p class="text-gray-400 text-sm mb-6 max-w-sm mx-auto leading-relaxed">
+                Your application for Program A Incubation has been locked and sent to evaluation managers.
+              </p>
+              <button type="button" @click="router.push('/dashboard')" class="bg-blue-600 hover:bg-blue-700 text-white px-6 h-10 rounded-lg text-sm font-medium transition-colors">
+                Go to Dashboard
+              </button>
+            </div>
+          </template>
+
+        </form>
+      </div>
 
     </div>
   </div>
