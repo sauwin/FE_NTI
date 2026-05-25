@@ -214,7 +214,6 @@ async function assignRole(userId: number, roleSlug: string) {
   }
 }
 
-// Функція скачування (експорту) з урахуванням усіх вибраних фільтрів
 async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
   loading.value = true
   message.value = ''

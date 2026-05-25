@@ -33,6 +33,7 @@ const actionOptions = [
   { value: 'delete', label: 'Delete Record' },
   { value: 'create', label: 'Create Record' },
   { value: 'export', label: 'Export Data' },
+  { value: 'bulk_notification', label: 'Bulk Notification' },
 ]
 
 // ─── Data fetching ─────────────────────────────────────────────────────────
@@ -270,6 +271,7 @@ const getBadgeColor = (action: string) => {
     create: 'bg-purple-950/50 text-purple-400 border-purple-900/50',
     unblock: 'bg-emerald-950/50 text-emerald-400 border-emerald-900/50',
     reset_password: 'bg-orange-950/50 text-orange-400 border-orange-900/50',
+    bulk_notification: 'bg-cyan-950/50 text-cyan-400 border-cyan-900/50',
   }
   return colors[action] || 'bg-slate-900/50 text-slate-400 border-slate-800'
 }
@@ -292,6 +294,7 @@ const getActionTitle = (log: any) => {
     delete: 'Delete',
     create: 'Create',
     reset_password: 'Reset Password',
+    bulk_notification: 'Bulk Notification',
   }
 
   const title = actionMap[baseAction] || baseAction
