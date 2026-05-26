@@ -7,13 +7,39 @@ export const useAuthStore = defineStore('auth', {
     }),
 
     getters: {
-        isLoggedIn: (state) => !!state.token,
-        role: (state) => state.user?.role_slug ?? null,
-        isStudent: (state) => state.user?.role_slug === 'student',
-        isCompany: (state) => state.user?.role_slug === 'company',
-        isAdmin: (state) => ['nti_admin', 'super_admin'].includes(state.user?.role_slug),
-        roleInOrg: (state) => state.user?.organization.role_in_org ?? null,
+    isLoggedIn: (state) => !!state.token,
+    role: (state) => state.user?.role_slug ?? null,
+    isStudent: (state) => state.user?.role_slug === 'student',
+    isCompany: (state) => state.user?.role_slug === 'company',
+    isAdmin: (state) => ['nti_admin', 'super_admin'].includes(state.user?.role_slug),
+    roleInOrg: (state) => state.user?.organization.role_in_org ?? null,
+
+    dashboardLabel: (state) => {
+        switch (state.user?.role_slug) {
+            case 'student':
+                return 'My Applications'
+
+            case 'mentor':
+                return 'My Mentorship'
+
+            case 'evaluator':
+                return 'My Evaluations'
+
+            case 'content_editor':
+                return 'My Editing'
+
+            case 'company':
+                return 'My Company'
+
+            case 'nti_admin':
+            case 'super_admin':
+                return 'Admin Panel'
+
+            default:
+                return 'Dashboard'
+        }
     },
+},
 
     actions: {
         login(token: string, user: object) {
