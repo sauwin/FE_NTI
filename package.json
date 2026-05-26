@@ -12,6 +12,9 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.3",
+    "@tiptap/core": "^3.23.6",
+    "@tiptap/starter-kit": "^3.23.6",
+    "@tiptap/vue-3": "^3.23.6",
     "axios": "^1.15.2",
     "docx": "^9.6.1",
     "jspdf": "^4.2.1",
