@@ -102,7 +102,6 @@ function quickCreateTeam() {
         <div class="border border-slate-800 bg-slate-900/40 rounded-2xl p-6 flex flex-col justify-between">
           <div>
             <div class="flex items-center gap-2 mb-4">
-              <span class="p-2 bg-blue-500/10 text-blue-400 rounded-xl text-md leading-none">💡</span>
               <h3 class="text-lg font-semibold text-white">Incubation Rules</h3>
             </div>
             <p class="text-xs text-slate-400 leading-relaxed space-y-2">
