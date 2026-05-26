@@ -8,6 +8,7 @@ import { programRoutes } from './routes/programs'
 import { applicationRoutes } from './routes/applications'
 import { profileRoutes } from './routes/profile'
 import { evaluationRoutes } from './routes/evaluations'
+import { articlesRoutes } from './routes/articles'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -16,6 +17,7 @@ const router = createRouter({
     publicRoutes,
     authRoutes,
     programRoutes,
+    articlesRoutes,
 
     ...applicationRoutes,
     ...profileRoutes,

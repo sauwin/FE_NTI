@@ -34,12 +34,6 @@ export interface ArticleApi {
   translations: ArticleTranslation[]
 }
 
-export interface ArticleForm {
-  slug: string
-  is_published: boolean
-  translations: Partial<ArticleTranslation>[]
-}
-
 export interface PaginationMeta {
   current_page: number
   last_page: number
@@ -54,4 +48,9 @@ export interface ArticlesResponse {
 
 export interface ApiResponse<T> {
   data: T
+}
+
+export type ArticleForm = {
+  slug: string
+  translations: Record<ArticleLang, ArticleTranslation & { id?: number }>
 }

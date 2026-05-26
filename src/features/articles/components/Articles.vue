@@ -20,7 +20,7 @@ async function fetchData() {
   }
 }
 
-async function deleteArticle(id: Number) {
+async function deleteArticle(id: string | number) {
   try {
     await deleteArticleApi(id)
     articlesObj.value = articlesObj.value?.filter(article => article.id != id) ?? []
@@ -38,6 +38,7 @@ onMounted(() => {
 
     <!-- Add new article -->
     <button
+      v-show="store.isAdmin"
       @click="router.push('/article/create')"
       class="border-2 border-dashed border-slate-700 hover:border-blue-700 bg-slate-900/30 rounded-2xl flex flex-col items-center justify-center gap-4 cursor-pointer transition group min-h-80">
       <div class="text-5xl text-slate-600 group-hover:text-blue-600 transition select-none font-thin">+</div>
@@ -46,7 +47,7 @@ onMounted(() => {
 
     <!-- Article cards -->
     <div
-      v-for="article in articlesObj?.slice(0, 2)" :key="article.id"
+      v-for="article in articlesObj?.slice(0, store.isAdmin ? 2 : 3)" :key="article.id"
       class="card-glowing flex flex-col overflow-hidden transition">
 
       <!-- Image — taller -->
