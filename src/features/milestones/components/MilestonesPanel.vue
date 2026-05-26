@@ -77,7 +77,7 @@ async function uploadDoc(id: number, event: Event) {
   if (!file) return
   uploadingId.value = id
   const fd = new FormData()
-  fd.append('document', file)
+  fd.append('file', file)
   try {
     await uploadMilestoneDocument(id, fd)
     success.value = 'Document uploaded.'

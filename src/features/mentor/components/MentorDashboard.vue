@@ -89,32 +89,51 @@ onMounted(() => {
 <template>
   <div class="p-6 bg-slate-950 min-h-screen text-slate-100">
     <div class="mb-8">
-      <div class="flex items-center justify-between mb-2">
+      <div class="mb-5">
         <h2 class="text-3xl font-bold text-white">Mentor Administration</h2>
+        <p class="text-sm text-slate-500 mt-2">Manage incoming mentorship requests, assigned projects, and consultation logs.</p>
       </div>
 
-      <div class="flex flex-wrap gap-2 border-b border-slate-800">
+      <div class="flex flex-wrap gap-2 border-b border-slate-800 pb-2">
         <button
           @click="activeTab = 'overview'"
-          :class="[activeTab === 'overview' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']"
+          :class="[
+            activeTab === 'overview'
+              ? 'bg-blue-600/15 border-blue-500 text-blue-400'
+              : 'text-slate-500 hover:text-slate-300 border-transparent hover:border-slate-700',
+            'px-4 py-2 text-sm font-medium transition rounded-xl border'
+          ]"
         >
           Quick Actions
         </button>
+        
         <button
           @click="activeTab = 'requests'; fetchMentorships()"
-          :class="[activeTab === 'requests' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']"
+          :class="[
+            activeTab === 'requests'
+              ? 'bg-blue-600/15 border-blue-500 text-blue-400'
+              : 'text-slate-500 hover:text-slate-300 border-transparent hover:border-slate-700',
+            'px-4 py-2 text-sm font-medium transition rounded-xl border'
+          ]"
         >
           New Requests ({{ mentorshipRequests.length }})
         </button>
+        
         <button
           @click="activeTab = 'mentorships'; fetchMentorships()"
-          :class="[activeTab === 'mentorships' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']"
+          :class="[
+            activeTab === 'mentorships'
+              ? 'bg-blue-600/15 border-blue-500 text-blue-400'
+              : 'text-slate-500 hover:text-slate-300 border-transparent hover:border-slate-700',
+            'px-4 py-2 text-sm font-medium transition rounded-xl border'
+          ]"
         >
           My Projects ({{ activeMentorships.length }})
         </button>
+        
         <button
           v-if="activeTab === 'project-detail'"
-          class="border-b-2 border-emerald-500 text-emerald-400 px-4 py-2 text-sm font-medium"
+          class="bg-emerald-600/15 border-emerald-500 text-emerald-400 px-4 py-2 text-sm font-medium rounded-xl border"
         >
           Application details: {{ selectedMentorship?.application?.team?.name || 'Details' }}
         </button>
