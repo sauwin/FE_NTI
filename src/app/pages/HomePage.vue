@@ -3,12 +3,14 @@
   import PageSection from '@/shared/ui/PageSection.vue'
   import Articles from '@/features/articles/components/Articles.vue'
   import CallToAction from '@/shared/components/CallToAction.vue'
-  import { ref, computed, onMounted } from 'vue'
+  import { ref, computed, onMounted, onUnmounted } from 'vue'
   import { getActiveCalls } from '@/shared/api/calls'
   import type { ActiveCall } from '@/shared/types/calls'
 
   const activeCalls = ref<ActiveCall[]>([])
   const loadingCalls = ref(true)
+  const now = ref(Date.now())
+  let timerInterval: ReturnType<typeof setInterval> | null = null
 
   onMounted(async () => {
     try {
@@ -19,6 +21,14 @@
     } finally {
       loadingCalls.value = false
     }
+
+    timerInterval = setInterval(() => {
+      now.value = Date.now()
+    }, 60000)
+  })
+
+  onUnmounted(() => {
+    if (timerInterval) clearInterval(timerInterval)
   })
 
   function programLabel(code?: string) {
@@ -31,13 +41,10 @@
     switch (status) {
       case 'open':
         return 'bg-green-500/15 text-green-400 border-green-800'
-
       case 'closed':
         return 'bg-red-500/15 text-red-400 border-red-800'
-
       case 'draft':
         return 'bg-yellow-500/15 text-yellow-400 border-yellow-800'
-
       default:
         return 'bg-slate-500/15 text-slate-400 border-slate-700'
     }
@@ -51,6 +58,24 @@
       month: 'short',
       year: 'numeric',
     })
+  }
+
+  function getUrgencyLabel(deadlineStr?: string | null): { text: string; isUrgent: boolean } | null {
+    if (!deadlineStr) return null
+    
+    const distance = new Date(deadlineStr).getTime() - now.value
+    if (distance < 0) return { text: 'Ended', isUrgent: false }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24))
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+
+    if (days > 7) {
+      return { text: `${days} days left`, isUrgent: false }
+    } else if (days > 0) {
+      return { text: `${days}d ${hours}h left`, isUrgent: true }
+    } else {
+      return { text: `Closes in ${hours}h!`, isUrgent: true }
+    }
   }
 
   const sortedCalls = computed(() => {
@@ -69,10 +94,10 @@
     <div class="hidden md:block bg-blue-950 absolute rounded-full h-120 w-120 -z-10 -right-30 -top-10"></div>
 
     <PageHero
-      badge="Nitrianský technologický inkubátor"
+      badge="Nitriansky technologický inkubátor"
       title="Zanechaj svoju stopu v"
       highlight="technologickej budúcnosti"
-      description="A prispej k rozvoju nitrianského regiónu"
+      description="A prispej k rozvoju nitrianskeho regiónu"
     >
       <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 w-full sm:w-auto">
         <router-link to="/programs/a" class="btn-primary text-center">
@@ -184,11 +209,26 @@
           class="card-glowing p-6 flex flex-col"
         >
           <div class="flex items-center justify-between gap-4 mb-5">
-            <div
-              class="inline-flex items-center px-3 py-1 rounded-full border text-xs font-bold tracking-wide uppercase"
-              :class="statusClass(call.status)"
-            >
-              {{ call.status }}
+            <div class="flex items-center gap-2">
+              <div
+                class="inline-flex items-center px-3 py-1 rounded-full border text-xs font-bold tracking-wide uppercase"
+                :class="statusClass(call.status)"
+              >
+                {{ call.status }}
+              </div>
+              
+              <!-- Новий реактивний бейдж терміновості виклику -->
+              <span 
+                v-if="getUrgencyLabel(call.deadline_at)"
+                :class="[
+                  'text-[11px] font-medium px-2 py-0.5 rounded',
+                  getUrgencyLabel(call.deadline_at)?.isUrgent 
+                    ? 'text-amber-400 bg-amber-500/10 border border-amber-500/20 animate-pulse' 
+                    : 'text-slate-400 bg-slate-800'
+                ]"
+              >
+                {{ getUrgencyLabel(call.deadline_at)?.text }}
+              </span>
             </div>
 
             <div class="text-xs text-slate-500 font-mono">
