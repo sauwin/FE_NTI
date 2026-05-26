@@ -8,7 +8,6 @@ import type { TaskWithCall } from '@/features/company/types/company'
 
 const router = useRouter()
 const auth = useAuthStore()
-
 const tasks = ref<TaskWithCall[]>([])
 const myTasks = ref<TaskWithCall[]>([])
 const loading = ref<boolean>(true)
@@ -16,7 +15,6 @@ const loading = ref<boolean>(true)
 onMounted(async () => {
   try {
     if (auth.isCompany) {
-      // Компанія бачить свої створені таски TaskController@index
       const res = await getCompanyTasks()
       myTasks.value = res.data
     } else {
@@ -34,12 +32,10 @@ const goToCreateTask = (): void => {
   router.push('/programs/b/create-task')
 }
 
-// Перехід на окрему сторінку деталей завдання за його ID
 const goToTaskDetails = (taskId: number): void => {
   router.push(`/programs/b/tasks/${taskId}`)
 }
 
-// Форматування дати
 const formatDate = (dateString: string | null | undefined): string => {
   if (!dateString) return 'No deadline'
   return new Date(dateString).toLocaleDateString('uk-UA', {
@@ -49,7 +45,6 @@ const formatDate = (dateString: string | null | undefined): string => {
   })
 }
 
-// Кольори статусів
 const getStatusColor = (status: string) => {
   switch(status) {
     case 'draft': return 'bg-gray-800 text-gray-300 border-gray-600'
