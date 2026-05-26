@@ -95,13 +95,63 @@ onMounted(() => {
 <template>
   <div class="p-6 bg-slate-950 min-h-screen text-slate-100">
     <div class="mb-8">
-      <h2 class="text-3xl font-bold text-white mb-4">Company Administration</h2>
+      <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 mb-5">
+        <div>
+          <h2 class="text-3xl font-bold text-white">Company Administration</h2>
+          <p class="text-sm text-slate-500 mt-2">
+            Manage company profile, track project tasks, and moderate organization members.
+          </p>
+        </div>
+      </div>
       
-      <div class="flex flex-wrap gap-2 border-b border-slate-800">
-        <button @click="handleTabChange('company-info')" :class="[activeTab === 'company-info' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Company Info</button>
-        <button @click="handleTabChange('project-tasks')" :class="[activeTab === 'project-tasks' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Project Tasks</button>
-        <button @click="handleTabChange('approvals')" :class="[activeTab === 'approvals' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Manage Pending Approvals</button>
-        <button @click="handleTabChange('members')" :class="[activeTab === 'members' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-400', 'px-4 py-2 text-sm font-medium transition']">Manage Company Members</button>
+      <div class="flex flex-wrap gap-2 border-b border-slate-800 pb-2">
+        <button 
+          @click="handleTabChange('company-info')" 
+          :class="[
+            activeTab === 'company-info' 
+              ? 'bg-blue-600/15 border-blue-500 text-blue-400' 
+              : 'text-slate-500 hover:text-slate-300 border-transparent hover:border-slate-700', 
+            'px-4 py-2 text-sm font-medium transition rounded-xl border'
+          ]"
+        >
+          Company Info
+        </button>
+        
+        <button 
+          @click="handleTabChange('project-tasks')" 
+          :class="[
+            activeTab === 'project-tasks' 
+              ? 'bg-blue-600/15 border-blue-500 text-blue-400' 
+              : 'text-slate-500 hover:text-slate-300 border-transparent hover:border-slate-700', 
+            'px-4 py-2 text-sm font-medium transition rounded-xl border'
+          ]"
+        >
+          Project Tasks
+        </button>
+        
+        <button 
+          @click="handleTabChange('approvals')" 
+          :class="[
+            activeTab === 'approvals' 
+              ? 'bg-blue-600/15 border-blue-500 text-blue-400' 
+              : 'text-slate-500 hover:text-slate-300 border-transparent hover:border-slate-700', 
+            'px-4 py-2 text-sm font-medium transition rounded-xl border'
+          ]"
+        >
+          Manage Pending Approvals
+        </button>
+        
+        <button 
+          @click="handleTabChange('members')" 
+          :class="[
+            activeTab === 'members' 
+              ? 'bg-blue-600/15 border-blue-500 text-blue-400' 
+              : 'text-slate-500 hover:text-slate-300 border-transparent hover:border-slate-700', 
+            'px-4 py-2 text-sm font-medium transition rounded-xl border'
+          ]"
+        >
+          Manage Company Members
+        </button>
       </div>
     </div>
 

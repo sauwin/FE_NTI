@@ -1,105 +1,135 @@
 <script setup lang="ts">
-  import { ref } from 'vue'
-  import StudentInvitations from '@/features/student/components/StudentInvitations.vue'
-  import StudentAplications from '@/features/student/components/StudentAplications.vue'
-  import TeamsList from './TeamsList.vue'
-  import { useAuthStore } from '@/features/auth/stores/auth'
+import { ref, defineAsyncComponent } from 'vue'
+import { useAuthStore } from '@/features/auth/stores/auth'
 
-  const auth = useAuthStore()
+const StudentInvitations = defineAsyncComponent(() => import('@/features/student/components/StudentInvitations.vue'))
+const StudentAplications = defineAsyncComponent(() => import('@/features/student/components/StudentAplications.vue'))
+const TeamsList = defineAsyncComponent(() => import('./TeamsList.vue'))
 
-  const props = defineProps<{
-    userRole?: string
-  }>()
+const auth = useAuthStore()
 
-  const activeTab = ref('overview')
-  const currentUserId = ref(auth.user.id) 
+const props = defineProps<{
+  userRole?: string
+}>()
 
-  const teamsListRef = ref<InstanceType<typeof TeamsList> | null>(null)
+const activeTab = ref('overview')
+const currentUserId = ref(auth.user.id) 
 
-  function quickCreateTeam() {
-    activeTab.value = 'teams'
-    setTimeout(() => {
-      teamsListRef.value?.openForm()
-    }, 50)
-  }
+const teamsListRef = ref<InstanceType<typeof TeamsList> | null>(null)
+
+function quickCreateTeam() {
+  activeTab.value = 'teams'
+  setTimeout(() => {
+    teamsListRef.value?.openForm()
+  }, 50)
+}
 </script>
 
 <template>
   <div class="p-6 bg-slate-950 min-h-screen text-slate-100">
     <div class="mb-8">
-      <div class="flex items-center justify-between mb-2">
-        <h2 class="text-3xl font-bold text-white">Student Administration</h2>
-        <span class="text-xs bg-blue-950 text-blue-400 border border-blue-900 px-3 py-1 rounded-full capitalize">
-          Role: {{ userRole ?? 'Student' }}
-        </span>
-      </div>
-
-      <div class="flex flex-wrap gap-2 border-b border-slate-800">
-        <button
-          v-for="tab in [
-            { id: 'overview', label: 'Overview' },
-            { id: 'invitations', label: 'Team Invitations' },
-            { id: 'teams', label: 'Manage Teams' },
-            { id: 'aplications', label: 'Manage Applications' },
-          ]"
-          :key="tab.id"
-          @click="activeTab = tab.id"
-          :class="[
-            activeTab === tab.id
-              ? 'border-b-2 border-blue-500 text-blue-400'
-              : 'text-slate-500 hover:text-slate-400',
-            'px-4 py-2 text-sm font-medium transition'
-          ]"
-        >{{ tab.label }}</button>
-      </div>
-    </div>
-
-    <div v-show="activeTab === 'overview'" class="space-y-6">
-      <div>
-        <div class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Quick actions</div>
-        <div class="flex gap-4 flex-wrap">
-          <button 
-            @click="quickCreateTeam"
-            class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition shadow-lg shadow-blue-600/10"
-          >
-            Create Team
-          </button>
-          <router-link to="/programs/a/upload"
-                       class="border border-slate-800 bg-slate-900/50 hover:border-slate-700 text-slate-200 px-6 py-3 rounded-lg text-sm font-medium transition">
-            Apply to Program A
-          </router-link>
-          <router-link to="/programs/b/upload"
-                       class="border border-slate-800 bg-slate-900/50 hover:border-slate-700 text-slate-200 px-6 py-3 rounded-lg text-sm font-medium transition">
-            Apply to Program B
-          </router-link>
-          <router-link to="/profile"
-                       class="border border-slate-800 text-slate-400 hover:text-white px-6 py-3 rounded-lg text-sm font-medium transition">
-            My Profile
-          </router-link>
-        </div>
-      </div>
-
-      <div class="bg-gradient-to-r from-slate-900 to-slate-900/40 border border-slate-800 rounded-xl p-5 flex items-start gap-4">
-        <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400 text-xl">💡</div>
-        <div class="space-y-1">
-          <h4 class="text-white font-medium text-sm">Incubation Program Rules</h4>
-          <p class="text-xs text-slate-400 max-w-2xl leading-relaxed">
-            Remember that Program A require a minimum team size of <strong>3 members</strong>. 
-            You can create a team right now, invite colleagues via email, and draft your core documentation.
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
+        <div>
+          <h2 class="text-3xl font-bold text-white">Student Administration</h2>
+          <p class="text-sm text-slate-500 mt-2">
+            Manage your incubator applications, collaborate with team members, and track your program progress.
           </p>
         </div>
       </div>
+
+      <div class="flex flex-wrap gap-2 border-b border-slate-800 pb-2">
+        <button v-for="tab in [
+          { id: 'overview', label: 'Overview' },
+          { id: 'invitations', label: 'Team Invitations' },
+          { id: 'teams', label: 'Manage Teams' },
+          { id: 'aplications', label: 'Manage Applications' },
+        ]"
+        :key="tab.id"
+        @click="activeTab = tab.id"
+        :class="[
+          activeTab === tab.id
+            ? 'bg-blue-600/15 border-blue-500 text-blue-400'
+            : 'text-slate-500 hover:text-slate-300 border-transparent hover:border-slate-700',
+          'px-4 py-2 text-sm font-medium transition rounded-xl border'
+        ]">
+          {{ tab.label }}
+        </button>
+      </div>
     </div>
 
-    <div v-show="activeTab === 'invitations'">
+    <div v-if="activeTab === 'overview'" class="space-y-6">
+      
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        
+        <div class="xl:col-span-2 border border-slate-800 bg-slate-900/40 rounded-2xl p-6">
+          <div class="mb-6">
+            <h3 class="text-lg font-semibold text-white">Quick Actions</h3>
+            <p class="text-sm text-slate-500 mt-1">Accelerate your workflow by interacting with platform configurations directly.</p>
+          </div>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button 
+              @click="quickCreateTeam"
+              class="flex flex-col justify-between text-left p-4 rounded-xl border border-blue-900/40 bg-blue-950/20 hover:border-blue-500 transition-all group"
+            >
+              <div class="text-sm font-semibold text-blue-400 mb-1 group-hover:text-blue-300 transition-colors">Create Team</div>
+              <div class="text-xs text-slate-400">Initialize a new workgroup and start inviting core team members via corporate email.</div>
+            </button>
+
+            <router-link to="/programs/a/upload"
+              class="flex flex-col justify-between text-left p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 transition-all"
+            >
+              <div class="text-sm font-semibold text-white mb-1">Apply to Program A</div>
+              <div class="text-xs text-slate-400">Submit your commercial project prototype, build roadmap metrics, and fill system forms.</div>
+            </router-link>
+
+            <router-link to="/programs/b/upload"
+              class="flex flex-col justify-between text-left p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 transition-all"
+            >
+              <div class="text-sm font-semibold text-white mb-1">Apply to Program B</div>
+              <div class="text-xs text-slate-400">Upload system documents, wireframes, code specifications, and product presentations.</div>
+            </router-link>
+
+            <router-link to="/profile"
+              class="flex flex-col justify-between text-left p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 transition-all"
+            >
+              <div class="text-sm font-semibold text-slate-400 mb-1">My Profile</div>
+              <div class="text-xs text-slate-500">Edit account metrics, change contact variables, or configure security parameters.</div>
+            </router-link>
+          </div>
+        </div>
+
+        <div class="border border-slate-800 bg-slate-900/40 rounded-2xl p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 mb-4">
+              <span class="p-2 bg-blue-500/10 text-blue-400 rounded-xl text-md leading-none">💡</span>
+              <h3 class="text-lg font-semibold text-white">Incubation Rules</h3>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed space-y-2">
+              Please strictly notice that Program A requires a minimum team size of 
+              <strong class="text-blue-400 font-medium">3 verified members</strong> before you can legally push an application state to pending validation.
+            </p>
+            <div class="mt-4 p-3 bg-slate-950/60 border border-slate-800/80 rounded-xl text-xs text-slate-500 leading-relaxed">
+              You can spin up a team container right now, trigger instant system invites, and comfortably draft your platform files.
+            </div>
+          </div>
+          <div class="w-full h-1 rounded-full bg-slate-800 overflow-hidden mt-6">
+            <div class="w-1/3 h-full bg-blue-600 rounded-full"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div v-if="activeTab === 'invitations'">
       <StudentInvitations />
     </div>
 
-    <div v-show="activeTab === 'teams'">
+    <div v-if="activeTab === 'teams'">
       <TeamsList ref="teamsListRef" :current-user-id="currentUserId" />
     </div>
 
-    <div v-show="activeTab === 'aplications'">
+    <div v-if="activeTab === 'aplications'">
       <StudentAplications />
     </div>
   </div>

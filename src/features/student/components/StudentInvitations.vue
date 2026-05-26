@@ -34,59 +34,72 @@ onMounted(() => { fetchInvitations() })
 </script>
 
 <template>
-  <div class="mt-6">
-    <div class="mb-4">
-      <h3 class="text-white font-semibold text-lg">Team Invitations</h3>
-      <p class="text-xs text-slate-500">Here you can accept or decline requests to join other teams.</p>
+  <div class="space-y-6">
+    <div>
+      <h3 class="text-xl font-bold text-white">Team Invitations</h3>
+      <p class="text-sm text-slate-500 mt-1">Here you can accept or decline requests to join other incubator teams.</p>
     </div>
 
-    <div v-if="loading" class="text-slate-500 text-sm">Loading invitations…</div>
+    <div v-if="loading" class="text-slate-500 animate-pulse py-4 font-mono text-sm">
+      Loading invitations containers...
+    </div>
     
     <div v-else>
-      <div v-if="error" class="text-sm text-red-400 mb-3">{{ error }}</div>
-
-      <div v-if="invitations.length === 0" class="border border-slate-800 rounded-2xl p-8 text-center bg-slate-900/20">
-        <p class="text-slate-500 text-sm">No pending invitations.</p>
-        <p class="text-slate-600 text-xs mt-1">When someone invites you to a team via email, it will appear here.</p>
+      <div v-if="error" class="text-xs font-mono text-red-400 bg-red-950/20 border border-red-900/40 p-4 rounded-xl mb-4">
+        System Error: {{ error }}
       </div>
 
-      <div v-else class="space-y-3">
+      <div v-if="invitations.length === 0" class="border border-slate-800 border-dashed rounded-2xl p-12 text-center bg-slate-900/10">
+        <p class="text-slate-400 text-base font-medium">No pending invitations.</p>
+        <p class="text-slate-600 text-xs mt-1.5 font-mono">When someone invites you to a team container via email, it will appear here.</p>
+      </div>
+
+      <div v-else class="space-y-4">
         <div 
           v-for="invite in invitations" 
           :key="invite.id" 
-          class="border border-slate-800 bg-slate-900/40 p-4 rounded-xl flex items-center justify-between"
-          :class="{ 'opacity-75 border-dashed': invite.status === 'ready' }"
+          class="border rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all"
+          :class="invite.status === 'ready'
+            ? 'border-rose-900/50 bg-rose-950/10 opacity-80' 
+            : 'border-slate-800 bg-slate-900/40 hover:bg-slate-900/60'
+          "
         >
-          <div>
-            <div class="flex items-center gap-2">
-              <div class="text-white font-semibold text-sm">{{ invite.name }}</div>
+          <div class="space-y-1.5">
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="text-white font-bold text-base tracking-tight">{{ invite.name }}</div>
               
               <span 
                 v-if="invite.status === 'ready'" 
-                class="text-[10px] bg-red-950/40 text-red-400 border border-red-900/30 px-1.5 py-0.5 rounded"
+                class="text-[10px] bg-rose-900/40 text-rose-400 border border-rose-800 px-2 py-0.5 rounded font-mono uppercase tracking-wider font-semibold"
               >
-                🔒 Closed (Ready)
+                Locked Container
               </span>
             </div>
-            <div class="text-slate-400 text-xs mt-1">Leader: {{ invite.leader?.name }} ({{ invite.leader?.email }})</div>
             
-            <p v-if="invite.status === 'ready'" class="text-[11px] text-amber-500/80 mt-1">
-              ⚠️ You cannot join this team because it is already locked for applications.
+            <div class="text-xs text-slate-400 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+              <span class="text-slate-500 font-mono">Team Leader:</span>
+              <span class="text-slate-200 font-medium">{{ invite.leader?.name }}</span>
+              <span class="text-slate-500 font-mono hidden sm:inline">|</span>
+              <span class="text-slate-400 font-mono text-[11px]">{{ invite.leader?.email }}</span>
+            </div>
+            
+            <p v-if="invite.status === 'ready'" class="text-[11px] font-mono text-rose-400/90 bg-rose-950/40 border border-rose-900/30 px-3 py-1.5 rounded-lg max-w-xl">
+              Configuration Locked: You cannot append your user scope to this team because it has already locked its state layout for final application evaluation.
             </p>
           </div>
 
-          <div class="flex gap-2">
+          <div class="flex items-center gap-2 self-end sm:self-auto">
             <button 
               @click="respond(invite.id, 'accepted')"
               :disabled="invite.status === 'ready'"
-              class="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-20 disabled:hover:bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-md font-medium transition"
+              class="text-xs bg-emerald-900/40 hover:bg-emerald-900/60 px-3.5 py-2 rounded-xl text-emerald-400 border border-emerald-800/80 transition-all font-mono font-semibold cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed"
             >
               Accept
             </button>
             
             <button 
               @click="respond(invite.id, 'rejected')"
-              class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-md font-medium transition border border-slate-700"
+              class="text-xs bg-slate-800 hover:bg-slate-700 px-3.5 py-2 rounded-xl border border-slate-700 text-slate-300 transition-all font-mono font-medium cursor-pointer"
             >
               {{ invite.status === 'ready' ? 'Dismiss' : 'Decline' }}
             </button>

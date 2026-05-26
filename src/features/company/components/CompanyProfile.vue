@@ -57,96 +57,106 @@ async function save() {
 </script>
 
 <template>
-  <div v-if="loading" class="text-slate-500 text-sm">Loading...</div>
+  <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-pulse">
+    <div v-for="n in 4" :key="n" class="border border-slate-800 rounded-2xl p-6 bg-slate-900/50">
+      <div class="h-3 w-24 bg-slate-700 rounded mb-4"></div>
+      <div class="h-6 w-48 bg-slate-800 rounded"></div>
+    </div>
+    <div class="sm:col-span-2 border border-slate-800 rounded-2xl p-6 bg-slate-900/50 h-32"></div>
+  </div>
+
   <div v-else>
-
-    <div v-if="isNew" class="border border-yellow-800/50 bg-yellow-900/10 rounded-xl px-6 py-4 mb-8">
-      <div class="text-sm font-semibold text-yellow-400 mb-1">Profile not filled in yet</div>
-      <div class="text-muted-sm">Fill in your company profile to submit projects</div>
+    <div v-if="isNew" class="border border-yellow-900/40 bg-yellow-950/20 rounded-xl p-4 mb-6 text-sm">
+      <div class="font-semibold text-yellow-400 mb-1">Profile not filled in yet</div>
+      <div class="text-slate-400">Fill in your company profile to submit projects.</div>
     </div>
-    <div v-if="success" class="border border-green-800/50 bg-green-900/10 rounded-xl px-6 py-3 mb-8">
-      <span class="text-green-400 text-sm font-medium">Profile saved successfully</span>
+    
+    <div v-if="success" class="border border-green-900/40 bg-green-950/20 rounded-xl p-4 mb-6 text-sm">
+      <span class="text-green-400 font-medium">Profile saved successfully</span>
     </div>
-    <p v-if="error" class="text-red-400 text-sm mb-6">{{ error }}</p>
+    
+    <div v-if="error" class="mb-6 p-4 bg-red-900/20 border border-red-800 rounded-xl text-red-400 text-sm">
+      {{ error }}
+    </div>
 
-    <!-- VIEW -->
-    <div v-if="!editMode" class="flex flex-col gap-10">
-      <section>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="card">
-            <div class="label-hint">Company Name</div>
-            <div class="text-white font-medium">{{ profile.name || '—' }}</div>
-          </div>
-          <div class="card">
-            <div class="label-hint">Registration Number</div>
-            <div class="text-white font-medium">{{ profile.registration_number || '—' }}</div>
-          </div>
-          <div class="card">
-            <div class="label-hint">Sector</div>
-            <div class="text-white font-medium">{{ profile.sector || '—' }}</div>
-          </div>
-          <div class="card">
-            <div class="label-hint">Website</div>
+    <div v-if="!editMode" class="space-y-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="border border-slate-800 bg-slate-900/40 rounded-2xl p-6 transition hover:border-slate-700">
+          <div class="text-xs text-slate-500 uppercase font-mono mb-2">Company Name</div>
+          <div class="text-xl font-bold text-white">{{ profile.name || '—' }}</div>
+        </div>
+
+        <div class="border border-slate-800 bg-slate-900/40 rounded-2xl p-6 transition hover:border-slate-700">
+          <div class="text-xs text-slate-500 uppercase font-mono mb-2">Registration Number (IČO)</div>
+          <div class="text-xl font-bold text-white font-mono">{{ profile.registration_number || '—' }}</div>
+        </div>
+
+        <div class="border border-slate-800 bg-slate-900/40 rounded-2xl p-6 transition hover:border-slate-700">
+          <div class="text-xs text-slate-500 uppercase font-mono mb-2">Sector</div>
+          <div class="text-xl font-bold text-white">{{ profile.sector || '—' }}</div>
+        </div>
+
+        <div class="border border-slate-800 bg-slate-900/40 rounded-2xl p-6 transition hover:border-slate-700">
+          <div class="text-xs text-slate-500 uppercase font-mono mb-2">Website</div>
+          <div class="text-xl font-bold">
             <a v-if="profile.website" :href="profile.website" target="_blank"
-              class="text-blue-400 hover:text-blue-300 text-sm transition break-all">
+              class="text-blue-400 hover:text-blue-300 transition break-all border-b border-blue-500/30 hover:border-blue-400 pb-0.5">
               {{ profile.website }}
             </a>
-            <div v-else class="text-slate-500">—</div>
+            <span v-else class="text-slate-600">—</span>
           </div>
         </div>
-        <div v-if="profile.description" class="bg-slate-900/50 border border-slate-800 rounded-xl p-5 mt-4">
-          <div class="text-xs text-slate-500 uppercase tracking-wide mb-2">Description</div>
-          <div class="text-slate-300 text-sm leading-relaxed">{{ profile.description }}</div>
-        </div>
-      </section>
+      </div>
+
+      <div v-if="profile.description" class="bg-slate-900/40 border border-slate-800 rounded-2xl p-6">
+        <div class="text-xs text-slate-500 uppercase font-mono mb-3">Description</div>
+        <div class="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{{ profile.description }}</div>
+      </div>
     </div>
 
-    <!-- EDIT -->
-    <div v-else class="flex flex-col gap-6">
-      <section>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="label">Company Name <span class="text-error">*</span></label>
-            <input v-model="profile.name" type="text" placeholder="e.g. TechCorp s.r.o."
-              class="input" />
-          </div>
-          <div>
-            <label class="label">Registration Number (IČO)</label>
-            <input v-model="profile.registration_number" type="text" placeholder="12345678"
-              class="input" />
-          </div>
-          <div>
-            <label class="label">Sector</label>
-            <input v-model="profile.sector" type="text" placeholder="e.g. Software Development"
-              class="input" />
-          </div>
-          <div>
-            <label class="label">Website</label>
-            <input v-model="profile.website" type="url" placeholder="https://example.com"
-              class="input" />
-          </div>
+    <div v-else class="border border-slate-800 bg-slate-900/40 rounded-2xl p-6 space-y-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div>
+          <label class="block text-xs font-mono uppercase text-slate-400 mb-2">Company Name <span class="text-red-400">*</span></label>
+          <input v-model="profile.name" type="text" placeholder="e.g. TechCorp s.r.o."
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-slate-700 transition" />
         </div>
-        <div class="mt-4">
-          <label class="label">Description</label>
-          <textarea v-model="profile.description" rows="4" placeholder="Describe your company..."
-            class="textarea"></textarea>
+        <div>
+          <label class="block text-xs font-mono uppercase text-slate-400 mb-2">Registration Number (IČO)</label>
+          <input v-model="profile.registration_number" type="text" placeholder="12345678"
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-slate-700 transition font-mono" />
         </div>
-      </section>
+        <div>
+          <label class="block text-xs font-mono uppercase text-slate-400 mb-2">Sector</label>
+          <input v-model="profile.sector" type="text" placeholder="e.g. Software Development"
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-slate-700 transition" />
+        </div>
+        <div>
+          <label class="block text-xs font-mono uppercase text-slate-400 mb-2">Website</label>
+          <input v-model="profile.website" type="url" placeholder="https://example.com"
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-slate-700 transition" />
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-mono uppercase text-slate-400 mb-2">Description</label>
+        <textarea v-model="profile.description" rows="4" placeholder="Describe your company..."
+          class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-slate-700 transition resize-none"></textarea>
+      </div>
     </div>
 
-    <div class="mb-10 flex items-start justify-between gap-6">
-      <div v-if="auth.roleInOrg=='owner'" class="flex gap-3 pt-10">
+    <div class="mt-6 flex items-center justify-between border-t border-slate-900 pt-6">
+      <div v-if="auth.roleInOrg === 'owner'" class="flex gap-3">
         <button v-if="!editMode" @click="editMode = true"
-          class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition">
+          class="text-xs px-4 py-2 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 transition text-slate-300 font-medium">
           Edit Profile
         </button>
         <template v-else>
           <button v-if="!isNew" @click="editMode = false; error = ''"
-            class="border border-slate-700 hover:border-slate-500 text-gray-400 hover:text-white px-6 py-2.5 rounded-lg text-sm font-medium transition">
+            class="text-xs px-4 py-2 rounded-lg border border-slate-800 bg-transparent hover:bg-slate-900 transition text-slate-400 hover:text-slate-200">
             Cancel
           </button>
           <button @click="save" :disabled="saving"
-            class="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition">
+            class="text-xs px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-medium transition shadow-sm shadow-blue-900/20">
             {{ saving ? 'Saving...' : (isNew ? 'Create Profile' : 'Save Changes') }}
           </button>
         </template>

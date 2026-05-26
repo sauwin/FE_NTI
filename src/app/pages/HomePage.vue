@@ -7,35 +7,30 @@
 </script>
 
 <template>
-  <div class="container-main">
-    <div class="bg-blue-950 absolute rounded-full h-120 w-120 -z-10 -right-30 -top-10"></div>
+  <div class="container-main relative overflow-hidden">
+    
+    <div class="hidden md:block bg-blue-950 absolute rounded-full h-120 w-120 -z-10 -right-30 -top-10"></div>
 
-    <!-- HERO -->
     <PageHero
       badge="Nitrianský technologický inkubátor"
       title="Zanechaj svoju stopu v"
       highlight="technologickej budúcnosti"
-      description="
-        A prispej k rozvoju nitrianského regiónu
-      "
+      description="A prispej k rozvoju nitrianského regiónu"
     >
-      <div class="flex gap-4 mt-6">
-        <router-link to="/programs/a"
-          class="btn-primary">
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 w-full sm:w-auto">
+        <router-link to="/programs/a" class="btn-primary text-center">
           Explore Programs
         </router-link>
-        <router-link to="/about"
-          class="btn-secondary">
+        <router-link to="/about" class="btn-secondary text-center">
           About NTI
         </router-link>
       </div>
     </PageHero>
 
-    <!-- PROGRAMS -->
     <PageSection label="Programs" title="Two paths, one goal">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        <div class="card-glowing p-8">
+        <div class="card-glowing p-6 sm:p-8">
           <div class="inline-block bg-blue-600/15 border border-blue-800 text-blue-400 text-xs font-bold tracking-widest uppercase py-1 px-3 rounded-full mb-5">
             Program A
           </div>
@@ -57,13 +52,12 @@
               6 required documents
             </li>
           </ul>
-          <router-link to="/programs/a"
-            class="btn-link">
+          <router-link to="/programs/a" class="btn-link">
             Learn more →
           </router-link>
         </div>
 
-        <div class="card-glowing p-8">
+        <div class="card-glowing p-6 sm:p-8">
           <div class="inline-block bg-blue-600/15 border border-blue-800 text-blue-400 text-xs font-bold tracking-widest uppercase py-1 px-3 rounded-full mb-5">
             Program B
           </div>
@@ -85,8 +79,7 @@
               NTI mentor assigned
             </li>
           </ul>
-          <router-link to="/programs/b"
-            class="btn-link">
+          <router-link to="/programs/b" class="btn-link">
             Learn more →
           </router-link>
         </div>
@@ -94,12 +87,10 @@
       </div>
     </PageSection>
 
-    <!-- ARTICLES -->
     <PageSection label="News" title="Articles">
       <Articles />
     </PageSection>
 
-    <!-- CTA -->
     <CallToAction />
 
   </div>

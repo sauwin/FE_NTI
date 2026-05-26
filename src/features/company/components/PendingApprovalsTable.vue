@@ -13,57 +13,62 @@ const hasPending = computed(() => props.pendingUsers && props.pendingUsers.lengt
 
 <template>
   <div>
-    <div v-if="loading" class="text-center py-4 text-slate-400">
-      Loading pending members...
+    <div v-if="loading && (!pendingUsers || pendingUsers.length === 0)" class="space-y-4">
+      <div class="border border-slate-800 rounded-2xl p-6 bg-slate-900/50 animate-pulse">
+        <div class="h-5 bg-slate-800 rounded mb-4 w-1/4"></div>
+        <div class="space-y-3">
+          <div v-for="n in 3" :key="n" class="h-10 bg-slate-950/60 rounded-xl border border-slate-800/40 w-full"></div>
+        </div>
+      </div>
     </div>
 
-    <div v-else-if="!hasPending" class="bg-slate-900/40 border border-slate-800 rounded-lg text-center py-6 text-slate-500 text-sm">
+    <div v-else-if="!hasPending" class="bg-slate-900/40 border border-slate-800 rounded-2xl text-center py-10 text-slate-500 text-sm">
       No pending approvals
     </div>
 
-    <div v-else class="overflow-x-auto border border-slate-800 rounded-lg bg-slate-900/20">
+    <div v-else class="overflow-x-auto border border-slate-800 rounded-2xl bg-slate-900/40">
       <table class="w-full text-sm">
         <thead class="border-b border-slate-800 bg-slate-900/50">
-          <tr class="text-left text-slate-400">
-            <th class="py-3 px-4">Name</th>
-            <th class="py-3 px-4">Email</th>
-            <th class="py-3 px-4">Requested Role</th>
-            <th class="py-3 px-4">Created</th>
-            <th class="py-3 px-4">Actions</th>
+          <tr class="text-left text-slate-400 font-mono text-xs uppercase tracking-wider">
+            <th class="py-3.5 px-5">Name</th>
+            <th class="py-3.5 px-5">Email</th>
+            <th class="py-3.5 px-5">Requested Role</th>
+            <th class="py-3.5 px-5">Created</th>
+            <th class="py-3.5 px-5 text-right">Actions</th>
           </tr>
         </thead>
 
-        <tbody class="text-slate-300">
+        <tbody class="text-slate-300 divide-y divide-slate-800/60">
           <tr
             v-for="user in pendingUsers"
             :key="`${user.id}-${user.role_slug}`"
-            class="border-b border-slate-800/60 hover:bg-slate-800/20 transition"
+            class="hover:bg-slate-800/20 transition group"
           >
-            <td class="py-3 px-4 font-medium">
+            <td class="py-4 px-5 font-medium text-white">
               {{ user.first_name }} {{ user.last_name }}
             </td>
-            <td class="py-3 px-4 text-slate-400 text-sm">
+            <td class="py-4 px-5 text-slate-400 font-mono text-xs">
               {{ user.email }}
             </td>
-            <td class="py-3 px-4">
-              <span class="text-xs bg-yellow-600/30 border border-yellow-700 text-yellow-300 px-2 py-1 rounded">
-                {{ user.role_slug }}
+            <td class="py-4 px-5">
+              <span class="text-xs bg-amber-950/40 border border-amber-900/40 text-amber-400 px-2.5 py-1 rounded-xl font-medium uppercase font-mono tracking-wide">
+                {{ user.role_slug.replace('_', ' ') }}
               </span>
             </td>
-            <td class="py-3 px-4 text-xs text-slate-400">
-              {{ new Date(user.created_at).toLocaleDateString() }}
+            <td class="py-4 px-5 text-xs text-slate-400 font-mono">
+              {{ new Date(user.created_at).toLocaleDateString('uk-UA') }}
             </td>
-            <td class="py-3 px-4">
-              <div class="flex gap-2">
+            <td class="py-4 px-5 text-right">
+              <div class="flex gap-2 justify-end">
                 <button
                   @click="$emit('approve', user)"
-                  class="text-xs bg-green-600/30 hover:bg-green-600/50 text-green-400 px-3 py-1 rounded transition font-medium"
+                  class="text-xs bg-green-950/20 hover:bg-green-900/30 text-green-400 border border-green-900/40 px-3 py-1.5 rounded-lg transition font-medium"
                 >
                   Approve
                 </button>
                 <button
                   @click="$emit('reject', user)"
-                  class="text-xs bg-red-600/30 hover:bg-red-600/50 text-red-400 px-3 py-1 rounded transition font-medium"
+                  class="text-xs bg-red-950/20 hover:bg-red-900/30 text-red-400 border border-red-900/40 px-3 py-1.5 rounded-lg transition font-medium"
                 >
                   Reject
                 </button>
