@@ -1,6 +1,9 @@
 <script setup lang="ts">
   import Navbar from '@/shared/components/Navbar.vue'
   import Footer from '@/shared/components/Footer.vue'
+  import { useSeo } from '@/shared/seo/useSeo'
+
+useSeo()
 </script>
 
 <template>

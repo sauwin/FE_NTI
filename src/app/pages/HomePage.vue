@@ -1,9 +1,91 @@
 <script setup lang="ts">
   import PageHero from '@/shared/ui/PageHero.vue'
   import PageSection from '@/shared/ui/PageSection.vue'
-
   import Articles from '@/features/articles/components/Articles.vue'
   import CallToAction from '@/shared/components/CallToAction.vue'
+  import { ref, computed, onMounted, onUnmounted } from 'vue'
+  import { getActiveCalls } from '@/shared/api/calls'
+  import type { ActiveCall } from '@/shared/types/calls'
+
+  const activeCalls = ref<ActiveCall[]>([])
+  const loadingCalls = ref(true)
+  const now = ref(Date.now())
+  let timerInterval: ReturnType<typeof setInterval> | null = null
+
+  onMounted(async () => {
+    try {
+      const res = await getActiveCalls()
+      activeCalls.value = res.data
+    } catch (e) {
+      console.error(e)
+    } finally {
+      loadingCalls.value = false
+    }
+
+    timerInterval = setInterval(() => {
+      now.value = Date.now()
+    }, 60000)
+  })
+
+  onUnmounted(() => {
+    if (timerInterval) clearInterval(timerInterval)
+  })
+
+  function programLabel(code?: string) {
+    if (code === 'program_a') return 'Program A'
+    if (code === 'program_b') return 'Program B'
+    return 'Program'
+  }
+
+  function statusClass(status: string) {
+    switch (status) {
+      case 'open':
+        return 'bg-green-500/15 text-green-400 border-green-800'
+      case 'closed':
+        return 'bg-red-500/15 text-red-400 border-red-800'
+      case 'draft':
+        return 'bg-yellow-500/15 text-yellow-400 border-yellow-800'
+      default:
+        return 'bg-slate-500/15 text-slate-400 border-slate-700'
+    }
+  }
+
+  function formatDeadline(date?: string | null) {
+    if (!date) return 'No deadline'
+
+    return new Date(date).toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+  }
+
+  function getUrgencyLabel(deadlineStr?: string | null): { text: string; isUrgent: boolean } | null {
+    if (!deadlineStr) return null
+    
+    const distance = new Date(deadlineStr).getTime() - now.value
+    if (distance < 0) return { text: 'Ended', isUrgent: false }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24))
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+
+    if (days > 7) {
+      return { text: `${days} days left`, isUrgent: false }
+    } else if (days > 0) {
+      return { text: `${days}d ${hours}h left`, isUrgent: true }
+    } else {
+      return { text: `Closes in ${hours}h!`, isUrgent: true }
+    }
+  }
+
+  const sortedCalls = computed(() => {
+    return [...activeCalls.value].sort((a, b) => {
+      return (
+        new Date(a.deadline_at || '').getTime() -
+        new Date(b.deadline_at || '').getTime()
+      )
+    })
+  })
 </script>
 
 <template>
@@ -12,10 +94,10 @@
     <div class="hidden md:block bg-blue-950 absolute rounded-full h-120 w-120 -z-10 -right-30 -top-10"></div>
 
     <PageHero
-      badge="Nitrianský technologický inkubátor"
+      badge="Nitriansky technologický inkubátor"
       title="Zanechaj svoju stopu v"
       highlight="technologickej budúcnosti"
-      description="A prispej k rozvoju nitrianského regiónu"
+      description="A prispej k rozvoju nitrianskeho regiónu"
     >
       <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 w-full sm:w-auto">
         <router-link to="/programs/a" class="btn-primary text-center">
@@ -84,6 +166,110 @@
           </router-link>
         </div>
 
+      </div>
+    </PageSection>
+    
+    <PageSection
+      label="Opportunities"
+      title="Active Calls & Deadlines"
+    >
+      <div
+        v-if="loadingCalls"
+        class="grid grid-cols-1 lg:grid-cols-2 gap-6"
+      >
+        <div
+          v-for="i in 2"
+          :key="i"
+          class="card-glowing p-6 animate-pulse"
+        >
+          <div class="h-5 w-24 bg-slate-800 rounded mb-5"></div>
+          <div class="h-7 w-2/3 bg-slate-800 rounded mb-4"></div>
+          <div class="h-4 w-full bg-slate-800 rounded mb-2"></div>
+          <div class="h-4 w-4/5 bg-slate-800 rounded mb-6"></div>
+          <div class="h-10 w-full bg-slate-800 rounded-xl"></div>
+        </div>
+      </div>
+
+      <div
+        v-else-if="sortedCalls.length === 0"
+        class="card-glowing p-8 text-center"
+      >
+        <p class="text-slate-400">
+          There are currently no active calls.
+        </p>
+      </div>
+
+      <div
+        v-else
+        class="grid grid-cols-1 lg:grid-cols-2 gap-6"
+      >
+        <div
+          v-for="call in sortedCalls"
+          :key="call.id"
+          class="card-glowing p-6 flex flex-col"
+        >
+          <div class="flex items-center justify-between gap-4 mb-5">
+            <div class="flex items-center gap-2">
+              <div
+                class="inline-flex items-center px-3 py-1 rounded-full border text-xs font-bold tracking-wide uppercase"
+                :class="statusClass(call.status)"
+              >
+                {{ call.status }}
+              </div>
+              
+              <!-- Новий реактивний бейдж терміновості виклику -->
+              <span 
+                v-if="getUrgencyLabel(call.deadline_at)"
+                :class="[
+                  'text-[11px] font-medium px-2 py-0.5 rounded',
+                  getUrgencyLabel(call.deadline_at)?.isUrgent 
+                    ? 'text-amber-400 bg-amber-500/10 border border-amber-500/20 animate-pulse' 
+                    : 'text-slate-400 bg-slate-800'
+                ]"
+              >
+                {{ getUrgencyLabel(call.deadline_at)?.text }}
+              </span>
+            </div>
+
+            <div class="text-xs text-slate-500 font-mono">
+              {{ programLabel(call.program?.code) }}
+            </div>
+          </div>
+
+          <h3 class="text-xl font-bold text-white mb-3 leading-snug">
+            {{ call.name }}
+          </h3>
+
+          <p class="text-sm text-slate-400 leading-relaxed mb-6">
+            Application deadline:
+            <span class="text-white font-medium">
+              {{ formatDeadline(call.deadline_at) }}
+            </span>
+          </p>
+
+          <div class="flex items-center justify-between text-xs text-slate-500 mb-6">
+            <span>
+              Min team:
+              <span class="text-slate-300">
+                {{ call.min_team_size }}
+              </span>
+            </span>
+
+            <span v-if="call.max_team_size">
+              Max team:
+              <span class="text-slate-300">
+                {{ call.max_team_size }}
+              </span>
+            </span>
+          </div>
+
+          <router-link
+            :to="`/calls/${call.id}`"
+            class="btn-primary mt-auto text-center"
+          >
+            View Call
+          </router-link>
+        </div>
       </div>
     </PageSection>
 
