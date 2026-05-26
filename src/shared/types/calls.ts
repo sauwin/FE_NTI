@@ -18,13 +18,17 @@ export interface DocumentRequirement {
 export interface ActiveCall {
   id: number
   name: string
-  label?: string
-  status?: 'draft' | 'open' | 'closed'
+  status: 'draft' | 'open' | 'closed' | 'archived'
   deadline_at?: string | null
+  opens_at?: string | null
   min_team_size?: number
   max_team_size?: number | null
-  required_documents?: DocumentRequirement[] | string[] | Record<string, string> | null
-  evaluation_criteria?: unknown[]
+
+  program?: {
+    id: number
+    code: string
+    type: string
+  }
 }
 
 export interface CallData {
