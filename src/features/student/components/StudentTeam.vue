@@ -1,3 +1,0 @@
-<template>
-  Test tab
-</template>

@@ -7,7 +7,7 @@
 
 <template>
   <div class="container-main">
-    <div class="bg-blue-950 absolute rounded-full h-120 w-120 -z-10 -right-30 -top-10"></div>
+    <div class="hidden md:block bg-blue-950 absolute rounded-full h-120 w-120 -z-10 -right-30 -top-10"></div>
 
     <PageHero
       badge="About"

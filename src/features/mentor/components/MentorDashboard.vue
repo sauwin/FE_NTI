@@ -28,7 +28,6 @@ const fetchMentorships = async () => {
   }
 }
 
-// Separate requests (onboarding status) from active mentorships
 const mentorshipRequests = computed(() => {
   return mentorships.value.filter(m => m.application?.status === 'onboarding')
 })
@@ -48,7 +47,6 @@ const handleBackToList = () => {
   fetchMentorships()
 }
 
-// Accept onboarding application request
 const handleAcceptRequest = async (mentorship: Mentorship) => {
   error.value = ''
   successMessage.value = ''
@@ -62,15 +60,12 @@ const handleAcceptRequest = async (mentorship: Mentorship) => {
   }
 }
 
-// Reject onboarding application request (remove mentor and set app back to approved)
 const handleRejectRequest = async (mentorship: Mentorship) => {
   if (!confirm('Are you sure you want to reject this mentorship request?')) return
   error.value = ''
   successMessage.value = ''
   try {
-    // 1. Move status back to approved
     await updateApplicationStatusByMentor(mentorship.application.id, 'approved')
-    // 2. Detach mentor from the application
     await deleteMentorshipByMentor(mentorship.id)
     
     successMessage.value = 'Mentorship request rejected.'
@@ -89,9 +84,11 @@ onMounted(() => {
 <template>
   <div class="p-6 bg-slate-950 min-h-screen text-slate-100">
     <div class="mb-8">
-      <div class="mb-5">
-        <h2 class="text-3xl font-bold text-white">Mentor Administration</h2>
-        <p class="text-sm text-slate-500 mt-2">Manage incoming mentorship requests, assigned projects, and consultation logs.</p>
+      <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 mb-5">
+        <div>
+          <h2 class="text-3xl font-bold text-white">Mentor Administration</h2>
+          <p class="text-sm text-slate-500 mt-2">Manage incoming mentorship requests, assigned projects, and consultation logs.</p>
+        </div>
       </div>
 
       <div class="flex flex-wrap gap-2 border-b border-slate-800 pb-2">
@@ -140,22 +137,57 @@ onMounted(() => {
       </div>
     </div>
 
-    <div v-if="error" class="mb-4 p-4 bg-red-950/40 border border-red-900 text-red-400 text-sm rounded-xl">
-      ⚠️ {{ error }}
+    <div v-if="error" class="mb-6 p-4 bg-red-900/20 border border-red-800 rounded-xl text-red-400 text-sm">
+      {{ error }}
     </div>
-    <div v-if="successMessage" class="mb-4 p-4 bg-emerald-950/40 border border-emerald-900 text-emerald-400 text-sm rounded-xl">
-      ✅ {{ successMessage }}
+    <div v-if="successMessage" class="mb-6 p-4 bg-emerald-950/20 border border-emerald-900/40 rounded-xl text-emerald-400 text-sm">
+      {{ successMessage }}
     </div>
 
     <div v-show="activeTab === 'overview'" class="space-y-6">
-      <div class="flex gap-4 flex-wrap">
-        <router-link to="/mentor-profile"
-                     class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium transition">
-          My Profile
-        </router-link>
-        <button @click="activeTab = 'requests'; fetchMentorships()" class="bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition flex items-center gap-2">
-          Review Requests <span class="bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full text-xs font-bold">{{ mentorshipRequests.length }}</span>
-        </button>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        
+        <div 
+          @click="activeTab = 'requests'; fetchMentorships()"
+          class="border border-slate-800 bg-slate-900/40 rounded-2xl p-6 transition hover:border-slate-700 cursor-pointer group"
+        >
+          <div class="text-xs text-slate-500 uppercase font-mono mb-2 tracking-wider">Pending Requests</div>
+          <div class="flex items-baseline justify-between">
+            <span class="text-4xl font-bold text-white font-mono group-hover:text-blue-400 transition-colors">
+              {{ mentorshipRequests.length }}
+            </span>
+            <span class="text-xs text-blue-400 bg-blue-600/15 border border-blue-900/40 px-2.5 py-1 rounded-xl font-medium font-mono">
+              Review &rarr;
+            </span>
+          </div>
+        </div>
+
+        <div 
+          @click="activeTab = 'mentorships'; fetchMentorships()"
+          class="border border-slate-800 bg-slate-900/40 rounded-2xl p-6 transition hover:border-slate-700 cursor-pointer group"
+        >
+          <div class="text-xs text-slate-500 uppercase font-mono mb-2 tracking-wider">Active Mentorships</div>
+          <div class="flex items-baseline justify-between">
+            <span class="text-4xl font-bold text-white font-mono group-hover:text-blue-400 transition-colors">
+              {{ activeMentorships.length }}
+            </span>
+            <span class="text-xs text-slate-400 bg-slate-800 border border-slate-700/60 px-2.5 py-1 rounded-xl font-medium font-mono">
+              View All
+            </span>
+          </div>
+        </div>
+
+        <div class="border border-slate-800 bg-slate-900/40 rounded-2xl p-6 transition hover:border-slate-700 flex flex-col justify-between">
+          <div class="text-xs text-slate-500 uppercase font-mono mb-2 tracking-wider">Mentor Identity</div>
+          <div class="flex justify-between items-center mt-2">
+            <span class="text-sm text-slate-300 font-medium">Profile Configuration</span>
+            <router-link to="/mentor-profile"
+               class="text-xs px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 transition text-slate-300 font-medium font-mono">
+              Edit
+            </router-link>
+          </div>
+        </div>
+
       </div>
     </div>
 
