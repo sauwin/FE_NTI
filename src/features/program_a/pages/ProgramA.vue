@@ -19,7 +19,7 @@ onMounted(async () => {
       parsedDocuments.value = res.data.required_documents || []
     }
   } catch (error) {
-    console.error('Помилка завантаження виклику:', error)
+    console.error('Error fetching active call:', error)
     parsedDocuments.value = []
   } finally {
     loading.value = false
