@@ -36,3 +36,7 @@ export function deleteApplication(id: number | string) {
 export function submitApplication(id: number | string) {
   return api.post(`/applications/${id}/submit`)
 }
+
+export function applyApplicationChanges(id: number | string) {
+  return api.post(`/applications/${id}/apply-changes`)
+}

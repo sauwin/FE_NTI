@@ -79,8 +79,8 @@ const formattedDate = computed(() => {
         <button type="button" @click="router.push('/')" class="text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5">
           ← Back to Catalog
         </button>
-        <div class="text-[10px] font-mono tracking-wider text-slate-600 bg-slate-950 border border-slate-900 px-2.5 py-1 rounded">
-          UUID: {{ article.id }}
+        <div class="text-[12px] font-mono tracking-wider text-slate-600 bg-slate-950 border border-slate-900 px-2.5 py-1 rounded">
+          #{{ article.id }}
         </div>
       </div>
 
@@ -96,7 +96,7 @@ const formattedDate = computed(() => {
           {{ translation?.excerpt }}
         </p>
         <div class="flex items-center gap-2 text-xs font-mono text-slate-500">
-          <span>System Record Published:</span>
+          <span>Published at:</span>
           <time class="text-slate-400 font-semibold">{{ formattedDate }}</time>
         </div>
       </div>

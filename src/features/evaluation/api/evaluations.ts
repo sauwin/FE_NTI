@@ -1,12 +1,17 @@
 import api from '@/shared/api/axios'
 import type { EvaluationPayload } from '@/features/evaluation/types/evaluations'
 
-export function getEvaluations(params?: { application_id?: number; evaluator_id?: number }) {
-  return api.get('/evaluations', { params })
+// CLIENT / EVALUATOR PORTAL ENPOINTS
+export function getEvaluatorApplications(params?: { program_type?: 'a' | 'b'; status?: 'pending' | 'completed' }) {
+  return api.get('/evaluator/applications', { params })
 }
 
-export function getEvaluationById(id: number | string) {
-  return api.get(`/evaluations/${id}`)
+export function getMyEvaluations() {
+  return api.get('/evaluator/my-evaluations')
+}
+
+export function getEvaluatorApplicationById(id: number) {
+  return api.get(`/evaluator/applications/${id}`)
 }
 
 export function createEvaluation(payload: EvaluationPayload) {
@@ -15,6 +20,15 @@ export function createEvaluation(payload: EvaluationPayload) {
 
 export function updateEvaluation(id: number | string, payload: Partial<EvaluationPayload>) {
   return api.patch(`/evaluations/${id}`, payload)
+}
+
+export function getApplicationDocumentStream(applicationId: number, fileId: number) {
+  return api.get(`/evaluator/applications/${applicationId}/files/${fileId}`, { responseType: 'blob' })
+}
+
+// ADMIN ENDPOINTS
+export function getAllEvaluations(params?: { application_id?: number; evaluator_id?: number }) {
+  return api.get('/admin/evaluations', { params })
 }
 
 export function getCallEvaluators(callId: number | string) {

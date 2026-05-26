@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useConfirm } from '@/shared/composables/useConfirm'
-import { getApplications, deleteApplication, submitApplication } from '@/features/applications/api/applications'
+import { getApplications, deleteApplication, submitApplication, applyApplicationChanges } from '@/features/applications/api/applications'
 import type { StudentApplication } from '@/features/applications/types/applications'
 
 const router = useRouter()
@@ -68,11 +68,15 @@ function editApplication(id: number) {
   router.push(`/applications/${id}/edit`)
 }
 
-async function submitApp(id: number | string) {
+async function submitApp(id: number | string, status: string) {
+  const isRevision = status === 'pending_revision'
+  
   const confirmed = await useConfirm({
-    title: 'Submit Application',
-    message: 'Are you sure you want to finalize and submit this application? You will not be able to edit it until review.',
-    confirmText: 'Submit Now',
+    title: isRevision ? 'Potvrdiť zmeny (Apply Changes)' : 'Submit Application',
+    message: isRevision 
+      ? 'Naozaj chcete odoslať opravenú prihlášku na opätovnú kontrolu? Uistite sa, že ste nahrali všetky požadované dokumenty.' 
+      : 'Are you sure you want to finalize and submit this application? You will not be able to edit it until review.',
+    confirmText: isRevision ? 'Odoslať opravu' : 'Submit Now',
     cancelText: 'Cancel',
     danger: false,
   })
@@ -81,10 +85,15 @@ async function submitApp(id: number | string) {
   submittingId.value = id
   error.value = ''
   try {
-    await submitApplication(id)
+    if (isRevision) {
+      await applyApplicationChanges(id)
+    } else {
+      // Якщо звичайна чернетка draft — викликаємо стандартну функцію
+      await submitApplication(id)
+    }
     await fetchApplications()
   } catch (e: any) {
-    error.value = e.response?.data?.message ?? 'Could not submit application.'
+    error.value = e.response?.data?.message ?? 'Could not process application request.'
   } finally {
     submittingId.value = null
   }
@@ -115,7 +124,6 @@ onMounted(() => {
 
 <template>
   <div class="space-y-6">
-    <!-- ВЕРХНЯ СЕКЦІЯ: НАЗВА ТА УПРАВЛІННЯ -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h3 class="text-white font-bold text-xl tracking-tight">Moje prihlášky (My Applications)</h3>
@@ -173,7 +181,6 @@ onMounted(() => {
         <p class="text-slate-600 text-xs mt-1.5">Zatiaľ ste si nevytvorili koncept ani nepodali žiadnu oficiálnu prihlášku.</p>
       </div>
 
-      <!-- СУВОРУЙ ДАТАГРІД / ТАБЛИЦЯ -->
       <div v-else class="overflow-x-auto border border-slate-800 rounded-2xl bg-slate-950/40">
         <table class="w-full text-left border-collapse">
           <thead>
@@ -192,13 +199,11 @@ onMounted(() => {
               :key="app.id" 
               class="hover:bg-slate-900/20 transition-colors"
             >
-              <!-- ID / CALL -->
               <td class="py-4 px-6 font-medium text-white">
                 <span class="font-mono text-sm">#{{ app.id }}</span>
                 <span class="text-[11px] text-slate-500 block font-mono mt-0.5">Call: {{ app.call_id }}</span>
               </td>
 
-              <!-- APPLICANT TYPE -->
               <td class="py-4 px-6 text-slate-300">
                 <span class="inline-flex items-center gap-1.5 font-medium">
                   <span class="text-slate-500 text-[10px] font-mono uppercase">
@@ -207,19 +212,16 @@ onMounted(() => {
                 </span>
               </td>
 
-              <!-- PROGRAM -->
               <td class="py-4 px-6">
                 <span class="px-2 py-1 text-[10px] bg-slate-900 text-slate-400 border border-slate-800 rounded-lg font-mono uppercase tracking-wider">
                   Prog {{ app.program_type }}
                 </span>
               </td>
 
-              <!-- DATE -->
               <td class="py-4 px-6 font-mono text-slate-400">
                 {{ formatDate(app.created_at ?? '') }}
               </td>
 
-              <!-- STATUS BADGE -->
               <td class="py-4 px-6 text-center">
                 <span 
                   class="inline-block px-3 py-1 text-[11px] font-medium rounded-xl border text-center tracking-wide min-w-[110px]"
@@ -229,17 +231,18 @@ onMounted(() => {
                 </span>
               </td>
 
-              <!-- ACTIONS -->
               <td class="py-4 px-6 text-right">
                 <div class="flex justify-end gap-2 items-center">
                   
                   <button 
                     v-if="['draft', 'pending_revision'].includes(app.status)"
-                    @click="submitApp(app.id)"
+                    @click="submitApp(app.id, app.status)"
                     :disabled="submittingId === app.id"
                     class="border border-blue-900/50 text-blue-400 hover:text-white hover:bg-blue-600/20 px-2.5 py-1.5 rounded-xl transition font-medium cursor-pointer disabled:opacity-50"
                   >
-                    {{ submittingId === app.id ? '...' : 'Submit' }}
+                    <span v-if="submittingId === app.id">...</span>
+                    <span v-else-if="app.status === 'pending_revision'">Apply Changes</span>
+                    <span v-else>Submit</span>
                   </button>
 
                   <button 
