@@ -38,9 +38,9 @@
         <tbody class="divide-y divide-slate-800 text-sm">
           <tr v-for="m in mentorships" :key="m.id" class="hover:bg-slate-850 transition">
             <td class="p-4 font-medium text-white">{{ m.application?.team?.name || 'Without name (Individual)' }}</td>
-            <td class="p-4 text-slate-400">{{ m.application?.program?.name || 'N/A' }}</td>
+            <td class="p-4 text-slate-400">{{ 'Program ' + (m.application?.program_type)?.toUpperCase() || 'N/A' }}</td>
             <td class="p-4 text-slate-400">{{ m.assigned_at ? new Date(m.assigned_at).toLocaleDateString() : '—' }}</td>
-            <td class="p-4">
+            <td class="p-4"> {{ console.log(m.application) }}
               <span 
                 class="px-2 py-1 text-xs rounded-full border"
                 :class="m.application?.status === 'onboarding' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'"

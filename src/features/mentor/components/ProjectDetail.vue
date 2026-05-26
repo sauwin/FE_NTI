@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { getMentorshipById, createConsultation } from '../api/mentorships'
+import { getMentorshipById, createConsultation, updateConsultation, deleteConsultation } from '../api/mentorships'
 import type { Mentorship, Consultation } from '../types/mentorships'
 
 const props = defineProps<{
@@ -11,16 +11,24 @@ const emit = defineEmits<{
   (e: 'back'): void
 }>()
 
+// Core journal datasets
 const consultations = ref<Consultation[]>([])
 const loadingDetail = ref(false)
-const showLogForm = ref(false)
 
+// Dialog & Form configuration states
+const showLogForm = ref(false)
+const editingConsultationId = ref<number | null>(null)
+
+// Form reactive fields
 const formDate = ref(new Date().toISOString().substr(0, 10))
 const formDuration = ref(60)
 const formSummary = ref('')
 const formSubmitting = ref(false)
 const formSuccess = ref('')
 
+/**
+ * Fetch consultation records
+ */
 const fetchConsultations = async () => {
   loadingDetail.value = true
   formSuccess.value = ''
@@ -28,12 +36,15 @@ const fetchConsultations = async () => {
     const res = await getMentorshipById(props.mentorship.id)
     consultations.value = res.data.consultations || []
   } catch (err) {
-    console.error('Error while loading consultation details', err)
+    console.error('Error while loading consultation details:', err)
   } finally {
     loadingDetail.value = false
   }
 }
 
+/**
+ * Store a newly planned or past consultation
+ */
 const submitConsultation = async () => {
   formSubmitting.value = true
   formSuccess.value = ''
@@ -41,18 +52,88 @@ const submitConsultation = async () => {
     const result = await createConsultation(props.mentorship.id, {
       date: formDate.value,
       duration_minutes: formDuration.value,
-      summary: formSummary.value,
+      summary: formSummary.value || null,
     })
     
     consultations.value.unshift(result.data.data)
-    formSummary.value = ''
+    resetForm()
     showLogForm.value = false
-    formSuccess.value = 'The consultation has been successfully saved!'
+    formSuccess.value = 'The consultation has been successfully scheduled!'
   } catch (err: any) {
-    alert(err.response?.data?.message || 'Error while saving')
+    alert(err.response?.data?.message || 'Error while saving consultation.')
   } finally {
     formSubmitting.value = false
   }
+}
+
+/**
+ * Open inline editing mode for a specific consultation
+ */
+const startEditConsultation = (c: Consultation) => {
+  editingConsultationId.value = c.id
+  formDate.value = c.date
+  formDuration.value = c.duration_minutes
+  formSummary.value = c.summary || ''
+}
+
+/**
+ * Save updated consultation or add post-meeting summary via PATCH API
+ */
+const saveConsultationUpdate = async (id: number) => {
+  formSubmitting.value = true
+  try {
+    await updateConsultation(props.mentorship.id, id, {
+      date: formDate.value,
+      duration_minutes: formDuration.value,
+      summary: formSummary.value || null,
+    })
+    
+    const target = consultations.value.find(c => c.id === id)
+    if (target) {
+      target.date = formDate.value
+      target.duration_minutes = formDuration.value
+      target.summary = formSummary.value || null
+    }
+    editingConsultationId.value = null
+    resetForm()
+    formSuccess.value = 'Consultation record updated successfully!'
+  } catch (err: any) {
+    alert(err.response?.data?.message || 'Failed to update consultation.')
+  } finally {
+    formSubmitting.value = false
+  }
+}
+
+/**
+ * Handle destruction of a consultation record
+ */
+const handleDestroyConsultation = async (consultationId: number) => {
+  if (!confirm('Are you absolutely sure you want to delete this consultation record?')) {
+    return
+  }
+  
+  try {
+    await deleteConsultation(props.mentorship.id, consultationId)
+    consultations.value = consultations.value.filter(c => c.id !== consultationId)
+    formSuccess.value = 'Consultation record removed successfully.'
+    if (editingConsultationId.value === consultationId) {
+      resetForm()
+    }
+  } catch (err: any) {
+    alert(err.response?.data?.message || 'Failed to delete consultation record.')
+  }
+}
+
+const resetForm = () => {
+  formDate.value = new Date().toISOString().substr(0, 10)
+  formDuration.value = 60
+  formSummary.value = ''
+  editingConsultationId.value = null
+}
+
+const isPastDate = (dateString: string) => {
+  const today = new Date().toISOString().substr(0, 10)
+  return dateString < today
 }
 
 watch(() => props.mentorship.id, () => {
@@ -62,68 +143,176 @@ watch(() => props.mentorship.id, () => {
 
 <template>
   <div class="space-y-6">
-    <div class="flex items-center">
+    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
       <button @click="emit('back')" class="text-sm text-slate-400 hover:text-white flex items-center gap-1 transition">
         ← Back to list
       </button>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 space-y-4 h-fit">
-        <h3 class="text-xl font-bold text-white">{{ mentorship.application?.team?.name }}</h3>
-        <p class="text-xs text-slate-500">Assigned by: {{ new Date(mentorship.assigned_at).toLocaleDateString() }}</p>
+      
+      <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 space-y-5 h-fit">
+        <div>
+          <h3 class="text-xl font-bold text-white">{{ mentorship.application?.team?.name || 'Individual Applicant' }}</h3>
+          <p class="text-xs text-slate-500 mt-1">Assigned on: {{ new Date(mentorship.assigned_at).toLocaleDateString() }}</p>
+        </div>
         
         <div class="border-t border-slate-800 pt-4 space-y-3">
           <div>
             <span class="text-xs text-slate-500 block uppercase tracking-wider">Program</span>
-            <span class="text-sm text-slate-300 font-medium">{{ mentorship.application?.program?.name }}</span>
+            <span class="text-sm text-slate-300 font-medium">{{ 'Program ' + (mentorship.application?.program_type)?.toUpperCase() || 'N/A' }}</span>
           </div>
           <div>
-            <span class="text-xs text-slate-500 block uppercase tracking-wider">Focus</span>
-            <span class="text-sm text-slate-400 italic">{{ mentorship.application?.program?.focus || 'Not specified' }}</span>
+            <span class="text-xs text-slate-500 block uppercase tracking-wider">Category</span>
+            <span class="text-sm text-blue-400 font-medium font-mono">
+              {{ (mentorship.application as any)?.category || 'General Technology Track' }}
+            </span>
           </div>
           <div>
             <span class="text-xs text-slate-500 block uppercase tracking-wider">Current status</span>
-            <span class="text-sm text-blue-400 font-medium">{{ mentorship.application?.status }}</span>
+            <span class="text-sm font-semibold capitalize text-amber-400">
+              {{ mentorship.application?.status?.replace(/_/g, ' ') }}
+            </span>
           </div>
+        </div>
+
+        <div class="border-t border-slate-800 pt-4">
+          <router-link 
+            :to="`/applications/${mentorship.application?.id}`"
+            class="w-full text-center block bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium px-4 py-2.5 rounded-lg transition shadow-md"
+          >
+            View Full Profile View
+          </router-link>
         </div>
       </div>
 
-      <div class="lg:col-span-2 bg-slate-900 p-6 rounded-xl border border-slate-800 space-y-6">
-        <div class="flex justify-between items-center">
-          <h4 class="text-lg font-semibold text-white">Consultation journal</h4>
-          
-          <button 
-            v-if="mentorship.application?.status !== 'onboarding'"
-            @click="showLogForm = !showLogForm"
-            class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-medium transition"
-          >
-            {{ showLogForm ? 'Cancel' : '＋ Add consultation' }}
-          </button>
-        </div>
-
-        <div v-if="mentorship.application?.status === 'onboarding'" class="p-4 bg-slate-950 rounded-lg border border-slate-850 text-center text-slate-500 text-sm italic">
-          You must accept this mentorship request from the list first to start planning and logging consultations.
-        </div>
-
-        <template v-else>
-          <div v-if="formSuccess" class="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm rounded">
-            {{ formSuccess }}
+      <div class="lg:col-span-2 space-y-6">
+        <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 space-y-6">
+          <div class="flex justify-between items-center">
+            <h4 class="text-lg font-semibold text-white">Consultation Journal</h4>
+            
+            <button 
+              v-if="mentorship.application?.status !== 'onboarding' && !editingConsultationId"
+              @click="showLogForm = !showLogForm; resetForm()"
+              class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-medium transition"
+            >
+              {{ showLogForm ? 'Cancel' : '＋ Schedule Consultation' }}
+            </button>
           </div>
 
-          <form v-if="showLogForm" @submit.prevent="submitConsultation" class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-4">
+          <div v-if="mentorship.application?.status === 'onboarding'" class="p-4 bg-slate-950 rounded-lg border border-slate-900 text-center text-slate-500 text-sm italic">
+            You must accept this mentorship request from the list first to start planning and logging consultations.
+          </div>
+
+          <template v-else>
+            <div v-if="formSuccess" class="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm rounded">
+              {{ formSuccess }}
+            </div>
+
+            <form v-if="showLogForm || editingConsultationId" @submit.prevent="editingConsultationId ? saveConsultationUpdate(editingConsultationId) : submitConsultation()" class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-4">
+              <p class="text-xs font-semibold uppercase tracking-wider text-blue-400">
+                {{ editingConsultationId ? 'Update Consultation / Add Summary' : 'Schedule New Consultation Room' }}
+              </p>
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs text-slate-400 uppercase font-medium mb-1">Date</label>
+                  <input v-model="formDate" type="date" required class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" />
+                </div>
+                <div>
+                  <label class="block text-xs text-slate-400 uppercase font-medium mb-1">Duration (minutes)</label>
+                  <input v-model.number="formDuration" type="number" required min="5" max="480" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" />
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-xs text-slate-400 uppercase font-medium mb-1">
+                  Meeting Summary 
+                  <span v-if="!isPastDate(formDate) && !editingConsultationId" class="text-[10px] text-slate-500 lowercase">(Optional for future dates)</span>
+                </label>
+                <textarea 
+                  v-model="formSummary" 
+                  :required="isPastDate(formDate)"
+                  placeholder="Provide logs of what was discussed, conclusions reached or milestones evaluated..." 
+                  rows="3" 
+                  class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+                ></textarea>
+              </div>
+
+              <div class="flex justify-end gap-2">
+                <button 
+                  v-if="editingConsultationId" 
+                  type="button" 
+                  @click="resetForm()" 
+                  class="text-slate-400 hover:text-white text-xs px-3 py-2"
+                >
+                  Cancel
+                </button>
+                <button :disabled="formSubmitting" type="submit" class="bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white px-4 py-2 rounded text-xs font-medium transition">
+                  {{ formSubmitting ? 'Processing...' : (editingConsultationId ? 'Update Record' : 'Schedule Consultation') }}
+                </button>
+              </div>
             </form>
 
-          <div v-if="loadingDetail" class="text-slate-500 text-sm">Loading history...</div>
-          <div v-else-if="consultations.length === 0" class="text-sm text-slate-500 italic">
-            No consultations have been scheduled for this project yet.
-          </div>
-          <div v-else class="space-y-4">
-            <div v-for="c in consultations" :key="c.id" class="bg-slate-950 p-4 rounded-lg border border-slate-850 space-y-2">
+            <div v-if="loadingDetail" class="text-slate-500 text-sm">Loading history...</div>
+            <div v-else-if="consultations.length === 0" class="text-sm text-slate-500 italic">
+              No consultations have been scheduled for this project yet.
+            </div>
+            
+            <div v-else class="space-y-4">
+              <div 
+                v-for="c in consultations" 
+                :key="c.id" 
+                class="p-4 rounded-lg border space-y-3 transition"
+                :class="editingConsultationId === c.id ? 'border-blue-500 bg-slate-900/40' : 'border-slate-900 bg-slate-950'"
+              >
+                <div class="flex justify-between items-center border-b border-slate-900 pb-2">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold text-slate-300">📅 {{ new Date(c.date).toLocaleDateString() }}</span>
+                    <span 
+                      class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full"
+                      :class="isPastDate(c.date) ? 'bg-slate-900 text-slate-400' : 'bg-blue-950 text-blue-400 border border-blue-900/30'"
+                    >
+                      {{ isPastDate(c.date) ? 'Occurred' : 'Upcoming' }}
+                    </span>
+                  </div>
+                  
+                  <div class="flex items-center gap-3">
+                    <span class="text-xs font-mono bg-slate-900 px-2 py-0.5 rounded border border-slate-800 text-slate-400">⏱️ {{ c.duration_minutes }} min</span>
+                    
+                    <button 
+                      v-if="editingConsultationId !== c.id"
+                      @click="startEditConsultation(c)" 
+                      class="text-[11px] text-blue-400 hover:text-blue-300 font-medium transition"
+                    >
+                      Edit / Review
+                    </button>
+
+                    <button 
+                      @click="handleDestroyConsultation(c.id)" 
+                      class="text-[11px] text-red-400 hover:text-red-300 font-medium flex items-center gap-0.5 transition ml-1"
+                      title="Delete this consultation log entries permanently"
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
+                </div>
+
+                <div v-if="c.summary" class="text-slate-300 text-sm whitespace-pre-line leading-relaxed">
+                  {{ c.summary }}
+                </div>
+                <div v-else-if="isPastDate(c.date)" class="p-3 bg-amber-950/20 border border-amber-900/30 text-amber-400 text-xs rounded-lg italic flex justify-between items-center">
+                  <span>This meeting has already passed. Please click "Edit / Review" to append the meeting summary.</span>
+                </div>
+                <div v-else class="text-slate-500 text-xs italic">
+                  No summary needed yet. This is an upcoming planned consultation.
+                </div>
               </div>
-          </div>
-        </template>
+            </div>
+          </template>
+        </div>
       </div>
+
     </div>
   </div>
 </template>

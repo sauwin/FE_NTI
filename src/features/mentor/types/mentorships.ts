@@ -5,15 +5,19 @@ export interface Mentorship {
     id: number
     status: string
     team?: { name: string }
-    program?: { name: string; focus?: string }
+    program_type?: string
+    program?: { name: string }
+    category?: string
   }
 }
 
 export interface Consultation {
   id: number
   date: string
-  summary: string
+  summary: string | null
   duration_minutes: number
+  created_at?: string
+  updated_at?: string
 }
 
 export interface MentorshipDetailsResponse {
@@ -24,5 +28,11 @@ export interface MentorshipDetailsResponse {
 export interface CreateConsultationPayload {
   date: string
   duration_minutes: number
-  summary: string
+  summary: string | null
+}
+
+export interface UpdateConsultationPayload {
+  date?: string
+  duration_minutes?: number
+  summary: string | null
 }
