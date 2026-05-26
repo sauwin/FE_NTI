@@ -10,6 +10,7 @@ import {
   exportCalls,
 } from '@/features/admin/api/admin'
 import type { AdminCall, AdminProgram, RequiredDocument } from '@/features/admin/types/admin'
+import {useConfirm} from "@/shared/composables/useConfirm.ts";
 
 const programADocs: RequiredDocument[] = [
   { document_name: 'Executive Summary', is_mandatory: true, max_size_mb: 10 },
@@ -176,7 +177,14 @@ async function updateCallStatus(id: number, status: string) {
 }
 
 async function handleDeleteCall(id: number) {
-  if (!confirm('Are you sure you want to delete this call?')) return
+  const confirmed = await useConfirm({
+    title: 'Delete Call',
+    message: 'Are you sure you want to delete this call?',
+    confirmText: 'Delete Now',
+    cancelText: 'Cancel',
+    danger: true,
+  })
+  if (!confirmed) return
   try {
     await deleteAdminCall(id)
     closeMenu()

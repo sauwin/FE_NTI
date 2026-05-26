@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import type { ConfirmOptions } from '@/shared/components/ConfirmDialog.vue'
+import ConfirmDialog from "@/shared/components/ConfirmDialog.vue";
 
 let dialogRef: any = null
 
@@ -15,6 +16,6 @@ if (!dialogRef) {
 const opts: ConfirmOptions = typeof options === 'string'
 ? { title: 'Confirm', message: options }
 : options
-
+  ConfirmDialog
 return await dialogRef.value.open(opts)
 }

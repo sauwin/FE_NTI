@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { getFaqItems, createFaqItem, updateFaqItem, deleteFaqItem } from '@/features/faq/api/faq'
 import type { FaqItem } from '@/features/faq/types/faq'
 import { useAuthStore } from '@/features/auth/stores/auth'
+import {useConfirm} from "@/shared/composables/useConfirm.ts";
 
 const auth = useAuthStore()
 const isAdmin = computed(() => auth.isAdmin)
@@ -98,7 +99,15 @@ async function saveFaq() {
 }
 
 async function deleteFaq(id: number) {
-  if (!confirm('Are you sure you want to delete this FAQ?')) {
+  const confirmed = await useConfirm({
+    title: 'Delete FAQ',
+    message: 'Are you sure you want to delete this FAQ?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    danger: true,
+  })
+
+  if (!confirmed) {
     return
   }
 

@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { inviteMember, removeMember } from '../api/teams'
 import type { TeamMember } from '../types/teams'
+import {useConfirm} from "@/shared/composables/useConfirm.ts";
 
 const props = defineProps<{
   team: {
@@ -41,7 +42,14 @@ async function sendInvite() {
 
 async function handleRemoveMember(userId: number) {
   if (!props.isLeader) return
-  if (!confirm('Are you sure you want to revoke access for this member?')) return
+  const confirmed = await useConfirm({
+    title: 'Manage Team',
+    message: 'Are you sure you want to revoke access for this member?',
+    confirmText: 'Revoke',
+    cancelText: 'Cancel',
+    danger: false,
+  })
+  if (!confirmed) return
 
   try {
     await removeMember(props.team.id, userId)

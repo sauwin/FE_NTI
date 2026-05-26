@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import { getMentorshipById, createConsultation, updateConsultation, deleteConsultation } from '../api/mentorships'
 import type { Mentorship, Consultation } from '../types/mentorships'
+import {useConfirm} from "@/shared/composables/useConfirm.ts";
 
 const props = defineProps<{
   mentorship: Mentorship
@@ -108,7 +109,14 @@ const saveConsultationUpdate = async (id: number) => {
  * Handle destruction of a consultation record
  */
 const handleDestroyConsultation = async (consultationId: number) => {
-  if (!confirm('Are you absolutely sure you want to delete this consultation record?')) {
+  const confirmed = await useConfirm({
+    title: 'Confirm Delete',
+    message: 'Are you absolutely sure you want to delete this consultation record?',
+    confirmText: 'Delete Now',
+    cancelText: 'Cancel',
+    danger: true,
+  })
+  if (!confirmed) {
     return
   }
   

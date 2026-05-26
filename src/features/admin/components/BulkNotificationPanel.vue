@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { getAdminCalls, getNotificationHistory, sendBulkNotification, exportNotifications } from '@/features/admin/api/admin'
+import {useConfirm} from "@/shared/composables/useConfirm.ts";
 
 const viewMode = ref('all') 
 const selectedCallId = ref('') 
@@ -136,7 +137,13 @@ async function send() {
     groupLabel = `Applicants of Call: "${foundCall?.name || selectedCallId.value}"`
   }
 
-  const confirmed = confirm(`Are you sure you want to send this mass email to [ ${groupLabel} ]?`)
+  const confirmed = await useConfirm({
+    title: 'Send Emails',
+    message: `Are you sure you want to send this mass email to [ ${groupLabel} ]?`,
+    confirmText: 'Send Now',
+    cancelText: 'Cancel',
+    danger: false,
+  })
   if (!confirmed) return
 
   loading.value = true
