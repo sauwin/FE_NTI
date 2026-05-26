@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../features/auth/stores/auth'
 import { getNotifications, markNotificationRead, markAllNotificationsRead } from '@/shared/api/notifications'
+import NotificationDetailModal from '@/shared/components/NotificationDetailModal.vue'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -12,6 +13,9 @@ const unread = ref(0)
 const notifications = ref<any[]>([])
 const notifOpen = ref(false)
 const mobileOpen = ref(false)
+
+const showModal = ref(false)
+const selectedNotif = ref<any | null>(null)
 
 onMounted(async () => {
   isLoggedIn.value = !!localStorage.getItem('token')
@@ -48,6 +52,15 @@ async function markAllRead() {
   notifications.value = notifications.value.map(n => ({ ...n, status: 'sent' }))
 }
 
+async function openNotification(n: any) {
+  selectedNotif.value = n
+  showModal.value = true
+  notifOpen.value = false
+  mobileOpen.value = false
+  
+  await markRead(n)
+}
+
 function logout() {
   auth.logout()
   isLoggedIn.value = false
@@ -57,9 +70,10 @@ function logout() {
 
 function notifMessage(n: any): string {
   try {
-    return JSON.parse(n.context)?.message ?? 'Notification'
+    const ctx = typeof n.context === 'string' ? JSON.parse(n.context) : n.context
+    return ctx?.subject || ctx?.message || 'Notification'
   } catch {
-    return 'Notification'
+    return n.message || 'Notification'
   }
 }
 </script>
@@ -106,16 +120,16 @@ function notifMessage(n: any): string {
               <div v-if="notifications.length === 0" class="px-4 py-6 text-center text-slate-500 text-sm italic">No notifications</div>
               <div
                 v-for="n in notifications" :key="n.id"
-                @click.stop="markRead(n)"
+                @click.stop="openNotification(n)"
                 :class="['px-4 py-3 text-sm cursor-pointer hover:bg-slate-800/40 transition', n.status === 'queued' ? 'bg-blue-600/5' : '']"
               >
                 <div class="flex items-start gap-2.5">
                   <span :class="['mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0', n.status === 'queued' ? 'bg-blue-400' : 'bg-slate-700']"></span>
                   <div class="flex-1 min-w-0">
-                    <p :class="['leading-snug break-words', n.status === 'queued' ? 'text-white font-medium' : 'text-slate-400']">
+                    <p :class="['leading-snug break-words truncate', n.status === 'queued' ? 'text-white font-medium' : 'text-slate-400']">
                       {{ notifMessage(n) }}
                     </p>
-                    <p class="text-slate-500 text-xs mt-1">{{ new Date(n.created_at).toLocaleDateString() }}</p>
+                    <p class="text-slate-500 text-[10px] font-mono mt-1">{{ new Date(n.created_at).toLocaleDateString() }}</p>
                   </div>
                 </div>
               </div>
@@ -153,16 +167,16 @@ function notifMessage(n: any): string {
               <div v-if="notifications.length === 0" class="px-4 py-6 text-center text-slate-500 text-sm italic">No notifications</div>
               <div
                 v-for="n in notifications" :key="n.id"
-                @click.stop="markRead(n)"
+                @click.stop="openNotification(n)"
                 :class="['px-4 py-3 text-sm cursor-pointer hover:bg-slate-800/40 transition', n.status === 'queued' ? 'bg-blue-600/5' : '']"
               >
                 <div class="flex items-start gap-2.5">
                   <span :class="['mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0', n.status === 'queued' ? 'bg-blue-400' : 'bg-slate-700']"></span>
                   <div class="flex-1 min-w-0">
-                    <p :class="['leading-snug break-words', n.status === 'queued' ? 'text-white font-medium' : 'text-slate-400']">
+                    <p :class="['leading-snug break-words truncate', n.status === 'queued' ? 'text-white font-medium' : 'text-slate-400']">
                       {{ notifMessage(n) }}
                     </p>
-                    <p class="text-slate-500 text-xs mt-1">{{ new Date(n.created_at).toLocaleDateString() }}</p>
+                    <p class="text-slate-500 text-[10px] font-mono mt-1">{{ new Date(n.created_at).toLocaleDateString() }}</p>
                   </div>
                 </div>
               </div>
@@ -179,7 +193,7 @@ function notifMessage(n: any): string {
         <svg v-if="!mobileOpen" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <svg v-else xmlns="http://www.w3.org/2000/xl" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
@@ -219,6 +233,11 @@ function notifMessage(n: any): string {
         </template>
       </div>
     </div>
-
   </nav>
+
+  <NotificationDetailModal 
+    :show="showModal" 
+    :notification="selectedNotif" 
+    @close="showModal = false; selectedNotif = null" 
+  />
 </template>
