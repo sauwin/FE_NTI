@@ -66,7 +66,12 @@ async function handleUpdateTeam(teamId: number) {
     editingTeamId.value = null
     await fetchTeams()
   } catch (e: any) {
-    alert(e?.response?.data?.message ?? 'Failed to mutate team resource.')
+    await useConfirm({
+      title: 'Error',
+      message: e?.response?.data?.message ?? 'Failed to mutate team resource.',
+      confirmText: 'Okay',
+      danger: false,
+    })
   } finally {
     saving.value = false
   }
@@ -88,7 +93,12 @@ async function handleDeleteTeam(teamId: number) {
     if (expandedTeamId.value === teamId) expandedTeamId.value = null
     await fetchTeams()
   } catch (e: any) {
-    alert(e?.response?.data?.message ?? 'Failed to terminate team scope.')
+    await useConfirm({
+      title: 'Error',
+      message: e?.response?.data?.message ?? 'Failed to terminate team scope.',
+      confirmText: 'Okay',
+      danger: false,
+    })
   }
 }
 

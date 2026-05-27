@@ -23,8 +23,12 @@ const deleteCall = async (id: number) => {
     await deleteAdminCall(id)
     await loadCalls()
   } catch (e: any) {
-    //fix me
-    alert(e.response?.data?.message || 'Error deleting call')
+    await useConfirm({
+      title: 'Error',
+      message: e.response?.data?.message || 'Error deleting call',
+      confirmText: 'Okay',
+      danger: false,
+    })
   }
 }
 

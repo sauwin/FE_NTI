@@ -4,6 +4,7 @@ import { getAdminApplications, updateAdminApplicationStatus, exportApplications 
 import api from '@/shared/api/axios' 
 import type { AdminApplicationListItem } from '@/features/admin/types/admin'
 import { useRouter } from 'vue-router'
+import {useConfirm} from "@/shared/composables/useConfirm.ts";
 
 const props = defineProps<{
   filterCallId?: number | null
@@ -117,7 +118,12 @@ async function handleStatusSelect(id: number, targetStatus: string) {
     const app = applications.value.find(a => a.id === id)
     if (app) app.status = targetStatus
   } catch {
-    alert('Error while changing status')
+    await useConfirm({
+      title: 'Error',
+      message: 'Error while changing status',
+      confirmText: 'Okay',
+      danger: false,
+    })
     loadApplications() 
   } finally {
     changingStatusId.value = null
@@ -138,7 +144,12 @@ async function submitRevision() {
     
     showRevisionModal.value = false
   } catch (error) {
-    alert('Failed to submit revision request.')
+    await useConfirm({
+      title: 'Error',
+      message: 'Failed to submit revision request.',
+      confirmText: 'Okay',
+      danger: false,
+    })
   } finally {
     revisionLoading.value = false
   }
@@ -167,7 +178,12 @@ async function downloadExport(format: 'csv' | 'xlsx' = 'xlsx') {
     window.URL.revokeObjectURL(url)
   } catch (error) {
     console.error('Export error:', error)
-    alert('Failed to download export.')
+    await useConfirm({
+      title: 'Error',
+      message: 'Failed to download export.',
+      confirmText: 'Okay',
+      danger: false,
+    })
   }
 }
 

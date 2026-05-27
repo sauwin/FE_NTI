@@ -61,7 +61,12 @@ const submitConsultation = async () => {
     showLogForm.value = false
     formSuccess.value = 'The consultation has been successfully scheduled!'
   } catch (err: any) {
-    alert(err.response?.data?.message || 'Error while saving consultation.')
+    await useConfirm({
+      title: 'Error',
+      message: err.response?.data?.message || 'Error while saving consultation.',
+      confirmText: 'Okay',
+      danger: false,
+    })
   } finally {
     formSubmitting.value = false
   }
@@ -99,7 +104,12 @@ const saveConsultationUpdate = async (id: number) => {
     resetForm()
     formSuccess.value = 'Consultation record updated successfully!'
   } catch (err: any) {
-    alert(err.response?.data?.message || 'Failed to update consultation.')
+    await useConfirm({
+      title: 'Error',
+      message: err.response?.data?.message || 'Failed to update consultation.',
+      confirmText: 'Okay',
+      danger: false,
+    })
   } finally {
     formSubmitting.value = false
   }
@@ -128,7 +138,12 @@ const handleDestroyConsultation = async (consultationId: number) => {
       resetForm()
     }
   } catch (err: any) {
-    alert(err.response?.data?.message || 'Failed to delete consultation record.')
+    await useConfirm({
+      title: 'Error',
+      message: err.response?.data?.message || 'Failed to delete consultation record.',
+      confirmText: 'Okay',
+      danger: false,
+    })
   }
 }
 

@@ -151,16 +151,31 @@ async function handleSubmitCall() {
 
     if (editingCallId.value) {
       await updateAdminCall(editingCallId.value, payload)
-      alert('Call updated successfully!')
+      await useConfirm({
+        title: 'Status change',
+        message: 'Call updated successfully!',
+        confirmText: 'Okay',
+        danger: false,
+      })
     } else {
       await createAdminCall(payload)
-      alert('Call created successfully!')
+      await useConfirm({
+        title: 'Status change',
+        message: 'Call created successfully!',
+        confirmText: 'Okay',
+        danger: false,
+      })
     }
 
     cancelEdit()
     loadData()
   } catch (e) {
-    alert(editingCallId.value ? 'Error updating call.' : 'Error creating call.')
+    await useConfirm({
+      title: 'Error',
+      message: editingCallId.value ? 'Error updating call.' : 'Error creating call.',
+      confirmText: 'Okay',
+      danger: false,
+    })
   } finally {
     isSubmitting.value = false
   }
@@ -172,7 +187,12 @@ async function updateCallStatus(id: number, status: string) {
     closeMenu()
     loadData()
   } catch {
-    alert('Failed to update status')
+    await useConfirm({
+      title: 'Error',
+      message: 'Failed to update status',
+      confirmText: 'Okay',
+      danger: false,
+    })
   }
 }
 
@@ -190,7 +210,12 @@ async function handleDeleteCall(id: number) {
     closeMenu()
     loadData()
   } catch {
-    alert('Call cannot be deleted (only Draft).')
+    await useConfirm({
+      title: 'Error',
+      message: 'Call cannot be deleted (only Draft).',
+      confirmText: 'Okay',
+      danger: false,
+    })
   }
 }
 
@@ -209,7 +234,12 @@ async function downloadCallsExport(format: 'csv' | 'xlsx' = 'xlsx') {
     link.click()
     document.body?.removeChild(link)
   } catch {
-    alert('Failed to download export.')
+    await useConfirm({
+      title: 'Error',
+      message: 'Failed to download export.',
+      confirmText: 'Okay',
+      danger: false,
+    })
   }
 }
 

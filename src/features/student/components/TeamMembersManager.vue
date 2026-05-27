@@ -55,7 +55,12 @@ async function handleRemoveMember(userId: number) {
     await removeMember(props.team.id, userId)
     emits('refresh')
   } catch (e: any) {
-    alert(e?.response?.data?.error ?? 'Failed to remove member from team instance.')
+    await useConfirm({
+      title: 'Error',
+      message: e?.response?.data?.error ?? 'Failed to remove member from team instance.',
+      confirmText: 'Okay',
+      danger: false,
+    })
   }
 }
 </script>
