@@ -88,7 +88,6 @@ async function submitApp(id: number | string, status: string) {
     if (isRevision) {
       await applyApplicationChanges(id)
     } else {
-      // Якщо звичайна чернетка draft — викликаємо стандартну функцію
       await submitApplication(id)
     }
     await fetchApplications()

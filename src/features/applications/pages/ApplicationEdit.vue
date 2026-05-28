@@ -261,7 +261,7 @@ async function submit(): Promise<void> {
           </template>
 
           <div class="flex gap-3 mt-2">
-            <button @click="router.back()" class="w-1/3 border border-slate-800 text-slate-400 h-11 rounded-lg hover:text-white transition text-sm font-medium">Cancel</button>
+            <button @click="router.push('/dashboard')" class="w-1/3 border border-slate-800 text-slate-400 h-11 rounded-lg hover:text-white transition text-sm font-medium">Cancel</button>
             <button @click="nextStep" class="flex-1 bg-blue-600 text-white h-11 rounded-lg font-medium hover:bg-blue-700 transition text-sm">
               Next: Review Documentation
             </button>

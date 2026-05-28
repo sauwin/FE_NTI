@@ -126,5 +126,5 @@ export function assignMentorship(payload: { application_id: number; mentor_id: n
 }
 
 export function deleteMentorship(mentorshipId: number | string) {
-  return api.delete(`/mentorships/${mentorshipId}`)
+  return api.delete(`admin/mentorships/${mentorshipId}`)
 }
