@@ -42,7 +42,7 @@ const statusColor = (status: string) => {
   if (status === 'approved' || status === 'active') return 'bg-green-900/30 border-green-800 text-green-400'
   if (status === 'rejected') return 'bg-red-900/30 border-red-800 text-red-400'
   if (status === 'suspended') return 'bg-amber-900/30 border-amber-800 text-amber-400'
-  if (status === 'archived') return 'bg-slate-800 text-slate-400 border-slate-700'
+  if (status === 'closed') return 'bg-slate-800 text-slate-400 border-slate-700'
   return 'bg-blue-900/30 border-blue-800 text-blue-400'
 }
 
@@ -88,13 +88,13 @@ async function toggleSuspension() {
 }
 
 /**
- * Permanently finishes the project lifecycle and sets to archived
+ * Permanently finishes the project lifecycle and sets to closed
  */
-async function archiveApp() {
+async function closeApp() {
   const confirmed = await useConfirm({
-    title: 'Archive Project',
-    message: 'Are you sure you want to archive this project? This closes all active sprints and concludes the mentorship permanently.',
-    confirmText: 'Archive',
+    title: 'Finish Project',
+    message: 'Are you sure you want to finish this project? This closes all active sprints and concludes the mentorship permanently.',
+    confirmText: 'Finish',
     cancelText: 'Cancel',
     danger: true,
   })
@@ -102,10 +102,10 @@ async function archiveApp() {
 
   statusUpdating.value = true
   try {
-    await updateApplicationStatus(id, 'archived')
-    app.value.status = 'archived'
+    await updateApplicationStatus(id, 'closed')
+    app.value.status = 'closed'
   } catch (e: any) {
-    error.value = e.response?.data?.message ?? 'Failed to archive application'
+    error.value = e.response?.data?.message ?? 'Failed to finish application'
   } finally {
     statusUpdating.value = false
   }
@@ -209,7 +209,7 @@ async function deleteApp() {
         </div>
 
         <div 
-          v-if="(currentUserRole === 'admin' || currentUserRole === 'mentor') && app.status !== 'archived'" 
+          v-if="(currentUserRole === 'admin' || currentUserRole === 'mentor') && app.status !== 'closed'" 
           class="border border-slate-800 rounded-xl p-4 bg-slate-950/40 mt-6 flex items-center justify-between gap-3"
         >
           <div>
@@ -229,11 +229,11 @@ async function deleteApp() {
             </button>
             
             <button 
-              @click="archiveApp"
+              @click="closeApp"
               :disabled="statusUpdating"
               class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded text-xs font-medium border border-slate-700 transition disabled:opacity-50"
             >
-              Archive Project
+              Finish Project
             </button>
           </div>
         </div>
