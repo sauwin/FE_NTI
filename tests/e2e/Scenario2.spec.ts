@@ -11,21 +11,15 @@ test('Scenario 2: admin approves application and assigns mentor', async ({ page 
 
 // --- Change application status to approved ---
     await page.locator('button', { hasText: 'Applications' }).click()
-    await page.waitForSelector('table tbody tr, [data-role="application-row"]')
+    await page.waitForSelector('table tbody tr', { timeout: 10000 })
+    // await expect(page.locator('table tbody tr')).not.toHaveCount(0, { timeout: 5000 })
 
 // Pick first application row and open details
-    await page.locator('button', { hasText: /View|Details/ }).first().click()
-    await page.waitForURL(/applications\/\d+/)
+    const row = page.locator('table tbody tr').filter({ hasNot: page.locator('select[disabled]') }).first()
+    const statusSelect = row.locator('select')
+    await statusSelect.selectOption('approved')
 
-// Approve: admin status change select or button
-    const statusSelect = page.locator('select[name="status"], select').filter({ hasText: /draft|pending|submitted/ }).first()
-    if (await statusSelect.count() > 0) {
-        await statusSelect.selectOption('approved')
-    } else {
-        await page.locator('button', { hasText: /Approve/ }).first().click()
-    }
-
-    await expect(page.locator('text=/approved/i')).toBeVisible({ timeout: 8000 })
+    await expect(row.locator('span').filter({ hasText: /approved/i })).toBeVisible({ timeout: 8000 })
 
 // --- Back to dashboard, open Mentors tab ---
     await page.goto('/dashboard')

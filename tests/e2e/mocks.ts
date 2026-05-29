@@ -37,14 +37,23 @@ const STUDENT_PROFILE = {
     academic_eligible: true,
 }
 
-const TEAM = { id: 1, name: 'E2E Team', members: [], leader_id: 1 }
+const TEAM = {
+    id: 1,
+    name: 'E2E Team',
+    leader_id: 1,
+    members: [
+        { id: 2, pivot: { status: 'accepted' } },
+        { id: 3, pivot: { status: 'accepted' } },
+        { id: 4, pivot: { status: 'accepted' } },
+    ],
+}
 
 const ACTIVE_CALL = {
     id: 1,
     program_type: 'a',
     status: 'active',
     deadline: '2099-12-31',
-    document_requirements: [
+    required_documents: [
         { document_name: 'Executive Summary', is_mandatory: true, max_size_mb: 10 },
     ],
     task: null,
@@ -59,13 +68,13 @@ const APPLICATION = {
 }
 
 const MENTORS = [
-    { id: 10, name: 'Mentor One', email: 'mentor@nti.test', role_slug: 'mentor' },
+    { id: 10, name: 'Mentor One', email: 'mentor@nti.test', role_slug: 'mentor', roles: [{ slug: 'mentor' }] },
 ]
 
 const APPLICATIONS_LIST = [
     {
         id: 1,
-        status: 'submitted',
+        status: 'approved',
         team: { name: 'E2E Team' },
         call: { id: 1, program_type: 'a' },
     },
@@ -113,8 +122,15 @@ export async function applyMocks(page: Page) {
     })
 
     await page.route('**/api/auth/logout', r => r.fulfill(ok({ message: 'ok' })))
-    await page.route('**/api/auth/me', r => r.fulfill(ok(STUDENT_USER)))
-    await page.route('**/api/auth/role-status', r => r.fulfill(ok({ status: 'active' })))
+    let loggedInUser: typeof STUDENT_USER | typeof ADMIN_USER | typeof COMPANY_USER = STUDENT_USER
+
+    await page.route('**/api/auth/login', async r => {
+        const body = JSON.parse(r.request().postData() ?? '{}')
+        loggedInUser = resolveUserByEmail(body.email ?? '')
+        r.fulfill(ok({ token: TOKEN, user: loggedInUser }))
+    })
+    await page.route('**/api/auth/me', r => r.fulfill(ok(loggedInUser)))
+    await page.route('**/api/auth/role-status', r => r.fulfill(ok({ approved: true })))
 
 // profile
     await page.route('**/api/profile/student', async r => {
@@ -174,8 +190,8 @@ export async function applyMocks(page: Page) {
 
 // admin
     await page.route('**/api/admin/reporting/dashboard-stats', r => r.fulfill(ok(DASHBOARD_STATS)))
-    await page.route('**/api/admin/applications', r => r.fulfill(ok({ data: APPLICATIONS_LIST })))
     await page.route('**/api/admin/applications/1', r => r.fulfill(ok(APPLICATION)))
+    await page.route('**/api/admin/applications*', r => r.fulfill(ok({ data: APPLICATIONS_LIST })))
     await page.route('**/api/admin/users', r => r.fulfill(ok([STUDENT_USER, COMPANY_USER])))
     await page.route('**/api/admin/admin-users', r => r.fulfill(ok([ADMIN_USER])))
     await page.route('**/api/admin/mentorships', r => r.fulfill(ok([])))

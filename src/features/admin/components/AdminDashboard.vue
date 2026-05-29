@@ -13,6 +13,7 @@ const AdminDocumentManager = defineAsyncComponent(() => import('@/features/admin
 const CreateAdminForm = defineAsyncComponent(() => import('./CreateAdminForm.vue'))
 const AdminLogs = defineAsyncComponent(() => import('./AdminLogs.vue'))
 const BulkNotificationPanel = defineAsyncComponent(() => import('@/features/admin/components/BulkNotificationPanel.vue'))
+const PagesManager = defineAsyncComponent(() => import('@/features/admin/components/PagesManager.vue'))
 
 const props = defineProps<{
   userRole?: string
@@ -141,6 +142,7 @@ onMounted(() => {
           { id: 'approvals', name: 'Approvals' },
           { id: 'documents', name: 'Documents' },
           ...(isSuperAdmin ? [{ id: 'create-admin', name: 'Create Admin' }] : []),
+          { id: 'pages', name: 'Pages' },
           { id: 'logs', name: 'Audit Logs' },
           { id: 'broadcast-notification', name: 'Broadcast' }
         ]" 
@@ -280,6 +282,10 @@ onMounted(() => {
 
     <div v-if="activeTab === 'broadcast-notification'">
       <BulkNotificationPanel />
+    </div>
+
+    <div v-if="activeTab === 'pages'">
+      <PagesManager />
     </div>
   </div>
 </template>

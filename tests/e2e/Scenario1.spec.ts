@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { STUDENT } from './helpers'
-import { applyMocks } from './mocks'
+import {applyMocks, setAuthState} from './mocks'
 
 // NOTE: email verification is a backend flow — test confirms redirect to /pending-verification
 // and then simulates the verified state by navigating to /verified directly (dev/test env only)
@@ -31,6 +31,7 @@ test('Scenario 1: student registers, verifies email, fills profile, submits Prog
 // In real E2E: use mailhog/mailpit API to extract token.
 // Here we navigate directly — requires BE to set session/cookie on GET /verified
     await page.goto('/verified')
+    await setAuthState(page, 'student')
     await page.goto('/dashboard')
 
 // --- Fill student profile ---
@@ -61,7 +62,7 @@ test('Scenario 1: student registers, verifies email, fills profile, submits Prog
 
     await page.locator('input[type="checkbox"]').first().check()
 
-    await page.locator('button', { hasText: 'Next' }).click()
+    await page.locator('button', { hasText: 'Continue to Documents' }).click()
 
 // Step 2: upload at least one required document
     const fileInput = page.locator('input[type="file"]').first()
@@ -73,5 +74,5 @@ test('Scenario 1: student registers, verifies email, fills profile, submits Prog
 
     await page.locator('button[type="submit"]').click()
 
-    await expect(page.locator('text=/submitted|success|dashboard/i')).toBeVisible({ timeout: 10000 })
+    await expect(page.locator('text=/submitted|success|dashboard/i').first()).toBeVisible({ timeout: 10000 })
 })
