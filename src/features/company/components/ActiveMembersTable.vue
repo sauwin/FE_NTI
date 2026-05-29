@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { updateMemberRole } from '@/features/company/api/company' 
 
 const USERS_PER_PAGE = 25
 
@@ -8,19 +9,41 @@ const props = defineProps<{
   loading?: boolean
 }>()
 
-const emit = defineEmits(['kick'])
+const emit = defineEmits(['kick', 'refresh']) 
 
-// Simple navigation pagination state
 const currentPage = ref(1)
+const updatingRoleId = ref<number | string | null>(null) 
+
+const roleInOrgOptions = [
+  { value: 'owner', label: 'Owner' },
+  { value: 'contact', label: 'Contact' },
+  { value: 'evaluator', label: 'Evaluator' },
+  { value: 'mentor', label: 'Mentor' }
+]
 
 const hasMembers = computed(() => props.activeMembers && props.activeMembers.length > 0)
 const totalPages = computed(() => Math.ceil((props.activeMembers?.length || 0) / USERS_PER_PAGE))
 
-// Slice list based on current page
 const visibleMembers = computed(() => {
   const start = (currentPage.value - 1) * USERS_PER_PAGE
   return (props.activeMembers || []).slice(start, start + USERS_PER_PAGE)
 })
+
+async function handleRoleChange(user: any, newRole: string) {
+  if (user.role_in_org === newRole) return
+
+  updatingRoleId.value = user.id
+  try {
+    await updateMemberRole(user.id, newRole)
+    user.role_in_org = newRole 
+    emit('refresh') 
+  } catch (error) {
+    console.error('Failed to update member role:', error)
+    emit('refresh') 
+  } finally {
+    updatingRoleId.value = null
+  }
+}
 </script>
 
 <template>
@@ -44,7 +67,7 @@ const visibleMembers = computed(() => {
           <tr class="text-left text-slate-400 font-mono text-xs uppercase tracking-wider">
             <th class="py-3.5 px-5">Name</th>
             <th class="py-3.5 px-5">Email</th>
-            <th class="py-3.5 px-5">Role</th>
+            <th class="py-3.5 px-5">Role in Org</th>
             <th class="py-3.5 px-5">Status</th>
             <th class="py-3.5 px-5 text-right">Actions</th>
           </tr>
@@ -62,10 +85,24 @@ const visibleMembers = computed(() => {
               {{ user.email }}
             </td>
             <td class="py-4 px-5">
-              <div class="flex gap-1 flex-wrap items-center">
-                <span class="text-xs bg-blue-600/15 border border-blue-900/40 text-blue-400 px-2.5 py-1 rounded-xl font-medium">
-                  {{ user.role_in_org }}
-                </span>
+              <div class="relative inline-block text-left">
+                <select 
+                  :value="user.role_in_org"
+                  :disabled="user.role_in_org=='owner'"
+                  @change="handleRoleChange(user, ($event.target as HTMLSelectElement).value)"
+                  class="text-xs bg-slate-950 border border-slate-800 text-blue-400 px-3 py-1.5 rounded-xl font-medium outline-none cursor-pointer focus:border-blue-600 transition disabled:opacity-50 appearance-none pr-8"
+                >
+                  <option 
+                    v-for="opt in roleInOrgOptions" 
+                    :key="opt.value" 
+                    :value="opt.value"
+                    :disabled="opt.value=='owner'"
+                    class="bg-slate-900 text-slate-300 disabled:bg-slate-800 disabled:text-slate-400"
+                  >
+                    {{ opt.label }}
+                  </option>
+                </select>
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 text-[10px]">▼</span>
               </div>
             </td>
             <td class="py-4 px-5">

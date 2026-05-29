@@ -33,8 +33,12 @@ export function removeUserRole(userId: number | string, role: string) {
   return api.delete(`/admin/users/${userId}/roles`, { data: { role } })
 }
 
-export function addUserRole(userId: number | string, role: string) {
-  return api.post(`/admin/users/${userId}/roles`, { role })
+export function addUserRole(userId: number | string, payload: { 
+  role: string, 
+  registration_number?: string, 
+  role_in_org?: string 
+}) {
+  return api.post(`/admin/users/${userId}/roles`, payload)
 }
 
 export function createAdmin(payload: CreateAdminPayload) {
