@@ -126,5 +126,13 @@ export function assignMentorship(payload: { application_id: number; mentor_id: n
 }
 
 export function deleteMentorship(mentorshipId: number | string) {
-  return api.delete(`/mentorships/${mentorshipId}`)
+  return api.delete(`admin/mentorships/${mentorshipId}`)
+}
+
+export function scheduleCallEvaluation(callId: number, payload: { evaluation_scheduled_at: string }) {
+  return api.patch(`/admin/calls/${callId}/schedule-evaluation`, payload)
+}
+
+export function getCallEvaluationInfo(callId: number) {
+  return api.get(`/admin/calls/${callId}/evaluation-info`)
 }

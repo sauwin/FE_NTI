@@ -119,7 +119,7 @@ const filteredApplications = computed(() => {
           class="border border-slate-800 hover:border-slate-700 rounded-xl px-6 py-5 bg-slate-900/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 transition"
         >
           <div class="space-y-1">
-            <div class="flex items-center gap-3">
+            <div class="flex items-center flex-wrap gap-3">
               <span 
                 :class="[
                   app.program_type?.toLowerCase() === 'a' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
@@ -129,6 +129,14 @@ const filteredApplications = computed(() => {
                 Program {{ app.program_type }}
               </span>
               <span class="text-slate-500 text-xs font-mono">#{{ app.id }}</span>
+
+              <span 
+                v-if="app.total_evaluators_count"
+                class="text-[11px] px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400 font-medium inline-flex items-center gap-1"
+                :title="`Chýba ešte ${app.pending_evaluators_count} hodnotení`"
+              >
+                Komisia: <strong class="text-blue-400 font-mono">{{ app.completed_evaluations_count }}/{{ app.total_evaluators_count }}</strong>
+              </span>
             </div>
             
             <h3 class="text-white font-medium text-base pt-1">{{ app.project_name || 'Bez názvu projektu' }}</h3>

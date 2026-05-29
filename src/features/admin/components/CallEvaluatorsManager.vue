@@ -1,16 +1,31 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { getAdminCalls, getAdminUsers } from '@/features/admin/api/admin'
 import { getCallEvaluators, assignEvaluator, removeEvaluator } from '@/features/evaluation/api/evaluations'
+import { scheduleCallEvaluation, getCallEvaluationInfo } from '@/features/admin/api/admin'
 
 const calls = ref<any[]>([])
 const selectedCallId = ref<number | null>(null)
+const selectedCall = ref<any>(null)
 const evaluators = ref<any[]>([])
 const allUsers = ref<any[]>([])
 const selectedUserId = ref<number | null>(null)
 const loading = ref(false)
 const error = ref('')
 const success = ref('')
+const evaluationScheduledAt = ref<string>('')
+const schedulingLoading = ref(false)
+const schedulingError = ref('')
+const schedulingSuccess = ref('')
+const evaluationStats = ref<any>({
+  formally_verified: 0,
+  under_evaluation: 0,
+  total: 0,
+})
+
+const applicationsToMove = computed(() => {
+  return evaluationStats.value.formally_verified ?? 0
+})
 
 onMounted(async () => {
   try {
@@ -22,19 +37,38 @@ onMounted(async () => {
     allUsers.value = (usersRes.data ?? []).filter((u: any) =>
         u.roles?.some((r: any) => r.slug === 'evaluator')
     )
-  } catch {
+  } catch (e) {
     error.value = 'Could not load data'
+    console.error('Error loading data:', e)
   }
 })
 
 async function loadEvaluators() {
   if (!selectedCallId.value) return
   loading.value = true
+  error.value = ''
   try {
-    const res = await getCallEvaluators(selectedCallId.value)
-    evaluators.value = res.data ?? []
-  } catch {
+    const [evaluatorsRes, statsRes] = await Promise.all([
+      getCallEvaluators(selectedCallId.value),
+      getCallEvaluationInfo(selectedCallId.value),
+    ])
+    evaluators.value = evaluatorsRes.data ?? []
+    
+    selectedCall.value = calls.value.find(c => c.id === selectedCallId.value) || null
+    
+    if (statsRes.data?.applications) {
+      evaluationStats.value = statsRes.data.applications
+    }
+    
+    if (selectedCall.value?.evaluation_scheduled_at) {
+      const dateStr = selectedCall.value.evaluation_scheduled_at
+      evaluationScheduledAt.value = dateStr.slice(0, 16)
+    } else {
+      evaluationScheduledAt.value = ''
+    }
+  } catch (e) {
     error.value = 'Could not load evaluators'
+    console.error('Error loading evaluators:', e)
   } finally {
     loading.value = false
   }
@@ -51,6 +85,7 @@ async function assign() {
     setTimeout(() => (success.value = ''), 3000)
   } catch (e: any) {
     error.value = e.response?.data?.message ?? 'Could not assign evaluator'
+    console.error('Error assigning evaluator:', e)
   }
 }
 
@@ -60,72 +95,191 @@ async function remove(userId: number) {
   try {
     await removeEvaluator(selectedCallId.value, userId)
     evaluators.value = evaluators.value.filter(e => e.id !== userId)
+    success.value = 'Evaluator removed.'
+    setTimeout(() => (success.value = ''), 3000)
   } catch (e: any) {
     error.value = e.response?.data?.message ?? 'Could not remove evaluator'
+    console.error('Error removing evaluator:', e)
   }
+}
+
+async function handleScheduleEvaluation() {
+  if (!selectedCallId.value || !evaluationScheduledAt.value) {
+    schedulingError.value = 'Будь ласка, виберіть Call та встановіть дату'
+    return
+  }
+  
+  schedulingError.value = ''
+  schedulingSuccess.value = ''
+  schedulingLoading.value = true
+  
+  try {
+    const res = await scheduleCallEvaluation(selectedCallId.value, {
+      evaluation_scheduled_at: evaluationScheduledAt.value,
+    })
+    
+    schedulingSuccess.value = `✓ Evaluation scheduled! ${res.data.data.applications_moved} applications moved to under_evaluation.`
+    
+    if (selectedCall.value) {
+      selectedCall.value.evaluation_scheduled_at = res.data.data.evaluation_scheduled_at
+    }
+    
+    evaluationStats.value.formally_verified = 0
+    evaluationStats.value.under_evaluation += res.data.data.applications_moved
+    
+    setTimeout(() => (schedulingSuccess.value = ''), 4000)
+  } catch (e: any) {
+    console.error('Error scheduling evaluation:', e)
+    schedulingError.value = e.response?.data?.message ?? 'Could not schedule evaluation'
+  } finally {
+    schedulingLoading.value = false
+  }
+}
+
+function getMinDateTime(): string {
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  return tomorrow.toISOString().substring(0, 10)
 }
 </script>
 
 <template>
-  <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6">
-    <h3 class="text-xl font-bold text-white mb-6">Call Evaluators</h3>
+  <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6 space-y-6">
+    <h3 class="text-xl font-bold text-white">Call Evaluators & Evaluation Scheduling</h3>
 
-    <p v-if="error" class="text-red-400 text-sm mb-4">{{ error }}</p>
-    <p v-if="success" class="text-green-400 text-sm mb-4">{{ success }}</p>
+    <!-- ERROR/SUCCESS MESSAGES -->
+    <div v-if="error" class="p-3 bg-red-950/30 border border-red-900/40 rounded-lg text-red-400 text-sm">
+      {{ error }}
+    </div>
+    <div v-if="success" class="p-3 bg-green-950/30 border border-green-900/40 rounded-lg text-green-400 text-sm">
+      {{ success }}
+    </div>
 
-    <div class="flex gap-3 mb-6 flex-wrap">
+    <!-- CALL SELECTION -->
+    <div>
+      <label class="block text-sm font-medium text-slate-300 mb-2">Select Call</label>
       <select
-          v-model="selectedCallId"
+          v-model.number="selectedCallId"
           @change="loadEvaluators"
-          class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-600 outline-none">
-        <option :value="null" disabled>Select call...</option>
-        <option v-for="c in calls" :key="c.id" :value="c.id">{{ c.name }} (#{{ c.id }})</option>
+          class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-600 outline-none">
+        <option :value="null">-- Choose a call --</option>
+        <option v-for="call in calls" :key="call.id" :value="call.id">
+          {{ call.name }} ({{ call.program?.name }})
+        </option>
       </select>
     </div>
 
-    <div v-if="selectedCallId">
-      <div class="flex gap-3 mb-6 flex-wrap items-center">
-        <select
-            v-model="selectedUserId"
-            class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-600 outline-none">
-          <option :value="null" disabled>Select evaluator to assign...</option>
-          <option v-for="u in allUsers" :key="u.id" :value="u.id">{{ u.first_name }} {{ u.last_name }} ({{ u.email }})</option>
-        </select>
+    <!-- EVALUATION SCHEDULING SECTION -->
+    <div v-if="selectedCall" class="pt-6 border-t border-slate-800 space-y-4">
+      <h4 class="text-lg font-semibold text-white flex items-center gap-2">
+        Schedule Commission Meeting
+      </h4>
+
+      <div v-if="schedulingError" class="p-3 bg-red-950/30 border border-red-900/40 rounded-lg text-red-400 text-sm">
+        {{ schedulingError }}
+      </div>
+      <div v-if="schedulingSuccess" class="p-3 bg-green-950/30 border border-green-900/40 rounded-lg text-green-400 text-sm">
+        {{ schedulingSuccess }}
+      </div>
+
+      <!-- DATE INPUT + BUTTON -->
+      <div class="flex gap-3 items-end">
+        <div class="flex-1">
+          <label class="block text-sm font-medium text-slate-300 mb-2">
+            Evaluation Date & Time
+            <span class="text-slate-500 text-xs">(when commission will meet)</span>
+          </label>
+          <input
+            v-model="evaluationScheduledAt"
+            type="datetime-local"
+            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-600 outline-none"
+            :min="getMinDateTime() + 'T09:00'"
+          />
+        </div>
+
         <button
-            @click="assign"
-            :disabled="!selectedUserId"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm disabled:opacity-50">
-          Assign
+          @click="handleScheduleEvaluation"
+          :disabled="!evaluationScheduledAt || schedulingLoading || applicationsToMove === 0"
+          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition"
+        >
+          <span v-if="schedulingLoading">Scheduling...</span>
+          <span v-else>Set Date</span>
         </button>
       </div>
 
-      <div v-if="loading" class="text-slate-500 animate-pulse text-sm">Loading evaluators...</div>
+      <!-- INFO BOX: HOW MANY APPLICATIONS WILL BE MOVED -->
+      <div class="p-4 bg-blue-950/20 border border-blue-900/30 rounded-lg space-y-2">
+        <p class="text-sm text-blue-300 font-medium">Applications Status</p>
+        <div class="grid grid-cols-3 gap-2 text-xs">
+          <div class="bg-slate-950/50 rounded p-2">
+            <div class="text-slate-400">Formally Verified</div>
+            <div class="text-white font-semibold text-lg">{{ evaluationStats.formally_verified }}</div>
+          </div>
+          <div class="bg-slate-950/50 rounded p-2">
+            <div class="text-slate-400">Under Evaluation</div>
+            <div class="text-white font-semibold text-lg">{{ evaluationStats.under_evaluation }}</div>
+          </div>
+          <div class="bg-slate-950/50 rounded p-2">
+            <div class="text-slate-400">Total</div>
+            <div class="text-white font-semibold text-lg">{{ evaluationStats.total }}</div>
+          </div>
+        </div>
+        <p v-if="applicationsToMove > 0" class="text-sm text-blue-300 mt-2">
+          <strong>{{ applicationsToMove }} application{{ applicationsToMove !== 1 ? 's' : '' }}</strong> 
+          will be moved from <code class="text-xs bg-slate-950 px-1.5 py-0.5 rounded">formally_verified</code> 
+          → <code class="text-xs bg-slate-950 px-1.5 py-0.5 rounded">under_evaluation</code> when you set this date
+        </p>
+        <p v-else class="text-sm text-slate-400 mt-2">
+          No applications in "formally_verified" status to move
+        </p>
+      </div>
+    </div>
 
-      <div v-else-if="evaluators.length === 0" class="text-slate-500 text-sm">No evaluators assigned to this call.</div>
+    <!-- EVALUATORS SECTION -->
+    <div v-if="selectedCall" class="pt-6 border-t border-slate-800 space-y-4">
+      <h4 class="text-lg font-semibold text-white">Assign Evaluators</h4>
 
-      <div v-else class="overflow-x-auto">
-        <table class="w-full text-left text-sm text-slate-300">
-          <thead class="text-xs text-slate-400 uppercase font-mono bg-slate-900/50">
-          <tr>
-            <th class="px-4 py-3">Name</th>
-            <th class="px-4 py-3">Email</th>
-            <th class="px-4 py-3">Assigned at</th>
-            <th class="px-4 py-3 text-right">Action</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr v-for="ev in evaluators" :key="ev.id" class="border-b border-slate-800 hover:bg-slate-800/30 transition">
-            <td class="px-4 py-3 text-white">{{ ev.name }}</td>
-            <td class="px-4 py-3 text-slate-400">{{ ev.email }}</td>
-            <td class="px-4 py-3 text-slate-500 text-xs">{{ ev.assigned_at ? new Date(ev.assigned_at).toLocaleDateString() : '—' }}</td>
-            <td class="px-4 py-3 text-right">
-              <button @click="remove(ev.id)" class="text-xs text-red-400 hover:text-red-300 border border-red-900 hover:border-red-700 px-3 py-1.5 rounded-lg transition">
-                Remove
-              </button>
-            </td>
-          </tr>
-          </tbody>
-        </table>
+      <!-- ASSIGN FORM -->
+      <div class="flex gap-3">
+        <select
+            v-model.number="selectedUserId"
+            class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-600 outline-none">
+          <option :value="null">-- Select evaluator --</option>
+          <option 
+            v-for="user in allUsers.filter(u => !evaluators.some(e => e.id === u.id))" 
+            :key="user.id" 
+            :value="user.id">
+            {{ user.name }} ({{ user.email }})
+          </option>
+        </select>
+        <button
+          @click="assign"
+          :disabled="!selectedUserId || loading"
+          class="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition">
+          {{ loading ? 'Assigning...' : 'Assign' }}
+        </button>
+      </div>
+
+      <!-- EVALUATORS LIST -->
+      <div class="space-y-2">
+        <p class="text-sm text-slate-400">{{ evaluators.length }} evaluator{{ evaluators.length !== 1 ? 's' : '' }} assigned</p>
+        <div v-if="evaluators.length === 0" class="text-xs text-slate-500 italic py-2">
+          No evaluators assigned yet
+        </div>
+        <div
+          v-for="evaluator in evaluators"
+          :key="evaluator.id"
+          class="flex justify-between items-center p-3 bg-slate-950/50 border border-slate-800 rounded-lg">
+          <div>
+            <p class="text-sm font-medium text-white">{{ evaluator.name }}</p>
+            <p class="text-xs text-slate-400">{{ evaluator.email }}</p>
+          </div>
+          <button
+            @click="remove(evaluator.id)"
+            class="px-3 py-1 text-xs bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded transition">
+            Remove
+          </button>
+        </div>
       </div>
     </div>
   </div>

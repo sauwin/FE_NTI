@@ -12,6 +12,7 @@ const loading = ref(true)
 onMounted(async () => {
   try {
     const res = await getActiveCallQuery('a')
+    console.log(res)
     
     if (res.data && res.data.id) {
       activeCall.value = res.data

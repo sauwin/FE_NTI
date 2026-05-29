@@ -1,14 +1,25 @@
 <script setup lang="ts">
   import { ref, onMounted, computed } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
-  import { getApplicationById } from '@/features/applications/api/applications'
-  import { createEvaluation, updateEvaluation, getMyEvaluations } from '@/features/evaluation/api/evaluations'
+  
+  import DocumentActionButtons from '@/shared/components/DocumentActionButtons.vue'
+
+  import { 
+    getApplicationById, 
+    getApplicationDocuments 
+  } from '@/features/applications/api/applications'
+  import { 
+    createEvaluation, 
+    updateEvaluation, 
+    getMyEvaluations 
+  } from '@/features/evaluation/api/evaluations'
 
   const route = useRoute()
   const router = useRouter()
   const applicationId = Number(route.params.applicationId)
 
   const app = ref<any>(null)
+  const docs = ref<any[]>([]) 
   const existingEvaluation = ref<any>(null)
   const loading = ref(true)
   const submitting = ref(false)
@@ -21,6 +32,18 @@
     { key: 'team', label: 'Kompetencia a zloženie tímu', weight: 25 },
     { key: 'impact', label: 'Trhový potenciál a rozpočet', weight: 25 },
   ]
+
+  const docLabels: Record<string, string> = {
+    executive_summary: 'Executive Summary',
+    technical_architecture: 'Technická architektúra',
+    roadmap: 'Projektová roadmapa',
+    budget: 'Rozpočet a alokácia grantu',
+    risk_analysis: 'Analýza rizík',
+    monetization: 'Monetizačný model',
+    cv: 'Životopis (CV)',
+    motivation_letter: 'Motivačný list',
+    technical_proposal: 'Technický návrh projektu',
+  }
 
   const scores = ref(
     CRITERIA.map(c => ({ criterion_key: c.key, score: 50, weight_at_moment: c.weight, comment: '' }))
@@ -37,13 +60,14 @@
 
   onMounted(async () => {
     try {
-
-      const [appRes, evalRes] = await Promise.all([
+      const [appRes, docsRes, evalRes] = await Promise.all([
         getApplicationById(applicationId),
+        getApplicationDocuments(applicationId),
         getMyEvaluations(),
       ])
       
       app.value = appRes.data
+      docs.value = docsRes.data ?? []
       
       const allMyEvals = evalRes.data?.data ?? evalRes.data ?? []
       const currentAppEvaluation = allMyEvals.find((e: any) => Number(e.application_id) === applicationId)
@@ -67,7 +91,7 @@
         }
       }
     } catch (err) {
-      error.value = 'Nepodarilo sa načítať podklady prihlášky.'
+      error.value = 'Nepodarilo sa načítať podklady prihlášky alebo dokumentáciu.'
     } finally {
       loading.value = false
     }
@@ -76,6 +100,8 @@
   async function submit() {
     submitting.value = true
     error.value = ''
+    success.value = ''
+    
     try {
       const payload = {
         application_id: applicationId,
@@ -83,11 +109,13 @@
         recommendation: recommendation.value,
         comment: comment.value,
       }
+      
       if (existingEvaluation.value) {
         await updateEvaluation(existingEvaluation.value.id, payload)
       } else {
         await createEvaluation(payload)
       }
+      
       success.value = 'Hodnotenie bolo úspešne zaznamenané do auditnej stopy NTI.'
       setTimeout(() => router.push('/dashboard'), 1500)
     } catch (e: any) {
@@ -111,11 +139,25 @@
         </h1>
       </div>
       
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-6">
+        <div v-if="app && app.total_evaluators_count" class="text-right hidden md:block border-r border-slate-800 pr-6">
+          <span class="text-xs text-slate-400 block">Stav hodnotiacej komisie</span>
+          <span class="text-sm font-mono font-semibold text-slate-300">
+            Odovzdané: <span class="text-blue-400 font-bold">{{ app.completed_evaluations_count }}</span> / {{ app.total_evaluators_count }}
+          </span>
+          <span v-if="app.pending_evaluators_count > 0" class="text-[10px] text-amber-400/80 block mt-0.5">
+            Čaká sa na ešte {{ app.pending_evaluators_count }} posudok(y)
+          </span>
+          <span v-else class="text-[10px] text-green-400 block mt-0.5">
+            Všetci členovia komisie uzavreli hodnotenie
+          </span>
+        </div>
+
         <div class="text-right hidden sm:block">
           <span class="text-xs text-slate-400 block">Vážený priemer</span>
           <span class="text-lg font-mono font-bold text-blue-400">{{ totalWeightedScore }} / 100 b</span>
         </div>
+        
         <button
           @click="submit"
           :disabled="submitting"
@@ -131,13 +173,12 @@
     </div>
 
     <div v-else class="flex-1 grid grid-cols-1 lg:grid-cols-2 overflow-hidden">
-      
       <div class="p-6 border-b lg:border-b-0 lg:border-r border-slate-800 lg:overflow-y-auto max-h-[calc(100vh-69px)]">
         <div class="space-y-6">
           <div>
             <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Základné informácie o projekte</h2>
             <div v-if="app" class="bg-slate-900/40 border border-slate-800 rounded-xl p-4 space-y-3 text-sm">
-              <div class="flex justify-between"><span class="text-slate-500">Názov tímu:</span> <span class="text-slate-300">{{ app.team.name }}</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">Názov tímu:</span> <span class="text-slate-300">{{ app.team?.name ?? 'Neznámy tím' }}</span></div>
               <div class="flex justify-between"><span class="text-slate-500">Typ programu:</span> <span class="text-indigo-400 uppercase font-semibold">Program {{ app.program_type }}</span></div>
               <div class="flex justify-between"><span class="text-slate-500">Fáza/Stav:</span> <span class="text-amber-400 capitalize">{{ app.status?.replace(/_/g, ' ') }}</span></div>
             </div>
@@ -148,7 +189,7 @@
             <div class="bg-slate-900/20 border border-slate-800/80 rounded-xl p-4 text-xs space-y-2">
               <div class="flex justify-between items-center">
                 <span class="text-slate-400">Počet členov v tíme:</span>
-                <span class="font-medium px-2 py-0.5 rounded bg-slate-800 text-white">{{ app.academic_signals?.member_count ?? 3 }} (Minimálne 3)</span>
+                <span class="font-medium px-2 py-0.5 rounded bg-slate-800 text-white">{{ app?.academic_signals?.member_count ?? 3 }} (Minimálne 3)</span>
               </div>
               <div class="flex justify-between items-center">
                 <span class="text-slate-400">Čestné vyhlásenie o prenášaní predmetov:</span>
@@ -159,20 +200,25 @@
 
           <div>
             <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Priložená projektová dokumentácia</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div v-for="doc in ['Executive Summary', 'Technická architektúra', 'Projektová roadmapa', 'Rozpočet a alokácia grantu']" :key="doc"
+            <div v-if="docs.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div v-for="doc in docs" :key="doc.id"
                    class="bg-slate-900/60 border border-slate-800 hover:border-slate-700 p-3 rounded-xl flex items-center justify-between group transition">
                 <div class="flex items-center gap-2 overflow-hidden">
                   <span class="text-xl">📄</span>
                   <div class="truncate">
-                    <p class="text-xs text-white font-medium truncate">{{ doc }}</p>
-                    <p class="text-[10px] text-slate-500">PDF Document</p>
+                    <p class="text-xs text-white font-medium truncate" :title="doc.name || doc.file_path">
+                      {{ docLabels[doc.type] ?? doc.name ?? doc.file_path?.split('/').pop() ?? 'Nepomenovaný dokument' }}
+                    </p>
+                    <p class="text-[10px] text-slate-500 uppercase">
+                      {{ doc.file_path?.split('.').pop() ?? 'SÚBOR' }}
+                    </p>
                   </div>
                 </div>
-                <button @click.prevent class="text-xs text-blue-400 hover:text-blue-300 font-medium opacity-80 group-hover:opacity-100 transition">
-                  Zobraziť
-                </button>
+                <DocumentActionButtons :documentId="doc.id" :fileName="doc.file_name" :mimeType="doc.mime_type"/>
               </div>
+            </div>
+            <div v-else class="text-xs text-slate-500 bg-slate-900/20 border border-slate-800/50 rounded-xl p-6 text-center">
+              K tejto prihláške neboli priložené žiadne dokumenty.
             </div>
           </div>
         </div>
@@ -183,51 +229,27 @@
         <p v-if="success" class="text-green-400 text-sm mb-4 bg-green-950/20 border border-green-900 p-3 rounded-xl">{{ success }}</p>
 
         <div class="space-y-6 mb-6">
-          <div v-for="(row, i) in scores" :key="row.criterion_key" class="bg-slate-900/40 border border-slate-800 p-5 rounded-xl">
+          <div v-for="row in scores" :key="row.criterion_key" class="bg-slate-900/40 border border-slate-800 p-5 rounded-xl">
             <div class="flex items-start justify-between gap-2 mb-2">
-              <div>
-                <h3 class="text-sm font-semibold text-white">{{ row.label }}</h3>
-              </div>
+              <div><h3 class="text-sm font-semibold text-white">{{ row.label }}</h3></div>
               <span class="text-[11px] font-medium bg-slate-800 text-slate-400 px-2 py-0.5 rounded">Váha: {{ row.weight_at_moment }}%</span>
             </div>
-            
             <div class="mt-4">
-              <input
-                type="range" min="0" max="100" v-model.number="row.score"
-                class="w-full accent-blue-500 cursor-pointer bg-slate-800 h-1.5 rounded-lg appearance-none"
-              />
+              <input type="range" min="0" max="100" v-model.number="row.score" class="w-full accent-blue-500 cursor-pointer bg-slate-800 h-1.5 rounded-lg appearance-none"/>
               <div class="flex justify-between text-xs text-slate-500 mt-2 font-mono">
                 <span>0 b.</span>
                 <span class="text-blue-400 font-bold bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-md text-sm">{{ row.score }} b.</span>
                 <span>100 b.</span>
               </div>
             </div>
-
-            <input
-              v-model="row.comment"
-              type="text"
-              placeholder="Špecifická poznámka ku kritériu (nepovinné)..."
-              class="mt-4 w-full bg-slate-950 border border-slate-800/80 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-blue-500 outline-none transition"
-            />
+            <input v-model="row.comment" type="text" placeholder="Špecifická poznámka ku kritériu (nepovinné)..." class="mt-4 w-full bg-slate-950 border border-slate-800/80 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-blue-500 outline-none transition"/>
           </div>
         </div>
 
         <div class="bg-slate-900/40 border border-slate-800 p-5 rounded-xl mb-6">
           <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Finálne odporúčanie komisie</h3>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <button
-              v-for="opt in ['approve', 'request_revision', 'reject']" 
-              :key="opt"
-              @click="recommendation = opt as any"
-              :class="[
-                'px-4 py-2.5 rounded-xl text-xs font-semibold border capitalize transition text-center flex items-center justify-center',
-                recommendation === opt
-                  ? opt === 'approve' ? 'bg-green-500/10 border-green-500 text-green-400 shadow-sm shadow-green-500/5'
-                  : opt === 'reject' ? 'bg-red-500/10 border-red-500 text-red-400 shadow-sm shadow-red-500/5'
-                  : 'bg-amber-500/10 border-amber-500 text-amber-400 shadow-sm shadow-amber-500/5'
-                  : 'border-slate-800 bg-slate-900/20 text-slate-400 hover:border-slate-700 hover:text-slate-200'
-              ]"
-            >
+            <button v-for="opt in ['approve', 'request_revision', 'reject']" :key="opt" @click="recommendation = opt as any" :class="['px-4 py-2.5 rounded-xl text-xs font-semibold border capitalize transition text-center flex items-center justify-center', recommendation === opt ? opt === 'approve' ? 'bg-green-500/10 border-green-500 text-green-400 shadow-sm shadow-green-500/5' : opt === 'reject' ? 'bg-red-500/10 border-red-500 text-red-400 shadow-sm shadow-red-500/5' : 'bg-amber-500/10 border-amber-500 text-amber-400 shadow-sm shadow-amber-500/5' : 'border-slate-800 bg-slate-900/20 text-slate-400 hover:border-slate-700 hover:text-slate-200']">
               <span v-if="opt === 'approve'">Schváliť do inkubátora</span>
               <span v-else-if="opt === 'request_revision'">Vrátiť na doplnenie</span>
               <span v-else>Zamietnuť projekt</span>
@@ -238,15 +260,9 @@
         <div class="bg-slate-900/40 border border-slate-800 p-5 rounded-xl mb-6">
           <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Celkové slovné odôvodnenie verdiktu</h3>
           <p class="text-[11px] text-slate-500 mb-3">Toto vyjadrenie bude zaznamenané v histórii a v prípade vrátenia sa zobrazí študentom.</p>
-          <textarea
-            v-model="comment"
-            rows="4"
-            placeholder="Zadajte podrobné oficiálne stanovisko komisie k celkovému hodnoteniu..."
-            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-blue-500 outline-none resize-none transition"
-          />
+          <textarea v-model="comment" rows="4" placeholder="Zadajte podrobné oficiálne stanovisko komisie k celkovému hodnoteniu..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-blue-500 outline-none resize-none transition"/>
         </div>
       </div>
-
     </div>
   </div>
 </template>
