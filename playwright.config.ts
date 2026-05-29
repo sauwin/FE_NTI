@@ -14,9 +14,14 @@ export default defineConfig
             screenshot: 'only-on-failure',
             video: 'retain-on-failure',
         },
+        // webServer: {
+        //     command: 'php artisan serve --port=8000',
+        //     port: 8000,
+        //     reuseExistingServer: true,
+        // },
         webServer: {
-            command: 'php artisan serve --port=8000',
-            port: 8000,
+            command: 'npm run dev',
+            port: 5173,
             reuseExistingServer: true,
         }
     }

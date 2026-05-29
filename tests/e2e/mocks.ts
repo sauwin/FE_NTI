@@ -113,7 +113,7 @@ function resolveUserByEmail(email: string) {
 
 export async function applyMocks(page: Page) {
 // auth
-    await page.route('**/api/auth/register', r => r.fulfill(ok({ message: 'ok' })))
+    await page.route('**/api/auth/register', r => r.fulfill(ok({ message: 'ok', token: TOKEN, user: COMPANY_USER })))
 
     await page.route('**/api/auth/login', async r => {
         const body = JSON.parse(r.request().postData() ?? '{}')
@@ -211,11 +211,10 @@ export async function applyMocks(page: Page) {
 
 export async function applyMocksToContext(context: BrowserContext) {
     await context.route('**/api/**', async r => {
-// catch-all fallback — return empty ok so nothing hard-crashes
+        if (r.request().frame().page().isClosed()) return r.abort()
         r.fulfill(ok({ data: [], message: 'ok' }))
     })
 }
-
 export async function setAuthState(page: Page, user: 'student' | 'admin' | 'company') {
     const map = { student: STUDENT_USER, admin: ADMIN_USER, company: COMPANY_USER }
     const u = map[user]
