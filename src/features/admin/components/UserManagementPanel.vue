@@ -395,7 +395,7 @@ async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
                   v-if="user.status === 'active' && canManage(user)"
                   @click="blockUser(user.id)"
                   :disabled="loading"
-                  class="text-xs px-3 py-1 rounded border bg-red-900/40 hover:bg-red-900/60 text-red-400 border-red-800 transition disabled:opacity-50 cursor-pointer"
+                  class="text-xs px-3 py-1 rounded border bg-yellow-900/40 hover:bg-yellow-900/60 text-yellow-400 border-yellow-800 transition disabled:opacity-50 cursor-pointer"
                 >
                   Block
                 </button>
