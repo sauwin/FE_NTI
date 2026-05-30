@@ -13,7 +13,6 @@ const AdminDocumentManager = defineAsyncComponent(() => import('@/features/admin
 const CreateAdminForm = defineAsyncComponent(() => import('./CreateAdminForm.vue'))
 const AdminLogs = defineAsyncComponent(() => import('./AdminLogs.vue'))
 const BulkNotificationPanel = defineAsyncComponent(() => import('@/features/admin/components/BulkNotificationPanel.vue'))
-const PagesManager = defineAsyncComponent(() => import('@/features/admin/components/PagesManager.vue'))
 
 const props = defineProps<{
   userRole?: string
@@ -282,10 +281,6 @@ onMounted(() => {
 
     <div v-if="activeTab === 'broadcast-notification'">
       <BulkNotificationPanel />
-    </div>
-
-    <div v-if="activeTab === 'pages'">
-      <PagesManager />
     </div>
   </div>
 </template>
