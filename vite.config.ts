@@ -9,9 +9,9 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [
     vue(),
-    vueDevTools(),
+    process.env.NODE_ENV !== 'test' && vueDevTools(),
     tailwindcss(),
-  ],
+  ].filter(Boolean),
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))

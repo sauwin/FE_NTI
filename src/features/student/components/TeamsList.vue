@@ -4,6 +4,7 @@ import { getTeams, deleteTeam, updateTeam } from '../api/teams'
 import type { Team } from '../types/teams'
 import TeamForm from './TeamForm.vue'
 import TeamMembersManager from './TeamMembersManager.vue'
+import {useConfirm} from "@/shared/composables/useConfirm.ts";
 
 const props = defineProps<{
   currentUserId?: number
@@ -65,14 +66,26 @@ async function handleUpdateTeam(teamId: number) {
     editingTeamId.value = null
     await fetchTeams()
   } catch (e: any) {
-    alert(e?.response?.data?.message ?? 'Failed to mutate team resource.')
+    await useConfirm({
+      title: 'Error',
+      message: e?.response?.data?.message ?? 'Failed to mutate team resource.',
+      confirmText: 'Okay',
+      danger: false,
+    })
   } finally {
     saving.value = false
   }
 }
 
 async function handleDeleteTeam(teamId: number) {
-  if (!confirm('Are you sure you want to permanently purge this team instance? This action is irreversible.')) {
+  const confirmed = await useConfirm({
+    title: 'Purge Team',
+    message: 'Are you sure you want to permanently purge this team instance? This action is irreversible.',
+    confirmText: 'Purge team',
+    cancelText: 'Cancel',
+    danger: true,
+  })
+  if (!confirmed) {
     return
   }
   try {
@@ -80,7 +93,12 @@ async function handleDeleteTeam(teamId: number) {
     if (expandedTeamId.value === teamId) expandedTeamId.value = null
     await fetchTeams()
   } catch (e: any) {
-    alert(e?.response?.data?.message ?? 'Failed to terminate team scope.')
+    await useConfirm({
+      title: 'Error',
+      message: e?.response?.data?.message ?? 'Failed to terminate team scope.',
+      confirmText: 'Okay',
+      danger: false,
+    })
   }
 }
 

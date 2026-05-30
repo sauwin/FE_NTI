@@ -48,5 +48,10 @@ export const publicRoutes: RouteRecordRaw = {
         requiresAuth: true,
       },
     },
+
+    {
+      path: ':slug',
+      component: () => import('@/features/pages/pages/SlugPage.vue'),
+    },
   ],
 }

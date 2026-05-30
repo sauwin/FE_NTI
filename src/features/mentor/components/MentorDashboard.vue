@@ -5,6 +5,7 @@ import type { Mentorship } from '../types/mentorships'
 
 import MentorshipsTable from './MentorshipsTable.vue'
 import ProjectDetail from './ProjectDetail.vue'
+import {useConfirm} from "@/shared/composables/useConfirm.ts";
 
 const activeTab = ref('overview')
 const mentorships = ref<Mentorship[]>([])
@@ -61,7 +62,14 @@ const handleAcceptRequest = async (mentorship: Mentorship) => {
 }
 
 const handleRejectRequest = async (mentorship: Mentorship) => {
-  if (!confirm('Are you sure you want to reject this mentorship request?')) return
+  const confirmed = await useConfirm({
+    title: 'Reject mentorship',
+    message: 'Are you sure you want to reject this mentorship request?',
+    confirmText: 'Reject',
+    cancelText: 'Cancel',
+    danger: true,
+  })
+  if (!confirmed) return
   error.value = ''
   successMessage.value = ''
   try {

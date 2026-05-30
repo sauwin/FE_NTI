@@ -5,6 +5,7 @@ import { useAuthStore } from '@/features/auth/stores/auth'
 import { getTaskById } from '@/features/tasks/api/tasks'
 import { downloadDocument as downloadDocumentFile } from '@/shared/api/documents'
 import type { AttachedDocument, TaskDetails } from '@/features/tasks/types/tasks'
+import {useConfirm} from "@/shared/composables/useConfirm.ts";
 
 const route = useRoute()
 const router = useRouter()
@@ -49,7 +50,12 @@ const downloadDocument = async (doc: AttachedDocument) => {
 
 const handleApply = () => {
   if (!task.value?.call_id) {
-    alert('Error: No call was found for this task.')
+    useConfirm({
+      title: 'Error',
+      message: 'Error: No call was found for this task.',
+      confirmText: 'Okay',
+      danger: false,
+    })
     return
   }
   router.push(`/programs/b/apply/${task.value.call_id}`)

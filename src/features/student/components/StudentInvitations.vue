@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { getMyInvitations, respondToInvitation } from '../api/teams'
 import type { Invitation } from '../types/teams'
+import {useConfirm} from "@/shared/composables/useConfirm.ts";
 
 const loading = ref(false)
 const invitations = ref<Invitation[]>([])
@@ -25,7 +26,13 @@ async function respond(teamId: number, status: 'accepted' | 'rejected') {
     await respondToInvitation(teamId, status)
     invitations.value = invitations.value.filter(inv => inv.id !== teamId)
   } catch (e: any) {
-    alert(e?.response?.data?.message ?? 'Action failed.')
+    await useConfirm({
+      title: 'Fail',
+      message: e?.response?.data?.message ?? 'Action failed.',
+      confirmText: 'Okay',
+      cancelText: 'Cancel',
+      danger: false,
+    })
     await fetchInvitations()
   }
 }

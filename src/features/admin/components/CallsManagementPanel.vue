@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getAdminCalls, deleteAdminCall } from '@/features/admin/api/admin'
+import {useConfirm} from "@/shared/composables/useConfirm.ts";
 
 const calls = ref<any[]>([])
 
@@ -10,12 +11,24 @@ const loadCalls = async () => {
 }
 
 const deleteCall = async (id: number) => {
-  if (!confirm('Are you sure you want to delete this draft call?')) return
+  const confirmed = await useConfirm({
+    title: 'Delete Draft',
+    message: 'Are you sure you want to delete this draft call?',
+    confirmText: 'Delete Now',
+    cancelText: 'Cancel',
+    danger: true,
+  })
+  if (!confirmed) return
   try {
     await deleteAdminCall(id)
     await loadCalls()
   } catch (e: any) {
-    alert(e.response?.data?.message || 'Error deleting call')
+    await useConfirm({
+      title: 'Error',
+      message: e.response?.data?.message || 'Error deleting call',
+      confirmText: 'Okay',
+      danger: false,
+    })
   }
 }
 
