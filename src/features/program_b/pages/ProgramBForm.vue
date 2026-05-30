@@ -33,7 +33,7 @@ const proposedSolution = ref<string>('')
 const files = ref<Record<string, File | null>>({})
 
 const defaultDocLabels: Record<string, string> = {
-  cv: 'CV (All team members in a single PDF file)',
+  cv: 'CV (All team members in a single file)',
   motivation_letter: 'Motivation Letter',
   technical_proposal: 'Technical Proposal / Solution Concept',
 }
@@ -76,7 +76,6 @@ const docLabels = computed<Record<string, string>>(() => {
     return labels
   }
 
-  // If the backend returns a flat key-value object -> { "1": "Motivation Letter" }
   if (typeof reqDocs === 'object') {
     return reqDocs as Record<string, string>
   }
@@ -105,7 +104,6 @@ onMounted(async () => {
 
   loading.value = true
 
-  // 1. Fetch Student Teams
   try {
     const teamsRes = await getTeams()
     myTeams.value = Array.isArray(teamsRes.data) ? teamsRes.data : []
@@ -116,13 +114,11 @@ onMounted(async () => {
     console.error('Unable to load student teams:', err)
   }
 
-  // 2. Fetch Call Details Directly Using Call ID
   try {
     const callRes = await getCallById(urlId.value)
     currentCall.value = callRes.data
     resolvedCallId.value = callRes.data.id
     
-    // Automatically fill title from the nested task structure
     if (callRes.data && callRes.data.task) {
       projectTitle.value = callRes.data.task.title || ''
     }
@@ -259,14 +255,14 @@ async function submit(): Promise<void> {
 
         <div v-else-if="step === 2">
           <h2 class="text-2xl font-bold text-white mb-1">Required Documentation</h2>
-          <p class="text-xs text-slate-500 mb-6">Step 2 of 2: Uploading accompanying PDF files specified by the call</p>
+          <p class="text-xs text-slate-500 mb-6">Step 2 of 2: Uploading accompanying files specified by the call</p>
           
           <p v-if="error" class="text-red-400 text-sm mb-4 bg-red-950/60 p-3 rounded-xl border border-red-900/50">{{ error }}</p>
 
           <div class="flex flex-col gap-4">
             <div v-for="(label, key) in docLabels" :key="key" class="border border-slate-950 p-4 rounded-xl bg-slate-950/60">
               <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{{ label }} *</label>
-              <input type="file" accept=".pdf" @change="onFileChange(String(key), $event)" class="text-xs text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-950 file:text-blue-400 hover:file:bg-blue-900 file:cursor-pointer transition" />
+              <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx" @change="onFileChange(String(key), $event)" class="text-xs text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-950 file:text-blue-400 hover:file:bg-blue-900 file:cursor-pointer transition" />
               <p v-if="files[key]" class="text-xs text-green-400 mt-2 font-medium">✓ Selected: {{ files[key]?.name }}</p>
             </div>
 

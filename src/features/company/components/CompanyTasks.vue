@@ -3,10 +3,14 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getCompanyTasks } from '@/features/company/api/company'
 import type { CompanyTask, TaskStatus } from '@/features/company/types/company'
+import { updateTaskStatus, deleteCallWithTask } from '@/features/tasks/api/tasks'
+import { useConfirm as confirm } from '../../../shared/composables/useConfirm'
 
 const router = useRouter()
+
 const tasks = ref<CompanyTask[]>([])
 const loading = ref(false)
+const actionLoading = ref<number | null>(null) 
 
 onMounted(async () => {
   await fetchTasks()
@@ -16,7 +20,7 @@ async function fetchTasks() {
   loading.value = true
   try {
     const response = await getCompanyTasks()
-    tasks.value = Array.isArray(response.data) ? response.data : []
+    tasks.value = Array.isArray(response.data) ? response.data : (response.data?.data ?? [])
   } catch {
     tasks.value = []
   } finally {
@@ -38,6 +42,38 @@ function getStatusColor(status: TaskStatus) {
 
 const viewDetails = (taskId: number) => {
   router.push(`/programs/b/tasks/${taskId}`)
+}
+
+async function handlePublishTask(task: CompanyTask) {
+  actionLoading.value = task.id
+  try {
+    await updateTaskStatus(task.id, 'published')
+    await fetchTasks()
+  } catch (err) {
+    console.error('Failed to publish task', err)
+  } finally {
+    actionLoading.value = null
+  }
+}
+
+async function handleDeleteTask(task: CompanyTask) {
+  const isConfirmed = await confirm({
+    title: 'Delete Innovation Challenge',
+    message: `Are you sure you want to permanently delete "${task.title}"? This will also remove the associated Call and all uploaded requirements from the disk.`,
+    danger: true
+  })
+
+  if (!isConfirmed) return
+
+  actionLoading.value = task.id
+  try {
+    await deleteCallWithTask(task.id)
+    await fetchTasks()
+  } catch (err) {
+    console.error('Failed to delete task', err)
+  } finally {
+    actionLoading.value = null
+  }
 }
 </script>
 
@@ -94,9 +130,20 @@ const viewDetails = (taskId: number) => {
               {{ task.short_description || task.brief || 'Опис відсутній.' }}
             </p>
           </div>
-          <span :class="['text-[10px] px-2.5 py-1 rounded-xl border uppercase font-mono font-semibold tracking-wider shrink-0', getStatusColor(task.status)]">
-            {{ task.status.replace('_', ' ') }}
-          </span>
+          <div class="flex items-center gap-3 shrink-0" @click.stop>
+            <button
+              v-if="task.status === 'draft'"
+              @click="handlePublishTask(task)"
+              :disabled="actionLoading === task.id"
+              class="text-[10px] bg-blue-600/20 hover:bg-blue-600 border border-blue-500/40 hover:border-blue-500 text-blue-400 hover:text-white px-2.5 py-1 rounded-xl transition font-mono font-semibold uppercase tracking-wider"
+            >
+              {{ actionLoading === task.id ? '...' : 'Publish' }}
+            </button>
+
+            <span :class="['text-[10px] px-2.5 py-1 rounded-xl border uppercase font-mono font-semibold tracking-wider', getStatusColor(task.status)]">
+              {{ task.status.replace('_', ' ') }}
+            </span>
+          </div>
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4 pt-4 border-t border-slate-950 text-xs">
@@ -109,19 +156,27 @@ const viewDetails = (taskId: number) => {
           <div>
             <span class="text-slate-500 block font-mono uppercase text-[10px] tracking-wider mb-1">Program</span>
             <p class="text-slate-300 font-medium font-mono uppercase tracking-wider">
-              {{ task.call?.program?.code ? task.call.program.code.replace('program_', 'Program ') : 'B' }}
+              {{ (task.call as any)?.program?.code ? (task.call as any).program.code.replace('program_', 'Program ') : 'B' }}
             </p>
           </div>
           <div>
             <span class="text-slate-500 block font-mono uppercase text-[10px] tracking-wider mb-1">Created</span>
             <p class="text-slate-300 font-medium font-mono">
-              {{ new Date(task.created_at).toLocaleDateString('uk-UA') }}
+              {{ task.created_at ? new Date(task.created_at).toLocaleDateString('sk-SK') : '—' }}
             </p>
           </div>
           
           <div class="text-right flex items-center justify-end gap-5 text-xs" @click.stop>
+            <button
+              @click="handleDeleteTask(task)"
+              :disabled="actionLoading === task.id"
+              class="text-red-400/70 hover:text-red-400 border-b border-transparent hover:border-red-500/40 font-mono transition text-[11px]"
+            >
+              {{ actionLoading === task.id ? 'Deleting...' : 'Delete' }}
+            </button>
+
             <router-link
-              :to="`/company/tasks/${task.id}/edit`"
+              :to="`/programs/b/tasks/${task.id}/edit`"
               class="text-slate-400 hover:text-white border-b border-transparent hover:border-slate-500 transition font-medium pb-0.5"
             >
               Edit

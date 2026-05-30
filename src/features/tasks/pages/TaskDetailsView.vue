@@ -13,7 +13,7 @@ const auth = useAuthStore()
 const task = ref<TaskDetails | null>(null)
 const loading = ref<boolean>(true)
 const error = ref<string>('')
-const downloadLoadingId = ref<number | null>(null) // Для індикації завантаження конкретного файлу
+const downloadLoadingId = ref<number | null>(null)
 
 onMounted(async () => {
   const taskId = route.params.id
@@ -36,7 +36,6 @@ const downloadDocument = async (doc: AttachedDocument) => {
     const blob = new Blob([response.data])
     const link = document.createElement('a')
     link.href = window.URL.createObjectURL(blob)
-    // Використовуємо реальне поле з бази даних
     link.download = doc.file_name || `document-${doc.id}.pdf`
     link.click()
     
