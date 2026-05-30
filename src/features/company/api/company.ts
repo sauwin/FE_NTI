@@ -32,3 +32,18 @@ export function rejectMember(userId: number | string) {
 export function kickMember(userId: number | string) {
   return api.delete(`/company/members/${userId}/kick`)
 }
+
+export function updateMemberRole(userId: number | string, roleInOrg: string) {
+  return api.patch(`/organization/members/${userId}/role`, { role_in_org: roleInOrg })
+}
+
+export function getOrganizationApplications() {
+  return api.get('/organization/applications')
+}
+
+export function updateApplicationStatus(applicationId: number | string, status: string, comment?: string) {
+  return api.patch(`/applications/${applicationId}/status`, { 
+    status, 
+    comment: comment || '' 
+  })
+}

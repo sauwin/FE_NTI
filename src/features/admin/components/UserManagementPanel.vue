@@ -27,6 +27,21 @@ const message = ref('')
 const success = ref(false)
 const currentPage = ref(1)
 
+const showCompanyModal = ref(false)
+const companyForm = ref({
+  userId: null as number | null,
+  roleSlug: '',
+  registration_number: '',
+  role_in_org: 'contact'
+})
+
+const roleInOrgOptions = [
+  { value: 'owner', label: 'Owner' },
+  { value: 'contact', label: 'Contact' },
+  { value: 'evaluator', label: 'Evaluator' },
+  { value: 'mentor', label: 'Mentor' }
+]
+
 const availableRoles = ['student', 'company', 'mentor']
 const superAdminRoles = ['student', 'company', 'mentor', 'evaluator', 'content_editor']
 
@@ -81,7 +96,18 @@ const visibleUsers = computed(() => {
 
 function onRoleSelect(userId: number, roleSlug: string) {
   if (!roleSlug) return
-  assignRole(userId, roleSlug)
+  
+  if (roleSlug === 'company') {
+    companyForm.value = {
+      userId,
+      roleSlug,
+      registration_number: '',
+      role_in_org: 'contact'
+    }
+    showCompanyModal.value = true
+  } else {
+    assignRole(userId, roleSlug)
+  }
 }
 
 function canManage(user: any) {
@@ -110,7 +136,10 @@ async function blockUser(userId: number) {
     success.value = true
     message.value = 'User blocked'
     emit('refresh')
-    setTimeout(() => success.value = false, 3000)
+    setTimeout(() => {
+      message.value = ''
+      success.value = false
+    }, 3000)
   } catch (e: any) {
     success.value = false
     message.value = e.response?.data?.message || 'Failed to block user'
@@ -135,7 +164,10 @@ async function unblockUser(userId: number) {
     success.value = true
     message.value = 'User unblocked'
     emit('refresh')
-    setTimeout(() => success.value = false, 3000)
+    setTimeout(() => {
+      message.value = ''
+      success.value = false
+    }, 3000)
   } catch (e: any) {
     success.value = false
     message.value = e.response?.data?.message || 'Failed to unblock user'
@@ -160,7 +192,10 @@ async function deleteUser(userId: number) {
     success.value = true
     message.value = 'User deleted'
     emit('refresh')
-    setTimeout(() => success.value = false, 3000)
+    setTimeout(() => {
+      message.value = ''
+      success.value = false
+    }, 3000)
   } catch (e: any) {
     success.value = false
     message.value = e.response?.data?.message || 'Failed to delete user'
@@ -185,7 +220,10 @@ async function removeRole(userId: number, roleSlug: string) {
     success.value = true
     message.value = 'Role removed'
     emit('refresh')
-    setTimeout(() => success.value = false, 3000)
+    setTimeout(() => {
+      message.value = ''
+      success.value = false
+    }, 3000)
   } catch (e: any) {
     success.value = false
     message.value = e.response?.data?.message || 'Failed to remove role'
@@ -194,11 +232,11 @@ async function removeRole(userId: number, roleSlug: string) {
   }
 }
 
-async function assignRole(userId: number, roleSlug: string) {
+async function assignRole(userId: number, roleSlug: string, extraData?: { registration_number: string, role_in_org: string }) {
   loading.value = true
   try {
     const user = props.users.find(u => u.id === userId)
-    const currentRoles = user?.roles?.map((r: AdminRole) => r.slug) || []
+    const currentRoles = user?.roles?.map((r: any) => r.slug) || []
     const replaceableRoles = props.isSuperAdmin ? superAdminRoles : availableRoles
     const rolesToRemove = currentRoles.filter((r: string) => replaceableRoles.includes(r))
 
@@ -206,17 +244,43 @@ async function assignRole(userId: number, roleSlug: string) {
       await removeUserRole(userId, role)
     }
 
-    await addUserRole(userId, roleSlug)
+    // Передаємо extraData (якщо є) у вашу функцію API
+    await addUserRole(userId, { 
+      role: roleSlug, 
+      ...extraData 
+    })
+    
     success.value = true
     message.value = `Role "${roleSlug}" assigned`
     emit('refresh')
-    setTimeout(() => success.value = false, 3000)
+    setTimeout(() => {
+      message.value = ''
+      success.value = false
+    }, 3000)
   } catch (e: any) {
     success.value = false
     message.value = e.response?.data?.message || 'Failed to assign role'
   } finally {
     loading.value = false
   }
+}
+
+async function confirmCompanyRole() {
+  if (!companyForm.value.registration_number) {
+    message.value = 'Registration number is required'
+    success.value = false
+    return
+  }
+  
+  await assignRole(
+    companyForm.value.userId!, 
+    companyForm.value.roleSlug, 
+    { 
+      registration_number: companyForm.value.registration_number,
+      role_in_org: companyForm.value.role_in_org 
+    }
+  )
+  showCompanyModal.value = false
 }
 
 async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
@@ -241,7 +305,10 @@ async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
     
     success.value = true
     message.value = `Export successful (${format.toUpperCase()})`
-    setTimeout(() => success.value = false, 3000)
+    setTimeout(() => {
+      message.value = ''
+      success.value = false
+    }, 3000)
   } catch (e: any) {
     success.value = false
     message.value = e.response?.data?.message || `Failed to export users as ${format.toUpperCase()}`
@@ -356,6 +423,7 @@ async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
               </div>
               <div class="text-xs text-slate-500 font-mono mt-0.5">
                 {{ user.email }}
+                {{ console.log(user) }}
               </div>
             </td>
 
@@ -366,7 +434,7 @@ async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
                   :key="role.id"
                   class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded border font-mono uppercase bg-blue-900/40 text-blue-400 border-blue-800"
                 >
-                  {{ role.slug }}
+                  {{ role.slug=='company' ? `${role.slug} (${user.role_in_org})` : role.slug }}
                   <button
                     v-if="!['nti_admin', 'super_admin'].includes(role.slug) && canManage(user)"
                     @click="removeRole(user.id, role.slug)"
@@ -474,6 +542,63 @@ async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
       >
         Next →
       </button>
+    </div>
+  </div>
+
+  <div v-if="showCompanyModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+      <h3 class="text-xl font-bold text-white mb-2">Company Role Details</h3>
+      <p class="text-slate-400 text-sm mb-6">Please provide organization details to assign this role.</p>
+
+      <div class="space-y-5">
+        <div>
+          <label class="block text-xs font-mono uppercase text-slate-500 mb-2">Registration Number</label>
+          <input 
+            v-model="companyForm.registration_number"
+            type="text"
+            placeholder="Enter organization ID/Code..."
+            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-blue-600 transition-all"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-mono uppercase text-slate-500 mb-2">Role within Organization</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button 
+              v-for="opt in roleInOrgOptions" 
+              :key="opt.value"
+              @click="companyForm.role_in_org = opt.value"
+              type="button"
+              :class="[
+                'px-3 py-2 text-xs font-mono uppercase border rounded-lg transition-all',
+                companyForm.role_in_org === opt.value 
+                  ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20' 
+                  : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'
+              ]"
+            >
+              {{ opt.label }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-3 mt-8">
+        <button 
+          @click="showCompanyModal = false"
+          type="button"
+          class="flex-1 px-4 py-2 text-sm font-semibold text-slate-400 hover:text-white transition"
+        >
+          Cancel
+        </button>
+        <button 
+          @click="confirmCompanyRole"
+          type="button"
+          :disabled="!companyForm.registration_number || loading"
+          class="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-lg shadow-blue-900/20"
+        >
+          {{ loading ? 'Processing...' : 'Confirm Assign' }}
+        </button>
+      </div>
     </div>
   </div>
 </template>

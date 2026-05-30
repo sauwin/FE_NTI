@@ -9,7 +9,7 @@ export interface CompanyUser {
 }
 
 export interface CompanyProfile {
-  name?: string
+  name: string
   registration_number?: string
   sector?: string
   description?: string

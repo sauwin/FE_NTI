@@ -136,7 +136,7 @@ async function deleteApp() {
 <template>
   <div class="flex-center-page">
     <div class="w-full max-w-2xl">
-      <button @click="router.back()" class="text-gray-500 hover:text-white text-sm mb-6">← Back to Dashboard</button>
+      <button @click="router.push('/dashboard')" class="text-gray-500 hover:text-white text-sm mb-6">← Back to Dashboard</button>
 
       <p v-if="error" class="text-error mb-4">{{ error }}</p>
 
@@ -177,20 +177,45 @@ async function deleteApp() {
         </div>
 
         <div class="border border-slate-800 rounded-xl p-6 bg-slate-900/30 mb-6">
-          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-4">Documents</div>
-          <div v-if="docs.length === 0" class="text-gray-500 text-sm">No documents uploaded.</div>
-          <div v-else class="flex flex-col gap-2">
-            <div v-for="doc in docs" :key="doc.id"
-                 class="flex flex-col gap-3 border border-slate-700 rounded-lg px-4 py-3 bg-slate-950/40">
-              <div>
-                <p class="text-white text-sm">{{ docLabels[doc.type] ?? doc.type }}</p>
-                <p class="text-gray-500 text-xs">{{ doc.file_name }}</p>
+          <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-4">Required Documents</div>
+          
+          <div v-if="!app.call?.required_documents || app.call.required_documents.length === 0" class="text-gray-500 text-sm">
+            No specific documents required for this challenge.
+          </div>
+
+          <div v-else class="flex flex-col gap-3">
+            <div 
+              v-for="req in (typeof app.call.required_documents === 'string' ? JSON.parse(app.call.required_documents) : app.call.required_documents)" 
+              :key="req.id"
+              class="flex flex-col gap-3 border border-slate-700/60 rounded-lg px-4 py-3 bg-slate-950/40"
+            >
+              <div class="flex items-start justify-between">
+                <div>
+                  <p class="text-white text-sm font-medium">
+                    {{ req.document_name }}
+                    <span v-if="req.is_mandatory" class="text-gray-300 text-xs">*</span>
+                  </p>
+                  <p class="text-gray-500 text-[11px] mt-0.5">Max size: {{ req.max_size_mb }} MB</p>
+                </div>
+
+                <span v-if="docs.find(d => d.type === req.document_name || d.type === req.id)" class="text-[10px] bg-emerald-950/50 text-emerald-400 border border-emerald-900 px-2 py-0.5 rounded font-mono uppercase">
+                  Uploaded
+                </span>
+                <span v-else class="text-[10px] bg-rose-950/30 text-rose-400/70 border border-rose-950 px-2 py-0.5 rounded font-mono uppercase">
+                  Missing
+                </span>
               </div>
-              <DocumentActionButtons
-                :documentId="doc.id"
-                :fileName="doc.file_name"
-                :mimeType="doc.mime_type"
-              />
+
+              <div v-if="docs.find(d => d.type === req.document_name || d.type === req.id)" class="pt-2 border-t border-slate-800/60">
+                <p class="text-xs text-slate-400 mb-2 font-mono truncate">
+                  File: {{ docs.find(d => d.type === req.document_name || d.type === req.id).file_name }}
+                </p>
+                <DocumentActionButtons
+                  :documentId="docs.find(d => d.type === req.document_name || d.type === req.id).id"
+                  :fileName="docs.find(d => d.type === req.document_name || d.type === req.id).file_name"
+                  :mimeType="docs.find(d => d.type === req.document_name || d.type === req.id).mime_type"
+                />
+              </div>
             </div>
           </div>
         </div>

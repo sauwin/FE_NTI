@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/features/auth/stores/auth'
 import { getMe, getRoleStatus, logout as authLogout } from '@/features/auth/api/auth'
 import { getApplications } from '@/features/applications/api/applications'
-import { getProfile, getStudentProfile } from '@/features/student/api/profile'
+import { getProfile } from '@/features/student/api/profile'
 import { getMentorProfile } from '@/features/mentor/api/profile'
 import { getCompanyProfile } from '@/features/company/api/company'
 import type { AuthUser } from '@/features/auth/types/auth'
@@ -16,7 +17,17 @@ import EvaluatorDashboard from '@/features/evaluation/components/EvaluatorDashbo
 import MentorDashboard from '@/features/mentor/components/MentorDashboard.vue'
 
 const router = useRouter()
-const auth = useAuthStore()
+const authStore = useAuthStore()
+
+const { 
+  role: roleSlug, 
+  isStudent, 
+  isCompany, 
+  isAdmin, 
+  roleInOrg, 
+  dashboardLabel 
+} = storeToRefs(authStore)
+
 const isAuthentified = ref(false)
 const userObj = ref<AuthUser | null>(null)
 const profileComplete = ref(true)
@@ -32,22 +43,26 @@ async function fetchData() {
     const res = await getMe()
     userObj.value = res.data
     isAuthentified.value = true
+    
+    authStore.user = res.data 
+    localStorage.setItem('user', JSON.stringify(res.data))
+
     const appRes = await getApplications()
     applications.value = appRes.data
     const roleRes = await getRoleStatus()
     roleApproved.value = roleRes.data.approved
 
-    if (res.data.role_slug === 'student') {
+    if (isStudent.value) {
       try {
         const p = await getProfile()
         profileComplete.value = !!p.data
       } catch { profileComplete.value = false }
-    } else if (res.data.role_slug === 'mentor') {
+    } else if (roleSlug.value === 'mentor') {
       try {
         const p = await getMentorProfile()
         profileComplete.value = !!p.data
       } catch { profileComplete.value = false }
-    } else if (res.data.role_slug === 'company') {
+    } else if (isCompany.value) {
       try {
         const p = await getCompanyProfile()
         profileComplete.value = !!p.data
@@ -55,16 +70,6 @@ async function fetchData() {
     }
   } catch {
     isAuthentified.value = false
-  }
-}
-
-async function logout() {
-  try {
-    await authLogout()
-    auth.logout()
-    router.push('/auth/login')
-  } catch {
-    error.value = 'Unable to log out'
   }
 }
 
@@ -91,10 +96,9 @@ onMounted(() => { fetchData() })
 
     <div v-else>
 
-      <!-- Header -->
       <div class="mb-10">
         <div class="inline-flex items-center bg-blue-600/15 border border-blue-800 text-blue-400 text-xs font-bold tracking-widest uppercase py-1.5 px-4 rounded-full mb-5">
-          Dashboard
+          {{ dashboardLabel }}
         </div>
         <h1 class="font-bold text-5xl leading-tight mb-3">
           Welcome, <span class="text-blue-400">{{ userObj?.first_name ?? userObj?.email }}</span>
@@ -103,7 +107,7 @@ onMounted(() => { fetchData() })
           <span class="text-sm text-gray-500">{{ userObj?.email }}</span>
           <span class="text-slate-700">·</span>
           <span class="text-xs capitalize bg-blue-600/15 border border-blue-800 text-blue-400 px-2.5 py-0.5 rounded-full">
-            {{ userObj?.role_slug ?? '—' }}
+            {{ roleSlug ?? '—' }}
           </span>
           <span class="text-slate-700">·</span>
           <span :class="[
@@ -115,7 +119,6 @@ onMounted(() => { fetchData() })
         </div>
       </div>
 
-      <!-- Error message -->
       <div v-if="error" class="border border-red-800/50 bg-red-900/10 rounded-xl px-6 py-4 mb-8 flex items-center justify-between gap-4">
         <div class="text-sm text-red-400">{{ error }}</div>
         <button @click="error = ''" class="text-red-400 hover:text-red-300">×</button>
@@ -126,7 +129,6 @@ onMounted(() => { fetchData() })
         <button @click="success = ''" class="text-green-400 hover:text-green-300">×</button>
       </div>
 
-      <!-- Role not approved banner -->
       <div v-if="!roleApproved"
            class="border border-orange-800/50 bg-orange-900/10 rounded-xl px-6 py-4 flex items-center justify-between gap-4 mb-8">
         <div>
@@ -135,33 +137,27 @@ onMounted(() => { fetchData() })
         </div>
       </div>
 
-      <!-- Profile incomplete banner -->
-      <div v-if="roleApproved && !profileComplete && userObj?.role_slug && ['student','mentor','company'].includes(userObj.role_slug)"
+      <div v-if="roleApproved && !profileComplete && roleSlug && ['student','mentor','company'].includes(roleSlug)"
            class="border border-yellow-800/50 bg-yellow-900/10 rounded-xl px-6 py-4 flex items-center justify-between gap-4 mb-8">
         <div>
           <div class="text-sm font-semibold text-yellow-400 mb-1">Complete your profile</div>
           <div class="text-muted-sm">Fill in your profile before using the full platform</div>
         </div>
-        <router-link :to="profileRoute[userObj!.role_slug!] ?? '/dashboard'"
+        <router-link :to="profileRoute[roleSlug] ?? '/dashboard'"
                      class="bg-yellow-600 hover:bg-yellow-500 text-white px-5 py-2 rounded-lg text-xs font-medium transition whitespace-nowrap">
           Complete now
         </router-link>
       </div>
 
-      <!-- ── STUDENT ── -->
-      <StudentDashboard v-if="userObj?.role_slug === 'student'"/>
+      <StudentDashboard v-if="isStudent"/>
 
-      <!-- ── MENTOR ── -->
-      <MentorDashboard v-if="userObj?.role_slug === 'mentor'"/>
+      <MentorDashboard v-if="roleSlug === 'mentor'"/>
         
-      <!-- ── EVALUATOR ── -->
-      <EvaluatorDashboard v-if="userObj?.role_slug === 'evaluator'"/>
+      <EvaluatorDashboard v-if="roleSlug === 'evaluator'"/>
 
-      <!-- ── COMPANY ── -->
-      <CompanyDashboard v-if="userObj?.role_slug === 'company'"/>
+      <CompanyDashboard v-if="isCompany" :role-in-org="roleInOrg"/>
 
-      <!-- ── ADMIN ── -->
-      <AdminDashboard v-if="userObj?.role_slug === 'nti_admin' || userObj?.role_slug === 'super_admin'" :user-role="userObj?.role_slug" />
+      <AdminDashboard v-if="isAdmin" :user-role="roleSlug" />
     </div>
   </div>
 </template>

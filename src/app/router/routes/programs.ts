@@ -47,5 +47,14 @@ export const programRoutes: RouteRecordRaw = {
         requiresAuth: true,
       },
     },
+
+    {
+      path: 'b/tasks/:id/edit',
+      component: () => import('@/features/tasks/pages/CompanyTaskForm.vue'),
+
+      meta: {
+        requiresAuth: true,
+      },
+    },
   ],
 }
