@@ -6,10 +6,19 @@ import { getCompanyTasks } from '@/features/company/api/company'
 import { createCallWithTask, updateCallWithTask } from '@/features/tasks/api/tasks'
 import type { Program } from '@/shared/types/programs'
 
+// Допоміжна функція для трансформації рядка у snake_case на фронтенді
+function toSnakeCase(str: string): string {
+  return str
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_ ]/g, '') // Видаляємо спецсимволи (наприклад, дужки у "Pitch (PDF)")
+    .replace(/\s+/g, '_')        // Замінюємо пробіли на підкреслення
+    .replace(/_+/g, '_')         // Запобігаємо подвійним підкресленням
+}
+
 interface TaskDocumentRequirement {
   id: string
   document_name: string
-  is_mandatory: boolean
   max_size_mb: number
 }
 
@@ -44,12 +53,14 @@ const callForm = ref({
   min_team_size: 3,
   max_team_size: null as number | null,
   required_documents: [
-    { id: Date.now().toString(), document_name: 'Team Project Pitch (PDF)', is_mandatory: true, max_size_mb: 10 }
+    { id: Date.now().toString(), document_name: 'Team Project Pitch', max_size_mb: 10 }
   ] as TaskDocumentRequirement[]
 })
 
+// Зберігаємо оригінальні файли за їхніми згенерованими id у формі
 const files = ref<Record<string, File>>({})
 
+// Для режиму редагування зберігаємо раніше завантажені документи
 const existingDocuments = ref<Array<{ type: string, file_name: string }>>([])
 
 onMounted(async () => {
@@ -95,12 +106,19 @@ onMounted(async () => {
               : currentTask.call.required_documents
             
             if (Array.isArray(reqDocs)) {
-              callForm.value.required_documents = reqDocs.map((doc: any, idx: number) => ({
-                id: doc.id || Date.now().toString() + idx,
-                document_name: doc.document_name || doc,
-                is_mandatory: doc.is_mandatory !== undefined ? doc.is_mandatory : true,
-                max_size_mb: doc.max_size_mb || 10
-              }))
+              // Якщо з бекенду прийшов масив рядків (напр. ["team_project_pitch"]), повертаємо їм "людський" вигляд для інпутів
+              callForm.value.required_documents = reqDocs.map((docString: string, idx: number) => {
+                const humanName = docString
+                  .split('_')
+                  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(' ')
+
+                return {
+                  id: docString, // Використовуємо snake_case рядок як ID для мапінгу файлів
+                  document_name: humanName,
+                  max_size_mb: 10
+                }
+              })
             }
           }
         }
@@ -134,13 +152,13 @@ function addDocumentRequirement() {
   callForm.value.required_documents.push({
     id: Date.now().toString(),
     document_name: '',
-    is_mandatory: true,
     max_size_mb: 10
   })
 }
 
 function removeDocumentRequirement(id: string) {
   callForm.value.required_documents = callForm.value.required_documents.filter(d => d.id !== id)
+  delete files.value[id]
 }
 
 function getExistingFileName(typeKey: string): string | null {
@@ -153,7 +171,6 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
   loading.value = true
 
   const fd = new FormData()
-  
   fd.append('status', frontendStatus)
 
   const techArray = taskForm.value.required_technologies.split(',').map(s => s.trim()).filter(Boolean)
@@ -175,23 +192,24 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
     fd.append(`required_skills[${index}]`, skill)
   })
 
-  const docsPayload = callForm.value.required_documents
-    .filter(d => d.document_name.trim().length > 0)
-    .map(d => ({
-      id: d.id,
-      document_name: d.document_name,
-      is_mandatory: d.is_mandatory,
-      max_size_mb: d.max_size_mb
-    }))
+  // 1. Формуємо чистий масив snake_case рядків для `required_documents`
+  const snakeCaseDocs: string[] = []
   
-  fd.append('required_documents', JSON.stringify(docsPayload))
+  callForm.value.required_documents.forEach(d => {
+    if (d.document_name.trim().length > 0) {
+      const snakeKey = toSnakeCase(d.document_name)
+      snakeCaseDocs.push(snakeKey)
 
-  Object.keys(files.value).forEach((key) => {
-    const file = files.value[key]
-    if (file) {
-      fd.append(`files[${key}]`, file)
+      // 2. Додаємо файл до FormData, прив'язуючи його до snake_case назви, яку очікує бекенд
+      // Перевіряємо за старим id з форми або вже за сформованим снейк-ключем
+      const filePayload = files.value[d.id] || files.value[snakeKey]
+      if (filePayload) {
+        fd.append(`files[${snakeKey}]`, filePayload)
+      }
     }
   })
+  
+  fd.append('required_documents', JSON.stringify(snakeCaseDocs))
 
   try {
     if (isEditMode.value && taskId.value) {
@@ -322,10 +340,6 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
               <label class="block text-[10px] font-mono uppercase text-gray-500 mb-1">Max Size (MB)</label>
               <input v-model="doc.max_size_mb" type="number" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs focus:border-blue-500 outline-none text-white" />
             </div>
-            <div class="flex items-center gap-2 mt-4 sm:mt-0 pt-2 sm:pt-0">
-              <input :id="'chk_' + doc.id" v-model="doc.is_mandatory" type="checkbox" class="rounded text-blue-600 focus:ring-0 bg-slate-900 border-slate-800 w-4 h-4 cursor-pointer" />
-              <label :for="'chk_' + doc.id" class="text-xs font-mono text-gray-400 uppercase select-none cursor-pointer">Mandatory</label>
-            </div>
             <button v-if="callForm.required_documents.length > 1" type="button" @click="removeDocumentRequirement(doc.id)" class="text-xs text-red-400 hover:text-red-300 mt-4 sm:mt-0 pt-2 sm:pt-0 font-mono cursor-pointer">[Remove]</button>
           </div>
         </div>
@@ -345,11 +359,11 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
           <div v-for="doc in callForm.required_documents.filter(d => d.document_name.trim())" :key="'upload_' + doc.id" class="bg-slate-950 p-4 border border-slate-800 rounded-xl space-y-2">
             <div class="flex justify-between items-center">
               <span class="text-xs font-medium text-gray-300 font-mono">{{ doc.document_name }}</span>
-              <span class="text-[10px] font-mono text-gray-500 uppercase">{{ doc.is_mandatory ? 'Required File' : 'Optional File' }}</span>
+              <span class="text-[10px] font-mono text-gray-500 uppercase">Attached Guideline File</span>
             </div>
 
-            <div v-if="isEditMode && getExistingFileName(doc.id)" class="text-xs text-emerald-400 font-mono bg-emerald-950/20 border border-emerald-900/30 p-2 rounded flex justify-between items-center">
-              <span>📄 Current: {{ getExistingFileName(doc.id) }}</span>
+            <div v-if="isEditMode && (getExistingFileName(doc.id) || getExistingFileName(toSnakeCase(doc.document_name)))" class="text-xs text-emerald-400 font-mono bg-emerald-950/20 border border-emerald-900/30 p-2 rounded flex justify-between items-center">
+              <span>📄 Current: {{ getExistingFileName(doc.id) || getExistingFileName(toSnakeCase(doc.document_name)) }}</span>
               <span class="text-[10px] text-emerald-500 uppercase">(Already Uploaded)</span>
             </div>
 
@@ -357,7 +371,7 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
               <input type="file" :id="'file_' + doc.id" @change="handleFileChange(doc.id, $event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
               <label :for="'file_' + doc.id" class="flex justify-between w-full items-center cursor-pointer">
                 <span class="text-sm truncate pr-2" :class="files[doc.id] ? 'text-white font-medium' : 'text-gray-600'">
-                  {{ files[doc.id]?.name ?? (isEditMode && getExistingFileName(doc.id) ? 'Choose new file to replace...' : 'Choose file...') }}
+                  {{ files[doc.id]?.name ?? (isEditMode && (getExistingFileName(doc.id) || getExistingFileName(toSnakeCase(doc.document_name))) ? 'Choose new file to replace...' : 'Choose file...') }}
                 </span>
                 <span class="text-xs bg-blue-900/50 text-blue-300 px-3 py-1 rounded font-mono">Browse</span>
               </label>
@@ -379,3 +393,30 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
     </form>
   </div>
 </template>
+Тепер ваш бекенд (ApplicationService.php) працюватиме ідеально:
+Оскільки фронтенд Програми Б тепер надсилає чистий масив снейк-кейс рядків (наприклад, ["team_project_pitch", "cv", "motivation_letter"]), ваш оригінальний метод валідації на бекенді повністю оживе і не буде нічого блокувати:
+
+PHP
+private function validateRequiredDocuments(Application $application): void
+{
+    $call = Call::find($application->call_id);
+    if ($call && is_array($call->required_documents)) {
+        $uploadedTypes = DB::table('application_documents')
+            ->join('documents', 'documents.id', '=', 'application_documents.document_id')
+            ->where('application_documents.application_id', $application->id)
+            ->pluck('documents.type')
+            ->toArray();
+
+        foreach ($call->required_documents as $reqDoc) {
+            // Оскільки $reqDoc тепер завжди РЯДОК (як для А, так і для Б), Str::snake відпрацює як треба!
+            $docName = is_string($reqDoc) ? $reqDoc : ($reqDoc['document_name'] ?? $reqDoc['type'] ?? '');
+            $docTypeKey = Str::snake(trim($docName));
+
+            if (! in_array($docTypeKey, $uploadedTypes)) {
+                throw ValidationException::withMessages([
+                    'documents' => 'Chýba povinný dokument: '.(is_string($reqDoc) ? $reqDoc : ($reqDoc['document_name'] ?? $docTypeKey)),
+                ]);
+            }
+        }
+    }
+}
