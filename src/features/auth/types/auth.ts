@@ -1,3 +1,13 @@
+export interface AuthUser {
+  email: string
+  first_name?: string
+  last_name?: string
+  role_slug?: string
+  organization_id?: number
+  status: string
+  id: number
+}
+
 export interface LoginPayload {
   email: string
   password: string
@@ -12,15 +22,6 @@ export interface RegisterPayload {
   role: string
   company_type?: string
   [key: string]: unknown
-}
-
-export interface AuthUser {
-  email: string
-  first_name?: string
-  last_name?: string
-  role_slug?: string
-  status?: string
-  id?: number
 }
 
 export interface RoleStatus {

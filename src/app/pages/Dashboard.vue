@@ -15,6 +15,7 @@ import CompanyDashboard from '@/features/company/components/CompanyDashboard.vue
 import AdminDashboard from '@/features/admin/components/AdminDashboard.vue'
 import EvaluatorDashboard from '@/features/evaluation/components/EvaluatorDashboard.vue'
 import MentorDashboard from '@/features/mentor/components/MentorDashboard.vue'
+import PendingApproval from '@/features/auth/pages/PendingApproval.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()

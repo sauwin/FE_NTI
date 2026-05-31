@@ -28,6 +28,13 @@ export async function authGuard(to: RouteLocationNormalized) {
     return '/pending-verification'
   }
 
+  if (
+    meta.requiresAuth &&
+    auth.user?.status === 'pending_approval'
+  ) {
+    return '/pending-approval'
+  }
+
   if (meta.role && auth.role !== meta.role) {
     return '/unauthorized'
   }

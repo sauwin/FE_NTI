@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { verifyResetToken, resetPassword } from '@/features/auth/api/auth'
 
 const route = useRoute()
 const router = useRouter()
-const token = ref(route.query.token as string || '')
 const password = ref('')
 const passwordConfirm = ref('')
 const error = ref('')
@@ -13,6 +12,14 @@ const success = ref('')
 const loading = ref(false)
 const tokenValid = ref(false)
 const checkingToken = ref(true)
+
+const token = ref(
+  typeof route.query.token === 'string'
+    ? route.query.token
+    : ''
+)
+
+let redirectTimeout: ReturnType<typeof setTimeout> | null = null
 
 onMounted(async () => {
   if (!token.value) {
@@ -42,11 +49,6 @@ async function submit() {
     return
   }
 
-  if (password.value.length < 8) {
-    error.value = 'Password must be at least 8 characters'
-    return
-  }
-
   loading.value = true
 
   try {
@@ -56,10 +58,12 @@ async function submit() {
       password_confirmation: passwordConfirm.value
     })
     success.value = 'Password reset successfully. Redirecting to login...'
-    setTimeout(() => router.push('/auth/login'), 2000)
+    redirectTimeout = setTimeout(() => router.push('/auth/login'), 2000)
   } catch (e: any) {
     if (e.response?.status === 400) {
       error.value = 'Reset link expired. Request a new one.'
+    } else if (e.response?.status == 429) {
+      error.value = 'Too many requests. Please try again later.'
     } else {
       error.value = 'Error resetting password. Try again.'
     }
@@ -67,10 +71,16 @@ async function submit() {
     loading.value = false
   }
 }
+
+onUnmounted(() => {
+  if (redirectTimeout) {
+    clearTimeout(redirectTimeout)
+  }
+})
 </script>
 
 <template>
-  <h1 class="font-bold text-4xl text-center p-4">Reset Password</h1>
+  <h1 class="font-bold text-4xl text-center p-4 mt-20">Reset Password</h1>
 
   <div v-if="checkingToken" class="flex justify-center">
     <p class="text-white">Verifying reset link...</p>
