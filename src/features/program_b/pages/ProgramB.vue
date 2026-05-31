@@ -6,6 +6,8 @@ import { getCompanyTasks } from '@/features/company/api/company'
 import { getProgramBTasks } from '@/features/tasks/api/tasks'
 import type { TaskWithCall } from '@/features/company/types/company'
 
+import PageHero from '@/shared/ui/PageHero.vue'
+
 const router = useRouter()
 const auth = useAuthStore()
 const tasks = ref<TaskWithCall[]>([])
@@ -57,98 +59,96 @@ const getStatusColor = (status: string) => {
 </script>
 
 <template>
-  <div class="px-20 py-10 relative overflow-hidden">
-    <div class="bg-blue-950 absolute rounded-[100%] h-120 w-120 -z-10 -right-30 -top-10"></div>
+  <div class="bg-blue-950 absolute rounded-[100%] h-120 w-120 -z-10 -right-30 -top-10"></div>
 
-    <div class="pb-20 mb-12">
-      <div class="bg-blue-600 text-blue-100 text-xs font-bold text-center py-1 rounded-xl w-32 mb-5">PROGRAM B</div>
-      <h1 class="font-bold text-5xl text-left leading-tight">
-        Real-world<br> 
-        <span class="text-blue-400">Industry Practice</span>
-      </h1>
+  <div class="pb-20 mb-12">
+    <PageHero
+    badge="Program A"
+    title="Real-world"
+    highlight="Industry Practice"
+    />
 
-      <div v-if="auth.isCompany" class="mt-12">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold text-white">Our Technical Specifications</h2>
-          <button @click="goToCreateTask" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition">
-            + Create New Task
-          </button>
+    <div v-if="auth.isCompany" class="mt-12">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-white">Our Technical Specifications</h2>
+        <button @click="goToCreateTask" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition">
+          + Create New Task
+        </button>
+      </div>
+
+      <div v-if="loading" class="text-gray-400">Loading your challenges...</div>
+      <div v-else class="grid gap-6 md:grid-cols-2">
+        <div v-for="task in myTasks" :key="task.id" class="border border-blue-900 bg-slate-950 p-6 rounded-2xl flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="text-xl font-bold text-blue-300">{{ task.title }}</h3>
+              <span :class="['text-xs px-2 py-0.5 rounded border uppercase font-semibold', getStatusColor(task.status)]">
+                {{ task.status }}
+              </span>
+            </div>
+            <p class="text-gray-400 text-sm mb-4 line-clamp-3">
+              {{ task.short_description || task.brief || 'No description provided.' }}
+            </p>
+          </div>
+          
+          <div class="border-t border-slate-900 pt-4 mt-4">
+            <div class="flex justify-between text-xs text-gray-500 mb-4">
+              <span>Budget: {{ task.budget ? `€${task.budget}` : 'Not specified' }}</span>
+              <span>Apply Deadline: {{ formatDate(task.call?.deadline_at || task.deadline) }}</span>
+            </div>
+            <button 
+              @click="goToTaskDetails(task.id)" 
+              class="w-full bg-slate-900 hover:bg-slate-800 text-blue-400 py-2 rounded-lg text-sm font-medium transition border border-blue-900/40"
+            >
+              View & Edit Details
+            </button>
+          </div>
         </div>
+        <div v-if="!myTasks.length" class="text-gray-500 italic">You haven't added any challenges yet.</div>
+      </div>
+    </div>
 
-        <div v-if="loading" class="text-gray-400">Loading your challenges...</div>
-        <div v-else class="grid gap-6 md:grid-cols-2">
-          <div v-for="task in myTasks" :key="task.id" class="border border-blue-900 bg-slate-950 p-6 rounded-2xl flex flex-col justify-between">
-            <div>
-              <div class="flex justify-between items-start mb-2">
-                <h3 class="text-xl font-bold text-blue-300">{{ task.title }}</h3>
-                <span :class="['text-xs px-2 py-0.5 rounded border uppercase font-semibold', getStatusColor(task.status)]">
-                  {{ task.status }}
-                </span>
+    <div v-else class="mt-12">
+      <h2 class="text-2xl font-bold text-white mb-6">Available Industry Tasks</h2>
+      
+      <div v-if="loading" class="text-gray-400">Loading catalog...</div>
+      <div v-else class="grid gap-6 md:grid-cols-2">
+        <div v-for="task in tasks" :key="task.id" class="border border-blue-800 bg-slate-950 p-6 rounded-2xl flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-blue-900 rounded-full flex items-center justify-center font-bold text-xs text-white">
+                  {{ task.organization?.name?.substring(0,2).toUpperCase() || 'CO' }}
+                </div>
+                <span class="text-sm text-gray-400 font-medium">{{ task.organization?.name || 'Unknown Company' }}</span>
               </div>
-              <p class="text-gray-400 text-sm mb-4 line-clamp-3">
-                {{ task.short_description || task.brief || 'No description provided.' }}
-              </p>
+              <span v-if="task.budget" class="text-xs bg-green-500/10 text-green-400 px-2 py-0.5 rounded border border-green-900">
+                €{{ task.budget }}
+              </span>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">{{ task.title }}</h3>
+            <p class="text-gray-400 text-sm mb-6 line-clamp-4">
+              {{ task.short_description || task.brief || 'No description available.' }}
+            </p>
+          </div>
+
+          <div class="border-t border-slate-900 pt-4 mt-auto">
+            <div class="flex justify-between text-xs text-gray-500 mb-4">
+              <span>Required Team: {{ task.call?.min_team_size || 3 }}-{{ task.call?.max_team_size || '∞' }} persons</span>
+              <span class="text-amber-400 font-medium">Apply before: {{ formatDate(task.call?.deadline_at) }}</span>
             </div>
             
-            <div class="border-t border-slate-900 pt-4 mt-4">
-              <div class="flex justify-between text-xs text-gray-500 mb-4">
-                <span>Budget: {{ task.budget ? `€${task.budget}` : 'Not specified' }}</span>
-                <span>Apply Deadline: {{ formatDate(task.call?.deadline_at || task.deadline) }}</span>
-              </div>
-              <button 
-                @click="goToTaskDetails(task.id)" 
-                class="w-full bg-slate-900 hover:bg-slate-800 text-blue-400 py-2 rounded-lg text-sm font-medium transition border border-blue-900/40"
-              >
-                View & Edit Details
-              </button>
-            </div>
+            <button 
+              @click="goToTaskDetails(task.id)" 
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-medium transition"
+            >
+              View Detailed Specifications
+            </button>
           </div>
-          <div v-if="!myTasks.length" class="text-gray-500 italic">You haven't added any challenges yet.</div>
         </div>
+        <div v-if="!tasks.length" class="text-gray-500 italic">No available challenges at the moment.</div>
       </div>
-
-      <div v-else class="mt-12">
-        <h2 class="text-2xl font-bold text-white mb-6">Available Industry Tasks</h2>
-        
-        <div v-if="loading" class="text-gray-400">Loading catalog...</div>
-        <div v-else class="grid gap-6 md:grid-cols-2">
-          <div v-for="task in tasks" :key="task.id" class="border border-blue-800 bg-slate-950 p-6 rounded-2xl flex flex-col justify-between">
-            <div>
-              <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 bg-blue-900 rounded-full flex items-center justify-center font-bold text-xs text-white">
-                    {{ task.organization?.name?.substring(0,2).toUpperCase() || 'CO' }}
-                  </div>
-                  <span class="text-sm text-gray-400 font-medium">{{ task.organization?.name || 'Unknown Company' }}</span>
-                </div>
-                <span v-if="task.budget" class="text-xs bg-green-500/10 text-green-400 px-2 py-0.5 rounded border border-green-900">
-                  €{{ task.budget }}
-                </span>
-              </div>
-              <h3 class="text-xl font-bold text-white mb-2">{{ task.title }}</h3>
-              <p class="text-gray-400 text-sm mb-6 line-clamp-4">
-                {{ task.short_description || task.brief || 'No description available.' }}
-              </p>
-            </div>
-
-            <div class="border-t border-slate-900 pt-4 mt-auto">
-              <div class="flex justify-between text-xs text-gray-500 mb-4">
-                <span>Required Team: {{ task.call?.min_team_size || 3 }}-{{ task.call?.max_team_size || '∞' }} persons</span>
-                <span class="text-amber-400 font-medium">Apply before: {{ formatDate(task.call?.deadline_at) }}</span>
-              </div>
-              
-              <button 
-                @click="goToTaskDetails(task.id)" 
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-medium transition"
-              >
-                View Detailed Specifications
-              </button>
-            </div>
-          </div>
-          <div v-if="!tasks.length" class="text-gray-500 italic">No available challenges at the moment.</div>
-        </div>
-      </div>
-
     </div>
+
   </div>
 </template>

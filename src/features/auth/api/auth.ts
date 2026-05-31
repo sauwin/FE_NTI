@@ -17,6 +17,7 @@ export function getMe() {
   return api.get('/auth/me')
 }
 
+//Todo: update this with dashboard
 export function getRoleStatus() {
   return api.get('/auth/role-status')
 }
@@ -25,6 +26,7 @@ export function forgotPassword(email: string) {
   return api.post('/auth/forgot-password', { email })
 }
 
+//Frontend token verification
 export function verifyResetToken(token: string) {
   return api.post('/auth/verify-reset-token', { token })
 }

@@ -13,7 +13,7 @@
   <div class="min-h-screen flex flex-col">
     <Navbar />
 
-    <main class="flex-1 pb-16 pt-24">
+    <main class="flex-1 px-4 sm:px-10 md:px-20 pb-12 mt-16 pt-20 md:pb-16 md:pt-24">
       <router-view />
     </main>
 
