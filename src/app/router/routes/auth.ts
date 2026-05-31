@@ -1,9 +1,9 @@
 import type { RouteRecordRaw } from 'vue-router'
-import AuthLayout from '@/app/layouts/AuthLayout.vue'
+import FormLayout from '@/app/layouts/FormLayout.vue'
 
 export const authRoutes: RouteRecordRaw = {
   path: '/auth',
-  component: AuthLayout,
+  component: FormLayout,
 
   children: [
     {

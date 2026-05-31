@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { register } from '@/features/auth/api/auth'
 import { useAuthStore } from '../stores/auth'
+import type { RegisterPayload } from '@/features/auth/types/auth'
 
 const firstName = ref('')
 const lastName = ref('')
@@ -10,7 +11,7 @@ const email = ref('')
 const password = ref('')
 const passwordConfirm = ref('')
 const role = ref('student')
-const companyType = ref('owner')
+const companyRole = ref('owner')
 const registrationNumber = ref('')
 const agreedTerms = ref(false)
 const agreedGdpr = ref(false)
@@ -20,34 +21,58 @@ const auth = useAuthStore()
 
 const isCompany = computed(() => role.value === 'company')
 
+const loading = ref(false)
+
 async function submit() {
   error.value = ''
   if (!agreedTerms.value) { error.value = 'You must agree to the Terms and Conditions'; return }
   if (!agreedGdpr.value) { error.value = 'You must agree to the processing of personal data (GDPR)'; return }
 
   try {
-    const payload: Record<string, any> = {
+    const payload: RegisterPayload = {
       first_name: firstName.value,
       last_name: lastName.value,
       email: email.value,
       password: password.value,
       password_confirmation: passwordConfirm.value,
       role: role.value,
-      gdpr_consent: true,
+      agreed_terms: agreedTerms.value,
+      gdpr_consent: agreedGdpr.value,
+    }
+
+    if (password.value !== passwordConfirm.value) {
+      error.value = 'Passwords are not identical'
+      return
     }
 
     if (isCompany.value) {
-      payload.company_type = companyType.value
-      if (companyType.value === 'member' && registrationNumber.value.trim()) {
-        payload.registration_number = parseInt(registrationNumber.value)
+      payload.company_type = companyRole.value
+      if (companyRole.value === 'member') {
+        if (registrationNumber.value.trim()) {
+          const id = Number(registrationNumber.value.trim())
+
+          if (Number.isNaN(id)) {
+            error.value = 'Invalid organization ID'
+            return
+          } 
+
+          payload.registration_number = id
+          payload.role_in_org = companyRole.value
+        } else {
+          error.value = 'No registration id of your company provided'
+          return
+        }
       }
     }
 
-    const res = await register(payload as import('@/features/auth/types/auth').RegisterPayload)
+    loading.value = true
+    const res = await register(payload)
     auth.login(res.data.token, res.data.user)
     router.push('/pending-verification')
   } catch (e: any) {
     error.value = e.response?.data?.message ?? 'Registration failed'
+  } finally {
+    loading.value = false
   }
 }
 </script>
@@ -97,7 +122,7 @@ async function submit() {
             v-model="email" 
             type="email" 
             required
-            placeholder="john.doe@example.com"
+            placeholder="john.pork@example.com"
             class="mt-1 block w-full px-3 py-2 bg-slate-950/50 border border-slate-800/80 rounded-lg text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition text-sm" 
           />
         </div>
@@ -132,7 +157,7 @@ async function submit() {
           >
             <option value="student" class="bg-slate-900">Student</option>
             <option value="company" class="bg-slate-900">Company</option>
-            <option value="mentor" class="bg-slate-900">Mentor</option>
+            <option value="internal" class="bg-slate-900">Internal Role</option>
           </select>
         </div>
 
@@ -140,7 +165,7 @@ async function submit() {
           <div>
             <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Company Registration Type</label>
             <select 
-              v-model="companyType" 
+              v-model="companyRole" 
               class="mt-1 block w-full px-3 py-2 bg-slate-950/50 border border-slate-800/80 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition text-sm cursor-pointer"
             >
               <option value="owner" class="bg-slate-900">Company Owner</option>
@@ -148,7 +173,7 @@ async function submit() {
             </select>
           </div>
           
-          <div v-if="companyType === 'member'">
+          <div v-if="companyRole === 'member'">
             <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Organization Registration Number</label>
             <input 
               v-model="registrationNumber" 
@@ -197,9 +222,10 @@ async function submit() {
 
         <button 
           type="submit"
-          class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-blue-500 active:bg-blue-700 transition duration-150 ease-in-out mt-6"
+          :disabled="loading"
+          class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-blue-500 active:bg-blue-700 transition duration-150 ease-in-out mt-6"
         >
-          Register
+          {{ loading ? 'Loading...' : 'Register' }}
         </button>
 
         <div class="text-center text-xs text-slate-400 mt-4">

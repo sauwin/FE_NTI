@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { login } from '@/features/auth/api/auth'
 import { useAuthStore } from '../stores/auth'
+import axios from 'axios'
 
 const email = ref('')
 const password = ref('')
@@ -10,25 +11,34 @@ const error = ref('')
 const router = useRouter()
 const auth = useAuthStore()
 
+const loading = ref(false)
+
 async function submit() {
   error.value = ''
   try {
+    loading.value = true
     const res = await login({ email: email.value, password: password.value })
     auth.login(res.data.token, res.data.user)
     router.push('/dashboard')
-  } catch (e: any) {
-    if (e.response?.status === 403) {
-      const msg = e.response.data.message
-      if (msg === 'pending_verification') {
-        router.push('/pending-verification')
-      } else if (msg === 'pending_approval') {
-        router.push('/pending-approval')
+  } catch (e: unknown) {
+    if (axios.isAxiosError(e)) {
+      if (e.response?.status === 403) {
+        const msg = e.response.data.message
+        if (msg === 'pending_verification') {
+          router.push('/pending-verification')
+        } else if (msg === 'pending_approval') {
+          router.push('/pending-approval')
+        } else {
+          error.value = 'Access denied'
+        }
       } else {
-        error.value = 'Access denied'
+        error.value = 'Invalid email or password'
       }
-    } else {
-      error.value = 'Invalid email or password'
-    }
+    } 
+    console.error(e)
+    error.value = 'Unexpected error'
+  } finally {
+    loading.value = false
   }
 }
 </script>
@@ -79,9 +89,10 @@ async function submit() {
 
         <button 
           type="submit"
-          class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-blue-500 active:bg-blue-700 transition duration-150 ease-in-out mt-6 cursor-pointer"
+          :disabled="loading"
+          class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-blue-500 active:bg-blue-700 transition duration-150 ease-in-out mt-6 cursor-pointer"
         >
-          Sign In
+          {{ loading ? 'Loading...' : 'Sign In' }}
         </button>
 
         <div class="text-center text-xs text-slate-400 mt-4">

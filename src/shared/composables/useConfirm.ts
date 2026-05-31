@@ -1,21 +1,28 @@
-import { ref } from 'vue'
+/** Simple shared confirm window */
+import type { Ref } from 'vue'
 import type { ConfirmOptions } from '@/shared/components/ConfirmDialog.vue'
-import ConfirmDialog from "@/shared/components/ConfirmDialog.vue";
+import ConfirmDialog from '@/shared/components/ConfirmDialog.vue'
 
-let dialogRef: any = null
+let dialogRef: Ref<InstanceType<typeof ConfirmDialog> | null> | null = null
 
-export function setConfirmDialogRef(ref: any) {
-dialogRef = ref
+export function setConfirmDialogRef(ref: Ref<InstanceType<typeof ConfirmDialog> | null>) {
+  dialogRef = ref
 }
 
+/** Use shared confirm window passed in App.vue */
 export async function useConfirm(options: ConfirmOptions | string): Promise<boolean> {
-if (!dialogRef) {
-  return false
-}
+  const dialog = dialogRef?.value
 
-const opts: ConfirmOptions = typeof options === 'string'
-? { title: 'Confirm', message: options }
-: options
-  ConfirmDialog
-return await dialogRef.value.open(opts)
+  if (!dialog) {
+    return false
+  }
+
+  // Ternary operator for passing both: 
+  // - string with confirm message 
+  // - ConfirmOptions object
+  const opts: ConfirmOptions = typeof options === 'string'
+  ? { title: 'Confirm', message: options }
+  : options
+  
+  return await dialog.open(opts)
 }

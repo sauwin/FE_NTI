@@ -3,28 +3,22 @@ import { onMounted, ref } from 'vue'
 import { useAuthStore } from '@/features/auth/stores/auth'
 import { setConfirmDialogRef } from '@/shared/composables/useConfirm'
 import ConfirmDialog from '@/shared/components/ConfirmDialog.vue'
-import { getMe } from '@/features/auth/api/auth'
+import Loader from '@/shared/components/Loader.vue'
 
 const auth = useAuthStore()
 const confirmDialogRef = ref()
 
 onMounted(async () => {
   setConfirmDialogRef(confirmDialogRef)
-
-  if (auth.token) {
-    try {
-      const res = await getMe()
-      auth.login(auth.token, res.data)
-    } catch {
-      auth.logout()
-    }
-  }
+  await auth.restoreSession()
 })
 </script>
 
 <template>
   <ConfirmDialog ref="confirmDialogRef" />
-  <router-view/>
+
+  <Loader v-if="!auth.authReady" />
+  <router-view />
 </template>
 
 <style scoped></style>

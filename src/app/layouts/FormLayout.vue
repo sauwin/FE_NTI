@@ -1,4 +1,7 @@
 <script setup lang="ts">
+  /**
+   * Simple layout without footer primarily for forms
+   */
   import Navbar from '@/shared/components/Navbar.vue'
 </script>
 
