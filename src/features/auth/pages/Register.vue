@@ -46,7 +46,7 @@ async function submit() {
     }
 
     if (isCompany.value) {
-      payload.company_type = companyRole.value
+      payload.role_in_org = companyRole.value
       if (companyRole.value === 'member') {
         if (registrationNumber.value.trim()) {
           const id = Number(registrationNumber.value.trim())
@@ -57,7 +57,6 @@ async function submit() {
           } 
 
           payload.registration_number = id
-          payload.role_in_org = companyRole.value
         } else {
           error.value = 'No registration id of your company provided'
           return

@@ -14,23 +14,25 @@ export interface LoginPayload {
 }
 
 export interface RegisterPayload {
+  first_name: string
+  last_name: string
   email: string
   password: string
   password_confirmation: string
-  first_name: string
-  last_name: string
   role: string
-  company_type?: string
-  [key: string]: unknown
+  agreed_terms: boolean,
+  gdpr_consent: boolean,
+  role_in_org?: string
+  registration_number?: number,
 }
 
+//Todo: update this with dashboard
 export interface RoleStatus {
   approved: boolean
 }
 
 export interface ResetPasswordPayload {
   token: string
-  email?: string
   password: string
   password_confirmation: string
 }
