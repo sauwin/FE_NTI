@@ -20,11 +20,13 @@ const adminRoles = ['nti_admin', 'evaluator', 'content_editor']
 async function createAdmin() {
   if (!form.value.first_name || !form.value.last_name || !form.value.email || !form.value.password) {
     message.value = 'All fields required'
+    success.value = false
     return
   }
 
   if (form.value.password.length < 8) {
     message.value = 'Password must be at least 8 characters'
+    success.value = false
     return
   }
 
@@ -41,7 +43,7 @@ async function createAdmin() {
     message.value = 'Admin created successfully'
     form.value = { first_name: '', last_name: '', email: '', password: '', role: 'nti_admin' }
     emit('created')
-    setTimeout(() => success.value = false, 3000)
+    setTimeout(() => { success.value = false; message.value = '' }, 3000)
   } catch (e: any) {
     success.value = false
     message.value = e.response?.data?.message || 'Failed to create admin'
@@ -52,49 +54,78 @@ async function createAdmin() {
 </script>
 
 <template>
-  <div class="max-w-md">
-    <form @submit.prevent="createAdmin" class="space-y-4">
-      <div>
-        <label class="label-small">First Name</label>
-        <input v-model="form.first_name" type="text" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
-      </div>
+  <div class="flex items-center justify-center min-h-[calc(100vh-4rem)] w-full p-4">
+    <div class="border border-slate-800 bg-slate-900/40 rounded-2xl p-6 max-w-md">
+      <h3 class="text-xl font-bold text-white mb-6">New Admin</h3>
 
-      <div>
-        <label class="label-small">Last Name</label>
-        <input v-model="form.last_name" type="text" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
-      </div>
+      <form @submit.prevent="createAdmin" class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-mono uppercase text-slate-400 mb-1">First Name</label>
+            <input
+              v-model="form.first_name"
+              type="text"
+              class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white text-sm focus:border-blue-600 outline-none transition"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Last Name</label>
+            <input
+              v-model="form.last_name"
+              type="text"
+              class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white text-sm focus:border-blue-600 outline-none transition"
+            />
+          </div>
+        </div>
 
-      <div>
-        <label class="label-small">Email</label>
-        <input v-model="form.email" type="email" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
-      </div>
+        <div>
+          <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Email</label>
+          <input
+            v-model="form.email"
+            type="email"
+            class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white text-sm focus:border-blue-600 outline-none transition"
+          />
+        </div>
 
-      <div>
-        <label class="label-small">Password</label>
-        <input v-model="form.password" type="password" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
-      </div>
+        <div>
+          <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Password</label>
+          <input
+            v-model="form.password"
+            type="password"
+            class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white text-sm focus:border-blue-600 outline-none transition"
+          />
+        </div>
 
-      <div>
-        <label class="label-small">Admin Role</label>
-        <select v-model="form.role" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm">
-          <option v-for="role in adminRoles" :key="role" :value="role">
-            {{ role }}
-          </option>
-        </select>
-      </div>
+        <div>
+          <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Admin Role</label>
+          <select
+            v-model="form.role"
+            class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white text-sm focus:border-blue-600 outline-none transition"
+          >
+            <option v-for="role in adminRoles" :key="role" :value="role" class="bg-slate-950 text-white">
+              {{ role }}
+            </option>
+          </select>
+        </div>
 
-      <button type="submit" :disabled="loading" class="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 text-white py-2 rounded-lg text-sm font-medium transition">
-        {{ loading ? 'Creating...' : 'Create Admin' }}
-      </button>
+        <div
+          v-if="message"
+          class="px-4 py-3 rounded-xl text-sm font-mono border"
+          :class="success
+            ? 'bg-emerald-950/60 border-emerald-900 text-emerald-400'
+            : 'bg-red-950/40 border-red-900 text-red-400'"
+        >
+          {{ message }}
+        </div>
 
-      <div v-if="message" :class="[
-'p-3 rounded-lg text-sm',
-success
-? 'bg-green-900/20 border border-green-800 text-green-400'
-: 'bg-red-900/20 border border-red-800 text-red-400'
-]">
-        {{ message }}
-      </div>
-    </form>
+        <button
+          type="submit"
+          :disabled="loading"
+          class="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition text-sm"
+        >
+          {{ loading ? 'Creating...' : 'Create Admin' }}
+        </button>
+      </form>
+    </div>
   </div>
 </template>

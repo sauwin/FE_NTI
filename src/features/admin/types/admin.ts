@@ -26,17 +26,18 @@ export interface RequiredDocument {
 
 export interface DashboardStats {
   total_users: number
-  active_projects: number
-  pending_approvals: number
-  open_calls: number
-  blocked_users?: number
+  students?: number
+  company_owners?: number
+  admins?: number
+  content_editors?: number
   evaluators?: number
   mentors?: number
-  admins?: number
-  draft_calls?: number
-  closed_calls?: number
-  archived_calls?: number
-  applications_total?: number
+  total_calls: number
+  open_calls?: number
+  total_applications: number
+  application_submitted?: number
+  application_active?: number
+  application_closed?: number
 }
 
 export interface AdminApplication {
