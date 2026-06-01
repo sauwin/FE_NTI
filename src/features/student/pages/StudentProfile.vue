@@ -84,10 +84,6 @@ const levelColor: Record<string, string> = {
   <div v-else>
     <div class="mb-10 flex items-start justify-between gap-6">
       <div>
-        <button @click="router.push('/dashboard')"
-          class="text-xs text-slate-500 hover:text-slate-300 transition mb-4 block">
-          ← Back to Dashboard
-        </button>
         <div class="inline-flex items-center bg-blue-600/15 border border-blue-800 text-blue-400 text-xs font-bold tracking-widest uppercase py-1.5 px-4 rounded-full mb-4">
           Student Profile
         </div>
@@ -255,5 +251,10 @@ const levelColor: Record<string, string> = {
         </div>
       </section>
     </div>
+
+    <button @click="router.push('/dashboard')"
+      class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition mt-12 mb-10">
+      Back to Dashboard
+    </button>
   </div>
 </template>

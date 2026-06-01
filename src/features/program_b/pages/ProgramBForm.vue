@@ -22,6 +22,7 @@ const resolvedCallId = ref<number | null>(null)
 const currentCall = ref<CallShortInfo | null>(null)
 const myTeams = ref<Team[]>([])
 const selectedTeamId = ref<number | null>(null)
+const applicantType = ref<'student' | 'team'>('team')
 
 const error = ref<string>('')
 const loading = ref<boolean>(false)
@@ -139,7 +140,7 @@ function onFileChange(type: string, event: Event): void {
 
 function nextStep(): void {
   error.value = ''
-  if (!selectedTeamId.value) { error.value = 'Please select or create a team'; return }
+  if (applicantType.value == 'team' && !selectedTeamId.value) { error.value = 'Please select or create a team'; return }
   if (!projectTitle.value.trim()) { error.value = 'Please enter the project name'; return }
   if (!proposedSolution.value.trim()) { error.value = 'Please describe the concept behind your solution'; return }
   step.value = 2
@@ -160,10 +161,10 @@ async function submit(): Promise<void> {
 
   try {
     const applicationPayload = {
-      applicant_type: 'team' as const,
+      applicant_type: applicantType.value,
       program_type: 'b' as const,
       call_id: resolvedCallId.value,
-      team_id: selectedTeamId.value, 
+      team_id: applicantType.value == 'team' ? selectedTeamId.value : null, 
       project_title: projectTitle.value,
       proposed_solution: proposedSolution.value
     }
@@ -197,7 +198,7 @@ async function submit(): Promise<void> {
     <div class="w-full max-w-xl bg-slate-900/40 p-8 border border-slate-900 rounded-2xl relative overflow-hidden backdrop-blur-md">
       
       <div v-if="loading" class="text-center py-10 text-sm text-slate-400">
-        Loading context parameters...
+        Submitting Application...
       </div>
 
       <div v-else>
@@ -215,6 +216,22 @@ async function submit(): Promise<void> {
           
           <div class="flex flex-col gap-5">
             <div>
+              <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">Applicant Type *</label>
+              
+              <select 
+                v-model="applicantType" 
+                class="w-full bg-slate-950 border border-slate-800 h-11 px-3 rounded-lg text-white focus:border-blue-600 transition outline-none text-sm cursor-pointer"
+              >
+                <option key="student" value="student">
+                  Student
+                </option>
+                <option key="team" value="team">
+                  Team
+                </option>
+              </select>
+            </div>
+
+            <div v-show="applicantType == 'team'">
               <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">Choose your team *</label>
               
               <div v-if="myTeams.length === 0" class="p-3 border border-dashed border-amber-900/60 bg-amber-950/20 rounded-lg text-xs text-amber-400">
@@ -246,7 +263,7 @@ async function submit(): Promise<void> {
             
             <div class="flex gap-3 mt-2">
               <button @click="router.back()" class="w-1/3 border border-slate-800 text-slate-400 h-11 rounded-lg hover:text-white transition text-sm font-medium">Cancel</button>
-              <button @click="nextStep" :disabled="myTeams.length === 0" class="flex-1 bg-blue-600 disabled:bg-slate-800 disabled:text-slate-600 text-white h-11 rounded-lg font-medium hover:bg-blue-700 transition text-sm">
+              <button @click="nextStep" :disabled="applicantType == 'team' && myTeams.length === 0" class="flex-1 bg-blue-600 disabled:bg-slate-800 disabled:text-slate-600 text-white h-11 rounded-lg font-medium hover:bg-blue-700 transition text-sm">
                 Next: Documentation
               </button>
             </div>
@@ -278,7 +295,7 @@ async function submit(): Promise<void> {
         <div v-if="step === 3" class="text-center py-6">
           <div class="text-5xl mb-4">🎉</div>
           <h2 class="text-2xl font-bold text-white mb-2">Application Successfully Submitted!</h2>
-          <p class="text-gray-400 text-sm mb-6 max-w-sm mx-auto">Your team proposal has been registered. You can track its assessment status inside your student account management panel.</p>
+          <p class="text-gray-400 text-sm mb-6 max-w-sm mx-auto">Your application has been registered. You can track its assessment status inside your student account management panel.</p>
           <button @click="router.push('/programs/b')" class="bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition">Back to Catalog</button>
         </div>
       </div>
