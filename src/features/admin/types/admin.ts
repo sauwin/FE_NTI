@@ -113,3 +113,37 @@ export interface BulkNotificationPayload {
   subject: string
   message: string
 }
+
+export interface Call {
+  id: number
+  name: string
+  [key: string]: any
+}
+
+export interface Sender {
+  id: number
+  first_name?: string | null
+  last_name?: string | null
+  email: string
+}
+
+export interface NotificationItem {
+  id: number
+  subject: string
+  message: string
+  recipient_group: string
+  sender_id: number | null
+  sender: Sender | null
+  created_at: string
+  total_recipients: number
+}
+
+export interface StatusMessage {
+  ok: boolean
+  text: string
+}
+
+export interface GroupOption {
+  value: string
+  label: string
+}

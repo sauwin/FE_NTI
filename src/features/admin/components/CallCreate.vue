@@ -106,7 +106,7 @@ async function submitCall() {
           <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Target Core Program *</label>
           <select v-model="programId" class="w-full bg-slate-900 border border-blue-900 rounded-md h-10 px-3 text-white focus:outline-none">
             <option v-for="prog in programs" :key="prog.id" :value="prog.id">
-              {{ prog.code.toUpperCase().replace('_', ' ') }} ({{ prog.type }})
+              {{ prog.code?.toUpperCase().replace('_', ' ') || 'UNKNOWN CODE' }} ({{ prog.type }})
             </option>
           </select>
         </div>

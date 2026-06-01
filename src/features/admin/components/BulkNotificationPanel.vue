@@ -1,23 +1,24 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { getAdminCalls, getNotificationHistory, sendBulkNotification, exportNotifications } from '@/features/admin/api/admin'
-import {useConfirm} from "@/shared/composables/useConfirm.ts";
+import { useConfirm } from "@/shared/composables/useConfirm.ts"
+import type { Call, NotificationItem, StatusMessage, GroupOption } from '@/features/admin/types/admin'
 
-const viewMode = ref('all') 
-const selectedCallId = ref('') 
-const subject = ref('')
-const message = ref('')
-const status = ref(null)
-const loading = ref(false)
-const calls = ref([])
-const history = ref([])
-const loadingHistory = ref(false)
+const viewMode = ref<string>('all') 
+const selectedCallId = ref<string>('') 
+const subject = ref<string>('')
+const message = ref<string>('')
+const status = ref<StatusMessage | null>(null)
+const loading = ref<boolean>(false)
+const calls = ref<Call[]>([])
+const history = ref<NotificationItem[]>([])
+const loadingHistory = ref<boolean>(false)
 
-const exportLoading = ref(false)
-const exportMessage = ref('')
-const exportSuccess = ref(false)
+const exportLoading = ref<boolean>(false)
+const exportMessage = ref<string>('')
+const exportSuccess = ref<boolean>(false)
 
-const viewGroups = [
+const viewGroups: GroupOption[] = [
   { value: 'all', label: 'All Users' },
   { value: 'students', label: 'Students' },
   { value: 'companies', label: 'Companies' },
@@ -25,21 +26,27 @@ const viewGroups = [
   { value: 'call_selector', label: 'Specific Call Participants (Výzva)' },
 ]
 
-const historyFilterSubject = ref('')
-const historyFilterGroup = ref('')
-const historyFilterSender = ref('')
-const historyFilterDateFrom = ref('')
-const historyFilterDateTo = ref('')
+const historyFilterSubject = ref<string>('')
+const historyFilterGroup = ref<string>('')
+const historyFilterSender = ref<string>('')
+const historyFilterDateFrom = ref<string>('')
+const historyFilterDateTo = ref<string>('')
 
-const uniqueGroups = computed(() => [...new Set(history.value.map(h => h.recipient_group))])
-const uniqueSenders = computed(() => {
+const uniqueGroups = computed<string[]>(() => [
+  ...new Set(history.value.map(h => h.recipient_group))
+])
+
+const uniqueSenders = computed<{ id: number; name: string }[]>(() => {
   const senders = history.value
-    .filter(h => h.sender)
-    .map(h => ({ id: h.sender_id, name: `${h.sender?.first_name ?? ''} ${h.sender?.last_name ?? ''}`.trim() || h.sender?.email }))
+    .filter((h): h is NotificationItem & { sender_id: number; sender: any } => !!h.sender && h.sender_id !== null)
+    .map(h => ({
+      id: h.sender_id,
+      name: `${h.sender.first_name ?? ''} ${h.sender.last_name ?? ''}`.trim() || h.sender.email
+    }))
   return [...new Map(senders.map(s => [s.id, s])).values()]
 })
 
-const filteredHistory = computed(() => {
+const filteredHistory = computed<NotificationItem[]>(() => {
   return history.value.filter(item => {
     if (historyFilterSubject.value && !item.subject.toLowerCase().includes(historyFilterSubject.value.toLowerCase())) return false
     if (historyFilterGroup.value && item.recipient_group !== historyFilterGroup.value) return false
@@ -55,7 +62,7 @@ onMounted(() => {
   fetchHistory()
 })
 
-function resetHistoryFilters() {
+function resetHistoryFilters(): void {
   historyFilterSubject.value = ''
   historyFilterGroup.value = ''
   historyFilterSender.value = ''
@@ -63,7 +70,7 @@ function resetHistoryFilters() {
   historyFilterDateTo.value = ''
 }
 
-async function triggerExport(format = 'csv') {
+async function triggerExport(format: 'csv' | 'xlsx' = 'csv'): Promise<void> {
   exportLoading.value = true
   exportMessage.value = ''
   
@@ -91,7 +98,7 @@ async function triggerExport(format = 'csv') {
     exportSuccess.value = true
     exportMessage.value = `Export successful (${format.toUpperCase()})`
     setTimeout(() => { exportSuccess.value = false; exportMessage.value = '' }, 3000)
-  } catch (e) {
+  } catch (e: any) {
     exportSuccess.value = false
     exportMessage.value = e.response?.data?.message || `Failed to export notifications as ${format.toUpperCase()}`
   } finally {
@@ -99,21 +106,21 @@ async function triggerExport(format = 'csv') {
   }
 }
 
-async function fetchCalls() {
+async function fetchCalls(): Promise<void> {
   try {
-    const res = await getAdminCalls()
-    calls.value = Array.isArray(res.data) ? res.data : (res.data.data || [])
-  } catch (e) {
+    const res: any = await getAdminCalls()
+    calls.value = Array.isArray(res.data) ? res.data : (res.data?.data || [])
+  } catch (e: any) {
     console.warn('Failed to load active calls:', e.message)
   }
 }
 
-async function fetchHistory() {
+async function fetchHistory(): Promise<void> {
   loadingHistory.value = true
   try {
     const res = await getNotificationHistory()
     history.value = Array.isArray(res.data) ? res.data : (res.data.data || [])
-  } catch (e) {
+  } catch (e: any) {
     console.warn('History failed to fetch:', e.message)
     history.value = []
   } finally {
@@ -121,7 +128,7 @@ async function fetchHistory() {
   }
 }
 
-async function send() {
+async function send(): Promise<void> {
   if (viewMode.value === 'call_selector' && !selectedCallId.value) {
     status.value = { ok: false, text: 'Please select a specific Call window.' }
     return
@@ -164,14 +171,14 @@ async function send() {
     
     fetchHistory()
     setTimeout(() => { status.value = null }, 5000)
-  } catch (e) {
+  } catch (e: any) {
     status.value = { ok: false, text: e.response?.data?.message || e.message }
   } finally {
     loading.value = false
   }
 }
 
-function formatDate(dateStr) {
+function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return '—'
   return new Date(dateStr).toLocaleDateString('sk-SK', {
     year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'

@@ -10,7 +10,7 @@ interface CallDocumentRequirement extends RequiredDocument {
 
 const router = useRouter()
 const route = useRoute()
-const callId = route.params.id
+const callId = route.params.id as string
 
 const programs = ref<AdminProgram[]>([])
 const loading = ref<boolean>(false)
@@ -85,7 +85,7 @@ async function updateCall() {
       required_documents: requiredDocuments.value,
     })
 
-    router.push('/admin/dashboard') // або туди, де у тебе список викликів
+    router.push('/admin/dashboard')
   } catch (e: any) {
     error.value = e?.response?.data?.message || 'Error updating Call configuration.'
   } finally {
@@ -112,7 +112,7 @@ async function updateCall() {
           <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Target Core Program (Locked)</label>
           <select v-model="programId" disabled class="w-full bg-slate-900 border border-slate-800 rounded-md h-10 px-3 text-gray-500 opacity-60">
             <option v-for="prog in programs" :key="prog.id" :value="prog.id">
-              {{ prog.code.toUpperCase().replace('_', ' ') }} ({{ prog.type }})
+              {{ prog.code?.toUpperCase().replace('_', ' ') }} ({{ prog.title || prog.name || 'No Title' }})
             </option>
           </select>
         </div>
