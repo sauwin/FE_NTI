@@ -27,29 +27,27 @@ const selectedCallIdForApps = ref<number | null>(null)
 
 const stats = ref<DashboardStats>({
   total_users: 0,
-  active_projects: 0,
-  pending_approvals: 0,
-  open_calls: 0,
-  blocked_users: 0,
+  students: 0,
+  company_owners: 0,
+  admins: 0,
+  content_editors: 0,
   evaluators: 0,
   mentors: 0,
-  admins: 0,
-  draft_calls: 0,
-  closed_calls: 0,
-  archived_calls: 0,
-  applications_total: 0,
+  total_calls: 0,
+  open_calls: 0,
+  total_applications: 0,
+  application_submitted: 0,
+  application_active: 0,
+  application_closed: 0,
 })
 
 const users = ref<any[]>([])
 const pendingUsers = ref<any[]>([])
 
 const quickStats = computed(() => [
-  { label: 'Total Users', value: stats.value.total_users, color: 'text-white', border: 'border-slate-800', bg: 'bg-slate-900/50' },
-  { label: 'Active Projects', value: stats.value.active_projects, color: 'text-green-400', border: 'border-green-900/40', bg: 'bg-green-950/20' },
-  { label: 'Pending Approvals', value: stats.value.pending_approvals, color: 'text-yellow-400', border: 'border-yellow-900/40', bg: 'bg-yellow-950/20' },
-  { label: 'Open Calls', value: stats.value.open_calls, color: 'text-blue-400', border: 'border-blue-900/40', bg: 'bg-blue-950/20' },
-  { label: 'Blocked Users', value: stats.value.blocked_users, color: 'text-red-400', border: 'border-red-900/40', bg: 'bg-red-950/20' },
-  { label: 'Applications', value: stats.value.applications_total, color: 'text-cyan-400', border: 'border-cyan-900/40', bg: 'bg-cyan-950/20' },
+  { label: 'Total Users', value: stats.value.total_users, color: 'text-white', border: 'border-slate-800', bg: 'bg-slate-900/40' },
+  { label: 'Total Calls', value: stats.value.total_calls, color: 'text-white', border: 'border-slate-800', bg: 'bg-slate-900/40' },
+  { label: 'Total Applications', value: stats.value.total_applications, color: 'text-white', border: 'border-slate-800', bg: 'bg-slate-900/40' },
 ])
 
 async function loadAggregatedStats() {
@@ -57,18 +55,19 @@ async function loadAggregatedStats() {
     loadingStats.value = true
     const res = await getDashboardStats()
     stats.value = {
-      total_users: Number(res.data.total_users ?? 0),
-      active_projects: Number(res.data.active_projects ?? 0),
-      pending_approvals: Number(res.data.pending_approvals ?? 0),
-      open_calls: Number(res.data.open_calls ?? 0),
-      blocked_users: Number(res.data.blocked_users ?? 0),
-      evaluators: Number(res.data.evaluators ?? 0),
-      mentors: Number(res.data.mentors ?? 0),
-      admins: Number(res.data.admins ?? 0),
-      draft_calls: Number(res.data.draft_calls ?? 0),
-      closed_calls: Number(res.data.closed_calls ?? 0),
-      archived_calls: Number(res.data.archived_calls ?? 0),
-      applications_total: Number(res.data.applications_total ?? 0),
+      total_users: Number(res.data?.total_users ?? 0),
+      students: Number(res.data?.students ?? 0),
+      company_owners: Number(res.data?.company_owners ?? 0),
+      admins: Number(res.data?.admins ?? 0),
+      content_editors: Number(res.data?.content_editors ?? 0),
+      evaluators: Number(res.data?.evaluators ?? 0),
+      mentors: Number(res.data?.mentors ?? 0),
+      total_calls: Number(res.data?.total_calls ?? 0),
+      open_calls: Number(res.data?.open_calls ?? 0),
+      total_applications: Number(res.data?.total_applications ?? 0),
+      application_submitted: Number(res.data?.application_submitted ?? 0),
+      application_active: Number(res.data?.application_active ?? 0),
+      application_closed: Number(res.data?.application_closed ?? 0),
     }
     error.value = ''
   } catch (e: any) {
@@ -81,7 +80,7 @@ async function loadAggregatedStats() {
 async function loadUserData() {
   try {
     const res = await getAdminUsers()
-    users.value = res.data
+    users.value = res.data ?? []
   } catch (e: any) {
     error.value = e.response?.data?.message || 'Failed to load users'
   }
@@ -90,7 +89,7 @@ async function loadUserData() {
 async function loadPendingApprovals() {
   try {
     const appRes = await getPendingApprovals()
-    pendingUsers.value = appRes.data
+    pendingUsers.value = appRes.data ?? []
   } catch (e: any) {
     error.value = e.response?.data?.message || 'Failed to load approvals'
   }
@@ -141,7 +140,6 @@ onMounted(() => {
           { id: 'approvals', name: 'Approvals' },
           { id: 'documents', name: 'Documents' },
           ...(isSuperAdmin ? [{ id: 'create-admin', name: 'Create Admin' }] : []),
-          { id: 'pages', name: 'Pages' },
           { id: 'logs', name: 'Audit Logs' },
           { id: 'broadcast-notification', name: 'Broadcast' }
         ]" 
@@ -164,7 +162,7 @@ onMounted(() => {
 
     <div v-if="activeTab === 'overview'" class="space-y-6">
       <div v-if="loadingStats" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-        <div v-for="n in 6" :key="n" class="border border-slate-800 rounded-2xl p-6 bg-slate-900/50 animate-pulse">
+        <div v-for="n in 3" :key="n" class="border border-slate-800 rounded-2xl p-6 bg-slate-900/50 animate-pulse">
           <div class="h-4 w-24 bg-slate-700 rounded mb-5"></div>
           <div class="h-10 w-20 bg-slate-800 rounded mb-4"></div>
           <div class="h-3 w-full bg-slate-800 rounded"></div>
@@ -189,54 +187,64 @@ onMounted(() => {
             <div class="flex items-center justify-between mb-6">
               <div>
                 <h3 class="text-lg font-semibold text-white">Platform Activity</h3>
-                <p class="text-sm text-slate-500 mt-1">Overview of users, programs and workflow state.</p>
+                <p class="text-sm text-slate-500 mt-1">Overview of programs and workflow state.</p>
               </div>
-              <button @click="loadAggregatedStats" class="text-xs px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 transition text-slate-300">
-                Refresh
-              </button>
             </div>
 
             <div class="space-y-4">
               <div class="flex items-center justify-between bg-slate-950/60 border border-slate-800 rounded-xl p-4">
                 <div>
-                  <div class="text-sm text-slate-300">Draft Calls</div>
-                  <div class="text-xs text-slate-500 mt-1">Calls not yet published</div>
+                  <div class="text-sm text-white">Open calls</div>
+                  <div class="text-xs text-slate-500 mt-1">Currently open calls</div>
                 </div>
-                <div class="text-2xl font-bold text-slate-300">{{ stats.draft_calls }}</div>
+                <div class="text-2xl font-bold text-white">{{ stats.open_calls }}</div>
               </div>
 
               <div class="flex items-center justify-between bg-slate-950/60 border border-slate-800 rounded-xl p-4">
                 <div>
-                  <div class="text-sm text-slate-300">Closed Calls</div>
-                  <div class="text-xs text-slate-500 mt-1">Finished application periods</div>
+                  <div class="text-sm text-white">Applications submitted</div>
+                  <div class="text-xs text-slate-500 mt-1">Applications submitted for review</div>
                 </div>
-                <div class="text-2xl font-bold text-orange-400">{{ stats.closed_calls }}</div>
+                <div class="text-2xl font-bold text-white">{{ stats.application_submitted }}</div>
               </div>
 
               <div class="flex items-center justify-between bg-slate-950/60 border border-slate-800 rounded-xl p-4">
                 <div>
-                  <div class="text-sm text-slate-300">Archived Calls</div>
-                  <div class="text-xs text-slate-500 mt-1">Historical archived calls</div>
+                  <div class="text-sm text-white">Applications active</div>
+                  <div class="text-xs text-slate-500 mt-1">The application is currently under development</div>
                 </div>
-                <div class="text-2xl font-bold text-slate-500">{{ stats.archived_calls }}</div>
+                <div class="text-2xl font-bold text-white">{{ stats.application_active }}</div>
+              </div>
+
+              <div class="flex items-center justify-between bg-slate-950/60 border border-slate-800 rounded-xl p-4">
+                <div>
+                  <div class="text-sm text-white">Applications closed</div>
+                  <div class="text-xs text-slate-500 mt-1">Historical archived applications</div>
+                </div>
+                <div class="text-2xl font-bold text-white">{{ stats.application_closed }}</div>
               </div>
             </div>
           </div>
 
           <div class="border border-slate-800 bg-slate-900/40 rounded-2xl p-6">
             <div class="mb-6">
-              <h3 class="text-lg font-semibold text-white">Staff Overview</h3>
-              <p class="text-sm text-slate-500 mt-1">Administrative and review team distribution.</p>
+              <h3 class="text-lg font-semibold text-white">Users Overview</h3>
+              <p class="text-sm text-slate-500 mt-1">Distribution of Administrative and User Groups</p>
             </div>
 
             <div class="space-y-4">
-              <div class="flex items-center justify-between"><span class="text-sm text-slate-400">Administrators</span><span class="text-lg font-semibold text-red-400">{{ stats.admins }}</span></div>
+              <div class="flex items-center justify-between"><span class="text-sm text-white">Students</span><span class="text-lg font-semibold text-white">{{ stats.students }}</span></div>
               <div class="border-t border-slate-800"></div>
-              <div class="flex items-center justify-between"><span class="text-sm text-slate-400">Evaluators</span><span class="text-lg font-semibold text-blue-400">{{ stats.evaluators }}</span></div>
+              <div class="flex items-center justify-between"><span class="text-sm text-white">Company owners</span><span class="text-lg font-semibold text-white">{{ stats.company_owners }}</span></div>
               <div class="border-t border-slate-800"></div>
-              <div class="flex items-center justify-between"><span class="text-sm text-slate-400">Mentors</span><span class="text-lg font-semibold text-purple-400">{{ stats.mentors }}</span></div>
+              <div class="flex items-center justify-between"><span class="text-sm text-white">Administration</span><span class="text-lg font-semibold text-white">{{ stats.admins }}</span></div>
               <div class="border-t border-slate-800"></div>
-              <div class="flex items-center justify-between"><span class="text-sm text-slate-400">Blocked Users</span><span class="text-lg font-semibold text-yellow-400">{{ stats.blocked_users }}</span></div>
+              <div class="flex items-center justify-between"><span class="text-sm text-white">Content editors</span><span class="text-lg font-semibold text-white">{{ stats.content_editors }}</span></div>
+              <div class="border-t border-slate-800"></div>
+              <div class="flex items-center justify-between"><span class="text-sm text-white">Evaluators</span><span class="text-lg font-semibold text-white">{{ stats.evaluators }}</span></div>
+              <div class="border-t border-slate-800"></div>
+              <div class="flex items-center justify-between"><span class="text-sm text-white">Mentors</span><span class="text-lg font-semibold text-white">{{ stats.mentors }}</span></div>
+              <div class="border-t border-slate-800"></div>
             </div>
           </div>
         </div>
