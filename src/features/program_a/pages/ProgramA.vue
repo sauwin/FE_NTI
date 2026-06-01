@@ -14,14 +14,22 @@ const loading = ref(true)
 onMounted(async () => {
   try {
     const res = await getActiveCalls('a')
-    console.log(res)
+    console.log('API Response:', res.data)
     
-    if (res.data[0]) {
-      activeCall.value = res.data[0]
-      parsedDocuments.value = res.data[0].required_documents || []
+    if (res.data) {
+      const callData = Array.isArray(res.data) ? res.data[0] : res.data
+      
+      if (callData && callData.status === 'open') {
+        activeCall.value = callData
+        parsedDocuments.value = callData.required_documents || []
+      } else {
+        activeCall.value = null
+        parsedDocuments.value = []
+      }
     }
   } catch (error) {
     console.error('Error fetching active call:', error)
+    activeCall.value = null
     parsedDocuments.value = []
   } finally {
     loading.value = false

@@ -15,7 +15,7 @@
   onMounted(async () => {
     try {
       const res = await getActiveCalls()
-      activeCalls.value = res.data
+      activeCalls.value = Array.isArray(res.data) ? res.data : (res.data ? [res.data] : [])
     } catch (e) {
       console.error(e)
     } finally {
@@ -60,10 +60,10 @@
     })
   }
 
-  function getUrgencyLabel(deadlineStr?: string | null): { text: string; isUrgent: boolean } | null {
+  function calculateUrgency(deadlineStr: string | null | undefined, currentNow: number) {
     if (!deadlineStr) return null
     
-    const distance = new Date(deadlineStr).getTime() - now.value
+    const distance = new Date(deadlineStr).getTime() - currentNow
     if (distance < 0) return { text: 'Ended', isUrgent: false }
 
     const days = Math.floor(distance / (1000 * 60 * 60 * 24))
@@ -79,12 +79,19 @@
   }
 
   const sortedCalls = computed(() => {
-    return [...activeCalls.value].sort((a, b) => {
-      return (
-        new Date(a.deadline_at || '').getTime() -
-        new Date(b.deadline_at || '').getTime()
-      )
-    })
+    const data = Array.isArray(activeCalls.value) ? activeCalls.value : []
+    
+    return data
+      .map(call => ({
+        ...call,
+        urgency: calculateUrgency(call.deadline_at, now.value)
+      }))
+      .sort((a, b) => {
+        return (
+          new Date(a.deadline_at || '').getTime() -
+          new Date(b.deadline_at || '').getTime()
+        )
+      })
   })
 </script>
 
@@ -215,17 +222,16 @@
               {{ call.status }}
             </div>
             
-            <!-- Новий реактивний бейдж терміновості виклику -->
             <span 
-              v-if="getUrgencyLabel(call.deadline_at)"
+              v-if="call.urgency"
               :class="[
                 'text-[11px] font-medium px-2 py-0.5 rounded',
-                getUrgencyLabel(call.deadline_at)?.isUrgent 
+                call.urgency.isUrgent 
                   ? 'text-amber-400 bg-amber-500/10 border border-amber-500/20 animate-pulse' 
                   : 'text-slate-400 bg-slate-800'
               ]"
             >
-              {{ getUrgencyLabel(call.deadline_at)?.text }}
+              {{ call.urgency.text }}
             </span>
           </div>
 
