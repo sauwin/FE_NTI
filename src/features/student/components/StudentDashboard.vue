@@ -76,14 +76,14 @@ function quickCreateTeam() {
               <div class="text-xs text-slate-400">Initialize a new workgroup and start inviting core team members via corporate email.</div>
             </button>
 
-            <router-link to="/programs/a/upload"
+            <router-link to="/programs/a"
               class="flex flex-col justify-between text-left p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 transition-all"
             >
               <div class="text-sm font-semibold text-white mb-1">Apply to Program A</div>
               <div class="text-xs text-slate-400">Submit your commercial project prototype, build roadmap metrics, and fill system forms.</div>
             </router-link>
 
-            <router-link to="/programs/b/upload"
+            <router-link to="/programs/b"
               class="flex flex-col justify-between text-left p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 transition-all"
             >
               <div class="text-sm font-semibold text-white mb-1">Apply to Program B</div>

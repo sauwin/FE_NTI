@@ -4,9 +4,11 @@ import { useAuthStore } from '@/features/auth/stores/auth'
 import { setConfirmDialogRef } from '@/shared/composables/useConfirm'
 import ConfirmDialog from '@/shared/components/ConfirmDialog.vue'
 import Loader from '@/shared/components/Loader.vue'
+import { useSeo } from '@/shared/seo/useSeo'
 
 const auth = useAuthStore()
 const confirmDialogRef = ref()
+useSeo()
 
 onMounted(async () => {
   setConfirmDialogRef(confirmDialogRef)

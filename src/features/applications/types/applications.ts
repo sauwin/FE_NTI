@@ -38,3 +38,13 @@ export interface StudentApplication {
   call?: { name?: string; deadline_at?: string }
   team?: { name: string }
 }
+
+export interface ApplicationRevisionRequest {
+  application_id: number
+  created_at: string | null
+  deadline: string | null
+  id: number
+  message: string
+  requested_by: number
+  resolved_at: string | null
+}

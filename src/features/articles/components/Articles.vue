@@ -9,6 +9,7 @@ const router = useRouter()
 const store = useAuthStore()
 const articlesObj = ref<Article[] | null>(null)
 const fetchSuccessfull = ref<boolean | null>(null)
+const canEdit = store.isAdmin || store.isContentEditor
 
 async function fetchData() {
   try {
@@ -38,7 +39,7 @@ onMounted(() => {
 
     <!-- Add new article -->
     <button
-      v-show="store.isAdmin"
+      v-show="canEdit"
       @click="router.push('/article/create')"
       class="border-2 border-dashed border-slate-700 hover:border-blue-700 bg-slate-900/30 rounded-2xl flex flex-col items-center justify-center gap-4 cursor-pointer transition group min-h-80">
       <div class="text-5xl text-slate-600 group-hover:text-blue-600 transition select-none font-thin">+</div>
@@ -47,8 +48,9 @@ onMounted(() => {
 
     <!-- Article cards -->
     <div
-      v-for="article in articlesObj?.slice(0, store.isAdmin ? 2 : 3)" :key="article.id"
+      v-for="article in articlesObj?.slice(0, canEdit ? 2 : 3)" :key="article.id"
       class="card-glowing flex flex-col overflow-hidden transition">
+      {{ console.log(article) }}
 
       <!-- Image — taller -->
       <img
@@ -66,23 +68,23 @@ onMounted(() => {
 
         <!-- Actions -->
         <div class="flex items-center gap-2 mt-6">
-          <div class="text-blue-400" v-show="!store.isAdmin">Published {{ new Date(article.published_at).toLocaleDateString() }}</div>
+          <div class="text-blue-400" v-show="!canEdit">Published {{ new Date(article.published_at).toLocaleDateString() }}</div>
           <button
             @click="deleteArticle(article.id)"
-            v-show="store.isAdmin"
+            v-show="canEdit"
             class="border border-red-800/60 hover:border-red-600 text-red-400/60 hover:text-red-400 px-4 py-1.5 rounded-lg text-sm font-medium transition">
             Delete
           </button>
           <button
             @click="router.push(`/article/edit/${article.id}`)"
-            v-show="store.isAdmin"
+            v-show="canEdit"
             class="border border-yellow-700/60 hover:border-yellow-500 text-yellow-400/60 hover:text-yellow-400 px-4 py-1.5 rounded-lg text-sm font-medium transition">
             Edit
           </button>
           <button
             @click="router.push(`/article/${article.id}`)"
             class="ml-auto bg-blue-600 hover:bg-blue-500 text-white px-6 py-1.5 rounded-lg text-sm font-medium transition">
-            Read more
+            {{ canEdit ? 'Preview' : 'Read more' }}
           </button>
         </div>
       </div>

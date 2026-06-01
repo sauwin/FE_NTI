@@ -1,5 +1,6 @@
 import { useHead } from '@vueuse/head'
 import { useRoute } from 'vue-router'
+import { computed } from 'vue'
 import { seoMap } from './seoMap'
 
 /**
@@ -8,18 +9,21 @@ import { seoMap } from './seoMap'
 export function useSeo() {
   const route = useRoute()
 
-  const seo = seoMap[route.path] ?? {
-    title: 'NTI',
-    description: 'NTI platform',
-  }
+  const seo = computed(
+    () =>
+      seoMap[route.path] ?? {
+        title: 'NTI',
+        description: 'NTI platform',
+      },
+  )
 
-  useHead({
-    title: seo.title,
+  useHead(() => ({
+    title: seo.value.title,
     meta: [
       {
         name: 'description',
-        content: seo.description,
+        content: seo.value.description,
       },
     ],
-  })
+  }))
 }

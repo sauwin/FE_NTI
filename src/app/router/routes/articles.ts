@@ -12,6 +12,11 @@ export const articlesRoutes: RouteRecordRaw = {
     },
 
     {
+      path: 'create',
+      component: () => import('@/features/articles/pages/ArticleRedactor.vue'),
+    },
+
+    {
       path: 'edit/:id',
       component: () => import('@/features/articles/pages/ArticleRedactor.vue'),
     },

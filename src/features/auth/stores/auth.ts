@@ -15,6 +15,7 @@ export const useAuthStore = defineStore('auth', {
         isStudent: (state) => state.user?.role_slug === 'student',
         isCompany: (state) => state.user?.role_slug === 'company',
         isAdmin: (state) => ['nti_admin', 'super_admin'].includes(state.user?.role_slug),
+        isContentEditor: (state) => state.user?.role_slug === 'content_editor',
         roleInOrg: (state) => state.user?.role_in_org ?? null,
 
         //Todo: check whether all that idea with different names is relevant

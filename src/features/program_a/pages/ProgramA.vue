@@ -56,7 +56,7 @@ const parseDocName = (docName:string) => {
 </script>
 
 <template>
-  <div class="bg-blue-950 absolute rounded-[100%] h-120 w-120 -z-10 -right-30 -top-10 blur-3xl opacity-40"></div>
+  <div class="bg-blue-950 absolute rounded-[100%] h-120 w-120 -z-10 -right-30 -top-10"></div>
 
   <PageHero
     badge="Program A"
@@ -127,7 +127,7 @@ const parseDocName = (docName:string) => {
     </div>
   </section>
 
-  <section v-if="parsedDocuments.length" class="border-t border-slate-900 pt-16">
+  <section v-if="parsedDocuments.length" class="border-slate-900">
     <div class="text-xs font-mono uppercase tracking-widest text-blue-500 mb-2">Attachments configuration</div>
     <h2 class="text-3xl font-semibold text-white mb-8">Required documentation according to current open call</h2>
 

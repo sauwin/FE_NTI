@@ -42,6 +42,11 @@ export const publicRoutes: RouteRecordRaw = {
     },
 
     {
+      path: 'partners',
+      component: () => import('@/features/partners/pages/Partners.vue'),
+    },
+
+    {
       path: 'dashboard',
       component: () => import('@/app/pages/Dashboard.vue'),
       meta: {

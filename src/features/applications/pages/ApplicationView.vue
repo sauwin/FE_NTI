@@ -5,12 +5,14 @@ import { useConfirm } from '@/shared/composables/useConfirm'
 import DocumentActionButtons from '@/shared/components/DocumentActionButtons.vue'
 import MilestonesPanel from '@/features/milestones/components/MilestonesPanel.vue'
 import { useAuthStore } from '@/features/auth/stores/auth'
+import type { ApplicationRevisionRequest } from '../types/applications'
 
 import { 
   getApplicationById, 
   getApplicationDocuments, 
   deleteApplication,
-  updateApplicationStatus
+  updateApplicationStatus,
+  getApplicationLastRevision
 } from '@/features/applications/api/applications'
 
 const route = useRoute()
@@ -18,6 +20,7 @@ const router = useRouter()
 const id = route.params.id as string
 const app = ref<any>(null)
 const docs = ref<any[]>([])
+const revision = ref<ApplicationRevisionRequest | null>(null)
 const error = ref('')
 const deleting = ref(false)
 const statusUpdating = ref(false)
@@ -27,12 +30,14 @@ const currentUserRole = auth.role || 'student'
 
 onMounted(async () => {
   try {
-    const [appRes, docsRes] = await Promise.all([
+    const [appRes, docsRes, revisionRes] = await Promise.all([
       getApplicationById(id),
       getApplicationDocuments(id),
+      getApplicationLastRevision(id),
     ])
     app.value = appRes.data
     docs.value = docsRes.data
+    revision.value = revisionRes.data
   } catch {
     error.value = 'Could not load application'
   }
@@ -154,6 +159,24 @@ async function deleteApp() {
           </span>
         </div>
 
+        <div 
+          v-if="auth.isStudent && app.status == 'pending_revision'"
+          class="border border-amber-900/60 bg-amber-950/20 rounded-xl p-5 mb-6"
+        >
+          <div class="flex items-start gap-3.5 mb-2">
+            <div class="w-5 h-5 rounded-full bg-amber-500/10 border border-amber-600/40 flex items-center justify-center shrink-0 text-amber-400 mt-0.5">
+              <span class="text-xs font-bold font-mono">!</span>
+            </div>
+          
+            <h4 class="text-sm font-semibold text-amber-400 mb-1">Revision Required</h4>
+          </div>
+
+          <div class="mt-3 p-3 bg-slate-950/60 rounded-lg border border-slate-800 text-xs text-gray-400 font-mono whitespace-pre-wrap wrap-break-words">
+              <span class="text-amber-500/80 font-semibold uppercase tracking-wider block mb-1">[ Reviewer Comment ]</span>
+              {{ revision ? revision?.message : 'No message' }}
+          </div>
+        </div>
+
         <div class="border border-slate-800 rounded-xl p-6 bg-slate-900/30 mb-4">
           <div class="text-xs font-semibold tracking-widest uppercase text-blue-500 mb-4">Details</div>
           <div class="grid grid-cols-2 gap-4 text-sm">
@@ -222,7 +245,7 @@ async function deleteApp() {
 
         <MilestonesPanel v-if="app" :application-id="id" />
 
-        <div v-if="app.status === 'draft' || app.status === 'pending_revision'" class="flex gap-3">
+        <div v-if="app.status === 'draft' || app.status === 'pending_revision'" class="flex gap-3 mt-8">
           <router-link :to="`/applications/${app.id}/edit`"
                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium">
             Edit Application

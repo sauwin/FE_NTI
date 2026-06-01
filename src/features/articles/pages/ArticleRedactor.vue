@@ -136,7 +136,7 @@ onMounted(async () => {
       <div class="mb-6 flex items-center justify-between">
         <div>
           <div class="inline-block text-[10px] font-bold tracking-widest uppercase text-blue-400 bg-blue-600/10 border border-blue-900/50 px-3 py-1 rounded-full mb-1">
-            {{ article_id ? 'Edit System Resource' : 'Publish New Resource' }}
+            {{ article_id ? 'Edit Article' : 'Create Article' }}
           </div>
           <h1 class="font-bold text-2xl text-white">Article Editor</h1>
         </div>
@@ -152,7 +152,7 @@ onMounted(async () => {
           :class="['px-4 py-2 text-xs uppercase font-bold tracking-wider border-b-2 transition outline-none', 
             activeTab === 'main' ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-300']"
         >
-          General Core Data
+          General Data
         </button>
         <button 
           type="button" 
@@ -191,7 +191,7 @@ onMounted(async () => {
                 <label for="article-file-input" class="inline-block bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium px-4 py-2 rounded border border-slate-700 cursor-pointer transition">
                   Select System File
                 </label>
-                <p class="text-[10px] text-slate-500 mt-1.5">Supported definitions: WebP, PNG or JPEG formatting profiles.</p>
+                <p class="text-[10px] text-slate-500 mt-1.5">Supported endings: WebP, PNG or JPEG formatting profiles.</p>
               </div>
             </div>
           </div>
@@ -241,13 +241,13 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-800 mt-4">
+        <div class="flex items-center justify-end gap-3 pt-4 border-slate-800 mt-4">
           <button 
             type="submit"
             :disabled="isSubmitting"
             class="bg-blue-600 hover:bg-blue-500 font-semibold px-6 h-10 rounded-lg text-xs tracking-wide uppercase text-white transition disabled:opacity-50"
           >
-            {{ isSubmitting ? 'Saving Configuration...' : (article_id ? 'Update Catalog Record' : 'Commit Changes & Publish') }}
+            {{ isSubmitting ? 'Publishing...' : (article_id ? 'Update Article' : 'Publish Article') }}
           </button>
         </div>
       </form>

@@ -40,3 +40,9 @@ export function submitApplication(id: number | string) {
 export function applyApplicationChanges(id: number | string) {
   return api.post(`/applications/${id}/apply-changes`)
 }
+
+export function getApplicationLastRevision(id: number | string) {
+  return api.post(`/applications/${id}/last_revision`)
+}
+
+
