@@ -1,38 +1,44 @@
 import type { RouteRecordRaw } from 'vue-router'
+import MainLayout from '@/app/layouts/MainLayout.vue'
 
-export const profileRoutes: RouteRecordRaw[] = [
-  {
-    path: '/profile',
+export const profileRoutes: RouteRecordRaw = {
+  path: '/',
+  component: MainLayout,
 
-    component: () =>
-      import('@/features/student/pages/StudentProfile.vue'),
+  children: [
+    {
+      path: '/profile',
 
-    meta: {
-      requiresAuth: true,
-      role: 'student',
+      component: () =>
+        import('@/features/student/pages/StudentProfile.vue'),
+
+      meta: {
+        requiresAuth: true,
+        role: 'student',
+      },
     },
-  },
 
-  {
-    path: '/mentor-profile',
+    {
+      path: '/mentor-profile',
 
-    component: () =>
-      import('@/features/mentor/pages/MentorProfile.vue'),
+      component: () =>
+        import('@/features/mentor/pages/MentorProfile.vue'),
 
-    meta: {
-      requiresAuth: true,
-      role: 'mentor',
+      meta: {
+        requiresAuth: true,
+        role: 'mentor',
+      },
     },
-  },
 
-  {
-    path: '/profile/complete',
+    {
+      path: '/profile/complete',
 
-    component: () =>
-      import('@/features/student/pages/ProfileComplete.vue'),
+      component: () =>
+        import('@/features/student/pages/ProfileComplete.vue'),
 
-    meta: {
-      requiresAuth: true,
+      meta: {
+        requiresAuth: true,
+      },
     },
-  },
-]
+  ]
+} 

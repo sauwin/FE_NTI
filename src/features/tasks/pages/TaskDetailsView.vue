@@ -267,7 +267,7 @@ const formatDate = (dateString: string | null | undefined): string => {
             @click="handleApply" 
             class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20 hover:shadow-blue-900/40 cursor-pointer text-center text-sm"
           >
-            Apply with team
+            Submit Application
           </button>
           
           <div v-else class="text-center p-3 bg-slate-900 rounded-xl border border-blue-900/20">

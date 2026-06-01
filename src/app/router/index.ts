@@ -18,21 +18,15 @@ const router = createRouter({
     authRoutes,
     programRoutes,
     articlesRoutes,
+    profileRoutes,
 
     ...applicationRoutes,
-    ...profileRoutes,
     ...evaluationRoutes,
 
     {
       path: '/pending-verification',
       component: () =>
         import('@/features/auth/pages/PendingVerification.vue'),
-    },
-
-    {
-      path: '/pending-approval',
-      component: () =>
-        import('@/features/auth/pages/PendingApproval.vue'),
     },
 
     {

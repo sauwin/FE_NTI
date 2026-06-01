@@ -63,7 +63,7 @@ const getStatusColor = (status: string) => {
 
   <div class="pb-20 mb-12">
     <PageHero
-    badge="Program A"
+    badge="Program B"
     title="Real-world"
     highlight="Industry Practice"
     />

@@ -156,7 +156,6 @@ async function submit() {
           >
             <option value="student" class="bg-slate-900">Student</option>
             <option value="company" class="bg-slate-900">Company</option>
-            <option value="internal" class="bg-slate-900">Internal Role</option>
           </select>
         </div>
 

@@ -20,7 +20,7 @@ async function submit() {
     const res = await login({ email: email.value, password: password.value })
     auth.login(res.data.token, res.data.user)
     router.push('/dashboard')
-  } catch (e: unknown) {
+  } catch (e: any) {
     if (axios.isAxiosError(e)) {
       if (e.response?.status === 403) {
         const msg = e.response.data.message
@@ -31,12 +31,16 @@ async function submit() {
         } else {
           error.value = 'Access denied'
         }
+      } if (e.response?.status === 429) {
+        error.value = 'Too many requests. Please try again later'
       } else {
         error.value = 'Invalid email or password'
       }
     } 
-    console.error(e)
-    error.value = 'Unexpected error'
+    else {
+      console.error(e)
+      error.value = 'Unexpected error'
+    }
   } finally {
     loading.value = false
   }
