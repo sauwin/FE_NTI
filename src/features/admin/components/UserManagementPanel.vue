@@ -244,7 +244,6 @@ async function assignRole(userId: number, roleSlug: string, extraData?: { regist
       await removeUserRole(userId, role)
     }
 
-    // Передаємо extraData (якщо є) у вашу функцію API
     await addUserRole(userId, { 
       role: roleSlug, 
       ...extraData 

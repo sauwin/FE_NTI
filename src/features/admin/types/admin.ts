@@ -148,3 +148,26 @@ export interface GroupOption {
   value: string
   label: string
 }
+
+export interface EvaluationCriterion {
+  id?: number
+  call_id: number
+  slug: string
+  title: string
+  comment: string | null
+  weight: number
+  created_at?: string
+  updated_at?: string
+}
+
+export interface EvaluationCriterionPayloadItem {
+  id?: number
+  slug: string
+  title: string
+  comment?: string | null
+  weight: number
+}
+
+export interface EvaluationCriterionPayload {
+  criteria: EvaluationCriterionPayloadItem[]
+}
