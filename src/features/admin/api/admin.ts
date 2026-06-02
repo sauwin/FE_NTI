@@ -145,10 +145,6 @@ export function getCallEvaluationInfo(callId: number) {
   return api.get(`/admin/calls/${callId}/evaluation-info`)
 }
 
-export function getCallEvaluationCriteria(callId: number) {
-  return api.get(`admin/calls/${callId}/criteria`)
-}
-
 export function changeCallEvaluationCriteria(callId: number, payload: EvaluationCriterionPayload) {
   return api.put(`admin/calls/${callId}/criteria`, payload)
 }

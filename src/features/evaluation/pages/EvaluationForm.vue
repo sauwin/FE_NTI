@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { ref, onMounted, computed } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
+  import { getCallEvaluationCriteria } from '@/shared/api/calls';
   
   import DocumentActionButtons from '@/shared/components/DocumentActionButtons.vue'
 
@@ -26,27 +27,22 @@
   const error = ref('')
   const success = ref('')
 
-  const CRITERIA = [
-    { key: 'innovation', label: 'Inovácia a technologický prínos', weight: 25 },
-    { key: 'feasibility', label: 'Realizovateľnosť a plán (Roadmapa)', weight: 25 },
-    { key: 'team', label: 'Kompetencia a zloženie tímu', weight: 25 },
-    { key: 'impact', label: 'Trhový potenciál a rozpočet', weight: 25 },
-  ]
+  const criteria = ref([
+    {
+      id: 1,
+      call_id: 1,
+      slug: 'overall_score',
+      title: 'Overall score',
+      weight: 100,
+    }
+  ])
 
-  const docLabels: Record<string, string> = {
-    executive_summary: 'Executive Summary',
-    technical_architecture: 'Technická architektúra',
-    roadmap: 'Projektová roadmapa',
-    budget: 'Rozpočet a alokácia grantu',
-    risk_analysis: 'Analýza rizík',
-    monetization: 'Monetizačný model',
-    cv: 'Životopis (CV)',
-    motivation_letter: 'Motivačný list',
-    technical_proposal: 'Technický návrh projektu',
+  const criteriaToEmptyScores = () => {
+    return criteria.value.map(c => ({ criterion_id: c.id, score: 50, title: c.title, weight_at_moment: c.weight, comment: '' }))
   }
 
   const scores = ref(
-    CRITERIA.map(c => ({ criterion_key: c.key, score: 50, weight_at_moment: c.weight, comment: '' }))
+    criteriaToEmptyScores()
   )
   const recommendation = ref<'approve' | 'reject' | 'request_revision'>('approve')
   const comment = ref('')
@@ -57,6 +53,17 @@
     }, 0)
     return Math.round(sum)
   })
+
+  const fetchCallCriteria = async (callId: number) => {
+    const res = await getCallEvaluationCriteria(callId)
+    if (res.data) {
+      criteria.value = res.data
+      scores.value = criteriaToEmptyScores()
+      console.log(criteria.value)
+    } else {
+      criteria.value = []
+    }
+  }
 
   onMounted(async () => {
     try {
@@ -72,6 +79,10 @@
       const allMyEvals = evalRes.data?.data ?? evalRes.data ?? []
       const currentAppEvaluation = allMyEvals.find((e: any) => Number(e.application_id) === applicationId)
       
+      if(app.value.call.id) {
+        await fetchCallCriteria(app.value.call.id)
+      }
+
       if (currentAppEvaluation) {
         existingEvaluation.value = currentAppEvaluation
         recommendation.value = currentAppEvaluation.recommendation
@@ -79,10 +90,10 @@
         
         if (currentAppEvaluation.scores?.length) {
           scores.value = currentAppEvaluation.scores.map((s: any) => {
-            const meta = CRITERIA.find(c => c.key === s.criterion_key)
+            const meta = criteria.value.find(c => c.id === s.criterion_id)
             return {
-              criterion_key: s.criterion_key,
-              label: meta?.label ?? s.criterion_key, 
+              criterion_id: s.criterion_id,
+              title: meta?.title ?? 'No title', 
               score: s.score,
               weight_at_moment: s.weight_at_moment,
               comment: s.comment ?? '',
@@ -91,7 +102,7 @@
         }
       }
     } catch (err) {
-      error.value = 'Nepodarilo sa načítať podklady prihlášky alebo dokumentáciu.'
+      error.value = 'Vyskytla sa chyba pri načítaní údajov.'
     } finally {
       loading.value = false
     }
@@ -230,9 +241,9 @@
         <p v-if="success" class="text-green-400 text-sm mb-4 bg-green-950/20 border border-green-900 p-3 rounded-xl">{{ success }}</p>
 
         <div class="space-y-6 mb-6">
-          <div v-for="row in scores" :key="row.criterion_key" class="bg-slate-900/40 border border-slate-800 p-5 rounded-xl">
+          <div v-for="row in scores" :key="row.criterion_id" class="bg-slate-900/40 border border-slate-800 p-5 rounded-xl">
             <div class="flex items-start justify-between gap-2 mb-2">
-              <div><h3 class="text-sm font-semibold text-white">{{ row.label }}</h3></div>
+              <div><h3 class="text-sm font-semibold text-white">{{ row.title }}</h3></div>
               <span class="text-[11px] font-medium bg-slate-800 text-slate-400 px-2 py-0.5 rounded">Váha: {{ row.weight_at_moment }}%</span>
             </div>
             <div class="mt-4">

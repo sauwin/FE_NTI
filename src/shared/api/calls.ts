@@ -12,3 +12,7 @@ export function getActiveCalls(program?: 'a' | 'b') {
       : '/calls/active'
   )
 }
+
+export function getCallEvaluationCriteria(callId: number) {
+  return api.get(`calls/${callId}/criteria`)
+}

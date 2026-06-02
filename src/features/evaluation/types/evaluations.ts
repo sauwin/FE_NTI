@@ -1,5 +1,5 @@
 export interface EvaluationScorePayload {
-  criterion_key: string
+  criterion_id: number
   score: number
   weight_at_moment: number
   comment?: string
@@ -11,3 +11,4 @@ export interface EvaluationPayload {
   recommendation: 'approve' | 'reject' | 'request_revision'
   comment?: string
 }
+
