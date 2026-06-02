@@ -206,7 +206,7 @@ onMounted(loadUsers)
 </script>
 
 <template>
-  <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6">
+  <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6"></div>
     
     <div v-if="message" :class="[
       'p-3 rounded-lg text-sm mb-6 border',
@@ -394,7 +394,7 @@ onMounted(loadUsers)
             </td>
           </tr>
 
-          <tr v-if="visibleUsers.length === 0">
+          <tr v-if="users.length === 0">
             <td colspan="4" class="px-4 py-10 text-center text-slate-500 italic text-sm">
               No users found.
             </td>

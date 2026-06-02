@@ -243,6 +243,11 @@ async function downloadCallsExport(format: 'csv' | 'xlsx' = 'xlsx') {
   }
 }
 
+function isProgramB(programId: number): boolean {
+  const program = programs.value.find(p => p.id === programId)
+  return program?.code === 'program_b'
+}
+
 onMounted(() => {
   loadData()
   document.addEventListener('click', closeMenu)
@@ -253,18 +258,9 @@ onMounted(() => {
   <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
     <div class="xl:col-span-1 border border-slate-800 bg-slate-900/40 rounded-2xl p-6">
       <h3 class="text-xl font-bold text-white mb-6">
-        {{ editingCallId ? 'Edit Call' : 'New Call' }}
+        {{ editingCallId ? 'Edit Program A Call' : 'New Program A Call' }}
       </h3>
       <form @submit.prevent="handleSubmitCall" class="space-y-4">
-        <div>
-          <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Target Program</label>
-          <select v-model="newCall.program_type" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white focus:border-blue-600 outline-none">
-            <option v-for="p in programs" :key="p.id" :value="p.code === 'program_b' ? 'b' : 'a'" class="bg-slate-950 text-white">
-              {{ p.title || p.name || (p.code === 'program_a' ? 'Program A' : 'Program B') }}
-            </option>
-          </select>
-        </div>
-
         <div>
           <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Call Title</label>
           <input type="text" v-model="newCall.title" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white focus:border-blue-600 outline-none" required />
@@ -420,6 +416,15 @@ onMounted(() => {
 
               <div class="relative" @click.stop>
                 <button
+                  v-if="isProgramB(c.program_id)"
+                  @click="toggleMenu(c.id)"
+                  class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded border border-slate-700 text-yellow-400 transition-all font-mono whitespace-nowrap"
+                >
+                  Archived
+                </button>
+
+                <button
+                  v-if="!isProgramB(c.program_id)"
                   @click="toggleMenu(c.id)"
                   class="flex items-center justify-center w-8 h-8 rounded-md border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-all text-sm leading-none"
                 >
@@ -439,8 +444,6 @@ onMounted(() => {
                       Edit
                     </button>
 
-                    <div v-if="c.status === 'draft'" class="my-1 border-t border-slate-800"></div>
-
                     <button
                       v-if="c.status !== 'draft'"
                       @click="updateCallStatus(c.id, 'draft')"
@@ -448,6 +451,7 @@ onMounted(() => {
                     >
                       Set Draft
                     </button>
+
                     <button
                       v-if="c.status !== 'open'"
                       @click="updateCallStatus(c.id, 'open')"
@@ -455,6 +459,7 @@ onMounted(() => {
                     >
                       Open
                     </button>
+
                     <button
                       v-if="c.status !== 'closed'"
                       @click="updateCallStatus(c.id, 'closed')"
@@ -463,9 +468,16 @@ onMounted(() => {
                       Close
                     </button>
 
-                    <div class="my-1 border-t border-slate-800"></div>
+                    <button
+                      v-if="c.status !== 'archived'"
+                      @click="updateCallStatus(c.id, 'archived')"
+                      class="w-full text-left px-4 py-2.5 text-sm text-yellow-400 hover:bg-slate-800 transition"
+                    >
+                      Archived
+                    </button>
 
                     <button
+                      v-if="!isProgramB(c.program_id)"
                       @click="handleDeleteCall(c.id)"
                       class="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-slate-800 transition"
                     >
