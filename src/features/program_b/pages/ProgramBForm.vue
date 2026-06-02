@@ -25,6 +25,7 @@ const selectedTeamId = ref<number | null>(null)
 const applicantType = ref<'student' | 'team'>('team')
 
 const error = ref<string>('')
+const fieldErrors = ref<Record<string, string[]>>({})
 const loading = ref<boolean>(false)
 const step = ref<number>(1)
 
@@ -149,6 +150,7 @@ function nextStep(): void {
 async function submit(): Promise<void> {
   if (!resolvedCallId.value) { error.value = 'No call ID identified'; return }
   error.value = ''
+  fieldErrors.value = {}
   loading.value = true
 
   for (const key of Object.keys(docLabels.value)) {
@@ -185,6 +187,7 @@ async function submit(): Promise<void> {
 
     step.value = 3
   } catch (e: any) {
+    fieldErrors.value = e.response?.data?.errors ?? {}
     error.value = e?.response?.data?.message || 'Something went wrong while submitting the form.'
   } finally {
     loading.value = false
@@ -249,16 +252,19 @@ async function submit(): Promise<void> {
                   {{ team.name }} (Status: {{ team.status }})
                 </option>
               </select>
+              <p v-if="fieldErrors.team_id?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.team_id[0] }}</p>
             </div>
 
             <div>
               <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">Project Name / Specifications *</label>
               <input v-model="projectTitle" type="text" class="w-full bg-slate-950 border border-slate-800 h-11 px-3 rounded-lg text-white focus:border-blue-600 transition outline-none text-sm" />
+              <p v-if="fieldErrors.project_title?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.project_title[0] }}</p>
             </div>
 
             <div>
               <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">Solution Outline *</label>
               <textarea v-model="proposedSolution" rows="5" placeholder="Describe your team’s vision for implementing the technical specifications and your architectural approach..." class="w-full bg-slate-950 border border-slate-800 p-3 rounded-lg text-white resize-none focus:border-blue-600 transition outline-none text-sm"></textarea>
+              <p v-if="fieldErrors.proposed_solution?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.proposed_solution[0] }}</p>
             </div>
             
             <div class="flex gap-3 mt-2">

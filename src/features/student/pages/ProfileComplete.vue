@@ -7,6 +7,7 @@ import { useAuthStore } from '../../auth/stores/auth'
 const router = useRouter()
 const auth = useAuthStore()
 const error = ref('')
+const fieldErrors = ref<Record<string, string[]>>({})
 const loading = ref(false)
 
 const studyProgram = ref('')
@@ -34,6 +35,7 @@ async function submit() {
     })
     router.push('/dashboard')
   } catch (e: any) {
+    fieldErrors.value = e.response?.data?.errors ?? {}
     error.value = e.response?.data?.message ?? 'Failed to save profile'
   } finally {
     loading.value = false
@@ -56,6 +58,7 @@ async function submit() {
           <label class="label">Study program <span class="text-error">*</span></label>
           <input v-model="studyProgram" type="text" placeholder="e.g. Applied Informatics"
                  class="input" />
+          <p v-if="fieldErrors.study_program?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.study_program[0] }}</p>
         </div>
 
         <div>
@@ -64,24 +67,28 @@ async function submit() {
                   class="bg-blue-600/10 border border-blue-900 rounded-md w-full h-9 px-3 text-white focus:outline-none focus:border-blue-500">
             <option v-for="y in 6" :key="y" :value="y" class="bg-dark">Year {{ y }}</option>
           </select>
+          <p v-if="fieldErrors.year_of_study?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.year_of_study[0] }}</p>
         </div>
 
         <div>
           <label class="label">University</label>
           <input v-model="university" type="text" placeholder="e.g. UKF Nitra"
                  class="input" />
+          <p v-if="fieldErrors.university?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.university[0] }}</p>
         </div>
 
         <div>
           <label class="label">Bio</label>
           <textarea v-model="bio" rows="3" placeholder="Tell us about yourself..."
                     class="textarea"></textarea>
+          <p v-if="fieldErrors.bio?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.bio[0] }}</p>
         </div>
 
         <div>
           <label class="label">GitHub URL</label>
           <input v-model="githubUrl" type="url" placeholder="https://github.com/username"
                  class="input" />
+          <p v-if="fieldErrors.github_url?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.github_url[0] }}</p>
         </div>
 
         <div class="bg-blue-600/10 border border-blue-900 rounded-md p-4">

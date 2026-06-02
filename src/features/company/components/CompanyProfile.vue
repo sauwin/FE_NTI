@@ -10,6 +10,7 @@ const auth = useAuthStore()
 const loading = ref(true)
 const saving = ref(false)
 const error = ref('')
+const fieldErrors = ref<Record<string, string[]>>({})
 const success = ref(false)
 const editMode = ref(false)
 const isNew = ref(false)
@@ -50,6 +51,7 @@ async function save() {
     isNew.value = false
     setTimeout(() => success.value = false, 3000)
   } catch (e: any) {
+    fieldErrors.value = e.response?.data?.errors ?? {}
     error.value = e?.response?.data?.message || 'Failed to save'
   } finally {
     saving.value = false
@@ -121,27 +123,32 @@ async function save() {
           <label class="block text-xs font-mono uppercase text-slate-400 mb-2">Company Name <span class="text-red-400">*</span></label>
           <input v-model="profile.name" type="text" placeholder="e.g. TechCorp s.r.o."
             class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-slate-700 transition" />
+          <p v-if="fieldErrors.name?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.name[0] }}</p>
         </div>
         <div>
           <label class="block text-xs font-mono uppercase text-slate-400 mb-2">Registration Number (IČO)</label>
           <input v-model="profile.registration_number" type="text" placeholder="12345678"
             class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-slate-700 transition font-mono" />
+          <p v-if="fieldErrors.registration_number?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.registration_number[0] }}</p>
         </div>
         <div>
           <label class="block text-xs font-mono uppercase text-slate-400 mb-2">Sector</label>
           <input v-model="profile.sector" type="text" placeholder="e.g. Software Development"
             class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-slate-700 transition" />
+          <p v-if="fieldErrors.sector?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.sector[0] }}</p>
         </div>
         <div>
           <label class="block text-xs font-mono uppercase text-slate-400 mb-2">Website</label>
           <input v-model="profile.website" type="url" placeholder="https://example.com"
             class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-slate-700 transition" />
+          <p v-if="fieldErrors.website?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.website[0] }}</p>
         </div>
       </div>
       <div>
         <label class="block text-xs font-mono uppercase text-slate-400 mb-2">Description</label>
         <textarea v-model="profile.description" rows="4" placeholder="Describe your company..."
           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-slate-700 transition resize-none"></textarea>
+        <p v-if="fieldErrors.description?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.description[0] }}</p>
       </div>
     </div>
 

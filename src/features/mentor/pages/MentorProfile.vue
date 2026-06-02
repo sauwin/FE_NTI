@@ -10,6 +10,7 @@ const auth = useAuthStore()
 const loading = ref(true)
 const saving = ref(false)
 const error = ref('')
+const fieldErrors = ref<Record<string, string[]>>({})
 const success = ref(false)
 const editMode = ref(false)
 const isNew = ref(false)
@@ -63,6 +64,7 @@ async function save() {
     isNew.value = false
     setTimeout(() => success.value = false, 3000)
   } catch (e: any) {
+    fieldErrors.value = e.response?.data?.errors ?? {}
     error.value = e?.response?.data?.message || 'Failed to save'
   } finally {
     saving.value = false
@@ -150,6 +152,7 @@ async function save() {
           <label class="label">Bio</label>
           <textarea v-model="profile.bio" rows="4" placeholder="Describe your background..."
             class="textarea"></textarea>
+          <p v-if="fieldErrors.bio?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.bio[0] }}</p>
         </div>
         <div class="mt-4">
           <label class="flex items-center gap-3 cursor-pointer">
@@ -174,6 +177,7 @@ async function save() {
           <button @click="addExpertise" type="button"
             class="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded-md text-sm transition">Add</button>
         </div>
+        <p v-if="fieldErrors.expertise_areas?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.expertise_areas[0] }}</p>
       </section>
     </div>
 

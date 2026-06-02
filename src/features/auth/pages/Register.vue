@@ -15,6 +15,7 @@ const companyRole = ref('owner')
 const registrationNumber = ref('')
 const agreedTerms = ref(false)
 const agreedGdpr = ref(false)
+const fieldErrors = ref<Record<string, string[]>>({})
 const error = ref('')
 const router = useRouter()
 const auth = useAuthStore()
@@ -69,6 +70,7 @@ async function submit() {
     auth.login(res.data.token, res.data.user)
     router.push('/pending-verification')
   } catch (e: any) {
+    fieldErrors.value = e.response?.data?.errors ?? {}
     error.value = e.response?.data?.message ?? 'Registration failed'
   } finally {
     loading.value = false
@@ -102,6 +104,7 @@ async function submit() {
               placeholder="John"
               class="mt-1 block w-full px-3 py-2 bg-slate-950/50 border border-slate-800/80 rounded-lg text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition text-sm" 
             />
+            <p v-if="fieldErrors.first_name?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.first_name[0] }}</p>
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Last Name</label>
@@ -112,6 +115,7 @@ async function submit() {
               placeholder="Pork"
               class="mt-1 block w-full px-3 py-2 bg-slate-950/50 border border-slate-800/80 rounded-lg text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition text-sm" 
             />
+            <p v-if="fieldErrors.last_name?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.last_name[0] }}</p>
           </div>
         </div>
 
@@ -124,6 +128,7 @@ async function submit() {
             placeholder="john.pork@example.com"
             class="mt-1 block w-full px-3 py-2 bg-slate-950/50 border border-slate-800/80 rounded-lg text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition text-sm" 
           />
+          <p v-if="fieldErrors.email?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.email[0] }}</p>
         </div>
 
         <div>
@@ -135,6 +140,7 @@ async function submit() {
             placeholder="••••••••"
             class="mt-1 block w-full px-3 py-2 bg-slate-950/50 border border-slate-800/80 rounded-lg text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition text-sm" 
           />
+          <p v-if="fieldErrors.password?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.password[0] }}</p>
         </div>
 
         <div>
@@ -146,6 +152,7 @@ async function submit() {
             placeholder="••••••••"
             class="mt-1 block w-full px-3 py-2 bg-slate-950/50 border border-slate-800/80 rounded-lg text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition text-sm" 
           />
+          <p v-if="fieldErrors.password_confirmation?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.password_confirmation[0] }}</p>
         </div>
 
         <div>
@@ -179,6 +186,7 @@ async function submit() {
               placeholder="Enter company organization ID"
               class="mt-1 block w-full px-3 py-2 bg-slate-950/50 border border-slate-800/80 rounded-lg text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition text-sm" 
             />
+            <p v-if="fieldErrors.registration_number?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.registration_number[0] }}</p>
           </div>
         </div>
 

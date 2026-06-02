@@ -10,6 +10,7 @@ const auth = useAuthStore()
 const loading = ref(true)
 const saving = ref(false)
 const error = ref('')
+const fieldErrors = ref<Record<string, string[]>>({})
 const success = ref(false)
 const editMode = ref(false)
 
@@ -62,6 +63,7 @@ async function save() {
     isNew.value = false
     setTimeout(() => success.value = false, 3000)
   } catch (e: any) {
+    fieldErrors.value = e.response?.data?.errors ?? {}
     error.value = e?.response?.data?.message || 'Failed to save'
   } finally {
     saving.value = false
@@ -190,11 +192,13 @@ const levelColor: Record<string, string> = {
             <label class="label">University <span class="text-error">*</span></label>
             <input v-model="profile.university" type="text" placeholder="e.g. UKF Nitra"
               class="input" />
+            <p v-if="fieldErrors.university?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.university[0] }}</p>
           </div>
           <div>
             <label class="label">Study Program <span class="text-error">*</span></label>
             <input v-model="profile.study_program" type="text" placeholder="e.g. Applied Informatics"
               class="input" />
+            <p v-if="fieldErrors.study_program?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.study_program[0] }}</p>
           </div>
           <div>
             <label class="label">Year of Study <span class="text-error">*</span></label>
@@ -203,17 +207,20 @@ const levelColor: Record<string, string> = {
               <option :value="null" disabled class="bg-dark">Select year</option>
               <option v-for="y in [1,2,3,4,5,6]" :key="y" :value="y" class="bg-dark">{{ y }}. year</option>
             </select>
+            <p v-if="fieldErrors.year_of_study?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.year_of_study[0] }}</p>
           </div>
           <div>
             <label class="label">GitHub URL</label>
             <input v-model="profile.github_url" type="url" placeholder="https://github.com/username"
               class="input" />
+            <p v-if="fieldErrors.github_url?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.github_url[0] }}</p>
           </div>
         </div>
         <div class="mt-4">
           <label class="label">Bio</label>
           <textarea v-model="profile.bio" rows="3" placeholder="Tell us about yourself..."
             class="textarea"></textarea>
+          <p v-if="fieldErrors.bio?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.bio[0] }}</p>
         </div>
       </section>
 

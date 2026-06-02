@@ -9,6 +9,7 @@ import type { DocumentRequirement } from '@/shared/types/calls'
 
 const router = useRouter()
 const error = ref('')
+const fieldErrors = ref<Record<string, string[]>>({})
 const loading = ref(false)
 const step = ref(1)
 const auth = useAuthStore()
@@ -161,6 +162,7 @@ async function submit(mode: 'draft' | 'final' = 'final') {
       step.value = 3
     }
   } catch (e: any) {
+    fieldErrors.value = e.response?.data?.errors ?? {}
     error.value = e?.response?.data?.message || 'Something went wrong.'
   } finally {
     loading.value = false
@@ -210,6 +212,7 @@ async function submit(mode: 'draft' | 'final' = 'final') {
                   {{ team.name }}
                 </option>
               </select>
+              <p v-if="fieldErrors.team_id?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.team_id[0] }}</p>
               <p v-if="myTeams.length === 0 && !loadingTeams" class="text-[11px] text-amber-500 mt-1.5 leading-normal">
                 ⚠️ No eligible teams found. You must be the team leader, and at least 3 members must have already accepted your invitation.
               </p>
@@ -221,6 +224,7 @@ async function submit(mode: 'draft' | 'final' = 'final') {
                 <option value="" disabled selected>Select category...</option>
                 <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
               </select>
+              <p v-if="fieldErrors.category?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.category[0] }}</p>
             </div>
 
             <div class="p-4 bg-blue-950/20 border border-blue-900/50 rounded-xl mt-2">
