@@ -2,7 +2,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { getAdminCalls, getAdminUsers } from '@/features/admin/api/admin'
 import { getCallEvaluators, assignEvaluator, removeEvaluator } from '@/features/evaluation/api/evaluations'
-import { scheduleCallEvaluation, getCallEvaluationInfo } from '@/features/admin/api/admin'
+import { scheduleCallEvaluation, getCallEvaluationInfo, moveApplicationsUnderEvaluation } from '@/features/admin/api/admin'
+import EvaluationCriteriaManager from './EvaluationCriteriaManager.vue'
 
 const calls = ref<any[]>([])
 const selectedCallId = ref<number | null>(null)
@@ -15,6 +16,7 @@ const error = ref('')
 const success = ref('')
 const evaluationScheduledAt = ref<string>('')
 const schedulingLoading = ref(false)
+const movingLoading = ref(false)
 const schedulingError = ref('')
 const schedulingSuccess = ref('')
 const evaluationStats = ref<any>({
@@ -105,7 +107,7 @@ async function remove(userId: number) {
 
 async function handleScheduleEvaluation() {
   if (!selectedCallId.value || !evaluationScheduledAt.value) {
-    schedulingError.value = 'Будь ласка, виберіть Call та встановіть дату'
+    schedulingError.value = 'Please choose call and set date'
     return
   }
   
@@ -118,14 +120,11 @@ async function handleScheduleEvaluation() {
       evaluation_scheduled_at: evaluationScheduledAt.value,
     })
     
-    schedulingSuccess.value = `✓ Evaluation scheduled! ${res.data.data.applications_moved} applications moved to under_evaluation.`
+    schedulingSuccess.value = `✓ Evaluation scheduled!`
     
     if (selectedCall.value) {
       selectedCall.value.evaluation_scheduled_at = res.data.data.evaluation_scheduled_at
     }
-    
-    evaluationStats.value.formally_verified = 0
-    evaluationStats.value.under_evaluation += res.data.data.applications_moved
     
     setTimeout(() => (schedulingSuccess.value = ''), 4000)
   } catch (e: any) {
@@ -133,6 +132,39 @@ async function handleScheduleEvaluation() {
     schedulingError.value = e.response?.data?.message ?? 'Could not schedule evaluation'
   } finally {
     schedulingLoading.value = false
+  }
+}
+
+async function changeAppsStatus() {
+  if (!selectedCallId.value) {
+    schedulingError.value = 'Please choose call'
+    return
+  }
+
+  if (!evaluationScheduledAt.value) {
+    schedulingError.value = 'Please schedule evaluation first'
+    return
+  }
+  
+  schedulingError.value = ''
+  schedulingSuccess.value = ''
+  movingLoading.value = true
+  
+  try {
+    const res = await moveApplicationsUnderEvaluation(selectedCallId.value)
+    
+    console.log(res)
+    schedulingSuccess.value = `${res.data.applications_moved} applications moved to under_evaluation.`
+    
+    evaluationStats.value.formally_verified = 0
+    evaluationStats.value.under_evaluation += res.data.applications_moved
+    
+    setTimeout(() => (schedulingSuccess.value = ''), 4000)
+  } catch (e: any) {
+    console.error('Error while moving applications:', e)
+    schedulingError.value = e.response?.data?.message ?? 'Could not move applications to under_evaluation'
+  } finally {
+    movingLoading.value = false
   }
 }
 
@@ -199,7 +231,7 @@ function getMinDateTime(): string {
 
         <button
           @click="handleScheduleEvaluation"
-          :disabled="!evaluationScheduledAt || schedulingLoading || applicationsToMove === 0"
+          :disabled="!evaluationScheduledAt || schedulingLoading"
           class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition"
         >
           <span v-if="schedulingLoading">Scheduling...</span>
@@ -208,32 +240,57 @@ function getMinDateTime(): string {
       </div>
 
       <!-- INFO BOX: HOW MANY APPLICATIONS WILL BE MOVED -->
-      <div class="p-4 bg-blue-950/20 border border-blue-900/30 rounded-lg space-y-2">
+      <div class="relative p-4 bg-blue-950/20 border border-blue-900/30 rounded-lg space-y-2">
         <p class="text-sm text-blue-300 font-medium">Applications Status</p>
+
         <div class="grid grid-cols-3 gap-2 text-xs">
           <div class="bg-slate-950/50 rounded p-2">
             <div class="text-slate-400">Formally Verified</div>
-            <div class="text-white font-semibold text-lg">{{ evaluationStats.formally_verified }}</div>
+            <div class="text-white font-semibold text-lg">
+              {{ evaluationStats.formally_verified }}
+            </div>
           </div>
+
           <div class="bg-slate-950/50 rounded p-2">
             <div class="text-slate-400">Under Evaluation</div>
-            <div class="text-white font-semibold text-lg">{{ evaluationStats.under_evaluation }}</div>
+            <div class="text-white font-semibold text-lg">
+              {{ evaluationStats.under_evaluation }}
+            </div>
           </div>
+
           <div class="bg-slate-950/50 rounded p-2">
             <div class="text-slate-400">Total</div>
-            <div class="text-white font-semibold text-lg">{{ evaluationStats.total }}</div>
+            <div class="text-white font-semibold text-lg">
+              {{ evaluationStats.total }}
+            </div>
           </div>
         </div>
-        <p v-if="applicationsToMove > 0" class="text-sm text-blue-300 mt-2">
-          <strong>{{ applicationsToMove }} application{{ applicationsToMove !== 1 ? 's' : '' }}</strong> 
-          will be moved from <code class="text-xs bg-slate-950 px-1.5 py-0.5 rounded">formally_verified</code> 
-          → <code class="text-xs bg-slate-950 px-1.5 py-0.5 rounded">under_evaluation</code> when you set this date
+
+        <p v-if="applicationsToMove > 0" class="text-sm text-blue-300 mt-2 pr-28">
+          <strong>{{ applicationsToMove }} application{{ applicationsToMove !== 1 ? 's' : '' }}</strong>
+          will be moved from
+          <code class="text-xs bg-slate-950 px-1.5 py-0.5 rounded">formally_verified</code>
+          →
+          <code class="text-xs bg-slate-950 px-1.5 py-0.5 rounded">under_evaluation</code>
+          on this date
         </p>
+
         <p v-else class="text-sm text-slate-400 mt-2">
           No applications in "formally_verified" status to move
         </p>
+
+        <button 
+          v-if="applicationsToMove > 0" 
+          type="button" 
+          :disabled="movingLoading"
+          @click="changeAppsStatus" class="absolute bottom-4 right-4 px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition">
+          {{ movingLoading ? 'Moving...' : 'Move now' }}
+        </button>
       </div>
     </div>
+
+    <!-- EVALUATION CRITERIA SECTION -->
+    <EvaluationCriteriaManager v-if="selectedCall" :selected-call="selectedCall" />
 
     <!-- EVALUATORS SECTION -->
     <div v-if="selectedCall" class="pt-6 border-t border-slate-800 space-y-4">

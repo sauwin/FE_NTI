@@ -22,10 +22,10 @@ export const useAuthStore = defineStore('auth', {
         dashboardLabel: (state) => {
             switch (state.user?.role_slug) {
                 case 'student':
-                    return 'My Applications'
+                    return 'Dashboard'
 
                 case 'mentor':
-                    return 'My Mentorship'
+                    return 'My Mentorships'
 
                 case 'evaluator':
                     return 'My Evaluations'

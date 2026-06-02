@@ -201,13 +201,14 @@
           <div>
             <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Priložená projektová dokumentácia</h2>
             <div v-if="docs.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {{ console.log(docs) }}
               <div v-for="doc in docs" :key="doc.id"
                    class="bg-slate-900/60 border border-slate-800 hover:border-slate-700 p-3 rounded-xl flex items-center justify-between group transition">
                 <div class="flex items-center gap-2 overflow-hidden">
                   <span class="text-xl">📄</span>
                   <div class="truncate">
                     <p class="text-xs text-white font-medium truncate" :title="doc.name || doc.file_path">
-                      {{ docLabels[doc.type] ?? doc.name ?? doc.file_path?.split('/').pop() ?? 'Nepomenovaný dokument' }}
+                      {{ doc.type ?? doc.file_name ?? 'Unnamed document' }}
                     </p>
                     <p class="text-[10px] text-slate-500 uppercase">
                       {{ doc.file_path?.split('.').pop() ?? 'SÚBOR' }}

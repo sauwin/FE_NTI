@@ -62,9 +62,9 @@ const completedApplications = computed(() => {
         <button @click="activeTab = 'overview'" :class="[activeTab === 'overview' ? 'bg-blue-600/15 border-blue-500 text-blue-400' : 'text-slate-500 border-transparent hover:text-slate-300', 'px-4 py-2 text-sm font-medium transition rounded-xl border']">
           Prehľad a Štatistiky
         </button>
-        <button @click="activeTab = 'pending'" :class="[activeTab === 'pending' ? 'bg-blue-600/15 border-blue-500 text-blue-400' : 'text-slate-500 border-transparent hover:text-slate-300', 'px-4 py-2 text-sm font-medium transition rounded-xl border flex items-center gap-2']">
+        <button @click="activeTab = 'pending'" :class="[activeTab === 'pending' ? 'bg-blue-600/15 border-blue-500 text-blue-400' : 'text-slate-500 border-transparent hover:text-slate-300', 'px-4 py-2 text-sm font-medium transition rounded-xl border flex items-center gap-1.5']">
           Čaká na hodnotenie
-          <span v-if="stats.pending > 0" class="bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full text-xs font-bold">{{ stats.pending }}</span>
+          <span v-if="stats.pending > 0" class="bg-blue-400 border-2 border-blue-500 text-slate-950 px-1 mt-0.5 rounded-full text-xs font-bold">{{ stats.pending }}</span>
         </button>
         <button @click="activeTab = 'completed'" :class="[activeTab === 'completed' ? 'bg-blue-600/15 border-blue-500 text-blue-400' : 'text-slate-500 border-transparent hover:text-slate-300', 'px-4 py-2 text-sm font-medium transition rounded-xl border']">
           História hodnotení
