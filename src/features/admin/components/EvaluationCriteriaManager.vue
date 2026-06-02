@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { ref, onMounted } from 'vue';
-  import { getCallEvaluationCriteria, changeCallEvaluationCriteria } from '../api/admin';
+  import { changeCallEvaluationCriteria } from '../api/admin';
+  import { getCallEvaluationCriteria } from '@/shared/api/calls';
   import type { Call, EvaluationCriterion, EvaluationCriterionPayload } from '../types/admin';
 
   const props = defineProps<{
