@@ -61,7 +61,7 @@ function quickCreateTeam() {
       
       <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         
-        <div class="xl:col-span-2 border border-slate-800 bg-slate-900/40 rounded-2xl p-6">
+        <div class="xl:col-span-2 border border-slate-800 bg-slate-900/20 rounded-2xl p-6">
           <div class="mb-6">
             <h3 class="text-lg font-semibold text-white">Quick Actions</h3>
             <p class="text-sm text-slate-500 mt-1">Accelerate your workflow by interacting with platform configurations directly.</p>
@@ -70,7 +70,7 @@ function quickCreateTeam() {
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <button 
               @click="quickCreateTeam"
-              class="flex flex-col justify-between text-left p-4 rounded-xl border border-blue-900/40 bg-blue-950/20 hover:border-blue-500 transition-all group"
+              class="flex flex-col justify-between text-left p-4 rounded-xl border border-blue-900/20 bg-blue-950/20 hover:border-blue-500 transition-all group"
             >
               <div class="text-sm font-semibold text-blue-400 mb-1 group-hover:text-blue-300 transition-colors">Create Team</div>
               <div class="text-xs text-slate-400">Initialize a new workgroup and start inviting core team members via corporate email.</div>
@@ -93,13 +93,13 @@ function quickCreateTeam() {
             <router-link to="/profile"
               class="flex flex-col justify-between text-left p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 transition-all"
             >
-              <div class="text-sm font-semibold text-slate-400 mb-1">My Profile</div>
-              <div class="text-xs text-slate-500">Edit account metrics, change contact variables, or configure security parameters.</div>
+              <div class="text-sm font-semibold text-white mb-1">My Profile</div>
+              <div class="text-xs text-slate-400">Edit account metrics, change contact variables, or configure security parameters.</div>
             </router-link>
           </div>
         </div>
 
-        <div class="border border-slate-800 bg-slate-900/40 rounded-2xl p-6 flex flex-col justify-between">
+        <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6 flex flex-col justify-between">
           <div>
             <div class="flex items-center gap-2 mb-4">
               <h3 class="text-lg font-semibold text-white">Incubation Rules</h3>

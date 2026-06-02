@@ -66,7 +66,7 @@ async function handleRemoveMember(userId: number) {
 </script>
 
 <template>
-  <div class="mt-6 pt-6 border-t border-slate-700 space-y-6">
+  <div class="pt-6 border-t border-slate-800 space-y-6">
     <div class="space-y-4">
       <div class="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider">
         Team Members Registry
@@ -76,7 +76,7 @@ async function handleRemoveMember(userId: number) {
         <div 
           v-for="member in (team.members ?? [])" 
           :key="member.id" 
-          class="flex items-center justify-between bg-slate-900/40 p-4 rounded-xl border border-slate-700 hover:border-slate-500 transition-all"
+          class="flex items-center justify-between bg-slate-900/40 p-4 rounded-xl border border-slate-800 hover:border-slate-500 transition-all"
         >
           <div class="flex items-center gap-4">
             <div 
@@ -99,7 +99,7 @@ async function handleRemoveMember(userId: number) {
             
             <span 
               v-else-if="member.pivot?.status === 'pending'" 
-              class="text-xs text-slate-300 border border-slate-700 px-2.5 py-0.5 rounded font-mono uppercase tracking-wider bg-slate-950/60"
+              class="text-xs text-slate-300 border border-slate-800 px-2.5 py-0.5 rounded font-mono uppercase tracking-wider bg-slate-950/60"
             >
               Pending
             </span>
@@ -109,14 +109,14 @@ async function handleRemoveMember(userId: number) {
               @click="handleRemoveMember(member.id)"
               class="text-xs font-mono border border-slate-600 hover:border-red-400 text-slate-200 hover:text-red-400 px-3 py-1 rounded-lg transition cursor-pointer bg-slate-950"
             >
-              [ Remove ]
+              Remove
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="bg-slate-900/20 p-5 border border-slate-700 rounded-xl">
+    <div class="bg-slate-900/20 p-5 border border-slate-800 rounded-xl">
       <form v-if="isLeader" @submit.prevent="sendInvite" class="space-y-3">
         <label class="text-xs uppercase font-mono font-bold tracking-wider text-slate-300 block">
           Invite new member by Email
@@ -142,7 +142,7 @@ async function handleRemoveMember(userId: number) {
         <p v-if="success" class="text-sm font-mono text-emerald-400 mt-2 font-semibold">Success: {{ success }}</p>
       </form>
 
-      <div v-else class="text-sm font-mono text-slate-300 border border-slate-700 bg-slate-950/60 p-4 rounded-xl leading-relaxed">
+      <div v-else class="text-sm font-mono text-slate-300 border border-slate-800 bg-slate-950/60 p-4 rounded-xl leading-relaxed">
         Access Restricted: Only the authenticated team leader role possesses write privileges to mutate member scopes.
       </div>
     </div>
