@@ -9,13 +9,18 @@ const form = ref({
   last_name: '',
   email: '',
   password: '',
-  role: 'nti_admin'
+  role: ''
 })
 const loading = ref(false)
 const message = ref('')
 const success = ref(false)
 
-const adminRoles = ['nti_admin', 'evaluator', 'content_editor']
+const adminRoles = {
+  nti_admin: 'NTI Admin', 
+  evaluator: 'Evaluator', 
+  content_editor: 'Content Editor', 
+  mentor: 'Mentor'
+}
 
 async function createAdmin() {
   if (!form.value.first_name || !form.value.last_name || !form.value.email || !form.value.password) {
@@ -41,7 +46,7 @@ async function createAdmin() {
     })
     success.value = true
     message.value = 'Admin created successfully'
-    form.value = { first_name: '', last_name: '', email: '', password: '', role: 'nti_admin' }
+    form.value = { first_name: '', last_name: '', email: '', password: '', role: '' }
     emit('created')
     setTimeout(() => { success.value = false; message.value = '' }, 3000)
   } catch (e: any) {
@@ -102,8 +107,9 @@ async function createAdmin() {
             v-model="form.role"
             class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white text-sm focus:border-blue-600 outline-none transition"
           >
-            <option v-for="role in adminRoles" :key="role" :value="role" class="bg-slate-950 text-white">
-              {{ role }}
+            <option value="" disabled>Select a role</option>
+            <option v-for="(label, key) in adminRoles" :key="key" :value="key" class="bg-slate-950 text-white">
+              {{ label }}
             </option>
           </select>
         </div>
