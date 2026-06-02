@@ -122,122 +122,139 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6">
+    
+    <!-- Top Bar -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
       <div>
-        <h3 class="text-white font-bold text-xl tracking-tight">Moje prihlášky (My Applications)</h3>
-        <p class="text-xs text-slate-500 mt-1">Prehľad a sledovanie stavu vašich odoslaných projektov a prihlášok.</p>
+        <h3 class="text-xl font-bold text-white">My Applications</h3>
+        <p class="text-sm text-slate-500 mt-1">
+          Overview and status tracking of your submitted projects and applications.
+        </p>
       </div>
     </div>
 
-    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 bg-slate-900/40 p-4 border border-slate-800/80 rounded-2xl">
-      <div class="flex flex-wrap gap-4">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[10px] uppercase font-mono font-bold tracking-wider text-slate-500">Program</label>
-          <select 
-            v-model="filterProgram" 
-            class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-blue-500/50 min-w-[160px] transition"
-          >
-            <option value="all">Všetky programy</option>
-            <option value="a">Program A</option>
-            <option value="b">Program B</option>
-          </select>
-        </div>
-
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[10px] uppercase font-mono font-bold tracking-wider text-slate-500">Stav (Status)</label>
-          <select 
-            v-model="filterStatus" 
-            class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-blue-500/50 min-w-[180px] transition"
-          >
-            <option value="all">Všetky stavy</option>
-            <option v-for="(cfg, key) in statusConfig" :key="key" :value="key">
-              {{ cfg.text }}
-            </option>
-          </select>
-        </div>
+    <!-- Filters -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end w-full mb-6">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-mono uppercase text-slate-500">Program</label>
+        <select 
+          v-model="filterProgram" 
+          class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none transition-all cursor-pointer"
+        >
+          <option value="all">All Programs</option>
+          <option value="a">Program A</option>
+          <option value="b">Program B</option>
+        </select>
       </div>
 
-      <button 
-        @click="fetchApplications" 
-        class="text-slate-400 text-xs font-medium hover:text-white border border-slate-800 bg-slate-950 px-4 py-2 rounded-xl transition flex items-center justify-center gap-2 h-[34px] cursor-pointer"
-      >
-        Refresh
-      </button>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-mono uppercase text-slate-500">Status</label>
+        <select 
+          v-model="filterStatus" 
+          class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none transition-all cursor-pointer"
+        >
+          <option value="all">All Statuses</option>
+          <option v-for="(cfg, key) in statusConfig" :key="key" :value="key">
+            {{ cfg.text }}
+          </option>
+        </select>
+      </div>
+
+      <div class="flex justify-end w-full">
+        <button 
+          @click="fetchApplications" 
+          class="w-full sm:w-auto text-xs bg-slate-900/40 hover:bg-slate-800/50 px-4 py-2 rounded text-slate-400 border border-slate-800 transition-all font-mono h-[38px] cursor-pointer"
+        >
+          Refresh
+        </button>
+      </div>
     </div>
 
-    <div v-if="loading" class="border border-slate-800 rounded-2xl p-12 bg-slate-900/20 text-center text-slate-400 text-sm animate-pulse font-mono">
-      Načítavam prihlášky...
+    <!-- Error -->
+    <div v-if="error" class="p-3 rounded-lg text-sm mb-6 border bg-red-900/20 border-red-800 text-red-400 font-mono">
+      System Error: {{ error }}
     </div>
 
+    <!-- Loading -->
+    <div v-if="loading" class="text-slate-500 animate-pulse py-12 text-center font-mono text-sm">
+      Loading applications...
+    </div>
+
+    <!-- Content Table -->
     <div v-else>
-      <div v-if="error" class="text-xs font-mono text-red-400 bg-red-950/20 border border-red-900/40 p-4 rounded-xl mb-4">
-        System Error: {{ error }}
-      </div>
-
       <div v-if="filteredApplications.length === 0" class="border border-slate-800 border-dashed rounded-2xl p-12 text-center bg-slate-900/10">
-        <p class="text-slate-400 text-base font-medium">Nenašli sa žiadne prihlášky.</p>
-        <p class="text-slate-600 text-xs mt-1.5">Zatiaľ ste si nevytvorili koncept ani nepodali žiadnu oficiálnu prihlášku.</p>
+        <p class="text-slate-400 text-base font-medium">No applications found.</p>
+        <p class="text-slate-600 text-xs mt-1.5">You haven't created any drafts or submitted any official applications yet.</p>
       </div>
 
-      <div v-else class="overflow-x-auto border border-slate-800 rounded-2xl bg-slate-950/40">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="border-b border-slate-800 bg-slate-900/60 text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider">
-              <th class="py-3 px-6">ID / Výzva</th>
-              <th class="py-3 px-6">Typ žiadateľa</th>
-              <th class="py-3 px-6">Program</th>
-              <th class="py-3 px-6">Dátum vytvorenia</th>
-              <th class="py-3 px-6 text-center">Status</th>
-              <th class="py-3 px-6 text-right">Akcie</th>
+      <div v-else class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-slate-300">
+          <thead class="text-xs text-slate-400 uppercase bg-slate-900/50 font-mono">
+            <tr>
+              <th class="px-4 py-3 rounded-tl-lg">ID / Call</th>
+              <th class="px-4 py-3">Applicant Type</th>
+              <th class="px-4 py-3">Program</th>
+              <th class="px-4 py-3">Created At</th>
+              <th class="px-4 py-3 text-center">Status</th>
+              <th class="px-4 py-3 rounded-tr-lg text-right">Actions</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-800/40 text-xs text-slate-300">
+          
+          <tbody>
             <tr 
               v-for="app in filteredApplications" 
               :key="app.id" 
-              class="hover:bg-slate-900/20 transition-colors"
+              class="border-b border-slate-800 hover:bg-slate-800/30 transition"
             >
-              <td class="py-4 px-6 font-medium text-white">
-                <span class="font-mono text-sm">#{{ app.id }}</span>
-                <span class="text-[11px] text-slate-500 block font-mono mt-0.5">Call: {{ app.call_id }}</span>
+              <!-- Call -->
+              <td class="px-4 py-3">
+                <div class="font-semibold text-white text-sm font-mono">
+                  #{{ app.id }}
+                </div>
+                <div class="text-xs text-slate-500 font-mono mt-0.5">
+                  Call: {{ app.call_id }}
+                </div>
               </td>
 
-              <td class="py-4 px-6 text-slate-300">
-                <span class="inline-flex items-center gap-1.5 font-medium">
-                  <span class="text-slate-500 text-[10px] font-mono uppercase">
-                    {{ app.applicant_type === 'team' ? 'Team' : 'Individual' }}
-                  </span>
+              <!-- Applicant Type -->
+              <td class="px-4 py-3">
+                <span class="inline-flex items-center text-xs px-2 py-1 rounded border font-mono uppercase bg-slate-900 text-slate-400 border-slate-800">
+                  {{ app.applicant_type === 'team' ? 'Team' : 'Individual' }}
                 </span>
               </td>
 
-              <td class="py-4 px-6">
-                <span class="px-2 py-1 text-[10px] bg-slate-900 text-slate-400 border border-slate-800 rounded-lg font-mono uppercase tracking-wider">
-                  Prog {{ app.program_type }}
+              <!-- Program -->
+              <td class="px-4 py-3">
+                <span class="inline-flex items-center text-xs px-2 py-1 rounded border font-mono uppercase bg-blue-900/40 text-blue-400 border-blue-800">
+                  PROG {{ app.program_type }}
                 </span>
               </td>
 
-              <td class="py-4 px-6 font-mono text-slate-400">
+              <!-- Created At -->
+              <td class="px-4 py-3 text-xs text-slate-400 font-mono">
                 {{ formatDate(app.created_at ?? '') }}
               </td>
 
-              <td class="py-4 px-6 text-center">
+              <!-- Status -->
+              <td class="px-4 py-3 text-center whitespace-nowrap">
                 <span 
-                  class="inline-block px-3 py-1 text-[11px] font-medium rounded-xl border text-center tracking-wide min-w-[110px]"
-                  :class="statusConfig[app.status]?.class || 'bg-slate-800 text-slate-300 border-slate-700'"
+                  class="text-xs px-2 py-1 rounded border font-mono uppercase whitespace-nowrap inline-block min-w-[110px]"
+                  :class="statusConfig[app.status]?.class || 'bg-slate-900/40 text-slate-400 border-slate-800'"
                 >
                   {{ statusConfig[app.status]?.text ?? app.status }}
                 </span>
               </td>
 
-              <td class="py-4 px-6 text-right">
-                <div class="flex justify-end gap-2 items-center">
+              <!-- Actions -->
+              <td class="px-4 py-3 text-right whitespace-nowrap">
+                <div class="flex items-center justify-end gap-2">
                   
                   <button 
                     v-if="['draft', 'pending_revision'].includes(app.status)"
                     @click="submitApp(app.id, app.status)"
                     :disabled="submittingId === app.id"
-                    class="border border-blue-900/50 text-blue-400 hover:text-white hover:bg-blue-600/20 px-2.5 py-1.5 rounded-xl transition font-medium cursor-pointer disabled:opacity-50"
+                    class="text-xs px-3 py-1 rounded border bg-blue-900/40 hover:bg-blue-900/60 text-blue-400 border-blue-800 transition disabled:opacity-50 cursor-pointer"
                   >
                     <span v-if="submittingId === app.id">...</span>
                     <span v-else-if="app.status === 'pending_revision'">Apply Changes</span>
@@ -248,7 +265,7 @@ onMounted(() => {
                     v-if="['draft', 'pending_revision'].includes(app.status)"
                     @click="editApplication(app.id)"
                     :disabled="submittingId === app.id"
-                    class="border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 px-2.5 py-1.5 rounded-xl transition font-medium cursor-pointer disabled:opacity-50"
+                    class="text-xs px-3 py-1 rounded border bg-slate-800 hover:bg-slate-700 text-white border-slate-700 transition disabled:opacity-50 cursor-pointer"
                   >
                     Edit
                   </button>
@@ -257,7 +274,7 @@ onMounted(() => {
                     v-if="['draft', 'pending_revision'].includes(app.status)"
                     @click="deleteApp(app.id)"
                     :disabled="submittingId === app.id"
-                    class="border border-transparent text-slate-500 hover:text-red-400 hover:bg-red-950/20 px-2.5 py-1.5 rounded-xl transition font-medium cursor-pointer disabled:opacity-50"
+                    class="text-xs px-3 py-1 rounded border bg-red-900/40 hover:bg-red-900/60 text-red-400 border-red-800 transition disabled:opacity-50 cursor-pointer"
                   >
                     Delete
                   </button>
@@ -265,7 +282,7 @@ onMounted(() => {
                   <button 
                     @click="viewDetails(app.id)"
                     :disabled="submittingId === app.id"
-                    class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-3 py-1.5 rounded-xl transition cursor-pointer shadow-sm disabled:opacity-50"
+                    class="text-xs px-3 py-1 rounded border bg-blue-600 hover:bg-blue-500 text-white border-blue-500 transition disabled:opacity-50 cursor-pointer shadow-lg shadow-blue-900/20"
                   >
                     Detail
                   </button>
