@@ -99,7 +99,7 @@ const handleTabChange = (tab: string) => {
   activeTab.value = tab
 
   if (tab === 'overview') loadAggregatedStats()
-  if (tab === 'users' || tab === 'logs') loadUserData() 
+  if (tab === 'logs') loadUserData()
   if (tab === 'approvals') loadPendingApprovals()
 
   if (tab !== 'applications') {
@@ -268,7 +268,7 @@ onMounted(() => {
     </div>
 
     <div v-if="activeTab === 'users'">
-      <UserManagementPanel :users="users" :is-super-admin="isSuperAdmin" @refresh="loadUserData" />
+      <UserManagementPanel :is-super-admin="isSuperAdmin" @refresh="loadUserData" />
     </div>
 
     <div v-if="activeTab === 'approvals'">
@@ -284,7 +284,7 @@ onMounted(() => {
     </div>
 
     <div v-if="activeTab === 'logs'">
-      <AdminLogs :users="users.filter((u: any) => u.roles?.some((r: any) => ['nti_admin', 'super_admin', 'evaluator', 'content_editor'].includes(r.slug)))" />
+      <AdminLogs />
     </div>
 
     <div v-if="activeTab === 'broadcast-notification'">

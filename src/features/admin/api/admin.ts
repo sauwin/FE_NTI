@@ -5,8 +5,8 @@ export function getDashboardStats() {
   return api.get('/admin/reporting/dashboard-stats')
 }
 
-export function getAdminUsers() {
-  return api.get('/admin/users')
+export function getAdminUsers(params?: Record<string, any>) {
+  return api.get('/admin/users', { params })
 }
 
 export function getPendingApprovals() {
