@@ -8,8 +8,7 @@ import {
   Document, Packer, Paragraph, Table, TableRow, TableCell,
   TextRun, WidthType, HeadingLevel
 } from 'docx'
-
-const props = defineProps<{ users: any[] }>()
+import Pagination from '@/shared/components/Pagination.vue'
 
 const logs = ref<any[]>([])
 const loading = ref(false)
@@ -387,27 +386,10 @@ onMounted(async () => {
     </div>
 
     <!-- Pagination -->
-    <div
-      v-if="lastPage > 1"
-      class="flex items-center justify-between pt-4 border-t border-slate-800"
-    >
-      <span class="text-xs font-mono text-slate-500">Page {{ page }} of {{ lastPage }}</span>
-      <div class="flex items-center gap-2">
-        <button
-          @click="() => { page = Math.max(1, page - 1); fetchLogs() }"
-          :disabled="page === 1"
-          class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded border border-slate-700 text-slate-300 transition font-mono disabled:opacity-50"
-        >
-          ← Previous
-        </button>
-        <button
-          @click="() => { page = Math.min(lastPage, page + 1); fetchLogs() }"
-          :disabled="page === lastPage"
-          class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded border border-slate-700 text-slate-300 transition font-mono disabled:opacity-50"
-        >
-          Next →
-        </button>
-      </div>
-    </div>
+    <Pagination
+        :current-page="page"
+        :total-pages="lastPage"
+        @change="(p) => { page = p; fetchLogs() }"
+    />
   </div>
 </template>

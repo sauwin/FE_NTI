@@ -5,6 +5,7 @@ import api from '@/shared/api/axios'
 import type { AdminApplicationListItem } from '@/features/admin/types/admin'
 import { useRouter } from 'vue-router'
 import { useConfirm } from "@/shared/composables/useConfirm.ts"
+import Pagination from '@/shared/components/Pagination.vue'
 
 const props = defineProps<{
   filterCallId?: number | null
@@ -342,30 +343,14 @@ watch(() => props.filterCallId, () => { currentPage.value = 1; loadApplications(
       </div>
 
       <!-- Pagination -->
-      <div
-        v-if="totalPages > 1"
-        class="flex items-center justify-between mt-4 pt-4 border-t border-slate-800"
-      >
-        <span class="text-xs font-mono text-slate-500">
-          Page {{ currentPage }} of {{ totalPages }} &middot; {{ totalItems }} total
-        </span>
-        <div class="flex items-center gap-2">
-          <button
-            @click="changePage(currentPage - 1)"
-            :disabled="currentPage === 1 || loading"
-            class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded border border-slate-700 text-slate-300 transition font-mono disabled:opacity-50"
-          >
-            ← Previous
-          </button>
-          <button
-            @click="changePage(currentPage + 1)"
-            :disabled="currentPage === totalPages || loading"
-            class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded border border-slate-700 text-slate-300 transition font-mono disabled:opacity-50"
-          >
-            Next →
-          </button>
-        </div>
-      </div>
+      <Pagination
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          :total-items="totalItems"
+          :loading="loading"
+          @change="changePage"
+          class="mt-4"
+      />
     </div>
   </div>
 

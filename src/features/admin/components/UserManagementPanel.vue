@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import {
   blockUser as blockUserApi,
   unblockUser as unblockUserApi,
@@ -7,284 +7,180 @@ import {
   removeUserRole,
   addUserRole,
   exportUsers as exportUsersApi,
+  getAdminUsers,
 } from '@/features/admin/api/admin'
 import type { AdminRole } from '@/features/admin/types/admin'
 import { useConfirm } from '@/shared/composables/useConfirm'
+import Pagination from '@/shared/components/Pagination.vue'
 
-const USERS_PER_PAGE = 25
-
-const props = defineProps<{
-  users: any[]
-  isSuperAdmin?: boolean
-}>()
+defineProps<{ isSuperAdmin?: boolean }>()
 const emit = defineEmits(['refresh'])
 
-const searchQuery = ref('')
-const selectedRole = ref('')
-const selectedStatus = ref('')
+const AVAILABLE_ROLES = ['student', 'company', 'mentor']
+const SUPER_ADMIN_ROLES = ['student', 'company', 'mentor', 'evaluator', 'content_editor']
+const filterRoles = ['student', 'company', 'mentor', 'evaluator', 'content_editor', 'nti_admin', 'super_admin']
+
+const roleInOrgOptions = [
+  { value: 'owner', label: 'Owner' },
+  { value: 'contact', label: 'Contact' },
+  { value: 'evaluator', label: 'Evaluator' },
+  { value: 'mentor', label: 'Mentor' },
+]
+
+const users = ref<any[]>([])
 const loading = ref(false)
 const message = ref('')
 const success = ref(false)
 const currentPage = ref(1)
+const totalPages = ref(1)
+const totalItems = ref(0)
+const searchQuery = ref('')
+const selectedRole = ref('')
+const selectedStatus = ref('')
 
 const showCompanyModal = ref(false)
 const companyForm = ref({
   userId: null as number | null,
   roleSlug: '',
   registration_number: '',
-  role_in_org: 'contact'
+  role_in_org: 'contact',
 })
 
-const roleInOrgOptions = [
-  { value: 'owner', label: 'Owner' },
-  { value: 'contact', label: 'Contact' },
-  { value: 'evaluator', label: 'Evaluator' },
-  { value: 'mentor', label: 'Mentor' }
-]
+async function loadUsers() {
+  loading.value = true
+  try {
+    const params: any = { page: currentPage.value }
+    if (searchQuery.value) params.search = searchQuery.value
+    if (selectedRole.value) params.role = selectedRole.value
+    if (selectedStatus.value) params.status = selectedStatus.value
+    const res = await getAdminUsers(params)
+    if (res.data?.data) {
+      users.value = res.data.data
+      currentPage.value = res.data.current_page
+      totalPages.value = res.data.last_page
+      totalItems.value = res.data.total
+    } else {
+      users.value = Array.isArray(res.data) ? res.data : []
+      totalPages.value = 1
+      totalItems.value = users.value.length
+    }
+  } catch (e: any) {
+    setMessage(false, e.response?.data?.message || 'Failed to load users')
+  } finally {
+    loading.value = false
+  }
+}
 
-const availableRoles = ['student', 'company', 'mentor']
-const superAdminRoles = ['student', 'company', 'mentor', 'evaluator', 'content_editor']
-
-const filterRoles = [
-  'student',
-  'company',
-  'mentor',
-  'evaluator',
-  'content_editor',
-  'nti_admin',
-  'super_admin'
-]
-
-watch([searchQuery, selectedRole, selectedStatus], () => {
+function handleFilterChange() {
   currentPage.value = 1
-})
+  loadUsers()
+}
 
-const filtered = computed(() => {
-  let result = props.users
+function setMessage(ok: boolean, text: string) {
+  success.value = ok
+  message.value = text
+  setTimeout(() => { message.value = '' }, 3000)
+}
 
-  if (!props.isSuperAdmin) {
-    result = result.filter(u => !u.roles?.some((r: AdminRole) => ['nti_admin', 'super_admin'].includes(r.slug)))
-  }
+function canManage(user: any) {
+  const adminOnlyRoles = ['nti_admin', 'super_admin', 'evaluator', 'content_editor']
+  return !user.roles?.some((r: AdminRole) => adminOnlyRoles.includes(r.slug))
+}
 
-  if (searchQuery.value) {
-    const q = searchQuery.value.toLowerCase()
-    result = result.filter(u =>
-        `${u.first_name} ${u.last_name}`.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q)
-    )
-  }
-
-  if (selectedRole.value) {
-    result = result.filter(u =>
-        u.roles?.some((r: AdminRole) => r.slug === selectedRole.value)
-    )
-  }
-
-  if (selectedStatus.value) {
-    result = result.filter(u => u.status === selectedStatus.value)
-  }
-
-  return result
-})
-
-const totalPages = computed(() => Math.ceil(filtered.value.length / USERS_PER_PAGE))
-
-const visibleUsers = computed(() => {
-  const start = (currentPage.value - 1) * USERS_PER_PAGE
-  return filtered.value.slice(start, start + USERS_PER_PAGE)
-})
+function getAvailableRolesToAssign(isSuperAdmin?: boolean) {
+  return isSuperAdmin ? SUPER_ADMIN_ROLES : AVAILABLE_ROLES
+}
 
 function onRoleSelect(userId: number, roleSlug: string) {
   if (!roleSlug) return
-  
   if (roleSlug === 'company') {
-    companyForm.value = {
-      userId,
-      roleSlug,
-      registration_number: '',
-      role_in_org: 'contact'
-    }
+    companyForm.value = { userId, roleSlug, registration_number: '', role_in_org: 'contact' }
     showCompanyModal.value = true
   } else {
     assignRole(userId, roleSlug)
   }
 }
 
-function canManage(user: any) {
-  const adminOnlyRoles = ['nti_admin', 'super_admin', 'evaluator', 'content_editor']
-  const hasAdminRole = user.roles?.some((r: AdminRole) => adminOnlyRoles.includes(r.slug))
-  return !hasAdminRole || props.isSuperAdmin
-}
-
-function getAvailableRolesToAssign(user: any) {
-  return props.isSuperAdmin ? superAdminRoles : availableRoles
-}
-
 async function blockUser(userId: number) {
-  const confirmed = await useConfirm({
-    title: 'Block User',
-    message: 'Block this user? They will not be able to access the platform.',
-    confirmText: 'Block',
-    cancelText: 'Cancel',
-    danger: true,
-  })
-  if (!confirmed) return
-
+  if (!await useConfirm({ title: 'Block User', message: 'Block this user?', confirmText: 'Block', cancelText: 'Cancel', danger: true })) return
   loading.value = true
   try {
     await blockUserApi(userId)
-    success.value = true
-    message.value = 'User blocked'
+    setMessage(true, 'User blocked')
     emit('refresh')
-    setTimeout(() => {
-      message.value = ''
-      success.value = false
-    }, 3000)
+    loadUsers()
   } catch (e: any) {
-    success.value = false
-    message.value = e.response?.data?.message || 'Failed to block user'
-  } finally {
-    loading.value = false
-  }
+    setMessage(false, e.response?.data?.message || 'Failed to block user')
+  } finally { loading.value = false }
 }
 
 async function unblockUser(userId: number) {
-  const confirmed = await useConfirm({
-    title: 'Unblock User',
-    message: 'Unblock this user? They will be able to access the platform.',
-    confirmText: 'Unblock',
-    cancelText: 'Cancel',
-    danger: false,
-  })
-  if (!confirmed) return
-
+  if (!await useConfirm({ title: 'Unblock User', message: 'Unblock this user?', confirmText: 'Unblock', cancelText: 'Cancel', danger: false })) return
   loading.value = true
   try {
     await unblockUserApi(userId)
-    success.value = true
-    message.value = 'User unblocked'
+    setMessage(true, 'User unblocked')
     emit('refresh')
-    setTimeout(() => {
-      message.value = ''
-      success.value = false
-    }, 3000)
+    loadUsers()
   } catch (e: any) {
-    success.value = false
-    message.value = e.response?.data?.message || 'Failed to unblock user'
-  } finally {
-    loading.value = false
-  }
+    setMessage(false, e.response?.data?.message || 'Failed to unblock user')
+  } finally { loading.value = false }
 }
 
 async function deleteUser(userId: number) {
-  const confirmed = await useConfirm({
-    title: 'Delete User',
-    message: 'Delete this user permanently? This action cannot be undone.',
-    confirmText: 'Delete',
-    cancelText: 'Cancel',
-    danger: true,
-  })
-  if (!confirmed) return
-
+  if (!await useConfirm({ title: 'Delete User', message: 'Delete permanently? Cannot be undone.', confirmText: 'Delete', cancelText: 'Cancel', danger: true })) return
   loading.value = true
   try {
     await deleteAdminUser(userId)
-    success.value = true
-    message.value = 'User deleted'
+    setMessage(true, 'User deleted')
     emit('refresh')
-    setTimeout(() => {
-      message.value = ''
-      success.value = false
-    }, 3000)
+    loadUsers()
   } catch (e: any) {
-    success.value = false
-    message.value = e.response?.data?.message || 'Failed to delete user'
-  } finally {
-    loading.value = false
-  }
+    setMessage(false, e.response?.data?.message || 'Failed to delete user')
+  } finally { loading.value = false }
 }
 
 async function removeRole(userId: number, roleSlug: string) {
-  const confirmed = await useConfirm({
-    title: 'Remove Role',
-    message: `Remove the "${roleSlug}" role from this user?`,
-    confirmText: 'Remove',
-    cancelText: 'Cancel',
-    danger: true,
-  })
-  if (!confirmed) return
-
+  if (!await useConfirm({ title: 'Remove Role', message: `Remove "${roleSlug}" role?`, confirmText: 'Remove', cancelText: 'Cancel', danger: true })) return
   loading.value = true
   try {
     await removeUserRole(userId, roleSlug)
-    success.value = true
-    message.value = 'Role removed'
+    setMessage(true, 'Role removed')
     emit('refresh')
-    setTimeout(() => {
-      message.value = ''
-      success.value = false
-    }, 3000)
+    loadUsers()
   } catch (e: any) {
-    success.value = false
-    message.value = e.response?.data?.message || 'Failed to remove role'
-  } finally {
-    loading.value = false
-  }
+    setMessage(false, e.response?.data?.message || 'Failed to remove role')
+  } finally { loading.value = false }
 }
 
-async function assignRole(userId: number, roleSlug: string, extraData?: { registration_number: string, role_in_org: string }) {
+async function assignRole(userId: number, roleSlug: string, extraData?: { registration_number: string; role_in_org: string }) {
   loading.value = true
   try {
-    const user = props.users.find(u => u.id === userId)
+    const user = users.value.find(u => u.id === userId)
     const currentRoles = user?.roles?.map((r: any) => r.slug) || []
-    const replaceableRoles = props.isSuperAdmin ? superAdminRoles : availableRoles
+    const replaceableRoles = SUPER_ADMIN_ROLES
     const rolesToRemove = currentRoles.filter((r: string) => replaceableRoles.includes(r))
-
-    for (const role of rolesToRemove) {
-      await removeUserRole(userId, role)
-    }
-
-    await addUserRole(userId, { 
-      role: roleSlug, 
-      ...extraData 
-    })
-    
-    success.value = true
-    message.value = `Role "${roleSlug}" assigned`
+    for (const role of rolesToRemove) await removeUserRole(userId, role)
+    await addUserRole(userId, { role: roleSlug, ...extraData })
+    setMessage(true, `Role "${roleSlug}" assigned`)
     emit('refresh')
-    setTimeout(() => {
-      message.value = ''
-      success.value = false
-    }, 3000)
+    loadUsers()
   } catch (e: any) {
-    success.value = false
-    message.value = e.response?.data?.message || 'Failed to assign role'
-  } finally {
-    loading.value = false
-  }
+    setMessage(false, e.response?.data?.message || 'Failed to assign role')
+  } finally { loading.value = false }
 }
 
 async function confirmCompanyRole() {
-  if (!companyForm.value.registration_number) {
-    message.value = 'Registration number is required'
-    success.value = false
-    return
-  }
-  
-  await assignRole(
-    companyForm.value.userId!, 
-    companyForm.value.roleSlug, 
-    { 
-      registration_number: companyForm.value.registration_number,
-      role_in_org: companyForm.value.role_in_org 
-    }
-  )
+  if (!companyForm.value.registration_number) { setMessage(false, 'Registration number is required'); return }
+  await assignRole(companyForm.value.userId!, companyForm.value.roleSlug, {
+    registration_number: companyForm.value.registration_number,
+    role_in_org: companyForm.value.role_in_org,
+  })
   showCompanyModal.value = false
 }
 
 async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
   loading.value = true
-  message.value = ''
   try {
     const response = await exportUsersApi({
       search: searchQuery.value || undefined,
@@ -292,7 +188,6 @@ async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
       status: selectedStatus.value || undefined,
       format,
     })
-    
     const url = window.URL.createObjectURL(new Blob([response.data]))
     const link = document.createElement('a')
     link.href = url
@@ -301,20 +196,13 @@ async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
     link.click()
     document.body.removeChild(link)
     window.URL.revokeObjectURL(url)
-    
-    success.value = true
-    message.value = `Export successful (${format.toUpperCase()})`
-    setTimeout(() => {
-      message.value = ''
-      success.value = false
-    }, 3000)
+    setMessage(true, `Export successful (${format.toUpperCase()})`)
   } catch (e: any) {
-    success.value = false
-    message.value = e.response?.data?.message || `Failed to export users as ${format.toUpperCase()}`
-  } finally {
-    loading.value = false
-  }
+    setMessage(false, e.response?.data?.message || `Failed to export as ${format.toUpperCase()}`)
+  } finally { loading.value = false }
 }
+
+onMounted(loadUsers)
 </script>
 
 <template>
@@ -412,7 +300,7 @@ async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
 
         <tbody>
           <tr
-            v-for="user in visibleUsers"
+              v-for="user in users"
             :key="user.id"
             class="border-b border-slate-800 hover:bg-slate-800/30 transition"
           >
@@ -422,7 +310,7 @@ async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
               </div>
               <div class="text-xs text-slate-500 font-mono mt-0.5">
                 {{ user.email }}
-                {{ console.log(user) }}
+<!--                {{ console.log(user) }}-->
               </div>
             </td>
 
@@ -494,7 +382,7 @@ async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
                 >
                   <option value="" disabled selected class="bg-slate-900 text-slate-300">Assign Role</option>
                   <option
-                    v-for="role in getAvailableRolesToAssign(user)"
+                    v-for="role in getAvailableRolesToAssign(isSuperAdmin)"
                     :key="role"
                     :value="role"
                     class="bg-slate-900 text-slate-300"
@@ -515,34 +403,14 @@ async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
       </table>
     </div>
 
-    <div
-      v-if="totalPages > 1"
-      class="mt-6 flex items-center justify-center gap-3"
-    >
-      <button
-        v-if="currentPage > 1"
-        @click="currentPage--"
-        class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-sm rounded border border-slate-700 transition cursor-pointer"
-      >
-        ← Prev
-      </button>
-
-      <span class="text-sm text-slate-400 font-mono">
-        {{ currentPage }} / {{ totalPages }}
-        <span class="text-slate-600 ml-1">
-          ({{ filtered.length }})
-        </span>
-      </span>
-
-      <button
-        v-if="currentPage < totalPages"
-        @click="currentPage++"
-        class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-sm rounded border border-slate-700 transition cursor-pointer"
-      >
-        Next →
-      </button>
-    </div>
-  </div>
+    <Pagination
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        :total-items="totalItems"
+        :loading="loading"
+        @change="(p) => { currentPage = p; loadUsers() }"
+        class="mt-6"
+    />
 
   <div v-if="showCompanyModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95 duration-150">
