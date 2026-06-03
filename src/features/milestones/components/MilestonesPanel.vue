@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/features/auth/stores/auth'
 import {
   getMilestones,
@@ -10,6 +11,7 @@ import {
 
 const props = defineProps<{ applicationId: number | string }>()
 
+const { t, locale } = useI18n()
 const auth = useAuthStore()
 const canManage = auth.isAdmin || auth.role === 'mentor'
 
@@ -39,7 +41,7 @@ async function load() {
     const res = await getMilestones(props.applicationId)
     milestones.value = res.data?.data ?? res.data ?? []
   } catch {
-    error.value = 'Could not load milestones'
+    error.value = t('milestones.errors.loadFailed')
   } finally {
     loading.value = false
   }
@@ -52,11 +54,11 @@ async function create() {
     await createMilestone(props.applicationId, form.value)
     form.value = { title: '', due_date: '', description: '' }
     showForm.value = false
-    success.value = 'Milestone created.'
+    success.value = t('milestones.success.created')
     setTimeout(() => (success.value = ''), 3000)
     await load()
   } catch (e: any) {
-    error.value = e.response?.data?.message ?? 'Could not create milestone'
+    error.value = e.response?.data?.message ?? t('milestones.errors.createFailed')
   } finally {
     creating.value = false
   }
@@ -68,7 +70,7 @@ async function changeStatus(id: number, status: string) {
     const m = milestones.value.find(m => m.id === id)
     if (m) m.status = status
   } catch (e: any) {
-    error.value = e.response?.data?.message ?? 'Could not update status'
+    error.value = e.response?.data?.message ?? t('milestones.errors.updateFailed')
   }
 }
 
@@ -80,11 +82,11 @@ async function uploadDoc(id: number, event: Event) {
   fd.append('file', file)
   try {
     await uploadMilestoneDocument(id, fd)
-    success.value = 'Document uploaded.'
+    success.value = t('milestones.success.uploaded')
     setTimeout(() => (success.value = ''), 3000)
     await load()
   } catch (e: any) {
-    error.value = e.response?.data?.message ?? 'Upload failed'
+    error.value = e.response?.data?.message ?? t('milestones.errors.uploadFailed')
   } finally {
     uploadingId.value = null
   }
@@ -94,12 +96,12 @@ async function uploadDoc(id: number, event: Event) {
 <template>
   <div class="border border-slate-800 rounded-xl p-6 bg-slate-900/30 mb-4">
     <div class="flex items-center justify-between mb-4">
-      <div class="text-xs font-semibold tracking-widest uppercase text-blue-500">Milestones</div>
+      <div class="text-xs font-semibold tracking-widest uppercase text-blue-500">{{ t('milestones.heading') }}</div>
       <button
           v-if="canManage"
           @click="showForm = !showForm"
           class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition">
-        {{ showForm ? 'Cancel' : '+ Add Milestone' }}
+        {{ showForm ? t('milestones.btnCancel') : t('milestones.btnAddMilestone') }}
       </button>
     </div>
 
@@ -110,7 +112,7 @@ async function uploadDoc(id: number, event: Event) {
       <input
           v-model="form.title"
           type="text"
-          placeholder="Title *"
+          :placeholder="t('milestones.placeholderTitle')"
           class="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-blue-600 outline-none"
       />
       <input
@@ -121,20 +123,20 @@ async function uploadDoc(id: number, event: Event) {
       <textarea
           v-model="form.description"
           rows="3"
-          placeholder="Description (optional)"
+          :placeholder="t('milestones.placeholderDescription')"
           class="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-blue-600 outline-none resize-none"
       />
       <button
           @click="create"
           :disabled="creating || !form.title || !form.due_date"
           class="self-start bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm disabled:opacity-50">
-        {{ creating ? 'Saving...' : 'Save Milestone' }}
+        {{ creating ? t('milestones.btnSaving') : t('milestones.btnSaveMilestone') }}
       </button>
     </div>
 
-    <div v-if="loading" class="text-slate-500 animate-pulse text-sm">Loading...</div>
+    <div v-if="loading" class="text-slate-500 animate-pulse text-sm">{{ t('milestones.loading') }}</div>
 
-    <div v-else-if="milestones.length === 0" class="text-slate-500 text-sm">No milestones yet.</div>
+    <div v-else-if="milestones.length === 0" class="text-slate-500 text-sm">{{ t('milestones.noMilestones') }}</div>
 
     <div v-else class="flex flex-col gap-3">
       <div
@@ -144,11 +146,13 @@ async function uploadDoc(id: number, event: Event) {
           <div>
             <p class="text-white text-sm font-medium">{{ m.title }}</p>
             <p v-if="m.description" class="text-slate-500 text-xs mt-0.5">{{ m.description }}</p>
-            <p class="text-slate-600 text-xs mt-1">Due: {{ m.due_date ? new Date(m.due_date).toLocaleDateString() : '—' }}</p>
+            <p class="text-slate-600 text-xs mt-1">
+              {{ m.due_date ? t('milestones.lblDue', { date: new Date(m.due_date).toLocaleDateString(locale === 'sk' ? 'sk-SK' : 'en-US') }) : t('milestones.lblDueEmpty') }}
+            </p>
           </div>
           <span :class="['text-[10px] px-2 py-1 rounded border font-mono uppercase whitespace-nowrap', STATUS_COLORS[m.status] ?? STATUS_COLORS.pending]">
-{{ m.status }}
-</span>
+            {{ t('milestones.status.' + m.status) }}
+          </span>
         </div>
 
         <div v-if="canManage" class="flex items-center gap-2 mt-3 flex-wrap">
@@ -157,11 +161,11 @@ async function uploadDoc(id: number, event: Event) {
               @click="changeStatus(m.id, s)"
               :disabled="m.status === s"
               class="text-[10px] px-2 py-1 rounded border font-mono uppercase border-slate-700 text-slate-400 hover:border-slate-500 disabled:opacity-30 transition">
-            {{ s.replace('_', ' ') }}
+            {{ t('milestones.status.' + s) }}
           </button>
 
           <label class="ml-auto cursor-pointer text-xs text-blue-400 hover:text-blue-300 transition">
-            {{ uploadingId === m.id ? 'Uploading...' : '↑ Upload doc' }}
+            {{ uploadingId === m.id ? t('milestones.btnUploading') : t('milestones.btnUploadDoc') }}
             <input type="file" class="hidden" @change="uploadDoc(m.id, $event)" :disabled="uploadingId !== null" />
           </label>
         </div>

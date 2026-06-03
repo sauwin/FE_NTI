@@ -1,0 +1,45 @@
+{
+  "faq": {
+    "titlePrefix": "FAQ",
+    "titleMain": "Často kladené {span}",
+    "titleSpan": "otázky",
+    "subtitle": "Všetko, čo potrebujete vedieť o programoch NTI, prihláškach a celom procese.",
+    "errorLoad": "Nepodarilo sa načítať položky FAQ.",
+    "errorSave": "Nepodarilo sa uložiť FAQ. Uistite sa, že ste prihlásený s prístupom administrátora.",
+    "errorDelete": "Nepodarilo sa vymazať FAQ. Uistite sa, že ste prihlásený s prístupom administrátora.",
+    "successUpdated": "FAQ bolo úspešne upravené.",
+    "successCreated": "FAQ bolo úspešne vytvorené.",
+    "successDeleted": "FAQ bolo úspešne vymazané.",
+    "admin": {
+      "editorTitle": "Administrátorský FAQ editor",
+      "editorSubtitle": "Vytvárajte, upravujte a mažte príspevky FAQ pre verejnú stránku.",
+      "addFaq": "Pridať FAQ",
+      "labelQuestion": "Otázka",
+      "labelAnswer": "Odpoveď",
+      "labelContext": "Kontext stránky",
+      "labelActive": "Aktívne",
+      "labelOrder": "Poradie",
+      "placeholderQuestion": "Čo je to NTI?",
+      "placeholderAnswer": "NTI je ...",
+      "optionGeneral": "Všeobecné",
+      "optionProgramA": "Program A",
+      "optionProgramB": "Program B",
+      "optionYes": "Áno",
+      "optionNo": "Nie",
+      "saveChanges": "Uložiť zmeny",
+      "createFaq": "Vytvoriť FAQ",
+      "cancel": "Zrušiť",
+      "deleteTitle": "Vymazať FAQ",
+      "deleteConfirm": "Naozaj chcete vymazať toto FAQ?",
+      "deleteBtn": "Vymazať",
+      "editingEnabled": "Úpravy povolené."
+    },
+    "current": {
+      "title": "Aktuálne FAQ",
+      "subtitle": "Kliknutím na otázku zobrazíte odpoveď.",
+      "noItems": "Nenašli sa žiadne FAQ otázky.",
+      "btnEdit": "Upraviť",
+      "btnDelete": "Vymazať"
+    }
+  }
+}

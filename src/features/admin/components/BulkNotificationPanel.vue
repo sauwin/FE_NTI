@@ -3,6 +3,9 @@ import { ref, onMounted, computed } from 'vue'
 import { getAdminCalls, getNotificationHistory, sendBulkNotification, exportNotifications } from '@/features/admin/api/admin'
 import { useConfirm } from "@/shared/composables/useConfirm.ts"
 import type { Call, NotificationItem, StatusMessage, GroupOption } from '@/features/admin/types/admin'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const viewMode = ref<string>('all') 
 const selectedCallId = ref<string>('') 
@@ -18,13 +21,13 @@ const exportLoading = ref<boolean>(false)
 const exportMessage = ref<string>('')
 const exportSuccess = ref<boolean>(false)
 
-const viewGroups: GroupOption[] = [
-  { value: 'all', label: 'All Users' },
-  { value: 'students', label: 'Students' },
-  { value: 'companies', label: 'Companies' },
-  { value: 'mentors', label: 'Mentors' },
-  { value: 'call_selector', label: 'Specific Call Participants (Výzva)' },
-]
+const viewGroups = computed<GroupOption[]>(() => [
+  { value: 'all', label: t('admin.bulkNotificationPanel.audiences.all') },
+  { value: 'students', label: t('admin.bulkNotificationPanel.audiences.students') },
+  { value: 'companies', label: t('admin.bulkNotificationPanel.audiences.companies') },
+  { value: 'mentors', label: t('admin.bulkNotificationPanel.audiences.mentors') },
+  { value: 'call_selector', label: t('admin.bulkNotificationPanel.audiences.callSelector') },
+])
 
 const historyFilterSubject = ref<string>('')
 const historyFilterGroup = ref<string>('')
@@ -96,11 +99,11 @@ async function triggerExport(format: 'csv' | 'xlsx' = 'csv'): Promise<void> {
     window.URL.revokeObjectURL(url)
     
     exportSuccess.value = true
-    exportMessage.value = `Export successful (${format.toUpperCase()})`
+    exportMessage.value = t('admin.bulkNotificationPanel.jsMessages.exportSuccess', { format: format.toUpperCase() })
     setTimeout(() => { exportSuccess.value = false; exportMessage.value = '' }, 3000)
   } catch (e: any) {
     exportSuccess.value = false
-    exportMessage.value = e.response?.data?.message || `Failed to export notifications as ${format.toUpperCase()}`
+    exportMessage.value = e.response?.data?.message || t('admin.bulkNotificationPanel.jsMessages.exportFailed', { format: format.toUpperCase() })
   } finally {
     exportLoading.value = false
   }
@@ -130,7 +133,7 @@ async function fetchHistory(): Promise<void> {
 
 async function send(): Promise<void> {
   if (viewMode.value === 'call_selector' && !selectedCallId.value) {
-    status.value = { ok: false, text: 'Please select a specific Call window.' }
+    status.value = { ok: false, text: t('admin.bulkNotificationPanel.jsMessages.selectCallError') }
     return
   }
 
@@ -138,17 +141,17 @@ async function send(): Promise<void> {
     ? `call_${selectedCallId.value}` 
     : viewMode.value
 
-  let groupLabel = viewGroups.find(g => g.value === viewMode.value)?.label || viewMode.value
+  let groupLabel = viewGroups.value.find(g => g.value === viewMode.value)?.label || viewMode.value
   if (viewMode.value === 'call_selector') {
     const foundCall = calls.value.find(c => c.id === Number(selectedCallId.value))
-    groupLabel = `Applicants of Call: "${foundCall?.name || selectedCallId.value}"`
+    groupLabel = t('admin.bulkNotificationPanel.jsMessages.applicantsOfCall', { name: foundCall?.name || selectedCallId.value })
   }
 
   const confirmed = await useConfirm({
-    title: 'Send Emails',
-    message: `Are you sure you want to send this mass email to [ ${groupLabel} ]?`,
-    confirmText: 'Send Now',
-    cancelText: 'Cancel',
+    title: t('admin.bulkNotificationPanel.jsMessages.confirmTitle'),
+    message: t('admin.bulkNotificationPanel.jsMessages.confirmMessage', { group: groupLabel }),
+    confirmText: t('admin.bulkNotificationPanel.jsMessages.confirmText'),
+    cancelText: t('admin.bulkNotificationPanel.jsMessages.cancelText'),
     danger: false,
   })
   if (!confirmed) return
@@ -163,7 +166,10 @@ async function send(): Promise<void> {
       message: message.value,
     })
     
-    status.value = { ok: true, text: `Campaign saved & queued successfully for ${res.data?.queued ?? 'matched'} users.` }
+    status.value = { 
+      ok: true, 
+      text: t('admin.bulkNotificationPanel.jsMessages.successMessage', { count: res.data?.queued ?? t('admin.bulkNotificationPanel.jsMessages.matchedFallback') }) 
+    }
     subject.value = ''
     message.value = ''
     selectedCallId.value = ''
@@ -191,13 +197,13 @@ function formatDate(dateStr: string | null | undefined): string {
     
     <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6 space-y-5">
       <div>
-        <h3 class="text-xl font-bold text-white">Bulk Notifications</h3>
-        <p class="text-sm text-slate-500 mt-1">Send global dashboard system announcements and mass email blasts.</p>
+        <h3 class="text-xl font-bold text-white">{{ $t('admin.bulkNotificationPanel.form.title') }}</h3>
+        <p class="text-sm text-slate-500 mt-1">{{ $t('admin.bulkNotificationPanel.form.description') }}</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div :class="viewMode === 'call_selector' ? 'md:col-span-1' : 'md:col-span-3'">
-          <label class="block text-xs font-mono text-slate-400 mb-2 uppercase tracking-wider">Recipient Audience *</label>
+          <label class="block text-xs font-mono text-slate-400 mb-2 uppercase tracking-wider">{{ $t('admin.bulkNotificationPanel.form.audienceLabel') }}</label>
           <div class="relative">
             <select v-model="viewMode" class="w-full bg-[#0B1120] border border-slate-800 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none appearance-none cursor-pointer">
               <option v-for="g in viewGroups" :key="g.value" :value="g.value">{{ g.label }}</option>
@@ -207,10 +213,10 @@ function formatDate(dateStr: string | null | undefined): string {
         </div>
 
         <div v-if="viewMode === 'call_selector'" class="md:col-span-2">
-          <label class="block text-xs font-mono text-slate-400 mb-2 uppercase tracking-wider">Select Targeted Call *</label>
+          <label class="block text-xs font-mono text-slate-400 mb-2 uppercase tracking-wider">{{ $t('admin.bulkNotificationPanel.form.callLabel') }}</label>
           <div class="relative">
             <select v-model="selectedCallId" class="w-full bg-[#0B1120] border border-slate-800 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none appearance-none cursor-pointer">
-              <option value="" disabled>-- Select call filter window --</option>
+              <option value="" disabled>{{ $t('admin.bulkNotificationPanel.form.callPlaceholder') }}</option>
               <option v-for="call in calls" :key="call.id" :value="call.id">
                 {{ call.name }} (ID: #{{ call.id }})
               </option>
@@ -221,13 +227,13 @@ function formatDate(dateStr: string | null | undefined): string {
       </div>
 
       <div>
-        <label class="block text-xs font-mono text-slate-400 mb-2 uppercase tracking-wider">Subject Title *</label>
-        <input v-model="subject" maxlength="255" placeholder="Subject heading..." class="w-full bg-[#0B1120] border border-slate-800 rounded-lg px-4 py-2 text-white text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none placeholder-slate-600 transition-all" />
+        <label class="block text-xs font-mono text-slate-400 mb-2 uppercase tracking-wider">{{ $t('admin.bulkNotificationPanel.form.subjectLabel') }}</label>
+        <input v-model="subject" maxlength="255" :placeholder="$t('admin.bulkNotificationPanel.form.subjectPlaceholder')" class="w-full bg-[#0B1120] border border-slate-800 rounded-lg px-4 py-2 text-white text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none placeholder-slate-600 transition-all" />
       </div>
 
       <div>
-        <label class="block text-xs font-mono text-slate-400 mb-2 uppercase tracking-wider">Message Core Content *</label>
-        <textarea v-model="message" maxlength="10000" rows="6" placeholder="Write letter contents here..." class="w-full bg-[#0B1120] border border-slate-800 rounded-lg px-4 py-3 text-white text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none resize-none leading-relaxed placeholder-slate-600 transition-all" />
+        <label class="block text-xs font-mono text-slate-400 mb-2 uppercase tracking-wider">{{ $t('admin.bulkNotificationPanel.form.messageLabel') }}</label>
+        <textarea v-model="message" maxlength="10000" rows="6" :placeholder="$t('admin.bulkNotificationPanel.form.messagePlaceholder')" class="w-full bg-[#0B1120] border border-slate-800 rounded-lg px-4 py-3 text-white text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none resize-none leading-relaxed placeholder-slate-600 transition-all" />
       </div>
 
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-slate-900">
@@ -236,7 +242,7 @@ function formatDate(dateStr: string | null | undefined): string {
             @click="send"
             class="px-5 py-2.5 bg-green-950/20 hover:bg-green-900 text-green-400 hover:text-white border border-green-900/60 rounded-xl transition-all disabled:opacity-30 disabled:cursor-not-allowed text-sm font-semibold cursor-pointer"
         >
-          {{ loading ? 'Broadcasting...' : 'Send Broadcast' }}
+          {{ loading ? $t('admin.bulkNotificationPanel.form.btnSending') : $t('admin.bulkNotificationPanel.form.btnSend') }}
         </button>
 
         <p v-if="status" :class="status.ok ? 'text-green-400 bg-green-950/20 border-green-900/50' : 'text-red-400 bg-red-950/20 border-red-900/50'" class="text-xs font-mono border px-3 py-1.5 rounded-lg">
@@ -258,9 +264,9 @@ function formatDate(dateStr: string | null | undefined): string {
 
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h3 class="text-xl font-bold text-white">Campaigns History</h3>
+            <h3 class="text-xl font-bold text-white">{{ $t('admin.bulkNotificationPanel.history.title') }}</h3>
             <p class="text-sm text-slate-500 mt-1">
-              View and export previously sent bulk notifications.
+              {{ $t('admin.bulkNotificationPanel.history.description') }}
             </p>
           </div>
 
@@ -270,7 +276,7 @@ function formatDate(dateStr: string | null | undefined): string {
               :disabled="exportLoading"
               class="text-xs bg-green-900/40 hover:bg-green-900/60 disabled:opacity-50 px-3 py-1.5 rounded text-green-400 border border-green-800 transition-all font-mono cursor-pointer"
             >
-              Export CSV
+              {{ $t('admin.bulkNotificationPanel.history.btnCsv') }}
             </button>
 
             <button
@@ -278,7 +284,7 @@ function formatDate(dateStr: string | null | undefined): string {
               :disabled="exportLoading"
               class="text-xs bg-blue-900/40 hover:bg-blue-900/60 disabled:opacity-50 px-3 py-1.5 rounded text-blue-400 border border-blue-800 transition-all font-mono cursor-pointer"
             >
-              Export XLSX
+              {{ $t('admin.bulkNotificationPanel.history.btnXlsx') }}
             </button>
           </div>
         </div>
@@ -287,7 +293,7 @@ function formatDate(dateStr: string | null | undefined): string {
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-5">
         <input
           v-model="historyFilterSubject"
-          placeholder="Search by subject..."
+          :placeholder="$t('admin.bulkNotificationPanel.history.filterSubject')"
           class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-blue-600 outline-none transition-all"
         />
 
@@ -295,7 +301,7 @@ function formatDate(dateStr: string | null | undefined): string {
           v-model="historyFilterGroup"
           class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-300 focus:border-blue-600 outline-none transition-all cursor-pointer"
         >
-          <option value="">All Groups</option>
+          <option value="">{{ $t('admin.bulkNotificationPanel.history.filterAllGroups') }}</option>
           <option v-for="g in uniqueGroups" :key="g" :value="g">{{ g }}</option>
         </select>
 
@@ -303,7 +309,7 @@ function formatDate(dateStr: string | null | undefined): string {
           v-model="historyFilterSender"
           class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-300 focus:border-blue-600 outline-none transition-all cursor-pointer"
         >
-          <option value="">All Senders</option>
+          <option value="">{{ $t('admin.bulkNotificationPanel.history.filterAllSenders') }}</option>
           <option v-for="s in uniqueSenders" :key="s.id" :value="s.id">{{ s.name }}</option>
         </select>
 
@@ -323,28 +329,28 @@ function formatDate(dateStr: string | null | undefined): string {
             @click="resetHistoryFilters"
             class="px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-all whitespace-nowrap"
           >
-            Reset
+            {{ $t('admin.bulkNotificationPanel.history.btnReset') }}
           </button>
         </div>
       </div>
 
       <div v-if="loadingHistory" class="text-slate-500 animate-pulse py-4 font-mono text-sm">
-        Loading historical transmission waves...
+        {{ $t('admin.bulkNotificationPanel.history.loading') }}
       </div>
 
       <div v-else-if="filteredHistory.length === 0" class="text-center py-8 border border-dashed border-slate-800 rounded-xl text-slate-500 text-sm italic">
-        {{ history.length === 0 ? 'No mass broadcast events dispatched from this panel yet.' : 'No results match current filters.' }}
+        {{ history.length === 0 ? $t('admin.bulkNotificationPanel.history.noHistory') : $t('admin.bulkNotificationPanel.history.noResults') }}
       </div>
 
       <div v-else class="overflow-x-auto">
         <table class="w-full text-left text-sm text-slate-300">
           <thead class="text-xs text-slate-400 uppercase bg-slate-900/50 font-mono">
             <tr>
-              <th class="px-4 py-3 rounded-tl-lg">Sent Date</th>
-              <th class="px-4 py-3">Sender</th>
-              <th class="px-4 py-3">Group Audience</th>
-              <th class="px-4 py-3">Subject & Text Preview</th>
-              <th class="px-4 py-3 rounded-tr-lg text-right">Queued Total</th>
+              <th class="px-4 py-3 rounded-tl-lg">{{ $t('admin.bulkNotificationPanel.table.date') }}</th>
+              <th class="px-4 py-3">{{ $t('admin.bulkNotificationPanel.table.sender') }}</th>
+              <th class="px-4 py-3">{{ $t('admin.bulkNotificationPanel.table.audience') }}</th>
+              <th class="px-4 py-3">{{ $t('admin.bulkNotificationPanel.table.preview') }}</th>
+              <th class="px-4 py-3 rounded-tr-lg text-right">{{ $t('admin.bulkNotificationPanel.table.total') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -372,7 +378,7 @@ function formatDate(dateStr: string | null | undefined): string {
                 <div class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">{{ item.message }}</div>
               </td>
               <td class="px-4 py-4 text-right font-mono text-sm font-bold text-slate-400">
-                {{ item.total_recipients }} users
+                {{ item.total_recipients }} {{ $t('admin.bulkNotificationPanel.table.users') }}
               </td>
             </tr>
           </tbody>

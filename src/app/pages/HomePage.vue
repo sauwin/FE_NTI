@@ -4,9 +4,11 @@
   import Articles from '@/features/articles/components/Articles.vue'
   import CallToAction from '@/shared/components/CallToAction.vue'
   import { ref, computed, onMounted, onUnmounted } from 'vue'
+  import { useI18n } from 'vue-i18n'
   import { getActiveCalls } from '@/shared/api/calls'
   import type { ActiveCall } from '@/shared/types/calls'
 
+  const { t, locale } = useI18n()
   const activeCalls = ref<ActiveCall[]>([])
   const loadingCalls = ref(true)
   const now = ref(Date.now())
@@ -32,9 +34,9 @@
   })
 
   function programLabel(code?: string) {
-    if (code === 'program_a') return 'Program A'
-    if (code === 'program_b') return 'Program B'
-    return 'Program'
+    if (code === 'program_a') return t('home.programs.prog_a_label')
+    if (code === 'program_b') return t('home.programs.prog_b_label')
+    return t('home.programs.fallback_label')
   }
 
   function statusClass(status: string) {
@@ -51,9 +53,9 @@
   }
 
   function formatDeadline(date?: string | null) {
-    if (!date) return 'No deadline'
+    if (!date) return t('home.calls.no_deadline')
 
-    return new Date(date).toLocaleDateString('en-GB', {
+    return new Date(date).toLocaleDateString(locale.value === 'sk' ? 'sk-SK' : 'en-GB', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -64,17 +66,17 @@
     if (!deadlineStr) return null
     
     const distance = new Date(deadlineStr).getTime() - currentNow
-    if (distance < 0) return { text: 'Ended', isUrgent: false }
+    if (distance < 0) return { text: t('home.calls.urgency.ended'), isUrgent: false }
 
     const days = Math.floor(distance / (1000 * 60 * 60 * 24))
     const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
 
     if (days > 7) {
-      return { text: `${days} days left`, isUrgent: false }
+      return { text: t('home.calls.urgency.days_left', { days }), isUrgent: false }
     } else if (days > 0) {
-      return { text: `${days}d ${hours}h left`, isUrgent: true }
+      return { text: t('home.calls.urgency.time_left', { days, hours }), isUrgent: true }
     } else {
-      return { text: `Closes in ${hours}h!`, isUrgent: true }
+      return { text: t('home.calls.urgency.closes_hours', { hours }), isUrgent: true }
     }
   }
 
@@ -99,75 +101,75 @@
   <div class="hidden md:block bg-blue-950 absolute rounded-full h-120 w-120 -z-10 -right-30 -top-10"></div>
 
   <PageHero
-    badge="Nitriansky technologický inkubátor"
-    title="Zanechaj svoju stopu v"
-    highlight="technologickej budúcnosti"
-    description="A prispej k rozvoju nitrianskeho regiónu"
+    :badge="t('home.hero.badge')"
+    :title="t('home.hero.title')"
+    :highlight="t('home.hero.highlight')"
+    :description="t('home.hero.description')"
   >
     <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 w-full sm:w-auto">
       <router-link to="/programs/a" class="btn-primary text-center">
-        Explore Programs
+        {{ t('home.hero.btn_explore') }}
       </router-link>
       <router-link to="/about" class="btn-secondary text-center">
-        About NTI
+        {{ t('home.hero.btn_about') }}
       </router-link>
     </div>
   </PageHero>
 
-  <PageSection label="Programs" title="Two paths, one goal">
+  <PageSection :label="t('home.programs.label')" :title="t('home.programs.title')">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
       <div class="card-glowing p-6 sm:p-8">
         <div class="inline-block bg-blue-600/15 border border-blue-800 text-blue-400 text-xs font-bold tracking-widest uppercase py-1 px-3 rounded-full mb-5">
-          Program A
+          {{ t('home.programs.prog_a_label') }}
         </div>
-        <h3 class="text-2xl font-bold mb-3">Grant Incubation</h3>
+        <h3 class="text-2xl font-bold mb-3">{{ t('home.programs.prog_a_title') }}</h3>
         <p class="text-gray-400 text-sm leading-relaxed mb-6">
-          Have your own idea? Build a startup with NTI funding, expert mentoring, and full technical support.
+          {{ t('home.programs.prog_a_desc') }}
         </p>
         <ul class="flex flex-col gap-2 mb-8">
           <li class="bullet-point">
             <span class="bullet-dot"></span>
-            Min. 3 team members
+            {{ t('home.programs.prog_a_bullets.team') }}
           </li>
           <li class="bullet-point">
             <span class="bullet-dot"></span>
-            Quarterly evaluation rounds
+            {{ t('home.programs.prog_a_bullets.rounds') }}
           </li>
           <li class="bullet-point">
             <span class="bullet-dot"></span>
-            6 required documents
+            {{ t('home.programs.prog_a_bullets.docs') }}
           </li>
         </ul>
         <router-link to="/programs/a" class="btn-link">
-          Learn more →
+          {{ t('home.programs.learn_more') }}
         </router-link>
       </div>
 
       <div class="card-glowing p-6 sm:p-8">
         <div class="inline-block bg-blue-600/15 border border-blue-800 text-blue-400 text-xs font-bold tracking-widest uppercase py-1 px-3 rounded-full mb-5">
-          Program B
+          {{ t('home.programs.prog_b_label') }}
         </div>
-        <h3 class="text-2xl font-bold mb-3">Live Practice</h3>
+        <h3 class="text-2xl font-bold mb-3">{{ t('home.programs.prog_b_title') }}</h3>
         <p class="text-gray-400 text-sm leading-relaxed mb-6">
-          Work on real projects from companies. Get paid, gain experience, and build your portfolio with actual clients.
+          {{ t('home.programs.prog_b_desc') }}
         </p>
         <ul class="flex flex-col gap-2 mb-8">
           <li class="bullet-point">
             <span class="bullet-dot"></span>
-            Real company projects
+            {{ t('home.programs.prog_b_bullets.projects') }}
           </li>
           <li class="bullet-point">
             <span class="bullet-dot"></span>
-            Financial compensation
+            {{ t('home.programs.prog_b_bullets.comp') }}
           </li>
           <li class="bullet-point">
             <span class="bullet-dot"></span>
-            NTI mentor assigned
+            {{ t('home.programs.prog_b_bullets.mentor') }}
           </li>
         </ul>
         <router-link to="/programs/b" class="btn-link">
-          Learn more →
+          {{ t('home.programs.learn_more') }}
         </router-link>
       </div>
 
@@ -175,8 +177,8 @@
   </PageSection>
   
   <PageSection
-    label="Opportunities"
-    title="Active Calls & Deadlines"
+    :label="t('home.calls.label')"
+    :title="t('home.calls.title')"
   >
     <div
       v-if="loadingCalls"
@@ -200,7 +202,7 @@
       class="card-glowing p-8 text-center"
     >
       <p class="text-slate-400">
-        There are currently no active calls.
+        {{ t('home.calls.empty') }}
       </p>
     </div>
 
@@ -219,7 +221,7 @@
               class="inline-flex items-center px-3 py-1 rounded-full border text-xs font-bold tracking-wide uppercase"
               :class="statusClass(call.status)"
             >
-              {{ call.status }}
+              {{ call.status ? t(`home.calls.status.${call.status}`) : call.status }}
             </div>
             
             <span 
@@ -245,7 +247,7 @@
         </h3>
 
         <p class="text-sm text-slate-400 leading-relaxed mb-6">
-          Application deadline:
+          {{ t('home.calls.deadline') }}
           <span class="text-white font-medium">
             {{ formatDeadline(call.deadline_at) }}
           </span>
@@ -253,14 +255,14 @@
 
         <div class="flex items-center justify-between text-xs text-slate-500 mb-6">
           <span>
-            Min team:
+            {{ t('home.calls.min_team') }}
             <span class="text-slate-300">
               {{ call.min_team_size }}
             </span>
           </span>
 
           <span v-if="call.max_team_size">
-            Max team:
+            {{ t('home.calls.max_team') }}
             <span class="text-slate-300">
               {{ call.max_team_size }}
             </span>
@@ -271,13 +273,13 @@
           :to="`/calls/${call.id}`"
           class="btn-primary mt-auto text-center"
         >
-          View Call
+          {{ t('home.calls.btn_view') }}
         </router-link>
       </div>
     </div>
   </PageSection>
 
-  <PageSection label="News" title="Articles">
+  <PageSection :label="t('home.news.label')" :title="t('home.news.title')">
     <Articles />
   </PageSection>
 

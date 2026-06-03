@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 import { useAuthStore } from '@/features/auth/stores/auth'
 
@@ -94,11 +95,22 @@ function notifMessage(notification: any): string {
         ? JSON.parse(notification.context)
         : notification.context
 
-    return ctx?.subject || ctx?.message || 'Notification'
+    return ctx?.subject || ctx?.message || t('navbar.notificationFallback')
   } catch {
-    return notification.message || 'Notification'
+    return notification.message || t('navbar.notificationFallback')
   }
 }
+
+//Translations
+const { locale, t } = useI18n()
+
+const selectedLanguage = computed({
+  get: () => locale.value,
+  set: (value: string) => {
+    locale.value = value
+    localStorage.setItem('locale', value)
+  },
+})
 </script>
 
 <template>
@@ -116,7 +128,7 @@ function notifMessage(notification: any): string {
     >
       <img
         src="/logo.png"
-        alt="Logo"
+        :alt="$t('navbar.logoAlt')"
         class="w-8 h-8"
       />
 
@@ -130,7 +142,7 @@ function notifMessage(notification: any): string {
         exact-active-class="text-white"
         class="text-slate-400 hover:text-white transition"
       >
-        Home
+        {{ $t('navbar.home') }}
       </router-link>
 
       <router-link
@@ -138,7 +150,7 @@ function notifMessage(notification: any): string {
         active-class="text-white"
         class="text-slate-400 hover:text-white transition"
       >
-        Program A
+        {{ $t('navbar.programA') }}
       </router-link>
 
       <router-link
@@ -146,7 +158,7 @@ function notifMessage(notification: any): string {
         active-class="text-white"
         class="text-slate-400 hover:text-white transition"
       >
-        Program B
+        {{ $t('navbar.programB') }}
       </router-link>
 
       <router-link
@@ -154,7 +166,7 @@ function notifMessage(notification: any): string {
         active-class="text-white"
         class="text-slate-400 hover:text-white transition"
       >
-        Partners
+        {{ $t('navbar.partners') }}
       </router-link>
 
       <router-link
@@ -162,7 +174,7 @@ function notifMessage(notification: any): string {
         active-class="text-white"
         class="text-slate-400 hover:text-white transition"
       >
-        About
+        {{ $t('navbar.about') }}
       </router-link>
 
       <router-link
@@ -170,7 +182,7 @@ function notifMessage(notification: any): string {
         active-class="text-white"
         class="text-slate-400 hover:text-white transition"
       >
-        FAQ
+        {{ $t('navbar.faq') }}
       </router-link>
     </div>
 
@@ -181,14 +193,14 @@ function notifMessage(notification: any): string {
           to="/auth/login"
           class="px-4 py-1.5 text-sm text-slate-400 hover:text-white transition"
         >
-          Login
+          {{ $t('auth.login') }}
         </router-link>
 
         <router-link
           to="/auth/register"
           class="px-4 py-1.5 text-sm text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition"
         >
-          Register
+          {{ $t('auth.register') }}
         </router-link>
       </template>
 
@@ -240,14 +252,14 @@ function notifMessage(notification: any): string {
               px-4 py-3 border-b border-slate-800"
             >
               <span class="text-sm font-semibold text-white">
-                Notifications
+                {{ $t('navbar.notifications') }}
               </span>
 
               <button
                 @click.stop="markAllRead"
                 class="text-xs text-blue-400 hover:text-blue-300 transition"
               >
-                Mark all read
+                {{ $t('navbar.markAllRead') }}
               </button>
             </div>
 
@@ -256,7 +268,7 @@ function notifMessage(notification: any): string {
                 v-if="notifications.length === 0"
                 class="px-4 py-6 text-center text-sm italic text-slate-500"
               >
-                No notifications
+                {{ $t('navbar.noNotifications') }}
               </div>
 
               <div
@@ -319,9 +331,18 @@ function notifMessage(notification: any): string {
           text-slate-400 hover:text-red-400
           hover:border-red-900/50 transition"
         >
-          Logout
+          {{ $t('auth.logout') }}
         </button>
       </template>
+
+      <!-- LANGUAGE SELECTOR -->
+      <select
+        v-model="selectedLanguage"
+        class="bg-[#080f1e]/90 text-slate-400 hover:text-white text-xs rounded-lg px-2 py-1 transition"
+      >
+        <option value="en">EN</option>
+        <option value="sk">SK</option>
+      </select>
     </div>
 
     <!-- MOBILE ACTIONS -->
@@ -374,14 +395,14 @@ function notifMessage(notification: any): string {
               px-4 py-3 border-b border-slate-800"
             >
               <span class="text-sm font-semibold text-white">
-                Notifications
+                {{ $t('navbar.notifications') }}
               </span>
 
               <button
                 @click.stop="markAllRead"
                 class="text-xs text-blue-400 hover:text-blue-300"
               >
-                Mark all read
+                {{ $t('navbar.markAllRead') }}
               </button>
             </div>
 
@@ -390,7 +411,7 @@ function notifMessage(notification: any): string {
                 v-if="notifications.length === 0"
                 class="px-4 py-6 text-center text-sm italic text-slate-500"
               >
-                No notifications
+                {{ $t('navbar.noNotifications') }}
               </div>
 
               <div
@@ -441,7 +462,7 @@ function notifMessage(notification: any): string {
       <button
         @click.stop="mobileOpen = !mobileOpen; notifOpen = false"
         class="p-2 text-slate-400 hover:text-white rounded-full transition"
-        aria-label="Menu"
+        :aria-label="$t('navbar.menu')"
       >
         <svg
           v-if="!mobileOpen"
@@ -496,7 +517,7 @@ function notifMessage(notification: any): string {
         text-slate-400 hover:text-white transition
         border-b border-slate-800/60"
       >
-        Home
+        {{ $t('navbar.home') }}
       </router-link>
 
       <router-link
@@ -506,7 +527,7 @@ function notifMessage(notification: any): string {
         text-slate-400 hover:text-white transition
         border-b border-slate-800/60"
       >
-        Program A
+        {{ $t('navbar.programA') }}
       </router-link>
 
       <router-link
@@ -516,7 +537,7 @@ function notifMessage(notification: any): string {
         text-slate-400 hover:text-white transition
         border-b border-slate-800/60"
       >
-        Program B
+        {{ $t('navbar.programB') }}
       </router-link>
 
       <router-link
@@ -526,7 +547,7 @@ function notifMessage(notification: any): string {
         text-slate-400 hover:text-white transition
         border-b border-slate-800/60"
       >
-        Partners
+        {{ $t('navbar.partners') }}
       </router-link>
 
       <router-link
@@ -536,7 +557,7 @@ function notifMessage(notification: any): string {
         text-slate-400 hover:text-white transition
         border-b border-slate-800/60"
       >
-        About
+        {{ $t('navbar.about') }}
       </router-link>
 
       <router-link
@@ -546,7 +567,7 @@ function notifMessage(notification: any): string {
         text-slate-400 hover:text-white transition
         border-b border-slate-800/60"
       >
-        FAQ
+        {{ $t('navbar.faq') }}
       </router-link>
 
       <!-- MOBILE AUTH -->
@@ -559,7 +580,7 @@ function notifMessage(notification: any): string {
             text-slate-300 hover:text-white transition
             border border-slate-800 rounded-xl bg-slate-900/40"
           >
-            Login
+            {{ $t('auth.login') }}
           </router-link>
 
           <router-link
@@ -569,7 +590,7 @@ function notifMessage(notification: any): string {
             text-white bg-blue-600 hover:bg-blue-500
             rounded-xl transition shadow-lg shadow-blue-600/10"
           >
-            Register
+            {{ $t('auth.register') }}
           </router-link>
         </template>
 
@@ -591,7 +612,7 @@ function notifMessage(notification: any): string {
             border border-slate-800 hover:border-red-900/50
             rounded-xl transition"
           >
-            Logout
+            {{ $t('auth.logout') }}
           </button>
         </template>
       </div>

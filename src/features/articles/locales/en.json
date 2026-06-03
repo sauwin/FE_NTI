@@ -1,0 +1,54 @@
+{
+  "catalog": {
+    "newArticle": "New article",
+    "untitled": "Untitled",
+    "published": "Published",
+    "delete": "Delete",
+    "edit": "Edit",
+    "preview": "Preview",
+    "readMore": "Read more",
+    "failedLoad": "Failed to load articles"
+  },
+  "editor": {
+    "createTag": "Create Article",
+    "editTag": "Edit Article",
+    "title": "Article Editor",
+    "backToCatalog": "← Back to Catalog",
+    "tabs": {
+      "general": "General Data",
+      "sk": "Slovak (SK)",
+      "en": "English (EN)"
+    },
+    "fields": {
+      "slug": "Slug Endpoint",
+      "coverImage": "Cover Image Illustration",
+      "selectFile": "Select System File",
+      "supportedFiles": "Supported endings: WebP, PNG or JPEG formatting profiles.",
+      "titleSk": "Title (SK)",
+      "excerptSk": "Excerpt / Summary (SK)",
+      "contentSk": "Rich Text Content Layout (SK)",
+      "titleEn": "Title (EN)",
+      "excerptEn": "Excerpt / Summary (EN)",
+      "contentEn": "Rich Text Content Layout (EN)"
+    },
+    "buttons": {
+      "bold": "B",
+      "italic": "I",
+      "list": "• List",
+      "publishing": "Publishing...",
+      "update": "Update Article",
+      "publish": "Publish Article"
+    },
+    "fallbackError": "Failed to save article configuration"
+  },
+  "detail": {
+    "loading": "Loading article content...",
+    "returnToIndex": "← Return to Catalog Index",
+    "backToCatalog": "← Back to Catalog",
+    "untitledResource": "Untitled Resource Configuration",
+    "publishedAt": "Published at:",
+    "homePage": "Home page",
+    "fallbackError": "Failed to load article",
+    "invalidId": "Invalid article identifier"
+  }
+}

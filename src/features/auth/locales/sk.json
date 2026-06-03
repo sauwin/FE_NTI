@@ -1,0 +1,117 @@
+{
+  "forgotPassword": {
+    "title": "Zabudnuté heslo",
+    "emailLabel": "E-mail",
+    "btnSend": "Odoslať odkaz na obnovenie",
+    "btnSending": "Odosiela sa...",
+    "backToLogin": "Späť na prihlásenie",
+    "successMessage": "Odkaz na obnovenie hesla bol odoslaný na váš e-mail. Skontrolujte si schránku.",
+    "errors": {
+      "adminForbidden": "Administrátorské heslá nie je možné obnoviť týmto spôsobom",
+      "notFound": "E-mail sa nenašiel",
+      "tooManyRequests": "Príliš veľa požiadaviek. Skúste to neskôr znova.",
+      "generic": "Chyba pri odosielaní odkazu. Skúste to znova."
+    }
+  },
+  "login": {
+    "title": "Vitajte späť",
+    "subtitle": "Prihláste sa do svojho NTI účtu pre pokračovanie",
+    "emailLabel": "E-mailová adresa",
+    "passwordLabel": "Heslo",
+    "forgotPasswordLink": "Zabudli ste heslo?",
+    "btnSignIn": "Prihlásiť sa",
+    "btnLoading": "Načítava sa...",
+    "notRegistered": "Nemáte účet?",
+    "createAccount": "Vytvorte si ho"
+  },
+  "checkEmail": {
+    "title": "Skontrolujte si e-mail",
+    "description": "Na vašu e-mailovú adresu sme odoslali overovací odkaz.",
+    "resent": "E-mail bol znova odoslaný!",
+    "btnResend": "Znova odoslať overovací e-mail",
+    "error": "Nepodarilo sa odoslať znova. Skúste to neskôr."
+  },
+  "privacy": {
+    "tag": "Zásady ochrany súkromia",
+    "title": "Zásady ochrany osobných údajov",
+    "subtitle": "Táto stránka vysvetľuje, ako NTI narába s vašimi údajmi v rámci platformy.",
+    "p1": "NTI zhromažďuje a uchováva informácie potrebné na vytvorenie účtu, spracovanie žiadostí a prístup na základe rolí.",
+    "p2": "Osobné údaje sa používajú iba na poskytovanie služieb programu, správu žiadostí a komunikáciu so študentmi, spoločnosťami, mentormi a administrátormi.",
+    "p3": "Váš e-mail a informácie v profile sú chránené a nezdieľajú sa s neoprávnenými tretími stranami."
+  },
+  "register": {
+    "title": "Vytvoriť účet",
+    "subtitle": "Zaregistrujte sa do platformy NTI a začnite svoju cestu",
+    "firstName": "Meno",
+    "lastName": "Priezvisko",
+    "email": "E-mailová adresa",
+    "password": "Heslo",
+    "confirmPassword": "Potvrdenie hesla",
+    "accountType": "Typ účtu",
+    "student": "Študent",
+    "company": "Spoločnosť",
+    "companyType": "Typ registrácie spoločnosti",
+    "owner": "Vlastník spoločnosti",
+    "member": "Člen spoločnosti",
+    "regNumber": "Registračné číslo organizácie (IČO)",
+    "termsText": "Prečítal(a) som si a súhlasím so",
+    "termsLink": "Všeobecnými obchodnými podmienkami",
+    "gdprText": "Súhlasím so spracovaním osobných údajov v súlade so",
+    "gdprLink": "Zásadami ochrany súkromia",
+    "gdprSuffix": "(GDPR). Moje údaje budú použité výhradne na účely riadenia programu NTI.",
+    "btnRegister": "Zaregistrovať sa",
+    "btnLoading": "Načítava sa...",
+    "alreadyAccount": "Už máte účet?",
+    "logIn": "Prihlásiť sa",
+    "errors": {
+      "termsRequired": "Musíte súhlasiť so Všeobecnými obchodnými podmienkami",
+      "gdprRequired": "Musíte súhlasiť so spracovaním osobných údajov (GDPR)",
+      "passwordsMismatch": "Heslá sa nezhodujú",
+      "invalidOrgId": "Neplatné ID organizácie",
+      "missingOrgId": "Nebylo poskytnuté žiadne registračné ID vašej spoločnosti",
+      "failed": "Registrácia zlyhala"
+    }
+  },
+  "resetPassword": {
+    "title": "Obnovenie hesla",
+    "verifying": "Overuje sa odkaz na obnovenie...",
+    "newPassword": "Nové heslo",
+    "confirmPassword": "Potvrdiť heslo",
+    "btnReset": "Obnoviť heslo",
+    "btnResetting": "Obnovuje sa...",
+    "backToLogin": "Späť na prihlásenie",
+    "requestNewLink": "Vyžiadať nový odkaz na obnovenie",
+    "success": "Heslo bolo úspešne obnovené. Presmerovávam na prihlásenie...",
+    "fallbackError": "Neplatný alebo expirovaný odkaz na obnovenie",
+    "errors": {
+      "invalidLink": "Neplatný odkaz na obnovenie",
+      "expiredLink": "Odkaz na obnovenie vypršal alebo je neplatný",
+      "verifyError": "Chyba pri overovaní odkazu",
+      "passwordsMismatch": "Heslá sa nezhodujú",
+      "expiredSubmission": "Odkaz na obnovenie vypršal. Vyžiadajte si nový.",
+      "tooManyRequests": "Príliš veľa požiadaviek. Skúste to neskôr znova.",
+      "generic": "Chyba pri obnovovaní hesla. Skúste to znova."
+    }
+  },
+  "terms": {
+    "tag": "Podmienky používania",
+    "title": "Podmienky používania služieb",
+    "subtitle": "Pred použitím platformy NTI si pozorne prečítajte tieto podmienky.",
+    "p1": "Používanie NTI vyžaduje platný účet, dodržiavanie pravidiel programu a súlad s predpísanými postupmi pre jednotlivé role.",
+    "p2": "Študenti, spoločnosti, mentori a administrátori musia dodržiavať procesy platformy pre žiadosti, správu úloh, mentoring a notifikácie.",
+    "p3": "NTI si vyhradzuje právo zablokovať alebo pozastaviť účty, ktoré porušujú tieto podmienky alebo zneužívajú systém."
+  },
+  "accessDeniedPage": {
+    "title": "Prístup odmietnutý",
+    "description": "Nemáte oprávnenie na zobrazenie tejto stránky.",
+    "btnDashboard": "Prejsť na nástenku"
+  },
+  "verified": {
+    "title": "E-mail bol overený!",
+    "completeProfile": "dokončite svoj profil",
+    "waitApproval": "počkajte, kým administrátor schváli váš účet",
+    "descPrefix": "Váš e-mail je úspešne overený. Prosím, ",
+    "btnComplete": "Dokončiť profil",
+    "btnHome": "Prejsť domov"
+  }
+}

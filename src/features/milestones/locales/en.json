@@ -1,0 +1,33 @@
+{
+  "milestones": {
+    "heading": "Milestones",
+    "btnCancel": "Cancel",
+    "btnAddMilestone": "+ Add Milestone",
+    "btnSaveMilestone": "Save Milestone",
+    "btnSaving": "Saving...",
+    "loading": "Loading...",
+    "noMilestones": "No milestones yet.",
+    "lblDue": "Due: {date}",
+    "lblDueEmpty": "Due: —",
+    "btnUploading": "Uploading...",
+    "btnUploadDoc": "↑ Upload doc",
+    "placeholderTitle": "Title *",
+    "placeholderDescription": "Description (optional)",
+    "status": {
+      "pending": "pending",
+      "in_progress": "in progress",
+      "completed": "completed",
+      "overdue": "overdue"
+    },
+    "errors": {
+      "loadFailed": "Could not load milestones",
+      "createFailed": "Could not create milestone",
+      "updateFailed": "Could not update status",
+      "uploadFailed": "Upload failed"
+    },
+    "success": {
+      "created": "Milestone created.",
+      "uploaded": "Document uploaded."
+    }
+  }
+}

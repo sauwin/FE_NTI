@@ -9,6 +9,9 @@ import {
   updateAdminApplicationStatus,
 } from '@/features/admin/api/admin'
 import { getApplicationById } from '@/features/applications/api/applications'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const applications = ref<any[]>([])
 const selectedApplicationId = ref<number | null>(null)
@@ -36,7 +39,7 @@ onMounted(async () => {
       u.roles?.some((r: any) => r.slug === 'mentor')
     )
   } catch {
-    error.value = 'Could not load data'
+    error.value = t('admin.mentorsManager.errors.loadDataFailed')
   }
 })
 
@@ -48,7 +51,7 @@ async function loadMentors() {
     let mentorsList = res.data?.data ?? res.data ?? []
     mentors.value = mentorsList.filter((m: any) => m.application?.id === selectedApplicationId.value)
   } catch {
-    error.value = 'Could not load mentors'
+    error.value = t('admin.mentorsManager.errors.loadMentorsFailed')
   } finally {
     loading.value = false
   }
@@ -62,7 +65,7 @@ async function assign() {
   try {
     const app = applications.value.find(a => a.id === selectedApplicationId.value)
     if (!app) {
-      error.value = 'Application not found'
+      error.value = t('admin.mentorsManager.errors.appNotFound')
       return
     }
 
@@ -71,7 +74,7 @@ async function assign() {
     const currentStatus = appDetailsRes.data?.status
 
     if (!student_id) {
-      error.value = 'Could not determine student for this application'
+      error.value = t('admin.mentorsManager.errors.studentNotFound')
       return
     }
 
@@ -87,15 +90,15 @@ async function assign() {
       await updateAdminApplicationStatus(selectedApplicationId.value, 'onboarding')
       
       app.status = 'onboarding'
-      statusChangedNotice = ' and status moved to Onboarding'
+      statusChangedNotice = t('admin.mentorsManager.success.noticeOnboarding')
     }
 
-    success.value = `Mentor assigned${statusChangedNotice}.`
+    success.value = t('admin.mentorsManager.success.assigned', { notice: statusChangedNotice })
     selectedUserId.value = null
     await loadMentors()
     setTimeout(() => (success.value = ''), 4000)
   } catch (e: any) {
-    error.value = e.response?.data?.message ?? 'Could not assign mentor'
+    error.value = e.response?.data?.message ?? t('admin.mentorsManager.errors.assignFailed')
   }
 }
 
@@ -118,21 +121,21 @@ async function remove(mentorshipId: number) {
         await updateAdminApplicationStatus(selectedApplicationId.value, 'active')
         
         app.status = 'active'
-        statusChangedNotice = ' and status reverted to Active'
+        statusChangedNotice = t('admin.mentorsManager.success.noticeActive')
       }
     }
 
-    success.value = `Mentor removed${statusChangedNotice}.`
+    success.value = t('admin.mentorsManager.success.removed', { notice: statusChangedNotice })
     setTimeout(() => (success.value = ''), 4000)
   } catch (e: any) {
-    error.value = e.response?.data?.message ?? 'Could not remove mentor'
+    error.value = e.response?.data?.message ?? t('admin.mentorsManager.errors.removeFailed')
   }
 }
 </script>
 
 <template>
   <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6">
-    <h3 class="text-xl font-bold text-white mb-6">Application Mentors</h3>
+    <h3 class="text-xl font-bold text-white mb-6">{{ t('admin.mentorsManager.title') }}</h3>
 
     <p v-if="error" class="text-red-400 text-sm mb-4">{{ error }}</p>
     <p v-if="success" class="text-green-400 text-sm mb-4">{{ success }}</p>
@@ -143,9 +146,9 @@ async function remove(mentorshipId: number) {
         @change="loadMentors"
         class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-600 outline-none"
       >
-        <option :value="null" disabled>Select application...</option>
+        <option :value="null" disabled>{{ t('admin.mentorsManager.dropdowns.selectApp') }}</option>
         <option v-for="app in applications" :key="app.id" :value="app.id">
-          {{ app.team_name !== 'Jednotlivec' ? app.team_name : app.applicant_name }} - Program {{ app.program_type }} (#{{ app.id }})
+          {{ app.team_name !== 'Jednotlivec' ? app.team_name : app.applicant_name }} - {{ t('admin.mentorsManager.appFormat.program') }} {{ app.program_type }} (#{{ app.id }})
         </option>
       </select>
     </div>
@@ -156,7 +159,7 @@ async function remove(mentorshipId: number) {
           v-model="selectedUserId"
           class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-600 outline-none"
         >
-          <option :value="null" disabled>Select mentor to assign...</option>
+          <option :value="null" disabled>{{ t('admin.mentorsManager.dropdowns.selectMentor') }}</option>
           <option v-for="u in allUsers" :key="u.id" :value="u.id">{{ u.first_name }} {{ u.last_name }} ({{ u.email }})</option>
         </select>
         <button
@@ -164,22 +167,22 @@ async function remove(mentorshipId: number) {
           :disabled="!selectedUserId"
           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm disabled:opacity-50"
         >
-          Assign
+          {{ t('admin.mentorsManager.buttons.assign') }}
         </button>
       </div>
 
-      <div v-if="loading" class="text-slate-500 animate-pulse text-sm">Loading mentors...</div>
+      <div v-if="loading" class="text-slate-500 animate-pulse text-sm">{{ t('admin.mentorsManager.status.loading') }}</div>
 
-      <div v-else-if="mentors.length === 0" class="text-slate-500 text-sm">No mentors assigned to this application.</div>
+      <div v-else-if="mentors.length === 0" class="text-slate-500 text-sm">{{ t('admin.mentorsManager.status.empty') }}</div>
 
       <div v-else class="overflow-x-auto">
         <table class="w-full text-left text-sm text-slate-300">
           <thead class="text-xs text-slate-400 uppercase font-mono bg-slate-900/50">
             <tr>
-              <th class="px-4 py-3">Name</th>
-              <th class="px-4 py-3">Email</th>
-              <th class="px-4 py-3">Assigned at</th>
-              <th class="px-4 py-3 text-right">Action</th>
+              <th class="px-4 py-3">{{ t('admin.mentorsManager.table.name') }}</th>
+              <th class="px-4 py-3">{{ t('admin.mentorsManager.table.email') }}</th>
+              <th class="px-4 py-3">{{ t('admin.mentorsManager.table.assignedAt') }}</th>
+              <th class="px-4 py-3 text-right">{{ t('admin.mentorsManager.table.action') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -189,7 +192,7 @@ async function remove(mentorshipId: number) {
               <td class="px-4 py-3 text-slate-500 text-xs">{{ mentor.assigned_at ? new Date(mentor.assigned_at).toLocaleDateString() : '—' }}</td>
               <td class="px-4 py-3 text-right">
                 <button @click="remove(mentor.id)" class="text-xs text-red-400 hover:text-red-300 border border-red-900 hover:border-red-700 px-3 py-1.5 rounded-lg transition">
-                  Remove
+                  {{ t('admin.mentorsManager.buttons.remove') }}
                 </button>
               </td>
             </tr>

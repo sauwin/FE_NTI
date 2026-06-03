@@ -1,0 +1,85 @@
+{
+  "programA": {
+    "view": {
+      "badge": "Program A",
+      "title": "Grant Incubation",
+      "highlight": "Program",
+      "description": "Turn your innovative idea into a reality. Program A is designed for teams aiming to build a startup or a unique product. We provide the funding, expert mentoring, and technical resources needed to accelerate your project to the market.",
+      
+      "checkingStatus": "Checking open call status...",
+      "callIsOpen": "Call \"{name}\" is open until:",
+      "submitApplication": "Submit Application",
+      "learnMore": "Learn more",
+      "registrationClosed": "Registration Closed",
+      "noActiveCall": "Currently, there is no active call open for Program A. Follow the administration dashboard for upcoming spring/autumn rounds.",
+      "processTitle": "Application process",
+      "howItWorks": "How does it work?",
+      "steps": {
+        "registerTeam": {
+          "title": "Register Team",
+          "description": "Form a team of at least {size} members inside your profile."
+        },
+        "submitProposal": {
+          "title": "Submit Proposal",
+          "description": "Upload all dynamic attachments specified by the administration configuration form schema."
+        },
+        "evaluation": {
+          "title": "Evaluation",
+          "description": "Your uploaded package will undergo formal validation and technical verification by the expert commission."
+        },
+        "incubation": {
+          "title": "Incubation",
+          "description": "Upon formal approval, receive grant funding, get assigned an agile mentor, and start building."
+        }
+      },
+      "attachmentsTitle": "Attachments configuration",
+      "requiredDocs": "Required documentation according to current open call"
+    },
+    "upload": {
+      "loadingParams": "Loading program parameters...",
+      "newApplication": "New Application",
+      "title": "Program A: Incubation",
+      "stepIndicator": "Step {step} of 2: Team setup & verification",
+      "tabTeamInfo": "Team Info",
+      "tabDocuments": "Documents",
+      "errors": {
+        "selectTeam": "Please select a qualified team.",
+        "selectCategory": "Please select a focus category.",
+        "confirmDeclaration": "You must confirm the academic status declaration.",
+        "noDocsConfigured": "Active call has no required documents configured.",
+        "noActiveCall": "No active call available.",
+        "missingDoc": "Missing required document: {name}",
+        "genericError": "Something went wrong."
+      },
+      "form": {
+        "selectTeamLabel": "Select Your Team *",
+        "chooseTeamPlaceholder": "Choose a team...",
+        "noTeamsWarning": "⚠️ No eligible teams found. You must be the team leader, and at least 3 members must have already accepted your invitation.",
+        "focusCategoryLabel": "Focus Category *",
+        "selectCategoryPlaceholder": "Select category...",
+        "declaration": "I declare that I have no carried-over courses and my average grade of core courses meets the required threshold. I understand this will be verified by the committee. *",
+        "cancel": "Cancel",
+        "continue": "Continue to Documents →",
+        "chooseFile": "Choose file...",
+        "browse": "Browse",
+        "back": "← Back",
+        "saving": "Saving...",
+        "saveDraft": "Save Draft",
+        "submitting": "Submitting...",
+        "submitFinal": "Submit Final"
+      },
+      "success": {
+        "title": "Application Successfully Submitted!",
+        "description": "Your application for Program A Incubation has been locked and sent to evaluation managers.",
+        "goDashboard": "Go to Dashboard"
+      },
+      "categories": {
+        "softwareDevelopment": "Software Development",
+        "aiDataTechnologies": "AI & Data Technologies",
+        "webApplications": "Web Applications",
+        "gameDevelopment": "Game Development",
+        "iotEmbeddedSystems": "IoT & Embedded Systems"
+      }
+    }
+  }
+}

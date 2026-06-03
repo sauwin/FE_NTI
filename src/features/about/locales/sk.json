@@ -1,0 +1,36 @@
+{
+  "about": {
+    "hero": {
+      "badge": "O nás",
+      "title": "O",
+      "highlight": "NTI",
+      "description": "Nitriansky technologický inkubátor je inovačná platforma zameraná na študentov na UKF v Nitre. Pomáhame študentom premieňať nápady na produkty a spájame ich s reálnymi firmami."
+    },
+    "mission": {
+      "label": "Misia",
+      "title": "Čo robíme",
+      "items": {
+        "education": {
+          "title": "Vzdelávanie",
+          "desc": "Poskytujeme praktické workshopy, semináre a pravidelné odborné konzultácie."
+        },
+        "incubation": {
+          "title": "Inkubácia",
+          "desc": "Transformujeme inovatívne nápady na životaschopné riešenia a začínajúce podniky."
+        },
+        "networking": {
+          "title": "Networking",
+          "desc": "Prepájame talentovaných vysokoškolákov s technologickými spoločnosťami."
+        }
+      }
+    },
+    "opportunities": {
+      "label": "Kto sme",
+      "title": "Vytvorené pre študentov, pod záštitou UKF",
+      "students_title": "Pre študentov",
+      "students_desc": "NTI je otvorený pre všetkých študentov UKF v Nitre, ktorí chcú pracovať na reálnych technologických projektoch. Či už máš startupový nápad alebo chceš získať komerčné skúsenosti – máme pre teba program.",
+      "companies_title": "Pre firmy",
+      "companies_desc": "Firmy môžu zadávať svoje projekty do nášho backlogu. NTI ich prepojí s motivovanými študentskými tímami, koordinuje celý proces a zabezpečuje kvalitný výstup pod dohľadom mentora."
+    }
+  }
+}

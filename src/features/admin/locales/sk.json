@@ -1,0 +1,790 @@
+{
+  "admin": {
+    "dashboard": {
+      "totalUsers": "Celkový počet používateľov",
+      "totalCalls": "Celkový počet výziev",
+      "totalApplications": "Celkový počet žiadostí",
+      "title": "Centrálna administrácia NTI",
+      "description": "Centralizovaná správa používateľov, žiadostí, programov a pracovných postupov platformy.",
+      "tabLabels": {
+        "overview": "Prehľad",
+        "programsCalls": "Programy a výzvy",
+        "applications": "Žiadosti",
+        "evaluators": "Hodnotitelia",
+        "mentorships": "Mentori",
+        "users": "Používatelia",
+        "approvals": "Schvaľovania",
+        "documents": "Dokumenty",
+        "createAdmin": "Vytvoriť Admina",
+        "logs": "Audít",
+        "broadcastNotification": "Hromadné správy"
+      },
+      "errors": {
+        "metricsLoadFalied": "Nepodarilo sa načítať metriky nástenky",
+        "usersLoadFailed": "Nepodarilo sa načítať používateľov",
+        "approvalsLoadFailed": "Nepodarilo sa načítať schvaľovania"
+      }
+    },
+    "overview": {
+      "title": "Aktivita platformy",
+      "description": "Prehľad programov a stavu pracovných postupov.",
+      "openCalls": {
+        "title": "Otvorené výzvy",
+        "description": "Aktuálne otvorené výzvy"
+      },
+      "applicationsSubmitted": {
+        "title": "Odoslané žiadosti",
+        "description": "Žiadosti odoslané na kontrolu"
+      },
+      "applicationsActive": {
+        "title": "Aktívne žiadosti",
+        "description": "Žiadosť je momentálne v štádiu riešenia"
+      },
+      "applicationsClosed": {
+        "title": "Uzatvorené žiadosti",
+        "description": "Historické archivované žiadosti"
+      },
+      "usersOverview": {
+        "title": "Prehľad používateľov",
+        "description": "Distribúcia administratívnych a používateľských skupín",
+        "students": "Študenti",
+        "companyOwners": "Majitelia firiem",
+        "administration": "Administrácia",
+        "contentEditors": "Editori obsahu",
+        "evaluators": "Hodnotitelia",
+        "mentors": "Mentori"
+      }
+    },
+
+    "documentManager": {
+      "title": "Dokumenty",
+      "filters": {
+        "searchLabel": "Vyhľadávanie",
+        "searchPlaceholder": "Hľadať podľa názvu súboru...",
+        "dateLabel": "Dátum vytvorenia",
+        "apply": "Použiť",
+        "reset": "Resetovať"
+      },
+      "table": {
+        "fileName": "Názov súboru",
+        "size": "Veľkosť",
+        "uploaded": "Nahrané",
+        "actions": "Akcie",
+        "loading": "Načítavanie dokumentov…",
+        "empty": "Pre zvolené filtre sa nenašli žiadne dokumenty."
+      },
+      "actions": {
+        "download": "Stiahnuť",
+        "preview": "Náhľad"
+      },
+      "pagination": {
+        "page": "Strana {info}",
+        "previous": "← Predchádzajúca",
+        "next": "Nasledujúca →"
+      },
+      "errors": {
+        "loadFailed": "Nepodarilo sa načítať dokumenty.",
+        "downloadFailed": "Sťahovanie zlyhalo.",
+        "pdfOnly": "Náhľad je dostupný iba pre súbory vo formáte PDF.",
+        "previewFailed": "Náhľad zlyhal."
+      }
+    },
+
+    "logs": {
+      "title": "Audítorské záznamy",
+      "system": "Systém",
+      "buttons": {
+        "exportCSV": "Exportovať CSV",
+        "exportXLSX": "Exportovať XLSX",
+        "exportPDF": "Exportovať PDF",
+        "exportDOCX": "Exportovať DOCX",
+        "reset": "Resetovať"
+      },
+      "filters": {
+        "allActions": "Všetky akcie",
+        "allAdministrators": "Všetci administrátori"
+      },
+      "status": {
+        "loading": "Načítavanie záznamov...",
+        "empty": "Nenašli sa žiadne záznamy."
+      },
+      "item": {
+        "by": "Od:"
+      },
+      "actions": {
+        "approve": "Schváliť používateľa",
+        "block": "Zablokovať používateľa",
+        "unblock": "Odblokovať používateľa",
+        "assign": "Priradiť rolu",
+        "remove": "Odobrať rolu",
+        "delete": "Vymazať záznam",
+        "create": "Vytvoriť záznam",
+        "export": "Exportovať dáta",
+        "bulk_notification": "Hromadné oznámenie",
+        "exportCaps": "EXPORT",
+        "exportData": "Exportovať dáta",
+        "approveInline": "Schváliť",
+        "blockInline": "Zablokovať",
+        "unblockInline": "Odblokovať",
+        "assignRoleInline": "Priradiť rolu",
+        "removeRoleInline": "Odobrať rolu",
+        "deleteInline": "Vymazať",
+        "createInline": "Vytvoriť",
+        "resetPasswordInline": "Resetovať heslo",
+        "bulkNotificationInline": "Hromadné oznámenie"
+      },
+      "exportHeaders": {
+        "action": "Akcia",
+        "description": "Popis",
+        "adminName": "Meno admína",
+        "adminEmail": "E-mail admína",
+        "ipAddress": "IP adresa",
+        "dateTime": "Dátum a čas",
+        "details": "Detaily"
+      },
+      "reports": {
+        "pdfTitle": "NTI — Správa z audítorských záznamov",
+        "generated": "Generované: {date}"
+      }
+    },
+
+    "mentorsManager": {
+      "title": "Mentori žiadostí",
+      "dropdowns": {
+        "selectApp": "Vyberte žiadosť...",
+        "selectMentor": "Vyberte mentora na priradenie..."
+      },
+      "appFormat": {
+        "program": "Program"
+      },
+      "buttons": {
+        "assign": "Priradiť",
+        "remove": "Odobrať"
+      },
+      "status": {
+        "loading": "Načítavanie mentorov...",
+        "empty": "K tejto žiadosti nie sú priradení žiadni mentori."
+      },
+      "table": {
+        "name": "Meno",
+        "email": "E-mail",
+        "assignedAt": "Priradené dňa",
+        "action": "Akcia"
+      },
+      "success": {
+        "noticeOnboarding": " a stav bol zmenený na Onboarding",
+        "noticeActive": " a stav bol vrátený na Aktívny",
+        "assigned": "Mentor priradený{notice}.",
+        "removed": "Mentor odobraný{notice}."
+      },
+      "errors": {
+        "loadDataFailed": "Nepodarilo sa načítať dáta",
+        "loadMentorsFailed": "Nepodarilo sa načítať mentorov",
+        "appNotFound": "Žiadosť sa nenašla",
+        "studentNotFound": "Nepodarilo sa určiť študenta pre túto žiadosť",
+        "assignFailed": "Nepodarilo sa priradiť mentora",
+        "removeFailed": "Nepodarilo sa odobrať mentora"
+      }
+    },
+
+    "applicationsManager": {
+      "title": "Žiadosti",
+      "filterNotice": "Filtrované pre ID výzvy: {id}",
+      "buttons": {
+        "clearFilter": "Vymazať filter",
+        "exportCSV": "Exportovať CSV",
+        "exportXLSX": "Exportovať XLSX",
+        "finalVerdict": "Konečný verdikt",
+        "detail": "Detail"
+      },
+      "filters": {
+        "searchPlaceholder": "Hľadať podľa mena alebo e-mailu...",
+        "allPrograms": "Všetky typy programov",
+        "allStatuses": "Všetky stavy"
+      },
+      "status": {
+        "loading": "Načítavanie žiadostí...",
+        "empty": "Nenašli sa žiadne žiadosti."
+      },
+      "table": {
+        "id": "ID",
+        "applicant": "Žiadateľ",
+        "programCall": "Program / Výzva",
+        "status": "Stav",
+        "actions": "Akcie"
+      },
+      "programs": {
+        "programA": "Program A",
+        "programB": "Program B",
+        "labelPrefix": "Program"
+      },
+      "select": {
+        "draftReadOnly": "Koncept (Iba na čítanie)",
+        "placeholder": "Nastaviť stav...",
+        "returnRevision": "Vrátiť na prepracovanie"
+      },
+      "statuses": {
+        "draft": "Koncept",
+        "submitted": "Odoslaná",
+        "formally_verified": "Formálne overená",
+        "under_evaluation": "V štádiu hodnotenia",
+        "pending_revision": "Čaká na prepracovanie",
+        "approved": "Schválená",
+        "rejected": "Zamietnutá",
+        "onboarding": "Onboarding",
+        "active": "Aktívna",
+        "suspended": "Pozastavená",
+        "closed": "Uzatvorená"
+      },
+      "modal": {
+        "title": "Vrátiť na prepracovanie",
+        "subtitle": "poskytnite žiadateľovi jasné inštrukcie.",
+        "placeholder": "Popíšte, čo je potrebné opraviť alebo doplniť...",
+        "cancel": "Zrušiť",
+        "submit": "Odoslať na prepracovanie",
+        "sending": "Odosiela se..."
+      },
+      "confirm": {
+        "errorTitle": "Chyba",
+        "okay": "V poriadku",
+        "statusError": "Chyba pri zmene stavu",
+        "revisionError": "Nepodarilo sa odoslať žiadosť o prepracovanie.",
+        "exportError": "Nepodarilo sa stiahnuť export."
+      }
+    },
+
+    "bulkNotificationPanel": {
+      "form": {
+        "title": "Hromadné oznámenia",
+        "description": "Odosielajte globálne systémové oznámenia na nástenku a hromadné e-maily.",
+        "audienceLabel": "Príjemcovia (publikum) *",
+        "callLabel": "Vybrať cieľovú výzvu *",
+        "callPlaceholder": "-- Vyberte okno filtra výziev --",
+        "subjectLabel": "Predmet oznámenia *",
+        "subjectPlaceholder": "Názov predmetu...",
+        "messageLabel": "Hlavný obsah správy *",
+        "messagePlaceholder": "Sem napíšte obsah správy...",
+        "btnSend": "Odoslať hromadné oznámenie",
+        "btnSending": "Vysiela sa..."
+      },
+      "history": {
+        "title": "História kampaní",
+        "description": "Zobrazenie a export predtým odoslaných hromadných oznámení.",
+        "btnCsv": "Exportovať CSV",
+        "btnXlsx": "Exportovať XLSX",
+        "filterSubject": "Hľadať podľa predmetu...",
+        "filterAllGroups": "Všetky skupiny",
+        "filterAllSenders": "Všetci odosielatelia",
+        "btnReset": "Resetovať",
+        "loading": "Načítavanie histórie odosielania...",
+        "noHistory": "Z tohto panelu zatiaľ neboli odoslané žiadne hromadné oznámenia.",
+        "noResults": "Aktuálnym filtrom nezodpovedajú žiadne výsledky."
+      },
+      "table": {
+        "date": "Dátum odoslania",
+        "sender": "Odosielateľ",
+        "audience": "Cieľová skupina",
+        "preview": "Náhľad predmetu a textu",
+        "total": "Celkom v radu",
+        "users": "používateľov"
+      },
+      "audiences": {
+        "all": "Všetci používatelia",
+        "students": "Študenti",
+        "companies": "Firmy",
+        "mentors": "Mentori",
+        "callSelector": "Účastníci konkrétnej výzvy"
+      },
+      "jsMessages": {
+        "selectCallError": "Vyberte prosím konkrétne okno Výzvy.",
+        "applicantsOfCall": "Žiadatelia z Výzvy: \"{name}\"",
+        "confirmTitle": "Odoslať e-maily",
+        "confirmMessage": "Naozaj chcete odoslať tento hromadný e-mail skupine [ {group} ]?",
+        "confirmText": "Odoslať teraz",
+        "cancelText": "Zrušiť",
+        "successMessage": "Kampaň bola úspešne uložená a zaradená do radu pre {count} používateľov.",
+        "matchedFallback": "zodpovedá",
+        "exportSuccess": "Export bol úspešný ({format})",
+        "exportFailed": "Nepodarilo sa exportovať oznámenia vo formáte {format}"
+      }
+    },
+
+    "callCreate": {
+      "title": "Vytvoriť výzvu",
+      "subtitle": "Nakonfigurujte stav životného cyklu a štrukturálne pravidlá",
+      "labels": {
+        "program": "Cieľový hlavný program *",
+        "status": "Stav životného cyklu výzvy *",
+        "minTeam": "Min. veľkosť tímu *",
+        "maxTeam": "Max. veľkosť tímu (voliteľné)",
+        "opensAt": "Otvára sa dňa",
+        "deadlineAt": "Uzávierka dňa",
+        "documentsConfig": "Konfigurácia požadovaných dokumentov"
+      },
+      "placeholders": {
+        "unknownCode": "NEZNÁMY KÓD",
+        "noLimit": "Bez limitu",
+        "docNameExample": "napr. Sken pasu, Životopis, Návrh projektu"
+      },
+      "statusOptions": {
+        "draft": "koncept",
+        "open": "otvorená",
+        "closed": "uzatvorená",
+        "archived": "archivovaná"
+      },
+      "buttons": {
+        "addDocType": "+ Pridať typ dokumentu",
+        "mandatory": "Povinné",
+        "cancel": "Zrušiť",
+        "save": "Uložiť novú konfiguráciu výzvy",
+        "saving": "Vytvára sa..."
+      },
+      "errors": {
+        "programsLoadFailed": "Nepodarilo sa načítať systémové programy.",
+        "assignProgram": "Priraďte prosím túto výzvu k programu.",
+        "docNamesRequired": "Uveďte prosím názvy pre všetky požadované dokumenty.",
+        "fallbackSaveError": "Pri vytváraní výzvy sa vyskytla chyba."
+      },
+      "defaults": {
+        "defaultDocName": "Prezentácia projektu tímu (PDF)"
+      }
+    },
+
+    "callEdit": {
+      "title": "Upraviť konfiguráciu výzvy",
+      "subtitle": "Aktualizujte stav životného cyklu, dátumy a JSON schému",
+      "loadingConfigs": "Načítavanie konfigurácií...",
+      "labels": {
+        "programLocked": "Cieľový hlavný program (Uzamknuté)",
+        "status": "Stav životného cyklu výzvy *",
+        "minTeam": "Min. veľkosť tímu *",
+        "maxTeam": "Max. veľkosť tímu (voliteľné)",
+        "opensAt": "Otvára sa dňa",
+        "deadlineAt": "Uzávierka dňa",
+        "documentsConfig": "Konfigurácia požadovaných dokumentov"
+      },
+      "placeholders": {
+        "noTitle": "Bez názvu",
+        "noLimit": "Bez limitu",
+        "docNameExample": "napr. Životopis, Prezentácia (Pitch)"
+      },
+      "statusOptions": {
+        "draft": "koncept",
+        "open": "otvorená",
+        "closed": "uzatvorená",
+        "archived": "archivovaná"
+      },
+      "buttons": {
+        "addDocType": "+ Pridať typ dokumentu",
+        "mandatory": "Povinné",
+        "cancel": "Zrušiť",
+        "update": "Aktualizovať nastavenia výzvy",
+        "saving": "Ukladá sa..."
+      },
+      "errors": {
+        "loadFailed": "Nepodarilo sa načítať dáta pre túto výzvu.",
+        "docNamesRequired": "Uveďte prosím názvy pre všetky požadované dokumenty.",
+        "updateError": "Chyba pri aktualizácii konfigurácie výzvy."
+      }
+    },
+
+    "callEvaluatorsManager": {
+      "title": "Hodnotitelia výzvy a plánovanie hodnotenia",
+      "selectCallLabel": "Vybrať výzvu",
+      "chooseCallPlaceholder": "-- Vyberte výzvu --",
+      "errors": {
+        "loadDataFailed": "Nepodarilo sa načítať dáta",
+        "loadEvaluatorsFailed": "Nepodarilo sa načítať hodnotiteľov",
+        "assignFailed": "Nepodarilo sa priradiť hodnotiteľa",
+        "removeFailed": "Nepodarilo sa odobrať hodnotiteľa",
+        "validationChooseAndDate": "Vyberte prosím výzvu a nastavte dátum",
+        "validationChooseCall": "Vyberte prosím výzvu",
+        "validationScheduleFirst": "Najprv prosím naplánujte hodnotenie",
+        "scheduleFailed": "Nepodarilo sa naplánovať hodnotenie",
+        "moveFailed": "Nepodarilo sa presunúť žiadosti do stavu 'v štádiu hodnotenia'"
+      },
+      "success": {
+        "assigned": "Hodnotiteľ priradený.",
+        "removed": "Hodnotiteľ odobraný.",
+        "scheduled": "✓ Hodnotenie naplánované!",
+        "moved": "{count} žiadostí bolo presunutých do stavu 'v štádiu hodnotenia'."
+      },
+      "scheduling": {
+        "title": "Naplánovať zasadnutie komisie",
+        "dateLabel": "Dátum a čas hodnotenia",
+        "dateSublabel": "(kedy sa komisia stretne)",
+        "btnScheduling": "Plánuje sa...",
+        "btnSetDate": "Nastaviť dátum"
+      },
+      "stats": {
+        "title": "Stav žiadostí",
+        "formallyVerified": "Formálne overené",
+        "underEvaluation": "V štádiu hodnotenia",
+        "total": "Celkom",
+        "willBeMoved": "budú presunuté z",
+        "noAppsToMove": "Žiadne žiadosti v stave 'formálne overené' na presun",
+        "btnMoving": "Presúva sa...",
+        "btnMoveNow": "Presunúť teraz"
+      },
+      "assignSection": {
+        "title": "Priradiť hodnotiteľov",
+        "placeholder": "-- Vyberte hodnotiteľa --",
+        "btnAssigning": "Priraďuje sa...",
+        "btnAssign": "Priradiť",
+        "assignedCountZero": "0 priradených hodnotiteľov",
+        "assignedCountOne": "1 priradený hodnotiteľ",
+        "assignedCountPlural": "{count} priradených hodnotiteľov",
+        "noEvaluators": "Zatiaľ nie sú priradení žiadni hodnotitelia",
+        "btnRemove": "Odobrať"
+      }
+    },
+
+    "callsManagementPanel": {
+      "title": "Systémové výzvy",
+      "btnCreate": "+ Vytvoriť novú výzvu",
+      "tableHeaders": {
+        "program": "Program",
+        "status": "Stav",
+        "deadline": "Uzávierka",
+        "requiredDocs": "Počet požadovaných dok.",
+        "actions": "Akcie"
+      },
+      "tableRows": {
+        "noDeadline": "Bez uzávierky",
+        "rulesCount": "{count} pravidlo | {count} pravidlá | {count} pravidiel",
+        "btnEdit": "Upraviť",
+        "btnDelete": "Vymazať"
+      },
+      "confirmDelete": {
+        "title": "Vymazať koncept",
+        "message": "Naozaj chcete vymazať tento koncept výzvy?",
+        "confirmText": "Vymazať teraz",
+        "cancelText": "Zrušiť"
+      },
+      "errorDialog": {
+        "title": "Chyba",
+        "defaultMessage": "Chyba pri mazaní výzvy",
+        "confirmText": "V poriadku"
+      }
+    },
+
+    "createAdminForm": {
+      "title": "Nový administrátor",
+      "fields": {
+        "firstName": "Meno",
+        "lastName": "Priezvisko",
+        "email": "E-mail",
+        "password": "Heslo",
+        "adminRole": "Administrátorská rola",
+        "selectRole": "Vyberte rolu"
+      },
+      "roles": {
+        "ntiAdmin": "NTI Administrátor",
+        "evaluator": "Hodnotiteľ",
+        "contentEditor": "Editor obsahu",
+        "mentor": "Mentor"
+      },
+      "buttons": {
+        "create": "Vytvoriť administrátora",
+        "creating": "Vytvára sa..."
+      },
+      "messages": {
+        "allFieldsRequired": "Všetky polia sú povinné",
+        "passwordMinLength": "Heslo musí mať aspoň 8 znakov",
+        "success": "Administrátor bol úspešne vytvorený",
+        "failed": "Nepodarilo sa vytvoriť administrátora"
+      }
+    },
+
+    "evaluationCriteriaManager": {
+      "title": "Kritériá hodnotenia",
+      "description": "Definujte štruktúrované parametre a váhy pre bodovanie návrhov.",
+      "buttons": {
+        "addCriterion": "+ Pridať kritérium",
+        "saveConfiguration": "Uložiť konfiguráciu",
+        "saving": "Ukladá sa..."
+      },
+      "weightSummary": {
+        "totalAllocated": "Celková pridelená váha:"
+      },
+      "emptyState": {
+        "noCriteria": "Pre túto výzvu zatiaľ neboli definované žiadne kritériá hodnotenia. Kliknite na \"Pridať kritérium\" pre začatie."
+      },
+      "labels": {
+        "slug": "Identifikátor / Slug (Max 35 znakov)",
+        "criterionTitle": "Názov kritéria",
+        "weight": "Váha (%)",
+        "description": "Popis / Pokyny (Voliteľné)",
+        "removeCriterion": "Odobrať kritérium"
+      },
+      "placeholders": {
+        "slug": "napr. tech_feasibility",
+        "criterionTitle": "napr. Technická realizovateľnosť a inovácia",
+        "weight": "0",
+        "description": "Popíšte, na čo by mali hodnotitelia zamerať pozornosť pri bodovaní tohto konkrétneho kritéria..."
+      },
+      "messages": {
+        "nothingToSync": "Nič na synchronizáciu",
+        "success": "Kritériá boli úspešne uložené",
+        "fetchError": "Chyba pri načítavaní kritérií hodnotenia",
+        "saveError": "Chyba pri ukladaní kritérií"
+      }
+    },
+
+    "pendingApprovalTable": {
+      "emptyState": "Žiadne čakajúce schválenia",
+      "table": {
+        "headers": {
+          "name": "Meno",
+          "email": "E-mail",
+          "requestedRole": "Požadovaná rola",
+          "created": "Vytvorené",
+          "actions": "Akcie"
+        }
+      },
+      "buttons": {
+        "approve": "Schváliť",
+        "reject": "Zamietnuť"
+      },
+      "modals": {
+        "approve": {
+          "title": "Schváliť rolu",
+          "message": "Schváliť rolu \"{role}\" pre tohto používateľa?",
+          "confirm": "Schváliť",
+          "cancel": "Zrušiť"
+        },
+        "reject": {
+          "title": "Odobrať rolu",
+          "message": "Odobrať rolu \"{role}\" tomuto používateľovi?",
+          "confirm": "Odobrať",
+          "cancel": "Zrušiť"
+        }
+      },
+      "messages": {
+        "approveSuccess": "Rola schválená pre {role}",
+        "approveFailed": "Nepodarilo sa schváliť rolu",
+        "rejectSuccess": "Rola bola odobraná",
+        "rejectFailed": "Nepodarilo sa odobrať rolu"
+      }
+    },
+
+    "programCallsManager": {
+      "form": {
+        "titleCreate": "Nová výzva Programu A",
+        "titleEdit": "Upraviť výzvu Programu A",
+        "labels": {
+          "title": "Názov výzvy",
+          "opensAt": "Otvára sa dňa",
+          "deadline": "Uzávierka",
+          "minTeam": "Min. tím",
+          "maxTeam": "Max. tím",
+          "requiredDocuments": "Požadované dokumenty",
+          "requiredCheckbox": "Povinné"
+        },
+        "placeholders": {
+          "documentName": "Názov dokumentu"
+        }
+      },
+      "buttons": {
+        "addDocument": "+ Pridať dokument",
+        "cancel": "Zrušiť",
+        "save": "Vytvoriť výzvu",
+        "update": "Aktualizovať výzvu",
+        "saving": "Ukladá sa..."
+      },
+      "list": {
+        "title": "Výzvy",
+        "emptyState": "Nenašli sa žiadne výzvy.",
+        "placeholders": {
+          "search": "Hľadať podľa názvu..."
+        },
+        "labels": {
+          "membersCount": "{min}–{max} členovia",
+          "infiniteMembersCount": "{min}–∞ členovia"
+        },
+        "buttons": {
+          "exportCsv": "Exportovať CSV",
+          "exportXlsx": "Exportovať XLSX",
+          "applications": "Žiadosti"
+        },
+        "statuses": {
+          "all": "Všetky stavy",
+          "draft": "Koncept",
+          "open": "Otvorená",
+          "closed": "Uzatvorená",
+          "archived": "Archivovaná"
+        },
+        "programs": {
+          "all": "Všetky typy programov",
+          "a": "Program A",
+          "b": "Program B",
+          "fallback": "—"
+        },
+        "actions": {
+          "edit": "Upraviť",
+          "setDraft": "Nastaviť ako koncept",
+          "open": "Otvoriť",
+          "close": "Zatvoriť",
+          "archived": "Archivovať",
+          "delete": "Vymazať"
+        }
+      },
+      "modals": {
+        "successCreate": {
+          "title": "Zmena stavu",
+          "message": "Výzva bola úspešne vytvorená!"
+        },
+        "successUpdate": {
+          "title": "Zmena stavu",
+          "message": "Výzva bola úspešne aktualizovaná!"
+        },
+        "error": {
+          "title": "Chyba",
+          "createMessage": "Chyba pri vytváraní výzvy.",
+          "updateMessage": "Chyba pri aktualizácii výzvy.",
+          "statusMessage": "Nepodarilo sa aktualizovať stav",
+          "deleteMessage": "Výzvu nie je možné vymazať (iba v stave Koncept).",
+          "exportMessage": "Nepodarilo sa stiahnuť export."
+        },
+        "deleteConfirm": {
+          "title": "Vymazať výzvu",
+          "message": "Naozaj chcete vymazať túto výzvu?",
+          "confirm": "Vymazať teraz",
+          "cancel": "Zrušiť"
+        },
+        "genericButtons": {
+          "okay": "V poriadku"
+        }
+      }
+    },
+
+    "userManagementPanel": {
+      "title": "Správa používateľov",
+      "description": "Správa používateľov platformy, oprávnení a prístupu.",
+      "exportCsv": "Exportovať CSV",
+      "exportXlsx": "Exportovať XLSX",
+      "searchPlaceholder": "Hľadať podľa mena alebo e-mailu...",
+      "allRoles": "Všetky role",
+      "allStatuses": "Všetky stavy",
+      "statusActive": "Aktívny",
+      "statusBlocked": "Zablokovaný",
+      "loadingUsers": "Načítavanie používateľov...",
+      "tableHeaders": {
+        "user": "Používateľ",
+        "roles": "Role",
+        "status": "Stav",
+        "actions": "Akcie"
+      },
+      "actions": {
+        "block": "Zablokovať",
+        "unblock": "Odblokovať",
+        "delete": "Vymazať",
+        "assignRole": "Priradiť rolu"
+      },
+      "noUsersFound": "Nenašli sa žiadni používatelia.",
+      "modal": {
+        "title": "Detaily firemnej role",
+        "description": "Pre priradenie tejto role uveďte prosím údaje o organizácii.",
+        "regNumberLabel": "IČO / Registračné číslo",
+        "regNumberPlaceholder": "Zadajte identifikačné číslo/kód organizácie...",
+        "roleInOrgLabel": "Rola v rámci organizácie",
+        "cancel": "Zrušiť",
+        "confirm": "Potvrdiť priradenie",
+        "processing": "Spracováva sa..."
+      },
+      "rolesInOrg": {
+        "owner": "Majiteľ",
+        "contact": "Kontaktná osoba",
+        "evaluator": "Hodnotiteľ",
+        "mentor": "Mentor"
+      },
+      "messages": {
+        "loadFailed": "Nepodarilo sa načítať používateľov",
+        "regNumberRequired": "Registračné číslo je povinné",
+        "userBlocked": "Používateľ bol zablokovaný",
+        "blockFailed": "Nepodarilo sa zablokovať používateľa",
+        "userUnblocked": "Používateľ bol odblokovaný",
+        "unblockFailed": "Nepodarilo sa odblokovať používateľa",
+        "userDeleted": "Používateľ bol vymazaný",
+        "deleteFailed": "Nepodarilo sa vymazať používateľa",
+        "roleRemoved": "Rola bola odobraná",
+        "removeFailed": "Nepodarilo sa odobrať rolu",
+        "roleAssigned": "Rola \"{role}\" bola priradená",
+        "assignFailed": "Nepodarilo sa priradiť rolu",
+        "exportSuccess": "Export bol úspešný ({format})",
+        "exportFailed": "Nepodarilo sa exportovať vo formáte {format}"
+      },
+      "confirm": {
+        "blockTitle": "Zablokovať používateľa",
+        "blockMessage": "Zablokovať tohto používateľa?",
+        "unblockTitle": "Odblokovať používateľa",
+        "unblockMessage": "Odblokovať tohto používateľa?",
+        "deleteTitle": "Vymazať používateľa",
+        "deleteMessage": "Vymazať natrvalo? Túto akciu nie je možné vrátiť späť.",
+        "removeRoleTitle": "Odobrať rolu",
+        "removeRoleMessage": "Odobrať rolu \"{role}\"?"
+      }
+    },
+
+    "finalVerdictPanel": {
+      "navigation": {
+        "adminPanel": "Administrátorský panel"
+      },
+      "title": "Panel konsolidovaného verdiktu",
+      "status": {
+        "reviewsStatus": "Stav hodnotení",
+        "done": "{reviews} / {total} Hotovo",
+        "consolidatedScore": "Konsolidované skóre",
+        "scoreUnit": "{score} / 100 b"
+      },
+      "buttons": {
+        "saving": "Ukladá sa verdikt...",
+        "publish": "Zverejniť konečný verdikt",
+        "incomplete": "Hodnotenia komisie sú neúplné"
+      },
+      "loading": "Načítavanie hodnotení žiadosti a metadát...",
+      "sections": {
+        "specs": "Špecifikácie žiadosti",
+        "attachments": "Odoslané prílohy tímu",
+        "peerSheets": "Hodnotiace hárky členov komisie",
+        "averageIndex": "Priemerný index komisie",
+        "overrideStatus": "Prepísať systémový stav žiadosti",
+        "resolution": "Interné poznámky a oficiálne uznesenie"
+      },
+      "specsFields": {
+        "teamName": "Názov projektu / tímu:",
+        "programTrack": "Program {track}",
+        "stackCategory": "Kategória (Stack):",
+        "currentStatus": "Aktuálny stav:"
+      },
+      "peerSheetsFields": {
+        "recommendationApprove": "Schváliť",
+        "recommendationRevision": "Prepracovať",
+        "reviewerStatement": "Vyjadrenie hodnotiteľa:",
+        "scoreUnit": "{score} b. ({weight}%)"
+      },
+      "averageIndexDesc": "Automaticky generovaný matematický aritmetický priemer",
+      "statusOptions": {
+        "approve": {
+          "title": "🟢 Schváliť",
+          "desc": "Prijať do inkubátora"
+        },
+        "revision": {
+          "title": "🟡 Prepracovať",
+          "desc": "Vrátiť žiadateľovi"
+        },
+        "reject": {
+          "title": "🔴 Zamietnuť",
+          "desc": "Trvalé vyradenie"
+        }
+      },
+      "resolutionDesc": "Tento textový obsah bude trvalo uložený v databáze záznamov žiadosti a v prípade spustenia požiadavky na prepracovanie bude odoslaný tímu.",
+      "resolutionPlaceholder": "Uveďte analytický súhrn alebo odôvodnenie, ktoré viedlo k tomuto rozhodnutiu o zmene stavu (napr. súlad s limitmi programu, finančné kontrolné indikátory, zmluvné dohody)...",
+      "messages": {
+        "successSync": "Stav žiadosti bol úspešne synchronizovaný na [{status}].",
+        "submitFailed": "Nepodarilo sa zaznamenať konečné rozhodnutie administrátora.",
+        "loadFailed": "Nepodarilo sa načítať dáta žiadosti."
+      }
+    }
+  }
+}

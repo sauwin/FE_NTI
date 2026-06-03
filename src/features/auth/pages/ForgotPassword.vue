@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { forgotPassword } from '@/features/auth/api/auth'
 
+const { t } = useI18n()
 const email = ref('')
 const error = ref('')
 const success = ref('')
@@ -18,18 +20,18 @@ async function submit() {
 
   try {
     await forgotPassword(email.value.trim())
-    success.value = 'Reset link sent to your email. Check your inbox.'
+    success.value = t('forgotPassword.successMessage')
     email.value = ''
     redirectTimeout = setTimeout(() => router.push('/auth/login'), 3000)
   } catch (e: any) {
     if (e.response?.status === 403) {
-      error.value = 'Admin passwords cannot be reset this way'
+      error.value = t('forgotPassword.errors.adminForbidden')
     } else if (e.response?.status === 422) {
-      error.value = 'Email not found'
+      error.value = t('forgotPassword.errors.notFound')
     } else if (e.response?.status === 429) {
-      error.value = 'Too many requests. Please try again later.'
+      error.value = t('forgotPassword.errors.tooManyRequests')
     } else {
-      error.value = 'Error sending reset link. Try again.'
+      error.value = t('forgotPassword.errors.generic')
     }
   } finally {
     loading.value = false
@@ -44,14 +46,14 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <h1 class="font-bold text-4xl text-center p-4 mt-20">Forgot Password</h1>
+  <h1 class="font-bold text-4xl text-center p-4 mt-20">{{ t('forgotPassword.title') }}</h1>
   <div class="flex justify-center">
     <form class="flex flex-col gap-2 mt-5 w-96" @submit.prevent="submit">
       <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
       <p v-if="success" class="text-green-500 text-sm">{{ success }}</p>
 
       <div>
-        <label for="email" class="block text-white">Email</label>
+        <label for="email" class="block text-white">{{ t('forgotPassword.emailLabel') }}</label>
         <input
             v-model="email"
             :disabled="loading"
@@ -63,11 +65,11 @@ onUnmounted(() => {
       <input
           type="submit"
           :disabled="loading"
-          :value="loading ? 'Sending...' : 'Send Reset Link'"
+          :value="loading ? t('forgotPassword.btnSending') : t('forgotPassword.btnSend')"
           class="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 cursor-pointer text-white w-full h-10 mt-4 rounded" />
 
       <div class="text-center mt-4">
-        <router-link class="text-blue-500 hover:text-blue-600" to="/auth/login">Back to Login</router-link>
+        <router-link class="text-blue-500 hover:text-blue-600" to="/auth/login">{{ t('forgotPassword.backToLogin') }}</router-link>
       </div>
     </form>
   </div>

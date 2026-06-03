@@ -1,0 +1,85 @@
+{
+  "programA": {
+    "view": {
+      "badge": "Program A",
+      "title": "Grantový Inkubačný",
+      "highlight": "Program",
+      "description": "Premeňte svoj inovatívny nápad na skutočnosť. Program A je určený pre tímy, ktoré chcú založiť startup alebo vyvinúť jedinečný produkt. Poskytujeme financovanie, odborné poradenstvo a technické zdroje potrebné na urýchlenie uvedenia vášho projektu na trh.",
+
+      "checkingStatus": "Overovanie stavu výzvy...",
+      "callIsOpen": "Výzva \"{name}\" je otvorená do:",
+      "submitApplication": "Podať prihlášku",
+      "learnMore": "Dozvedieť sa viac",
+      "registrationClosed": "Prihlasovanie zatvorené",
+      "noActiveCall": "Momentálne nie je otvorená žiadna aktívna výzva pre Program A. Sledujte administráciu pre nasledujúce jarné/jesenné kolá.",
+      "processTitle": "Proces prihlasovania",
+      "howItWorks": "Ako to funguje?",
+      "steps": {
+        "registerTeam": {
+          "title": "Registrácia tímu",
+          "description": "Vytvorte si vo svojom profile tím s minimálne {size} členmi."
+        },
+        "submitProposal": {
+          "title": "Odoslanie návrhu",
+          "description": "Nahrajte všetky dynamické prílohy špecifikované konfiguračnou schémou formulára v administrácii."
+        },
+        "evaluation": {
+          "title": "Hodnotenie",
+          "description": "Váš nahraný balík dokumentov prejde formálnou validáciou a technickým overením odbornou komisiou."
+        },
+        "incubation": {
+          "title": "Inkubácia",
+          "description": "Po formálnom schválení získate grantové financovanie, bude vám pridelený agilný mentor a môžete začať stavať."
+        }
+      },
+      "attachmentsTitle": "Konfigurácia príloh",
+      "requiredDocs": "Požadovaná dokumentácia podľa aktuálnej otvorenej výzvy"
+    },
+    "upload": {
+      "loadingParams": "Načítavanie parametrov programu...",
+      "newApplication": "Nová prihláška",
+      "title": "Program A: Inkubácia",
+      "stepIndicator": "Krok {step} z 2: Nastavenie a overenie tímu",
+      "tabTeamInfo": "Informácie o tíme",
+      "tabDocuments": "Dokumenty",
+      "errors": {
+        "selectTeam": "Prosím, vyberte spôsobilý tím.",
+        "selectCategory": "Prosím, vyberte zameranie kategórie.",
+        "confirmDeclaration": "Musíte potvrdiť vyhlásenie o akademickom statuse.",
+        "noDocsConfigured": "Aktívna výzva nemá nakonfigurované žiadne požadované dokumenty.",
+        "noActiveCall": "Nie je k dispozícii žiadna aktívna výzva.",
+        "missingDoc": "Chýba požadovaný dokument: {name}",
+        "genericError": "Niečo sa pokazilo."
+      },
+      "form": {
+        "selectTeamLabel": "Vyberte svoj tím *",
+        "chooseTeamPlaceholder": "Vyberte tím...",
+        "noTeamsWarning": "⚠️ Nenašli sa žiadne vyhovujúce tímy. Musíte byť vedúcim tímu a minimálne 3 členovia už museli prijať vašu pozvánku.",
+        "focusCategoryLabel": "Zameranie kategórie *",
+        "selectCategoryPlaceholder": "Vyberte kategóriu...",
+        "declaration": "Čestne vyhlasujem, že neprenášam žiadne predmety a môj priemerný prospech z profilových predmetov spĺňa požadovanú hranicu. Beriem na vedomie, že táto skutočnosť bude overená komisiou. *",
+        "cancel": "Zrušiť",
+        "continue": "Pokračovať na dokumenty →",
+        "chooseFile": "Vybrať súbor...",
+        "browse": "Prehľadávať",
+        "back": "← Späť",
+        "saving": "Ukladá sa...",
+        "saveDraft": "Uložiť koncept",
+        "submitting": "Odosiela sa...",
+        "submitFinal": "Odoslať na finálne hodnotenie"
+      },
+      "success": {
+        "title": "Prihláška úspešne odoslaná!",
+        "description": "Vaša prihláška do Programu A Inkubácia bola uzamknutá a odoslaná manažérom hodnotenia.",
+        "goDashboard": "Prejsť na nástenku"
+      },
+      "categories": {
+        "softwareDevelopment": "Vývoj softvéru",
+        "aiDataTechnologies": "AI & Dátové technológie",
+        "webApplications": "Webové aplikácie",
+        "gameDevelopment": "Vývoj hier",
+        "iotEmbeddedSystems": "IoT & Vstavané systémy"
+      }
+    }
+  }
+}

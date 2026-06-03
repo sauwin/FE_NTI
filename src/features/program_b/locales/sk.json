@@ -1,0 +1,70 @@
+{
+  "programB": {
+    "view": {
+      "badge": "Program B",
+      "title": "Odborná Prax",
+      "highlight": "Od Skutočných Firiem",
+
+      "technicalSpecifications": "Naše technické špecifikácie",
+      "createNewTask": "+ Vytvoriť nové zadanie",
+      "loadingChallenges": "Načítavajú sa vaše výzvy...",
+      "noMyChallenges": "Zatiaľ ste nepridali žiadne výzvy.",
+      "availableTasks": "Dostupné priemyselné zadania",
+      "loadingCatalog": "Načítava sa katalóg zadatí...",
+      "noTasks": "Momentálne nie sú k dispozícii žiadne výzvy.",
+      "budgetNotSpecified": "Nešpecifikovaný",
+      "applyBefore": "Termín prihlásenia: {date}",
+      "applyDeadline": "Termín podania: {date}",
+      "viewEditDetails": "Zobraziť a upraviť podrobnosti",
+      "viewDetailedSpecs": "Zobraziť podrobné špecifikácie",
+      "requiredTeam": "Požadovaný tím: {min}-{max} osôb",
+      "unknownCompany": "Neznáma spoločnosť",
+      "noDescription": "Popis nie je k dispozícii.",
+      "noDescriptionProvided": "Popis nebol poskytnutý.",
+      "noDeadline": "Bez termínu"
+    },
+    "upload": {
+      "applyingFor": "Prihlasujete sa na:",
+      "partner": "Partner programu",
+      "submittingApp": "Odosiela sa prihláška...",
+      "step1Title": "Prihláška na participáciu",
+      "step1Sub": "Krok 1 z 2: Popis projektu a výber tímu",
+      "step2Title": "Požadovaná dokumentácia",
+      "step2Sub": "Krok 2 z 2: Nahrávanie sprievodných súborov špecifikovaných výzvou",
+      "successTitle": "Prihláška úspešne odoslaná!",
+      "successSub": "Vaša prihláška bola zaregistrovaná. Stav jej posúdenia môžete sledovať v paneli správy vášho študentského účtu.",
+      "backCatalog": "Späť do katalógu",
+      "errors": {
+        "selectTeam": "Prosím, vyberte alebo vytvorte tím",
+        "projectName": "Prosím, zadajte názov projektu",
+        "solutionConcept": "Prosím, popíšte koncept vášho riešenia",
+        "missingDoc": "Prosím, nahrajte požadovaný dokument: {name}",
+        "noCallId": "Nebolo identifikované ID výzvy",
+        "genericError": "Pri odosielaní formulára sa vyskytla chyba.",
+        "criticalUrlError": "Kritická chyba: ID cieľovej výzvy sa nenašlo alebo je v URL neplatné.",
+        "loadDetailsError": "Podrobnosti o prihláške do programu sa nepodarilo pre tento kontext výzvy nájsť."
+      },
+      "form": {
+        "applicantType": "Typ žiadateľa *",
+        "chooseTeam": "Vyberte svoj tím *",
+        "noTeamsWarning": "Zatiaľ nepatríte do žiadneho tímu. Najprv musíte {link} alebo počkať na prijatie do existujúceho tímu.",
+        "createOne": "nejaký vytvoriť",
+        "projectNameLabel": "Názov projektu / Špecifikácia *",
+        "solutionOutlineLabel": "Náčrt riešenia *",
+        "solutionPlaceholder": "Popíšte víziu vášho tímu na implementáciu technických špecifikácií a váš architektonický prístup...",
+        "cancel": "Zrušiť",
+        "nextDoc": "Ďalej: Dokumentácia",
+        "selectedFile": "✓ Vybrané: {name}",
+        "back": "Späť",
+        "submitFinal": "Odoslať finálnu prihlášku"
+      },
+      "defaultLabels": {
+        "cv": "Životopisy (Všetci členovia tímu v jednom súbore)",
+        "motivation_letter": "Motivačný list",
+        "technical_proposal": "Technický návrh / Koncept riešenia",
+        "fallbackDoc": "Požiadavka na dokument #{key}",
+        "genericDoc": "Dokument {key}"
+      }
+    }
+  }
+}

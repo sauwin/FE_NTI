@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { getTeams } from '@/features/student/api/teams'
 import { useAuthStore } from '@/features/auth/stores/auth'
 import { getActiveCall, createApplication } from '@/features/applications/api/applications'
 import { uploadDocument } from '@/shared/api/documents'
 import type { DocumentRequirement } from '@/shared/types/calls'
 
+const { t } = useI18n()
 const router = useRouter()
 const error = ref('')
 const fieldErrors = ref<Record<string, string[]>>({})
@@ -26,11 +28,11 @@ const requiredDocuments = ref<DocumentRequirement[]>([])
 const files = ref<Record<string, File | null>>({})
 
 const categories = [
-  'Software Development',
-  'AI & Data Technologies',
-  'Web Applications',
-  'Game Development',
-  'IoT & Embedded Systems',
+  { key: 'Software Development', labelKey: 'programA.upload.categories.softwareDevelopment' },
+  { key: 'AI & Data Technologies', labelKey: 'programA.upload.categories.aiDataTechnologies' },
+  { key: 'Web Applications', labelKey: 'programA.upload.categories.webApplications' },
+  { key: 'Game Development', labelKey: 'programA.upload.categories.gameDevelopment' },
+  { key: 'IoT & Embedded Systems', labelKey: 'programA.upload.categories.iotEmbeddedSystems' },
 ]
 
 function docKey(name: string): string {
@@ -92,10 +94,10 @@ onMounted(async () => {
         files.value[docKey(doc.document_name)] = null 
       })
     } else {
-      error.value = 'Active call has no required documents configured.'
+      error.value = t('programA.upload.errors.noDocsConfigured')
     }
   } catch (e) {
-    error.value = 'No active call available.'
+    error.value = t('programA.upload.errors.noActiveCall')
   } finally {
     loading.value = false
   }
@@ -104,22 +106,22 @@ onMounted(async () => {
 function nextStep() {
   error.value = ''
   if (!selectedTeamId.value) {
-    error.value = 'Please select a qualified team.'
+    error.value = t('programA.upload.errors.selectTeam')
     return
   }
   if (!category.value) {
-    error.value = 'Please select a focus category.'
+    error.value = t('programA.upload.errors.selectCategory')
     return
   }
   if (!academicDeclaration.value) {
-    error.value = 'You must confirm the academic status declaration.'
+    error.value = t('programA.upload.errors.confirmDeclaration')
     return
   }
   step.value = 2
 }
 
 async function submit(mode: 'draft' | 'final' = 'final') {
-  if (!callId.value) { error.value = 'No active call available'; return }
+  if (!callId.value) { error.value = t('programA.upload.errors.noActiveCall'); return }
   error.value = ''
   loading.value = true
 
@@ -140,7 +142,7 @@ async function submit(mode: 'draft' | 'final' = 'final') {
       const file = files.value[key]
 
       if (mode === 'final' && !file && doc.is_mandatory) {
-        error.value = `Missing required document: ${doc.document_name}`
+        error.value = t('programA.upload.errors.missingDoc', { name: doc.document_name })
         loading.value = false
         return
       }
@@ -163,7 +165,7 @@ async function submit(mode: 'draft' | 'final' = 'final') {
     }
   } catch (e: any) {
     fieldErrors.value = e.response?.data?.errors ?? {}
-    error.value = e?.response?.data?.message || 'Something went wrong.'
+    error.value = e?.response?.data?.message || t('programA.upload.errors.genericError')
   } finally {
     loading.value = false
   }
@@ -175,27 +177,37 @@ async function submit(mode: 'draft' | 'final' = 'final') {
     <div class="w-full max-w-xl bg-slate-900/40 p-8 border border-slate-900 rounded-2xl relative backdrop-blur-md">
       
       <div v-if="loading && step === 1 && myTeams.length === 0" class="text-center py-10 text-sm text-slate-400">
-        Loading program parameters...
+        {{ t('programA.upload.loadingParams') }}
       </div>
 
       <div v-else>
         <div class="mb-8">
-          <span class="text-[10px] uppercase font-bold tracking-wider text-blue-400 block mb-1">New Application</span>
-          <h2 class="text-2xl font-bold text-white">Program A: Incubation</h2>
-          <p class="text-xs text-slate-500 mt-1">Step {{ step }} of 2: Team setup & verification</p>
+          <span class="text-[10px] uppercase font-bold tracking-wider text-blue-400 block mb-1">
+            {{ t('programA.upload.newApplication') }}
+          </span>
+          <h2 class="text-2xl font-bold text-white">
+            {{ t('programA.upload.title') }}
+          </h2>
+          <p class="text-xs text-slate-500 mt-1">
+            {{ t('programA.upload.stepIndicator', { step: step }) }}
+          </p>
         </div>
 
         <div class="flex items-center mb-8" v-if="step < 3">
           <div class="flex flex-col items-center cursor-pointer" @click="step = 1">
             <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border transition',
               step >= 1 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">1</div>
-            <span class="text-[10px] mt-1.5 font-medium" :class="step >= 1 ? 'text-blue-400' : 'text-gray-600'">Team Info</span>
+            <span class="text-[10px] mt-1.5 font-medium" :class="step >= 1 ? 'text-blue-400' : 'text-gray-600'">
+              {{ t('programA.upload.tabTeamInfo') }}
+            </span>
           </div>
           <div class="flex-1 h-px mx-4 mb-4 transition-colors duration-300" :class="step >= 2 ? 'bg-blue-600' : 'bg-blue-900'"></div>
           <div class="flex flex-col items-center">
             <div :class="['flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border transition',
               step >= 2 ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-900 text-gray-500']">2</div>
-            <span class="text-[10px] mt-1.5 font-medium" :class="step >= 2 ? 'text-blue-400' : 'text-gray-600'">Documents</span>
+            <span class="text-[10px] mt-1.5 font-medium" :class="step >= 2 ? 'text-blue-400' : 'text-gray-600'">
+              {{ t('programA.upload.tabDocuments') }}
+            </span>
           </div>
         </div>
 
@@ -205,24 +217,34 @@ async function submit(mode: 'draft' | 'final' = 'final') {
           
           <template v-if="step === 1">
             <div>
-              <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">Select Your Team *</label>
+              <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">
+                {{ t('programA.upload.form.selectTeamLabel') }}
+              </label>
               <select v-model="selectedTeamId" class="w-full bg-slate-950 border border-slate-800 h-11 px-3 rounded-lg text-white focus:border-blue-600 transition outline-none text-sm cursor-pointer">
-                <option value="" disabled selected>Choose a team...</option>
+                <option value="" disabled selected>
+                  {{ t('programA.upload.form.chooseTeamPlaceholder') }}
+                </option>
                 <option v-for="team in myTeams" :key="team.id" :value="team.id">
                   {{ team.name }}
                 </option>
               </select>
               <p v-if="fieldErrors.team_id?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.team_id[0] }}</p>
               <p v-if="myTeams.length === 0 && !loadingTeams" class="text-[11px] text-amber-500 mt-1.5 leading-normal">
-                ⚠️ No eligible teams found. You must be the team leader, and at least 3 members must have already accepted your invitation.
+                {{ t('programA.upload.form.noTeamsWarning') }}
               </p>
             </div>
 
             <div>
-              <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">Focus Category *</label>
+              <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">
+                {{ t('programA.upload.form.focusCategoryLabel') }}
+              </label>
               <select v-model="category" class="w-full bg-slate-950 border border-slate-800 h-11 px-3 rounded-lg text-white focus:border-blue-600 transition outline-none text-sm cursor-pointer">
-                <option value="" disabled selected>Select category...</option>
-                <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+                <option value="" disabled selected>
+                  {{ t('programA.upload.form.selectCategoryPlaceholder') }}
+                </option>
+                <option v-for="cat in categories" :key="cat.key" :value="cat.key">
+                  {{ t(cat.labelKey) }}
+                </option>
               </select>
               <p v-if="fieldErrors.category?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.category[0] }}</p>
             </div>
@@ -231,15 +253,17 @@ async function submit(mode: 'draft' | 'final' = 'final') {
               <label class="flex items-start gap-3 cursor-pointer select-none">
                 <input v-model="academicDeclaration" type="checkbox" class="mt-1 accent-blue-500 rounded" />
                 <span class="text-xs text-gray-400 leading-normal">
-                  I declare that I have no carried-over courses and my average grade of core courses meets the required threshold. I understand this will be verified by the committee. *
+                  {{ t('programA.upload.form.declaration') }}
                 </span>
               </label>
             </div>
 
             <div class="flex gap-3 pt-2">
-              <button type="button" @click="router.back()" class="w-1/3 border border-slate-800 text-slate-400 h-11 rounded-lg hover:text-white transition text-sm font-medium">Cancel</button>
+              <button type="button" @click="router.back()" class="w-1/3 border border-slate-800 text-slate-400 h-11 rounded-lg hover:text-white transition text-sm font-medium">
+                {{ t('programA.upload.form.cancel') }}
+              </button>
               <button type="button" @click="nextStep" class="flex-1 bg-blue-600 text-white h-11 rounded-lg font-medium hover:bg-blue-700 transition text-sm">
-                Continue to Documents →
+                {{ t('programA.upload.form.continue') }}
               </button>
             </div>
           </template>
@@ -255,24 +279,26 @@ async function submit(mode: 'draft' | 'final' = 'final') {
                 
                 <label :for="`file-${docKey(doc.document_name)}`" class="flex items-center justify-between bg-blue-600/5 border border-blue-900/50 hover:border-blue-600 rounded-xl px-4 h-11 cursor-pointer transition-colors">
                   <span class="text-sm truncate pr-2" :class="files[docKey(doc.document_name)] ? 'text-white' : 'text-gray-600'">
-                    {{ files[docKey(doc.document_name)]?.name ?? 'Choose file...' }}
+                    {{ files[docKey(doc.document_name)]?.name ?? t('programA.upload.form.chooseFile') }}
                   </span>
-                  <span class="text-xs text-blue-400 shrink-0">Browse</span>
+                  <span class="text-xs text-blue-400 shrink-0">
+                    {{ t('programA.upload.form.browse') }}
+                  </span>
                 </label>
               </div>
             </div>
 
             <div class="flex flex-wrap gap-3 mt-2">
               <button type="button" @click="step = 1" class="border border-blue-900 hover:border-blue-600 text-gray-400 hover:text-white w-full sm:w-1/4 h-10 rounded-md text-sm cursor-pointer transition-colors">
-                ← Back
+                {{ t('programA.upload.form.back') }}
               </button>
               
               <button type="button" @click="submit('draft')" :disabled="loading || requiredDocuments.length === 0" class="border border-blue-600 text-blue-400 hover:bg-blue-600/10 disabled:opacity-50 cursor-pointer flex-1 h-10 rounded-md text-sm font-medium transition-colors">
-                {{ loading ? 'Saving...' : 'Save Draft' }}
+                {{ loading ? t('programA.upload.form.saving') : t('programA.upload.form.saveDraft') }}
               </button>
 
               <button type="submit" :disabled="loading || requiredDocuments.length === 0" class="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 cursor-pointer flex-1 h-10 rounded-md text-sm font-medium transition-colors">
-                {{ loading ? 'Submitting...' : 'Submit Final' }}
+                {{ loading ? t('programA.upload.form.submitting') : t('programA.upload.form.submitFinal') }}
               </button>
             </div>
           </template>
@@ -280,12 +306,14 @@ async function submit(mode: 'draft' | 'final' = 'final') {
           <template v-if="step === 3">
             <div class="text-center py-6">
               <div class="text-5xl mb-4">🎉</div>
-              <h2 class="text-2xl font-bold text-white mb-2">Application Successfully Submitted!</h2>
+              <h2 class="text-2xl font-bold text-white mb-2">
+                {{ t('programA.upload.success.title') }}
+              </h2>
               <p class="text-gray-400 text-sm mb-6 max-w-sm mx-auto leading-relaxed">
-                Your application for Program A Incubation has been locked and sent to evaluation managers.
+                {{ t('programA.upload.success.description') }}
               </p>
               <button type="button" @click="router.push('/dashboard')" class="bg-blue-600 hover:bg-blue-700 text-white px-6 h-10 rounded-lg text-sm font-medium transition-colors">
-                Go to Dashboard
+                {{ t('programA.upload.success.goDashboard') }}
               </button>
             </div>
           </template>

@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { getCompanyTasks } from '@/features/company/api/company'
 import type { CompanyTask, TaskStatus } from '@/features/company/types/company'
 import { updateTaskStatus, deleteCallWithTask } from '@/features/tasks/api/tasks'
 import { useConfirm as confirm } from '../../../shared/composables/useConfirm'
 
 const router = useRouter()
+const { t, locale } = useI18n()
 
 const tasks = ref<CompanyTask[]>([])
 const loading = ref(false)
@@ -58,8 +60,8 @@ async function handlePublishTask(task: CompanyTask) {
 
 async function handleDeleteTask(task: CompanyTask) {
   const isConfirmed = await confirm({
-    title: 'Delete Innovation Challenge',
-    message: `Are you sure you want to permanently delete "${task.title}"? This will also remove the associated Call and all uploaded requirements from the disk.`,
+    title: t('company.tasks.confirmDeleteTitle'),
+    message: t('company.tasks.confirmDeleteMsg', { title: task.title }),
     danger: true
   })
 
@@ -81,14 +83,14 @@ async function handleDeleteTask(task: CompanyTask) {
   <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center border-b border-slate-900 pb-5 gap-4">
       <div>
-        <h3 class="text-xl font-bold text-white">Our technical specifications</h3>
-        <p class="text-xs text-slate-500 mt-1">Requirements and Project Backlog Management in Program B</p>
+        <h3 class="text-xl font-bold text-white">{{ t('company.tasks.title') }}</h3>
+        <p class="text-xs text-slate-500 mt-1">{{ t('company.tasks.subtitle') }}</p>
       </div>
       <router-link
         to="/programs/b/create-task"
         class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-xs font-medium transition shadow-sm shadow-blue-900/20 text-center shrink-0"
       >
-        + Create a task
+        {{ t('company.tasks.createBtn') }}
       </router-link>
     </div>
 
@@ -108,9 +110,9 @@ async function handleDeleteTask(task: CompanyTask) {
     </div>
 
     <div v-else-if="tasks.length === 0" class="text-center py-12 border border-dashed border-slate-800 rounded-2xl bg-slate-900/40">
-      <p class="text-sm text-slate-500">You haven't added any assignments for students yet.</p>
+      <p class="text-sm text-slate-500">{{ t('company.tasks.noTasks') }}</p>
       <router-link to="/programs/b/create-task" class="text-blue-400 hover:text-blue-300 text-xs mt-2 inline-block font-medium transition">
-        Post the first assignment now &rarr;
+        {{ t('company.tasks.postFirst') }} &rarr;
       </router-link>
     </div>
 
@@ -127,7 +129,7 @@ async function handleDeleteTask(task: CompanyTask) {
               {{ task.title }}
             </h4>
             <p class="text-xs text-slate-400 line-clamp-2 max-w-3xl leading-relaxed">
-              {{ task.short_description || task.brief || 'Опис відсутній.' }}
+              {{ task.short_description || task.brief || t('company.tasks.noDesc') }}
             </p>
           </div>
           <div class="flex items-center gap-3 shrink-0" @click.stop>
@@ -137,7 +139,7 @@ async function handleDeleteTask(task: CompanyTask) {
               :disabled="actionLoading === task.id"
               class="text-[10px] bg-blue-600/20 hover:bg-blue-600 border border-blue-500/40 hover:border-blue-500 text-blue-400 hover:text-white px-2.5 py-1 rounded-xl transition font-mono font-semibold uppercase tracking-wider"
             >
-              {{ actionLoading === task.id ? '...' : 'Publish' }}
+              {{ actionLoading === task.id ? '...' : t('company.tasks.publish') }}
             </button>
 
             <span :class="['text-[10px] px-2.5 py-1 rounded-xl border uppercase font-mono font-semibold tracking-wider', getStatusColor(task.status)]">
@@ -148,21 +150,21 @@ async function handleDeleteTask(task: CompanyTask) {
 
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4 pt-4 border-t border-slate-950 text-xs">
           <div>
-            <span class="text-slate-500 block font-mono uppercase text-[10px] tracking-wider mb-1">Budget</span>
+            <span class="text-slate-500 block font-mono uppercase text-[10px] tracking-wider mb-1">{{ t('company.tasks.budget') }}</span>
             <p class="text-slate-300 font-medium">
-              {{ task.budget ? `€${Number(task.budget).toLocaleString()}` : 'Not specified' }}
+              {{ task.budget ? `€${Number(task.budget).toLocaleString()}` : t('company.tasks.notSpecified') }}
             </p>
           </div>
           <div>
-            <span class="text-slate-500 block font-mono uppercase text-[10px] tracking-wider mb-1">Program</span>
+            <span class="text-slate-500 block font-mono uppercase text-[10px] tracking-wider mb-1">{{ t('company.tasks.program') }}</span>
             <p class="text-slate-300 font-medium font-mono uppercase tracking-wider">
               {{ (task.call as any)?.program?.code ? (task.call as any).program.code.replace('program_', 'Program ') : 'B' }}
             </p>
           </div>
           <div>
-            <span class="text-slate-500 block font-mono uppercase text-[10px] tracking-wider mb-1">Created</span>
+            <span class="text-slate-500 block font-mono uppercase text-[10px] tracking-wider mb-1">{{ t('company.common.created') }}</span>
             <p class="text-slate-300 font-medium font-mono">
-              {{ task.created_at ? new Date(task.created_at).toLocaleDateString('sk-SK') : '—' }}
+              {{ task.created_at ? new Date(task.created_at).toLocaleDateString(locale === 'sk' ? 'sk-SK' : 'en-US') : '—' }}
             </p>
           </div>
           
@@ -172,14 +174,14 @@ async function handleDeleteTask(task: CompanyTask) {
               :disabled="actionLoading === task.id"
               class="text-red-400/70 hover:text-red-400 border-b border-transparent hover:border-red-500/40 font-mono transition text-[11px]"
             >
-              {{ actionLoading === task.id ? 'Deleting...' : 'Delete' }}
+              {{ actionLoading === task.id ? t('company.tasks.deleting') : t('company.common.delete') }}
             </button>
 
             <router-link
               :to="`/programs/b/tasks/${task.id}/edit`"
               class="text-slate-400 hover:text-white border-b border-transparent hover:border-slate-500 transition font-medium pb-0.5"
             >
-              Edit
+              {{ t('company.common.edit') }}
             </router-link>
             <button
               @click="viewDetails(task.id)"

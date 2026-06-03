@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
+const { t } = useI18n()
 
 function goHome() {
   router.push('/')
@@ -21,11 +23,11 @@ function goBack() {
       </div>
 
       <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">
-        Page Not Found
+        {{ t('errors.page_not_found.title') }}
       </h1>
       
       <p class="text-sm text-slate-400 mb-8 leading-relaxed">
-        Please check your URL and try again later
+        {{ t('errors.page_not_found.description') }}
       </p>
 
       <div class="flex flex-col gap-3">
@@ -33,14 +35,14 @@ function goBack() {
           @click="goBack" 
           class="w-full border border-slate-800 text-slate-400 h-11 rounded-lg hover:text-white hover:bg-slate-900/50 transition text-sm font-medium"
         >
-          Go Back
+          {{ t('errors.page_not_found.btn_back') }}
         </button>
         
         <button 
           @click="goHome" 
           class="w-full bg-blue-600 text-white h-11 rounded-lg font-medium hover:bg-blue-700 transition text-sm shadow-lg shadow-blue-950"
         >
-          Home Page
+          {{ t('errors.page_not_found.btn_home') }}
         </button>
       </div>
 

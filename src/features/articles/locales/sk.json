@@ -1,0 +1,54 @@
+{
+  "catalog": {
+    "newArticle": "Nový článok",
+    "untitled": "Bez názvu",
+    "published": "Publikované",
+    "delete": "Vymazať",
+    "edit": "Upraviť",
+    "preview": "Náhľad",
+    "readMore": "Čítať viac",
+    "failedLoad": "Nepodarilo sa načítať články"
+  },
+  "editor": {
+    "createTag": "Vytvoriť článok",
+    "editTag": "Upraviť článok",
+    "title": "Editor článkov",
+    "backToCatalog": "← Späť do katalógu",
+    "tabs": {
+      "general": "Všeobecné údaje",
+      "sk": "Slovenčina (SK)",
+      "en": "Angličtina (EN)"
+    },
+    "fields": {
+      "slug": "Slug adresa",
+      "coverImage": "Ilustrácia úvodného obrázka",
+      "selectFile": "Vybrať systémový súbor",
+      "supportedFiles": "Podporované prípony: Formáty WebP, PNG alebo JPEG.",
+      "titleSk": "Názov (SK)",
+      "excerptSk": "Úryvok / Zhrnutie (SK)",
+      "contentSk": "Formátovaný textový obsah (SK)",
+      "titleEn": "Názov (EN)",
+      "excerptEn": "Úryvok / Zhrnutie (EN)",
+      "contentEn": "Formátovaný textový obsah (EN)"
+    },
+    "buttons": {
+      "bold": "B",
+      "italic": "I",
+      "list": "• Zoznam",
+      "publishing": "Publikuje sa...",
+      "update": "Aktualizovať článok",
+      "publish": "Publikovať článok"
+    },
+    "fallbackError": "Nepodarilo sa uložiť nastavenie článku"
+  },
+  "detail": {
+    "loading": "Načítava se obsah článku...",
+    "returnToIndex": "← Návrat do katalógu",
+    "backToCatalog": "← Späť do katalógu",
+    "untitledResource": "Konfigurácia zdroja bez názvu",
+    "publishedAt": "Publikované dňa:",
+    "homePage": "Hlavná stránka",
+    "fallbackError": "Nepodarilo sa načítať článok",
+    "invalidId": "Neplatný identifikátor článku"
+  }
+}

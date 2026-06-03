@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import CompanyProfile from './CompanyProfile.vue'
 import CompanyTasks from './CompanyTasks.vue'
 import ActiveMembersTable from './ActiveMembersTable.vue'
@@ -15,6 +16,8 @@ import {
 } from '@/features/company/api/company'
 import type { CompanyUser } from '@/features/company/types/company'
 import { useConfirm as confirm } from '../../../shared/composables/useConfirm'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   roleInOrg?: string
@@ -53,8 +56,8 @@ async function fetchMembersData() {
 
 async function handleApprove(user: CompanyUser) {
   const ok = await confirm({ 
-    title: 'Approve Member', 
-    message: `Are you sure you want to approve ${user.first_name}?` 
+    title: t('company.approvals.confirmApproveTitle'), 
+    message: t('company.approvals.confirmApproveMsg', { name: user.first_name }) 
   })
   if (!ok) return
 
@@ -66,9 +69,9 @@ async function handleApprove(user: CompanyUser) {
 
 async function handleReject(user: CompanyUser) {
   const ok = await confirm({ 
-    title: 'Reject Request', 
-    message: `Reject request from ${user.first_name}?`, 
-    confirmText: 'Reject', 
+    title: t('company.approvals.confirmRejectTitle'), 
+    message: t('company.approvals.confirmRejectMsg', { name: user.first_name }), 
+    confirmText: t('company.approvals.reject'), 
     danger: true,
   })
   if (!ok) return
@@ -81,9 +84,9 @@ async function handleReject(user: CompanyUser) {
 
 async function handleKick(user: CompanyUser) {
   const ok = await confirm({ 
-    title: 'Remove Member', 
-    message: `Remove ${user.first_name} from organization?`, 
-    confirmText: 'Remove', 
+    title: t('company.approvals.confirmKickTitle'), 
+    message: t('company.approvals.confirmKickMsg', { name: user.first_name }), 
+    confirmText: t('company.approvals.reject'), // Or specific "Remove/Vymazať" mapping if preferred
     danger: true, 
   })
   if (!ok) return
@@ -106,23 +109,23 @@ onMounted(() => {
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/60 pb-5">
       <div class="flex flex-wrap gap-2">
         <button @click="handleTabChange('company-info')" :class="[activeTab === 'company-info' ? 'bg-blue-600/15 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-300 border-transparent hover:border-slate-700', 'px-4 py-2 text-sm font-medium transition rounded-xl border']">
-          Company Profile
+          {{ t('company.tabs.profile') }}
         </button>
         
         <button @click="handleTabChange('project-tasks')" :class="[activeTab === 'project-tasks' ? 'bg-blue-600/15 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-300 border-transparent hover:border-slate-700', 'px-4 py-2 text-sm font-medium transition rounded-xl border']">
-          Project Tasks
+          {{ t('company.tabs.tasks') }}
         </button>
 
         <button @click="handleTabChange('approvals')" v-if="roleInOrg === 'owner'" :class="[activeTab === 'approvals' ? 'bg-blue-600/15 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-300 border-transparent hover:border-slate-700', 'px-4 py-2 text-sm font-medium transition rounded-xl border']">
-          Manage Pending Approvals
+          {{ t('company.tabs.approvals') }}
         </button>
         
         <button @click="handleTabChange('members')" v-if="roleInOrg === 'owner'" :class="[activeTab === 'members' ? 'bg-blue-600/15 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-300 border-transparent hover:border-slate-700', 'px-4 py-2 text-sm font-medium transition rounded-xl border']">
-          Manage Company Members
+          {{ t('company.tabs.members') }}
         </button>
 
         <button @click="handleTabChange('applications')" v-if="roleInOrg === 'owner'" :class="[activeTab === 'applications' ? 'bg-blue-600/15 border-blue-500 text-blue-400' : 'text-slate-500 hover:text-slate-300 border-transparent hover:border-slate-700', 'px-4 py-2 text-sm font-medium transition rounded-xl border']">
-          Manage Applications
+          {{ t('company.tabs.applications') }}
         </button>
       </div>
     </div>

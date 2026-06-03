@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { updateMemberRole } from '@/features/company/api/company' 
+
+const { t } = useI18n()
 
 const USERS_PER_PAGE = 25
 
@@ -14,12 +17,12 @@ const emit = defineEmits(['kick', 'refresh'])
 const currentPage = ref(1)
 const updatingRoleId = ref<number | string | null>(null) 
 
-const roleInOrgOptions = [
-  { value: 'owner', label: 'Owner' },
-  { value: 'contact', label: 'Contact' },
-  { value: 'evaluator', label: 'Evaluator' },
-  { value: 'mentor', label: 'Mentor' }
-]
+const roleInOrgOptions = computed(() => [
+  { value: 'owner', label: t('company.roles.owner') },
+  { value: 'contact', label: t('company.roles.contact') },
+  { value: 'evaluator', label: t('company.roles.evaluator') },
+  { value: 'mentor', label: t('company.roles.mentor') }
+])
 
 const hasMembers = computed(() => props.activeMembers && props.activeMembers.length > 0)
 const totalPages = computed(() => Math.ceil((props.activeMembers?.length || 0) / USERS_PER_PAGE))
@@ -58,18 +61,18 @@ async function handleRoleChange(user: any, newRole: string) {
     </div>
 
     <div v-else-if="!hasMembers" class="bg-slate-900/40 border border-slate-800 rounded-2xl text-center py-10 text-slate-500 text-sm">
-      No active company members found
+      {{ t('company.membersTable.noMembers') }}
     </div>
 
     <div v-else class="overflow-x-auto border border-slate-800 rounded-2xl bg-slate-900/40">
       <table class="w-full text-sm">
         <thead class="border-b border-slate-800 bg-slate-900/50">
           <tr class="text-left text-slate-400 font-mono text-xs uppercase tracking-wider">
-            <th class="py-3.5 px-5">Name</th>
-            <th class="py-3.5 px-5">Email</th>
-            <th class="py-3.5 px-5">Role in Org</th>
-            <th class="py-3.5 px-5">Status</th>
-            <th class="py-3.5 px-5 text-right">Actions</th>
+            <th class="py-3.5 px-5">{{ t('company.common.name') }}</th>
+            <th class="py-3.5 px-5">{{ t('company.common.email') }}</th>
+            <th class="py-3.5 px-5">{{ t('company.membersTable.roleInOrg') }}</th>
+            <th class="py-3.5 px-5">{{ t('company.common.status') }}</th>
+            <th class="py-3.5 px-5 text-right">{{ t('company.common.actions') }}</th>
           </tr>
         </thead>
         <tbody class="text-slate-300 divide-y divide-slate-800/60">
@@ -115,7 +118,7 @@ async function handleRoleChange(user: any, newRole: string) {
                 @click="$emit('kick', user)" 
                 class="text-xs bg-red-950/20 hover:bg-red-900/30 text-red-400 border border-red-900/40 px-3 py-1.5 rounded-lg transition"
               >
-                Kick Out
+                {{ t('company.membersTable.kickOut') }}
               </button>
             </td>
           </tr>
@@ -129,11 +132,11 @@ async function handleRoleChange(user: any, newRole: string) {
         @click="currentPage--" 
         class="text-xs px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 transition text-slate-300"
       >
-        &larr; Prev
+        &larr; {{ t('company.membersTable.prev') }}
       </button>
       
       <div class="text-xs text-slate-500 font-mono">
-        Page <span class="text-slate-300">{{ currentPage }}</span> of <span class="text-slate-300">{{ totalPages }}</span> (<span class="text-slate-400">{{ activeMembers.length }} users</span>)
+        {{ t('company.membersTable.pagination', { current: currentPage, total: totalPages, count: activeMembers.length }) }}
       </div>
       
       <button 
@@ -141,7 +144,7 @@ async function handleRoleChange(user: any, newRole: string) {
         @click="currentPage++" 
         class="text-xs px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 transition text-slate-300"
       >
-        Next &rarr;
+        {{ t('company.membersTable.next') }} &rarr;
       </button>
     </div>
   </div>

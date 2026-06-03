@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { getArticles, deleteArticle as deleteArticleApi } from '@/features/articles/api/articles'
 import type { Article } from '@/features/articles/types/articles'
 import { useAuthStore } from '@/features/auth/stores/auth'
 
+const { t } = useI18n()
 const router = useRouter()
 const store = useAuthStore()
 const articlesObj = ref<Article[] | null>(null)
@@ -43,7 +45,9 @@ onMounted(() => {
       @click="router.push('/article/create')"
       class="border-2 border-dashed border-slate-700 hover:border-blue-700 bg-slate-900/30 rounded-2xl flex flex-col items-center justify-center gap-4 cursor-pointer transition group min-h-80">
       <div class="text-5xl text-slate-600 group-hover:text-blue-600 transition select-none font-thin">+</div>
-      <span class="text-xs font-semibold tracking-widest text-slate-600 group-hover:text-slate-400 transition uppercase">New article</span>
+      <span class="text-xs font-semibold tracking-widest text-slate-600 group-hover:text-slate-400 transition uppercase">
+        {{ t('catalog.newArticle') }}
+      </span>
     </button>
 
     <!-- Article cards -->
@@ -60,7 +64,7 @@ onMounted(() => {
       <!-- Content -->
       <div class="flex flex-col flex-1 p-6">
         <h3 class="text-lg font-bold text-white mb-2 leading-snug">
-          {{ article.translations.find(t => t.language === 'en')?.title ?? 'Untitled' }}
+          {{ article.translations.find(t => t.language === 'en')?.title ?? t('catalog.untitled') }}
         </h3>
         <p class="text-sm text-gray-400 leading-relaxed flex-1">
           {{ article.translations.find(t => t.language === 'en')?.excerpt ?? '' }}
@@ -68,23 +72,25 @@ onMounted(() => {
 
         <!-- Actions -->
         <div class="flex items-center gap-2 mt-6">
-          <div class="text-blue-400" v-show="!canEdit">Published {{ new Date(article.published_at).toLocaleDateString() }}</div>
+          <div class="text-blue-400" v-show="!canEdit">
+            {{ t('catalog.published') }} {{ new Date(article.published_at).toLocaleDateString() }}
+          </div>
           <button
             @click="deleteArticle(article.id)"
             v-show="canEdit"
             class="border border-red-800/60 hover:border-red-600 text-red-400/60 hover:text-red-400 px-4 py-1.5 rounded-lg text-sm font-medium transition">
-            Delete
+            {{ t('catalog.delete') }}
           </button>
           <button
             @click="router.push(`/article/edit/${article.id}`)"
             v-show="canEdit"
             class="border border-yellow-700/60 hover:border-yellow-500 text-yellow-400/60 hover:text-yellow-400 px-4 py-1.5 rounded-lg text-sm font-medium transition">
-            Edit
+            {{ t('catalog.edit') }}
           </button>
           <button
             @click="router.push(`/article/${article.id}`)"
             class="ml-auto bg-blue-600 hover:bg-blue-500 text-white px-6 py-1.5 rounded-lg text-sm font-medium transition">
-            {{ canEdit ? 'Preview' : 'Read more' }}
+            {{ canEdit ? t('catalog.preview') : t('catalog.readMore') }}
           </button>
         </div>
       </div>
@@ -93,7 +99,7 @@ onMounted(() => {
     <!-- Error state -->
     <div v-if="fetchSuccessfull === false"
       class="border border-slate-800 rounded-2xl flex items-center justify-center py-16 col-span-3">
-      <p class="text-sm text-slate-600">Failed to load articles</p>
+      <p class="text-sm text-slate-600">{{ t('catalog.failedLoad') }}</p>
     </div>
 
   </div>

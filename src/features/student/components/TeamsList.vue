@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getTeams, deleteTeam, updateTeam } from '../api/teams'
 import type { Team } from '../types/teams'
 import TeamForm from './TeamForm.vue'
 import TeamMembersManager from './TeamMembersManager.vue'
-import {useConfirm} from "@/shared/composables/useConfirm.ts";
+import { useConfirm } from "@/shared/composables/useConfirm.ts"
 
+const { t } = useI18n()
 const props = defineProps<{
   currentUserId?: number
 }>()
@@ -28,7 +30,7 @@ async function fetchTeams() {
     const res = await getTeams()
     teams.value = res.data
   } catch (e: any) {
-    error.value = e?.response?.data?.message ?? 'Failed to load teams.'
+    error.value = e?.response?.data?.message ?? t('student.teamsList.errLoad')
   } finally {
     loading.value = false
   }
@@ -67,9 +69,9 @@ async function handleUpdateTeam(teamId: number) {
     await fetchTeams()
   } catch (e: any) {
     await useConfirm({
-      title: 'Error',
-      message: e?.response?.data?.message ?? 'Failed to update team.',
-      confirmText: 'Okay',
+      title: t('student.common.errorTitle'),
+      message: e?.response?.data?.message ?? t('student.teamsList.errUpdate'),
+      confirmText: t('student.common.okay'),
       danger: false,
     })
   } finally {
@@ -79,10 +81,10 @@ async function handleUpdateTeam(teamId: number) {
 
 async function handleDeleteTeam(teamId: number) {
   const confirmed = await useConfirm({
-    title: 'Delete Team',
-    message: 'Are you sure you want to delete this team? This action cannot be undone.',
-    confirmText: 'Delete',
-    cancelText: 'Cancel',
+    title: t('student.teamsList.confirmDeleteTitle'),
+    message: t('student.teamsList.confirmDeleteMsg'),
+    confirmText: t('student.common.delete'),
+    cancelText: t('student.common.cancel'),
     danger: true,
   })
   if (!confirmed) {
@@ -94,9 +96,9 @@ async function handleDeleteTeam(teamId: number) {
     await fetchTeams()
   } catch (e: any) {
     await useConfirm({
-      title: 'Error',
-      message: e?.response?.data?.message ?? 'Failed to delete team.',
-      confirmText: 'Okay',
+      title: t('student.common.errorTitle'),
+      message: e?.response?.data?.message ?? t('student.teamsList.errDelete'),
+      confirmText: t('student.common.okay'),
       danger: false,
     })
   }
@@ -119,10 +121,8 @@ onMounted(() => { fetchTeams() })
   <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
       <div>
-        <h3 class="text-xl font-bold text-white">Manage Teams</h3>
-        <p class="text-sm text-slate-500 mt-1">
-          Create and manage the teams you lead or belong to.
-        </p>
+        <h3 class="text-xl font-bold text-white">{{ t('student.teamsList.title') }}</h3>
+        <p class="text-sm text-slate-500 mt-1">{{ t('student.teamsList.description') }}</p>
       </div>
       <div class="flex items-center gap-2">
         <button
@@ -130,13 +130,13 @@ onMounted(() => { fetchTeams() })
           @click="showTeamForm = true"
           class="text-xs px-3 py-1.5 rounded border bg-emerald-900/40 hover:bg-emerald-900/60 text-emerald-400 border-emerald-800 transition font-mono uppercase cursor-pointer font-semibold"
         >
-          Create Team
+          {{ t('student.teamsList.title') }}
         </button>
         <button
           @click="fetchTeams"
           class="text-xs bg-slate-900/40 hover:bg-slate-800/50 px-4 py-2 rounded text-slate-400 border border-slate-800 transition-all font-mono cursor-pointer"
         >
-          Refresh
+          {{ t('student.common.refresh') }}
         </button>
       </div>
     </div>
@@ -144,17 +144,17 @@ onMounted(() => { fetchTeams() })
     <TeamForm v-if="showTeamForm" @created="onTeamCreated" @cancel="showTeamForm = false" />
 
     <div v-if="error" class="p-3 rounded-lg text-sm mb-6 border bg-red-900/20 border-red-800 text-red-400 font-mono">
-      System Error: {{ error }}
+      {{ t('student.common.systemError', { error }) }}
     </div>
 
     <div v-if="loading" class="text-slate-500 animate-pulse py-12 text-center font-mono text-sm">
-      Loading teams...
+      {{ t('student.common.loading') }}
     </div>
 
     <div v-else>
       <div v-if="teams.length === 0" class="border border-slate-800 border-dashed rounded-2xl p-12 text-center bg-slate-900/10">
-        <p class="text-slate-400 text-base font-medium">No teams found.</p>
-        <p class="text-slate-600 text-xs mt-1.5">Create a new team or accept an invitation to join one.</p>
+        <p class="text-slate-400 text-base font-medium">{{ t('student.teamsList.noTeams') }}</p>
+        <p class="text-slate-600 text-xs mt-1.5">{{ t('student.teamsList.noTeamsDesc') }}</p>
       </div>
 
       <div v-else class="space-y-4">
@@ -169,7 +169,7 @@ onMounted(() => { fetchTeams() })
         >
           <div v-if="editingTeamId === team.id" class="space-y-4 bg-slate-900/20 p-5 rounded-xl border border-slate-800 mb-2">
             <div class="flex flex-col gap-1.5">
-              <label class="text-xs font-mono uppercase text-slate-500">Team Name</label>
+              <label class="text-xs font-mono uppercase text-slate-500">{{ t('student.teamsList.labelName') }}</label>
               <input
                 v-model="editName"
                 type="text"
@@ -178,7 +178,7 @@ onMounted(() => { fetchTeams() })
             </div>
 
             <div class="flex flex-col gap-1.5">
-              <label class="text-xs font-mono uppercase text-slate-500">Description</label>
+              <label class="text-xs font-mono uppercase text-slate-500">{{ t('student.teamsList.labelDesc') }}</label>
               <textarea
                 v-model="editDescription"
                 rows="3"
@@ -192,13 +192,13 @@ onMounted(() => { fetchTeams() })
                 :disabled="saving"
                 class="text-xs px-3 py-1.5 rounded border bg-blue-900/40 hover:bg-blue-900/60 text-blue-400 border-blue-800 transition disabled:opacity-50 cursor-pointer font-mono uppercase"
               >
-                {{ saving ? 'Saving...' : 'Save' }}
+                {{ saving ? t('student.common.saving') : t('student.common.save') }}
               </button>
               <button
                 @click="cancelEdit"
                 class="text-xs px-3 py-1.5 rounded border bg-slate-800 hover:bg-slate-700 text-white border-slate-700 transition font-mono uppercase cursor-pointer"
               >
-                Cancel
+                {{ t('student.common.cancel') }}
               </button>
             </div>
           </div>
@@ -212,34 +212,34 @@ onMounted(() => { fetchTeams() })
                   v-if="team.status === 'ready'"
                   class="text-xs px-2 py-0.5 rounded border font-mono uppercase bg-slate-800 text-slate-400 border-slate-700"
                 >
-                  Locked
+                  {{ t('student.teamsList.locked') }}
                 </span>
 
                 <span class="text-xs font-mono px-2 py-0.5 rounded border border-slate-800 bg-slate-900 text-slate-400 uppercase">
-                  {{ expandedTeamId === team.id ? 'Collapse' : 'Expand' }}
+                  {{ expandedTeamId === team.id ? t('student.teamsList.collapse') : t('student.teamsList.expand') }}
                 </span>
               </div>
               <div class="text-sm text-slate-400 line-clamp-2 leading-relaxed">
-                {{ team.description ?? 'No description provided.' }}
+                {{ team.description ?? t('student.teamsList.noDesc') }}
               </div>
             </div>
 
             <div class="text-left sm:text-right flex flex-row sm:flex-col items-center sm:items-end gap-2">
               <span class="text-xs font-mono px-2 py-1 rounded border bg-slate-900 text-slate-400 border-slate-800 uppercase">
-                {{ team.members?.length ?? team.members_count ?? 0 }} members
+                {{ t('student.teamsList.membersCount', { count: team.members?.length ?? team.members_count ?? 0 }) }}
               </span>
 
               <span
                 v-if="getAcceptedMembersCount(team) >= 3"
                 class="text-xs px-2 py-0.5 rounded border font-mono uppercase bg-emerald-950/60 text-emerald-400 border-emerald-900/80"
               >
-                Prog A: Complete
+                {{ t('student.teamsList.progAComplete') }}
               </span>
               <span
                 v-else
                 class="text-xs px-2 py-0.5 rounded border font-mono uppercase bg-slate-900/40 text-slate-400 border-slate-800"
               >
-                Prog A: Incomplete
+                {{ t('student.teamsList.progAIncomplete') }}
               </span>
             </div>
           </div>
@@ -250,18 +250,18 @@ onMounted(() => { fetchTeams() })
                 @click="startEdit(team)"
                 class="text-xs px-3 py-1 rounded border bg-slate-800 hover:bg-slate-700 text-white border-slate-700 transition cursor-pointer"
               >
-                Edit
+                {{ t('student.common.edit') }}
               </button>
               <button
                 @click="handleDeleteTeam(team.id)"
                 class="text-xs px-3 py-1 rounded border bg-red-900/40 hover:bg-red-900/60 text-red-400 border-red-800 transition cursor-pointer"
               >
-                Delete
+                {{ t('student.common.delete') }}
               </button>
             </div>
 
             <div v-else-if="team.leader_id === currentUserId && team.status === 'ready'" class="text-sm text-slate-400 border border-slate-800 bg-slate-950/60 p-3 rounded-xl mb-4 leading-relaxed">
-              This team is locked and can no longer be modified.
+              {{ t('student.teamsList.lockedWarning') }}
             </div>
 
             <TeamMembersManager

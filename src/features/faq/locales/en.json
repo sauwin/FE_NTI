@@ -1,0 +1,45 @@
+{
+  "faq": {
+    "titlePrefix": "FAQ",
+    "titleMain": "Frequently asked {span}",
+    "titleSpan": "questions",
+    "subtitle": "Everything you need to know about NTI programs, applications, and the process.",
+    "errorLoad": "Unable to load FAQ items.",
+    "errorSave": "Unable to save FAQ. Make sure you are logged in with admin access.",
+    "errorDelete": "Unable to delete FAQ. Make sure you are logged in with admin access.",
+    "successUpdated": "FAQ updated successfully.",
+    "successCreated": "FAQ created successfully.",
+    "successDeleted": "FAQ deleted successfully.",
+    "admin": {
+      "editorTitle": "Admin FAQ editor",
+      "editorSubtitle": "Create, update, and remove FAQ entries for the public FAQ page.",
+      "addFaq": "Add FAQ",
+      "labelQuestion": "Question",
+      "labelAnswer": "Answer",
+      "labelContext": "Page context",
+      "labelActive": "Active",
+      "labelOrder": "Order position",
+      "placeholderQuestion": "What is NTI?",
+      "placeholderAnswer": "NTI is ...",
+      "optionGeneral": "General",
+      "optionProgramA": "Program A",
+      "optionProgramB": "Program B",
+      "optionYes": "Yes",
+      "optionNo": "No",
+      "saveChanges": "Save changes",
+      "createFaq": "Create FAQ",
+      "cancel": "Cancel",
+      "deleteTitle": "Delete FAQ",
+      "deleteConfirm": "Are you sure you want to delete this FAQ?",
+      "deleteBtn": "Delete",
+      "editingEnabled": "Editing enabled."
+    },
+    "current": {
+      "title": "Current FAQ",
+      "subtitle": "Tap a question to expand the answer.",
+      "noItems": "No FAQ items found.",
+      "btnEdit": "Edit",
+      "btnDelete": "Delete"
+    }
+  }
+}

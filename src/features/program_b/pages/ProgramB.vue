@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/features/auth/stores/auth'
 import { getCompanyTasks } from '@/features/company/api/company'
 import { getProgramBTasks } from '@/features/tasks/api/tasks'
@@ -8,6 +9,7 @@ import type { TaskWithCall } from '@/features/company/types/company'
 
 import PageHero from '@/shared/ui/PageHero.vue'
 
+const { t, locale } = useI18n()
 const router = useRouter()
 const auth = useAuthStore()
 const tasks = ref<TaskWithCall[]>([])
@@ -39,8 +41,11 @@ const goToTaskDetails = (taskId: number): void => {
 }
 
 const formatDate = (dateString: string | null | undefined): string => {
-  if (!dateString) return 'No deadline'
-  return new Date(dateString).toLocaleDateString('uk-UA', {
+  if (!dateString) return t('programB.view.noDeadline')
+  
+  // Use the active runtime language to match correct context parsing
+  const currentLang = locale.value === 'sk' ? 'sk-SK' : 'en-US'
+  return new Date(dateString).toLocaleDateString(currentLang, {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
@@ -63,20 +68,20 @@ const getStatusColor = (status: string) => {
 
   <div class="pb-20 mb-12">
     <PageHero
-    badge="Program B"
-    title="Real-world"
-    highlight="Industry Practice"
+      :badge="t('programB.view.badge')"
+      :title="t('programB.view.title')"
+      :highlight="t('programB.view.highlight')"
     />
 
-    <div v-if="auth.isCompany" class="mt-12">
+    <div v-if="auth.isCompany">
       <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-white">Our Technical Specifications</h2>
+        <h2 class="text-2xl font-bold text-white">{{ t('programB.view.technicalSpecifications') }}</h2>
         <button @click="goToCreateTask" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition">
-          + Create New Task
+          {{ t('programB.view.createNewTask') }}
         </button>
       </div>
 
-      <div v-if="loading" class="text-gray-400">Loading your challenges...</div>
+      <div v-if="loading" class="text-gray-400">{{ t('programB.view.loadingChallenges') }}</div>
       <div v-else class="grid gap-6 md:grid-cols-2">
         <div v-for="task in myTasks" :key="task.id" class="border border-blue-900 bg-slate-950 p-6 rounded-2xl flex flex-col justify-between">
           <div>
@@ -87,31 +92,31 @@ const getStatusColor = (status: string) => {
               </span>
             </div>
             <p class="text-gray-400 text-sm mb-4 line-clamp-3">
-              {{ task.short_description || task.brief || 'No description provided.' }}
+              {{ task.short_description || task.brief || t('programB.view.noDescriptionProvided') }}
             </p>
           </div>
           
           <div class="border-t border-slate-900 pt-4 mt-4">
             <div class="flex justify-between text-xs text-gray-500 mb-4">
-              <span>Budget: {{ task.budget ? `€${task.budget}` : 'Not specified' }}</span>
-              <span>Apply Deadline: {{ formatDate(task.call?.deadline_at || task.deadline) }}</span>
+              <span>Budget: {{ task.budget ? `€${task.budget}` : t('programB.view.budgetNotSpecified') }}</span>
+              <span>{{ t('programB.view.applyDeadline', { date: formatDate(task.call?.deadline_at || task.deadline) }) }}</span>
             </div>
             <button 
               @click="goToTaskDetails(task.id)" 
               class="w-full bg-slate-900 hover:bg-slate-800 text-blue-400 py-2 rounded-lg text-sm font-medium transition border border-blue-900/40"
             >
-              View & Edit Details
+              {{ t('programB.view.viewEditDetails') }}
             </button>
           </div>
         </div>
-        <div v-if="!myTasks.length" class="text-gray-500 italic">You haven't added any challenges yet.</div>
+        <div v-if="!myTasks.length" class="text-gray-500 italic">{{ t('programB.view.noMyChallenges') }}</div>
       </div>
     </div>
 
     <div v-else class="mt-12">
-      <h2 class="text-2xl font-bold text-white mb-6">Available Industry Tasks</h2>
+      <h2 class="text-2xl font-bold text-white mb-6">{{ t('programB.view.availableTasks') }}</h2>
       
-      <div v-if="loading" class="text-gray-400">Loading catalog...</div>
+      <div v-if="loading" class="text-gray-400">{{ t('programB.view.loadingCatalog') }}</div>
       <div v-else class="grid gap-6 md:grid-cols-2">
         <div v-for="task in tasks" :key="task.id" class="border border-blue-800 bg-slate-950 p-6 rounded-2xl flex flex-col justify-between">
           <div>
@@ -120,7 +125,7 @@ const getStatusColor = (status: string) => {
                 <div class="w-8 h-8 bg-blue-900 rounded-full flex items-center justify-center font-bold text-xs text-white">
                   {{ task.organization?.name?.substring(0,2).toUpperCase() || 'CO' }}
                 </div>
-                <span class="text-sm text-gray-400 font-medium">{{ task.organization?.name || 'Unknown Company' }}</span>
+                <span class="text-sm text-gray-400 font-medium">{{ task.organization?.name || t('programB.view.unknownCompany') }}</span>
               </div>
               <span v-if="task.budget" class="text-xs bg-green-500/10 text-green-400 px-2 py-0.5 rounded border border-green-900">
                 €{{ task.budget }}
@@ -128,25 +133,25 @@ const getStatusColor = (status: string) => {
             </div>
             <h3 class="text-xl font-bold text-white mb-2">{{ task.title }}</h3>
             <p class="text-gray-400 text-sm mb-6 line-clamp-4">
-              {{ task.short_description || task.brief || 'No description available.' }}
+              {{ task.short_description || task.brief || t('programB.view.noDescription') }}
             </p>
           </div>
 
           <div class="border-t border-slate-900 pt-4 mt-auto">
             <div class="flex justify-between text-xs text-gray-500 mb-4">
-              <span>Required Team: {{ task.call?.min_team_size || 3 }}-{{ task.call?.max_team_size || '∞' }} persons</span>
-              <span class="text-amber-400 font-medium">Apply before: {{ formatDate(task.call?.deadline_at) }}</span>
+              <span>{{ t('programB.view.requiredTeam', { min: task.call?.min_team_size || 3, max: task.call?.max_team_size || '∞' }) }}</span>
+              <span class="text-amber-400 font-medium">{{ t('programB.view.applyBefore', { date: formatDate(task.call?.deadline_at) }) }}</span>
             </div>
             
             <button 
               @click="goToTaskDetails(task.id)" 
               class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-medium transition"
             >
-              View Detailed Specifications
+              {{ t('programB.view.viewDetailedSpecs') }}
             </button>
           </div>
         </div>
-        <div v-if="!tasks.length" class="text-gray-500 italic">No available challenges at the moment.</div>
+        <div v-if="!tasks.length" class="text-gray-500 italic">{{ t('programB.view.noTasks') }}</div>
       </div>
     </div>
 

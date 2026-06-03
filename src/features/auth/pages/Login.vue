@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { login } from '@/features/auth/api/auth'
 import { useAuthStore } from '../stores/auth'
 import axios from 'axios'
 
+const { t } = useI18n()
 const email = ref('')
 const password = ref('')
 const error = ref('')
@@ -29,17 +31,17 @@ async function submit() {
         } else if (msg === 'pending_approval') {
           router.push('/pending-approval')
         } else {
-          error.value = 'Access denied'
+          error.value = t('login.errors.accessDenied')
         }
       } if (e.response?.status === 429) {
-        error.value = 'Too many requests. Please try again later'
+        error.value = t('login.errors.tooManyRequests')
       } else {
-        error.value = 'Invalid email or password'
+        error.value = t('login.errors.invalidCredentials')
       }
     } 
     else {
       console.error(e)
-      error.value = 'Unexpected error'
+      error.value = t('login.errors.unexpected')
     }
   } finally {
     loading.value = false
@@ -52,9 +54,9 @@ async function submit() {
     <div class="max-w-md w-full space-y-6 bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-2xl p-8 shadow-2xl">
       
       <div>
-        <h1 class="font-bold text-3xl text-center text-white tracking-tight">Welcome Back</h1>
+        <h1 class="font-bold text-3xl text-center text-white tracking-tight">{{ t('login.title') }}</h1>
         <p class="mt-2 text-center text-sm text-slate-400">
-          Log in to your NTI account to continue
+          {{ t('login.subtitle') }}
         </p>
       </div>
 
@@ -65,7 +67,7 @@ async function submit() {
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Email Address</label>
+          <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('login.emailLabel') }}</label>
           <input 
             v-model="email" 
             type="email" 
@@ -77,7 +79,7 @@ async function submit() {
 
         <div>
           <div class="flex justify-between items-center">
-            <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Password</label>
+            <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('login.passwordLabel') }}</label>
           </div>
           <input 
             v-model="password" 
@@ -87,7 +89,7 @@ async function submit() {
             class="mt-1 block w-full px-3 py-2 bg-slate-950/50 border border-slate-800/80 rounded-lg text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition text-sm" 
           />
           <router-link class="mt-1 text-xs text-blue-400 hover:text-blue-300 transition" to="/auth/forgot-password">
-              Forgot password?
+              {{ t('login.forgotPasswordLink') }}
           </router-link>
         </div>
 
@@ -96,13 +98,13 @@ async function submit() {
           :disabled="loading"
           class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-blue-500 active:bg-blue-700 transition duration-150 ease-in-out mt-6 cursor-pointer"
         >
-          {{ loading ? 'Loading...' : 'Sign In' }}
+          {{ loading ? t('login.btnLoading') : t('login.btnSignIn') }}
         </button>
 
         <div class="text-center text-xs text-slate-400 mt-4">
-          Not registered? 
+          {{ t('login.notRegistered') }} 
           <router-link class="text-blue-400 hover:text-blue-300 font-medium transition" to="/auth/register">
-            Create an account
+            {{ t('login.createAccount') }}
           </router-link>
         </div>
       </form>

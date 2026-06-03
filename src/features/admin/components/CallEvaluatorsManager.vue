@@ -4,6 +4,9 @@ import { getAdminCalls, getAdminUsers } from '@/features/admin/api/admin'
 import { getCallEvaluators, assignEvaluator, removeEvaluator } from '@/features/evaluation/api/evaluations'
 import { scheduleCallEvaluation, getCallEvaluationInfo, moveApplicationsUnderEvaluation } from '@/features/admin/api/admin'
 import EvaluationCriteriaManager from './EvaluationCriteriaManager.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const calls = ref<any[]>([])
 const selectedCallId = ref<number | null>(null)
@@ -40,7 +43,7 @@ onMounted(async () => {
         u.roles?.some((r: any) => r.slug === 'evaluator')
     )
   } catch (e) {
-    error.value = 'Could not load data'
+    error.value = t('admin.callEvaluatorsManager.errors.loadDataFailed')
     console.error('Error loading data:', e)
   }
 })
@@ -69,7 +72,7 @@ async function loadEvaluators() {
       evaluationScheduledAt.value = ''
     }
   } catch (e) {
-    error.value = 'Could not load evaluators'
+    error.value = t('admin.callEvaluatorsManager.errors.loadEvaluatorsFailed')
     console.error('Error loading evaluators:', e)
   } finally {
     loading.value = false
@@ -81,12 +84,12 @@ async function assign() {
   error.value = ''
   try {
     await assignEvaluator(selectedCallId.value, selectedUserId.value)
-    success.value = 'Evaluator assigned.'
+    success.value = t('admin.callEvaluatorsManager.success.assigned')
     selectedUserId.value = null
     await loadEvaluators()
     setTimeout(() => (success.value = ''), 3000)
   } catch (e: any) {
-    error.value = e.response?.data?.message ?? 'Could not assign evaluator'
+    error.value = e.response?.data?.message ?? t('admin.callEvaluatorsManager.errors.assignFailed')
     console.error('Error assigning evaluator:', e)
   }
 }
@@ -97,17 +100,17 @@ async function remove(userId: number) {
   try {
     await removeEvaluator(selectedCallId.value, userId)
     evaluators.value = evaluators.value.filter(e => e.id !== userId)
-    success.value = 'Evaluator removed.'
+    success.value = t('admin.callEvaluatorsManager.success.removed')
     setTimeout(() => (success.value = ''), 3000)
   } catch (e: any) {
-    error.value = e.response?.data?.message ?? 'Could not remove evaluator'
+    error.value = e.response?.data?.message ?? t('admin.callEvaluatorsManager.errors.removeFailed')
     console.error('Error removing evaluator:', e)
   }
 }
 
 async function handleScheduleEvaluation() {
   if (!selectedCallId.value || !evaluationScheduledAt.value) {
-    schedulingError.value = 'Please choose call and set date'
+    schedulingError.value = t('admin.callEvaluatorsManager.errors.validationChooseAndDate')
     return
   }
   
@@ -120,7 +123,7 @@ async function handleScheduleEvaluation() {
       evaluation_scheduled_at: evaluationScheduledAt.value,
     })
     
-    schedulingSuccess.value = `✓ Evaluation scheduled!`
+    schedulingSuccess.value = t('admin.callEvaluatorsManager.success.scheduled')
     
     if (selectedCall.value) {
       selectedCall.value.evaluation_scheduled_at = res.data.data.evaluation_scheduled_at
@@ -129,7 +132,7 @@ async function handleScheduleEvaluation() {
     setTimeout(() => (schedulingSuccess.value = ''), 4000)
   } catch (e: any) {
     console.error('Error scheduling evaluation:', e)
-    schedulingError.value = e.response?.data?.message ?? 'Could not schedule evaluation'
+    schedulingError.value = e.response?.data?.message ?? t('admin.callEvaluatorsManager.errors.scheduleFailed')
   } finally {
     schedulingLoading.value = false
   }
@@ -137,12 +140,12 @@ async function handleScheduleEvaluation() {
 
 async function changeAppsStatus() {
   if (!selectedCallId.value) {
-    schedulingError.value = 'Please choose call'
+    schedulingError.value = t('admin.callEvaluatorsManager.errors.validationChooseCall')
     return
   }
 
   if (!evaluationScheduledAt.value) {
-    schedulingError.value = 'Please schedule evaluation first'
+    schedulingError.value = t('admin.callEvaluatorsManager.errors.validationScheduleFirst')
     return
   }
   
@@ -154,7 +157,7 @@ async function changeAppsStatus() {
     const res = await moveApplicationsUnderEvaluation(selectedCallId.value)
     
     console.log(res)
-    schedulingSuccess.value = `${res.data.applications_moved} applications moved to under_evaluation.`
+    schedulingSuccess.value = t('admin.callEvaluatorsManager.success.moved', { count: res.data.applications_moved })
     
     evaluationStats.value.formally_verified = 0
     evaluationStats.value.under_evaluation += res.data.applications_moved
@@ -162,7 +165,7 @@ async function changeAppsStatus() {
     setTimeout(() => (schedulingSuccess.value = ''), 4000)
   } catch (e: any) {
     console.error('Error while moving applications:', e)
-    schedulingError.value = e.response?.data?.message ?? 'Could not move applications to under_evaluation'
+    schedulingError.value = e.response?.data?.message ?? t('admin.callEvaluatorsManager.errors.moveFailed')
   } finally {
     movingLoading.value = false
   }
@@ -177,7 +180,7 @@ function getMinDateTime(): string {
 
 <template>
   <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6 space-y-6">
-    <h3 class="text-xl font-bold text-white">Call Evaluators & Evaluation Scheduling</h3>
+    <h3 class="text-xl font-bold text-white">{{ $t('admin.callEvaluatorsManager.title') }}</h3>
 
     <!-- ERROR/SUCCESS MESSAGES -->
     <div v-if="error" class="p-3 bg-red-950/30 border border-red-900/40 rounded-lg text-red-400 text-sm">
@@ -189,12 +192,12 @@ function getMinDateTime(): string {
 
     <!-- CALL SELECTION -->
     <div>
-      <label class="block text-sm font-medium text-slate-300 mb-2">Select Call</label>
+      <label class="block text-sm font-medium text-slate-300 mb-2">{{ $t('admin.callEvaluatorsManager.selectCallLabel') }}</label>
       <select
           v-model.number="selectedCallId"
           @change="loadEvaluators"
           class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-600 outline-none">
-        <option :value="null">-- Choose a call --</option>
+        <option :value="null">{{ $t('admin.callEvaluatorsManager.chooseCallPlaceholder') }}</option>
         <option v-for="call in calls" :key="call.id" :value="call.id">
           {{ call.name }} ({{ call.program?.name }})
         </option>
@@ -204,7 +207,7 @@ function getMinDateTime(): string {
     <!-- EVALUATION SCHEDULING SECTION -->
     <div v-if="selectedCall" class="pt-6 border-t border-slate-800 space-y-4">
       <h4 class="text-lg font-semibold text-white flex items-center gap-2">
-        Schedule Commission Meeting
+        {{ $t('admin.callEvaluatorsManager.scheduling.title') }}
       </h4>
 
       <div v-if="schedulingError" class="p-3 bg-red-950/30 border border-red-900/40 rounded-lg text-red-400 text-sm">
@@ -218,8 +221,8 @@ function getMinDateTime(): string {
       <div class="flex gap-3 items-end">
         <div class="flex-1">
           <label class="block text-sm font-medium text-slate-300 mb-2">
-            Evaluation Date & Time
-            <span class="text-slate-500 text-xs">(when commission will meet)</span>
+            {{ $t('admin.callEvaluatorsManager.scheduling.dateLabel') }}
+            <span class="text-slate-500 text-xs">{{ $t('admin.callEvaluatorsManager.scheduling.dateSublabel') }}</span>
           </label>
           <input
             v-model="evaluationScheduledAt"
@@ -234,32 +237,32 @@ function getMinDateTime(): string {
           :disabled="!evaluationScheduledAt || schedulingLoading"
           class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition"
         >
-          <span v-if="schedulingLoading">Scheduling...</span>
-          <span v-else>Set Date</span>
+          <span v-if="schedulingLoading">{{ $t('admin.callEvaluatorsManager.scheduling.btnScheduling') }}</span>
+          <span v-else>{{ $t('admin.callEvaluatorsManager.scheduling.btnSetDate') }}</span>
         </button>
       </div>
 
       <!-- INFO BOX: HOW MANY APPLICATIONS WILL BE MOVED -->
       <div class="relative p-4 bg-blue-950/20 border border-blue-900/30 rounded-lg space-y-2">
-        <p class="text-sm text-blue-300 font-medium">Applications Status</p>
+        <p class="text-sm text-blue-300 font-medium">{{ $t('admin.callEvaluatorsManager.stats.title') }}</p>
 
         <div class="grid grid-cols-3 gap-2 text-xs">
           <div class="bg-slate-950/50 rounded p-2">
-            <div class="text-slate-400">Formally Verified</div>
+            <div class="text-slate-400">{{ $t('admin.callEvaluatorsManager.stats.formallyVerified') }}</div>
             <div class="text-white font-semibold text-lg">
               {{ evaluationStats.formally_verified }}
             </div>
           </div>
 
           <div class="bg-slate-950/50 rounded p-2">
-            <div class="text-slate-400">Under Evaluation</div>
+            <div class="text-slate-400">{{ $t('admin.callEvaluatorsManager.stats.underEvaluation') }}</div>
             <div class="text-white font-semibold text-lg">
               {{ evaluationStats.under_evaluation }}
             </div>
           </div>
 
           <div class="bg-slate-950/50 rounded p-2">
-            <div class="text-slate-400">Total</div>
+            <div class="text-slate-400">{{ $t('admin.callEvaluatorsManager.stats.total') }}</div>
             <div class="text-white font-semibold text-lg">
               {{ evaluationStats.total }}
             </div>
@@ -267,8 +270,11 @@ function getMinDateTime(): string {
         </div>
 
         <p v-if="applicationsToMove > 0" class="text-sm text-blue-300 mt-2 pr-28">
-          <strong>{{ applicationsToMove }} application{{ applicationsToMove !== 1 ? 's' : '' }}</strong>
-          will be moved from
+          <strong>
+            {{ applicationsToMove }} 
+            {{ applicationsToMove === 1 ? 'application' : 'applications' }}
+          </strong>
+          {{ $t('admin.callEvaluatorsManager.stats.willBeMoved') }}
           <code class="text-xs bg-slate-950 px-1.5 py-0.5 rounded">formally_verified</code>
           →
           <code class="text-xs bg-slate-950 px-1.5 py-0.5 rounded">under_evaluation</code>
@@ -276,7 +282,7 @@ function getMinDateTime(): string {
         </p>
 
         <p v-else class="text-sm text-slate-400 mt-2">
-          No applications in "formally_verified" status to move
+          {{ $t('admin.callEvaluatorsManager.stats.noAppsToMove') }}
         </p>
 
         <button 
@@ -284,7 +290,7 @@ function getMinDateTime(): string {
           type="button" 
           :disabled="movingLoading"
           @click="changeAppsStatus" class="absolute bottom-4 right-4 px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition">
-          {{ movingLoading ? 'Moving...' : 'Move now' }}
+          {{ movingLoading ? $t('admin.callEvaluatorsManager.stats.btnMoving') : $t('admin.callEvaluatorsManager.stats.btnMoveNow') }}
         </button>
       </div>
     </div>
@@ -294,14 +300,14 @@ function getMinDateTime(): string {
 
     <!-- EVALUATORS SECTION -->
     <div v-if="selectedCall" class="pt-6 border-t border-slate-800 space-y-4">
-      <h4 class="text-lg font-semibold text-white">Assign Evaluators</h4>
+      <h4 class="text-lg font-semibold text-white">{{ $t('admin.callEvaluatorsManager.assignSection.title') }}</h4>
 
       <!-- ASSIGN FORM -->
       <div class="flex gap-3">
         <select
             v-model.number="selectedUserId"
             class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-600 outline-none">
-          <option :value="null">-- Select evaluator --</option>
+          <option :value="null">{{ $t('admin.callEvaluatorsManager.assignSection.placeholder') }}</option>
           <option 
             v-for="user in allUsers.filter(u => !evaluators.some(e => e.id === u.id))" 
             :key="user.id" 
@@ -313,15 +319,23 @@ function getMinDateTime(): string {
           @click="assign"
           :disabled="!selectedUserId || loading"
           class="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition">
-          {{ loading ? 'Assigning...' : 'Assign' }}
+          {{ loading ? $t('admin.callEvaluatorsManager.assignSection.btnAssigning') : $t('admin.callEvaluatorsManager.assignSection.btnAssign') }}
         </button>
       </div>
 
       <!-- EVALUATORS LIST -->
       <div class="space-y-2">
-        <p class="text-sm text-slate-400">{{ evaluators.length }} evaluator{{ evaluators.length !== 1 ? 's' : '' }} assigned</p>
+        <p class="text-sm text-slate-400">
+          {{ 
+            evaluators.length === 0 
+              ? $t('admin.callEvaluatorsManager.assignSection.assignedCountZero') 
+              : evaluators.length === 1 
+                ? $t('admin.callEvaluatorsManager.assignSection.assignedCountOne') 
+                : $t('admin.callEvaluatorsManager.assignSection.assignedCountPlural', { count: evaluators.length }) 
+          }}
+        </p>
         <div v-if="evaluators.length === 0" class="text-xs text-slate-500 italic py-2">
-          No evaluators assigned yet
+          {{ $t('admin.callEvaluatorsManager.assignSection.noEvaluators') }}
         </div>
         <div
           v-for="evaluator in evaluators"
@@ -334,7 +348,7 @@ function getMinDateTime(): string {
           <button
             @click="remove(evaluator.id)"
             class="px-3 py-1 text-xs bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded transition">
-            Remove
+            {{ $t('admin.callEvaluatorsManager.assignSection.btnRemove') }}
           </button>
         </div>
       </div>

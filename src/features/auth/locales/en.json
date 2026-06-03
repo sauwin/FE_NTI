@@ -1,0 +1,123 @@
+{
+  "forgotPassword": {
+    "title": "Forgot Password",
+    "emailLabel": "Email",
+    "btnSend": "Send Reset Link",
+    "btnSending": "Sending...",
+    "backToLogin": "Back to Login",
+    "successMessage": "Reset link sent to your email. Check your inbox.",
+    "errors": {
+      "adminForbidden": "Admin passwords cannot be reset this way",
+      "notFound": "Email not found",
+      "tooManyRequests": "Too many requests. Please try again later.",
+      "generic": "Error sending reset link. Try again."
+    }
+  },
+  "login": {
+    "title": "Welcome Back",
+    "subtitle": "Log in to your NTI account to continue",
+    "emailLabel": "Email Address",
+    "passwordLabel": "Password",
+    "forgotPasswordLink": "Forgot password?",
+    "btnSignIn": "Sign In",
+    "btnLoading": "Loading...",
+    "notRegistered": "Not registered?",
+    "createAccount": "Create an account",
+    "errors": {
+      "accessDenied": "Access denied",
+      "tooManyRequests": "Too many requests. Please try again later",
+      "invalidCredentials": "Invalid email or password",
+      "unexpected": "Unexpected error"
+    }
+  },
+  "checkEmail": {
+    "title": "Check your email",
+    "description": "We sent a verification link to your email address.",
+    "resent": "Email resent!",
+    "btnResend": "Resend verification email",
+    "error": "Could not resend. Try again later."
+  },
+  "privacy": {
+    "tag": "Privacy Policy",
+    "title": "Privacy Policy",
+    "subtitle": "This page explains how NTI handles your data within the platform.",
+    "p1": "NTI collects and stores information required for account creation, application processing, and role-based access.",
+    "p2": "Personal data is used only to deliver program services, manage applications, and communicate with students, companies, mentors, and administrators.",
+    "p3": "Your email and profile information are protected and not shared with unauthorized third parties."
+  },
+  "register": {
+    "title": "Create an Account",
+    "subtitle": "Join the NTI platform and start your journey",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email Address",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "accountType": "Type of Account",
+    "student": "Student",
+    "company": "Company",
+    "companyType": "Company Registration Type",
+    "owner": "Company Owner",
+    "member": "Company Member",
+    "regNumber": "Organization Registration Number",
+    "termsText": "I have read and agree to the",
+    "termsLink": "Terms and Conditions",
+    "gdprText": "I agree to the processing of personal data in accordance with the",
+    "gdprLink": "Privacy Policy",
+    "gdprSuffix": "(GDPR). My data will be used solely for NTI program management purposes.",
+    "btnRegister": "Register",
+    "btnLoading": "Loading...",
+    "alreadyAccount": "Already have an account?",
+    "logIn": "Log in",
+    "errors": {
+      "termsRequired": "You must agree to the Terms and Conditions",
+      "gdprRequired": "You must agree to the processing of personal data (GDPR)",
+      "passwordsMismatch": "Passwords are not identical",
+      "invalidOrgId": "Invalid organization ID",
+      "missingOrgId": "No registration id of your company provided",
+      "failed": "Registration failed"
+    }
+  },
+  "resetPassword": {
+    "title": "Reset Password",
+    "verifying": "Verifying reset link...",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "btnReset": "Reset Password",
+    "btnResetting": "Resetting...",
+    "backToLogin": "Back to Login",
+    "requestNewLink": "Request a new reset link",
+    "success": "Password reset successfully. Redirecting to login...",
+    "fallbackError": "Invalid or expired reset link",
+    "errors": {
+      "invalidLink": "Invalid reset link",
+      "expiredLink": "Reset link expired or invalid",
+      "verifyError": "Error verifying link",
+      "passwordsMismatch": "Passwords do not match",
+      "expiredSubmission": "Reset link expired. Request a new one.",
+      "tooManyRequests": "Too many requests. Please try again later.",
+      "generic": "Error resetting password. Try again."
+    }
+  },
+  "terms": {
+    "tag": "Terms of Service",
+    "title": "Terms of Service",
+    "subtitle": "Please read these terms carefully before using the NTI platform.",
+    "p1": "Use of NTI requires a valid account, adherence to program rules, and compliance with the displayed role-specific workflows.",
+    "p2": "Students, companies, mentors, and administrators must follow the platform processes for applications, task management, mentorship, and notifications.",
+    "p3": "NTI reserves the right to block or suspend accounts that violate these terms or misuse the system."
+  },
+  "accessDeniedPage": {
+    "title": "Access Denied",
+    "description": "You don't have permission to view this page.",
+    "btnDashboard": "Go to Dashboard"
+  },
+  "verified": {
+    "title": "Email verified!",
+    "completeProfile": "complete your profile",
+    "waitApproval": "wait till admin will approve your account",
+    "descPrefix": "Your email is verified. Please ",
+    "btnComplete": "Complete Profile",
+    "btnHome": "Go Home"
+  }
+}

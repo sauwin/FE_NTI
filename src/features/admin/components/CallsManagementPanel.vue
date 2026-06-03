@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getAdminCalls, deleteAdminCall } from '@/features/admin/api/admin'
-import {useConfirm} from "@/shared/composables/useConfirm.ts";
+import { useConfirm } from "@/shared/composables/useConfirm.ts";
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const calls = ref<any[]>([])
 
@@ -12,10 +15,10 @@ const loadCalls = async () => {
 
 const deleteCall = async (id: number) => {
   const confirmed = await useConfirm({
-    title: 'Delete Draft',
-    message: 'Are you sure you want to delete this draft call?',
-    confirmText: 'Delete Now',
-    cancelText: 'Cancel',
+    title: t('admin.callsManagementPanel.confirmDelete.title'),
+    message: t('admin.callsManagementPanel.confirmDelete.message'),
+    confirmText: t('admin.callsManagementPanel.confirmDelete.confirmText'),
+    cancelText: t('admin.callsManagementPanel.confirmDelete.cancelText'),
     danger: true,
   })
   if (!confirmed) return
@@ -24,9 +27,9 @@ const deleteCall = async (id: number) => {
     await loadCalls()
   } catch (e: any) {
     await useConfirm({
-      title: 'Error',
-      message: e.response?.data?.message || 'Error deleting call',
-      confirmText: 'Okay',
+      title: t('admin.callsManagementPanel.errorDialog.title'),
+      message: e.response?.data?.message || t('admin.callsManagementPanel.errorDialog.defaultMessage'),
+      confirmText: t('admin.callsManagementPanel.errorDialog.confirmText'),
       danger: false,
     })
   }
@@ -38,20 +41,20 @@ onMounted(loadCalls)
 <template>
   <div class="bg-slate-950 p-6 rounded-xl border border-slate-900">
     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-white font-bold text-xl">System Calls (Výzvy)</h2>
+      <h2 class="text-white font-bold text-xl">{{ $t('admin.callsManagementPanel.title') }}</h2>
       <router-link to="/admin/calls/create" class="bg-blue-600 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-700">
-        + Create New Call
+        {{ $t('admin.callsManagementPanel.btnCreate') }}
       </router-link>
     </div>
 
     <table class="w-full text-left text-sm text-gray-400">
       <thead class="bg-slate-900 text-xs uppercase text-gray-500">
         <tr>
-          <th class="p-3">Program</th>
-          <th class="p-3">Status</th>
-          <th class="p-3">Deadline</th>
-          <th class="p-3">Required Docs Count</th>
-          <th class="p-3">Actions</th>
+          <th class="p-3">{{ $t('admin.callsManagementPanel.tableHeaders.program') }}</th>
+          <th class="p-3">{{ $t('admin.callsManagementPanel.tableHeaders.status') }}</th>
+          <th class="p-3">{{ $t('admin.callsManagementPanel.tableHeaders.deadline') }}</th>
+          <th class="p-3">{{ $t('admin.callsManagementPanel.tableHeaders.requiredDocs') }}</th>
+          <th class="p-3">{{ $t('admin.callsManagementPanel.tableHeaders.actions') }}</th>
         </tr>
       </thead>
       <tbody>
@@ -64,11 +67,11 @@ onMounted(loadCalls)
               'text-red-400 bg-red-400/10 px-2 py-0.5 rounded text-xs': call.status === 'closed'
             }">{{ call.status }}</span>
           </td>
-          <td class="p-3">{{ call.deadline_at ? new Date(call.deadline_at).toLocaleDateString() : 'No deadline' }}</td>
-          <td class="p-3">{{ call.required_documents?.length || 0 }} rules</td>
+          <td class="p-3">{{ call.deadline_at ? new Date(call.deadline_at).toLocaleDateString() : $t('admin.callsManagementPanel.tableRows.noDeadline') }}</td>
+          <td class="p-3">{{ $t('admin.callsManagementPanel.tableRows.rulesCount', { count: call.required_documents?.length || 0 }) }}</td>
           <td class="p-3 flex gap-2">
-            <router-link :to="`/admin/calls/${call.id}/edit`" class="text-blue-400 hover:underline">Edit</router-link>
-            <button v-if="call.status === 'draft'" @click="deleteCall(call.id)" class="text-red-400 hover:underline ml-2">Delete</button>
+            <router-link :to="`/admin/calls/${call.id}/edit`" class="text-blue-400 hover:underline">{{ $t('admin.callsManagementPanel.tableRows.btnEdit') }}</router-link>
+            <button v-if="call.status === 'draft'" @click="deleteCall(call.id)" class="text-red-400 hover:underline ml-2">{{ $t('admin.callsManagementPanel.tableRows.btnDelete') }}</button>
           </td>
         </tr>
       </tbody>

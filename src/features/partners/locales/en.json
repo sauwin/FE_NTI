@@ -1,0 +1,15 @@
+{
+  "partners": {
+    "hero": {
+      "badge": "Partners",
+      "title": "Our Strategic",
+      "highlight": "Partners",
+      "description": "Our project is made possible through the support of dedicated organizations and individuals who share our vision and help us create meaningful opportunities for participants."
+    },
+    "states": {
+      "loading": "Loading...",
+      "error": "Failed to load partners.",
+      "empty": "No partners yet."
+    }
+  }
+}

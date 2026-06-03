@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getMentorships, updateApplicationStatusByMentor, deleteMentorshipByMentor } from '../api/mentorships'
 import type { Mentorship } from '../types/mentorships'
 
 import MentorshipsTable from './MentorshipsTable.vue'
 import ProjectDetail from './ProjectDetail.vue'
-import {useConfirm} from "@/shared/composables/useConfirm.ts";
+import { useConfirm } from "@/shared/composables/useConfirm.ts"
+
+const { t } = useI18n()
 
 const activeTab = ref('overview')
 const mentorships = ref<Mentorship[]>([])
@@ -22,7 +25,7 @@ const fetchMentorships = async () => {
     const res = await getMentorships()
     mentorships.value = res.data
   } catch (err: any) {
-    error.value = 'Unable to load projects.'
+    error.value = t('mentor.errors.loadFailed')
     console.error(err)
   } finally {
     loading.value = false
@@ -53,20 +56,20 @@ const handleAcceptRequest = async (mentorship: Mentorship) => {
   successMessage.value = ''
   try {
     await updateApplicationStatusByMentor(mentorship.application.id, 'active')
-    successMessage.value = 'Mentorship request successfully accepted!'
+    successMessage.value = t('mentor.success.accepted')
     await fetchMentorships()
     setTimeout(() => (successMessage.value = ''), 4000)
   } catch (err: any) {
-    error.value = err.response?.data?.message ?? 'Failed to accept mentorship request.'
+    error.value = err.response?.data?.message ?? t('mentor.errors.acceptFailed')
   }
 }
 
 const handleRejectRequest = async (mentorship: Mentorship) => {
   const confirmed = await useConfirm({
-    title: 'Reject mentorship',
-    message: 'Are you sure you want to reject this mentorship request?',
-    confirmText: 'Reject',
-    cancelText: 'Cancel',
+    title: t('mentor.confirm.rejectTitle'),
+    message: t('mentor.confirm.rejectMessage'),
+    confirmText: t('mentor.confirm.rejectBtn'),
+    cancelText: t('mentor.confirm.cancelBtn'),
     danger: true,
   })
   if (!confirmed) return
@@ -76,11 +79,11 @@ const handleRejectRequest = async (mentorship: Mentorship) => {
     await updateApplicationStatusByMentor(mentorship.application.id, 'approved')
     await deleteMentorshipByMentor(mentorship.id)
     
-    successMessage.value = 'Mentorship request rejected.'
+    successMessage.value = t('mentor.success.rejected')
     await fetchMentorships()
     setTimeout(() => (successMessage.value = ''), 4000)
   } catch (err: any) {
-    error.value = err.response?.data?.message ?? 'Failed to reject mentorship request.'
+    error.value = err.response?.data?.message ?? t('mentor.errors.rejectFailed')
   }
 }
 
@@ -94,8 +97,8 @@ onMounted(() => {
     <div class="mb-8">
       <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 mb-5">
         <div>
-          <h2 class="text-3xl font-bold text-white">Mentor Administration</h2>
-          <p class="text-sm text-slate-500 mt-2">Manage incoming mentorship requests, assigned projects, and consultation logs.</p>
+          <h2 class="text-3xl font-bold text-white">{{ t('mentor.adminTitle') }}</h2>
+          <p class="text-sm text-slate-500 mt-2">{{ t('mentor.adminSubtitle') }}</p>
         </div>
       </div>
 
@@ -109,7 +112,7 @@ onMounted(() => {
             'px-4 py-2 text-sm font-medium transition rounded-xl border'
           ]"
         >
-          Quick Actions
+          {{ t('mentor.tabs.overview') }}
         </button>
         
         <button
@@ -121,7 +124,7 @@ onMounted(() => {
             'px-4 py-2 text-sm font-medium transition rounded-xl border'
           ]"
         >
-          New Requests ({{ mentorshipRequests.length }})
+          {{ t('mentor.tabs.requests', { count: mentorshipRequests.length }) }}
         </button>
         
         <button
@@ -133,14 +136,14 @@ onMounted(() => {
             'px-4 py-2 text-sm font-medium transition rounded-xl border'
           ]"
         >
-          My Projects ({{ activeMentorships.length }})
+          {{ t('mentor.tabs.projects', { count: activeMentorships.length }) }}
         </button>
         
         <button
           v-if="activeTab === 'project-detail'"
           class="bg-emerald-600/15 border-emerald-500 text-emerald-400 px-4 py-2 text-sm font-medium rounded-xl border"
         >
-          Application details: {{ selectedMentorship?.application?.team?.name || 'Details' }}
+          {{ t('mentor.tabs.details', { name: selectedMentorship?.application?.team?.name || 'Details' }) }}
         </button>
       </div>
     </div>
@@ -159,13 +162,12 @@ onMounted(() => {
           @click="activeTab = 'requests'; fetchMentorships()"
           class="border border-slate-800 bg-slate-900/40 rounded-2xl p-6 transition hover:border-slate-700 cursor-pointer group"
         >
-          <div class="text-xs text-slate-500 uppercase font-mono mb-2 tracking-wider">Pending Requests</div>
+          <div class="text-xs text-slate-500 uppercase font-mono mb-2 tracking-wider">{{ t('mentor.overview.pending') }}</div>
           <div class="flex items-baseline justify-between">
             <span class="text-4xl font-bold text-white font-mono group-hover:text-blue-400 transition-colors">
               {{ mentorshipRequests.length }}
             </span>
-            <span class="text-xs text-blue-400 bg-blue-600/15 border border-blue-900/40 px-2.5 py-1 rounded-xl font-medium font-mono">
-              Review &rarr;
+            <span class="text-xs text-blue-400 bg-blue-600/15 border border-blue-900/40 px-2.5 py-1 rounded-xl font-medium font-mono" v-html="t('mentor.overview.review')">
             </span>
           </div>
         </div>
@@ -174,24 +176,24 @@ onMounted(() => {
           @click="activeTab = 'mentorships'; fetchMentorships()"
           class="border border-slate-800 bg-slate-900/40 rounded-2xl p-6 transition hover:border-slate-700 cursor-pointer group"
         >
-          <div class="text-xs text-slate-500 uppercase font-mono mb-2 tracking-wider">Active Mentorships</div>
+          <div class="text-xs text-slate-500 uppercase font-mono mb-2 tracking-wider">{{ t('mentor.overview.active') }}</div>
           <div class="flex items-baseline justify-between">
             <span class="text-4xl font-bold text-white font-mono group-hover:text-blue-400 transition-colors">
               {{ activeMentorships.length }}
             </span>
             <span class="text-xs text-slate-400 bg-slate-800 border border-slate-700/60 px-2.5 py-1 rounded-xl font-medium font-mono">
-              View All
+              {{ t('mentor.overview.viewAll') }}
             </span>
           </div>
         </div>
 
         <div class="border border-slate-800 bg-slate-900/40 rounded-2xl p-6 transition hover:border-slate-700 flex flex-col justify-between">
-          <div class="text-xs text-slate-500 uppercase font-mono mb-2 tracking-wider">Mentor Identity</div>
+          <div class="text-xs text-slate-500 uppercase font-mono mb-2 tracking-wider">{{ t('mentor.overview.identity') }}</div>
           <div class="flex justify-between items-center mt-2">
-            <span class="text-sm text-slate-300 font-medium">Profile Configuration</span>
+            <span class="text-sm text-slate-300 font-medium">{{ t('mentor.overview.profileConfig') }}</span>
             <router-link to="/mentor-profile"
                class="text-xs px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 transition text-slate-300 font-medium font-mono">
-              Edit
+              {{ t('mentor.overview.edit') }}
             </router-link>
           </div>
         </div>

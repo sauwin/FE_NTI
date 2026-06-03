@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
   show: boolean
@@ -9,6 +10,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'close'): void
 }>()
+
+const { t, locale } = useI18n()
 
 const parsedContext = computed(() => {
   if (!props.notification?.context) return null
@@ -22,16 +25,20 @@ const parsedContext = computed(() => {
 })
 
 const subject = computed(() => {
-  return parsedContext.value?.subject || 'System Notification'
+  return parsedContext.value?.subject || t('notifications.default_subject')
 })
 
 const fullMessage = computed(() => {
-  return parsedContext.value?.message || props.notification?.message || 'No content provided.'
+  return parsedContext.value?.message || props.notification?.message || t('notifications.default_message')
 })
 
 const eventType = computed(() => {
   return parsedContext.value?.event_type || 'system_alert'
 })
+
+const formatNotificationDate = (dateStr: string) => {
+  return new Date(dateStr).toLocaleString(locale.value === 'sk' ? 'sk-SK' : 'en-GB')
+}
 </script>
 
 <template>
@@ -63,7 +70,7 @@ const eventType = computed(() => {
                 {{ eventType.replace(/_/g, ' ') }}
               </span>
               <span class="text-xs font-mono text-slate-500">
-                {{ notification ? new Date(notification.created_at).toLocaleString('uk-UA') : '' }}
+                {{ notification ? formatNotificationDate(notification.created_at) : '' }}
               </span>
             </div>
             
@@ -84,7 +91,7 @@ const eventType = computed(() => {
                 {{ subject }}
               </h3>
               <p class="text-xs font-mono text-slate-500 mt-1">
-                To: {{ notification?.recipient_email || 'Platform User' }}
+                {{ t('notifications.recipient_prefix') }} {{ notification?.recipient_email || t('notifications.fallback_recipient') }}
               </p>
             </div>
 
@@ -100,7 +107,7 @@ const eventType = computed(() => {
               @click="emit('close')" 
               class="bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-200 text-xs font-medium px-4 py-2 rounded-xl transition"
             >
-              Close Message
+              {{ t('notifications.btn_close') }}
             </button>
           </div>
 

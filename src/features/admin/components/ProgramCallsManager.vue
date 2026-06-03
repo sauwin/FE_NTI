@@ -11,6 +11,9 @@ import {
 } from '@/features/admin/api/admin'
 import type { AdminCall, AdminProgram, RequiredDocument } from '@/features/admin/types/admin'
 import {useConfirm} from "@/shared/composables/useConfirm.ts";
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const programADocs: RequiredDocument[] = [
   { document_name: 'Executive Summary', is_mandatory: true, max_size_mb: 10 },
@@ -77,10 +80,10 @@ const filteredCalls = computed(() => {
 
 function getProgramLabel(programId: number): string {
   const program = programs.value.find(p => p.id === programId)
-  if (!program) return '—'
-  if (program.code === 'program_a') return 'Program A'
-  if (program.code === 'program_b') return 'Program B'
-  return program.title || program.name || '—'
+  if (!program) return t('admin.programCallsManager.list.programs.fallback')
+  if (program.code === 'program_a') return t('admin.programCallsManager.list.programs.a')
+  if (program.code === 'program_b') return t('admin.programCallsManager.list.programs.b')
+  return program.title || program.name || t('admin.programCallsManager.list.programs.fallback')
 }
 
 function addDocument() {
@@ -152,17 +155,17 @@ async function handleSubmitCall() {
     if (editingCallId.value) {
       await updateAdminCall(editingCallId.value, payload)
       await useConfirm({
-        title: 'Status change',
-        message: 'Call updated successfully!',
-        confirmText: 'Okay',
+        title: t('admin.programCallsManager.modals.successUpdate.title'),
+        message: t('admin.programCallsManager.modals.successUpdate.message'),
+        confirmText: t('admin.programCallsManager.modals.genericButtons.okay'),
         danger: false,
       })
     } else {
       await createAdminCall(payload)
       await useConfirm({
-        title: 'Status change',
-        message: 'Call created successfully!',
-        confirmText: 'Okay',
+        title: t('admin.programCallsManager.modals.successCreate.title'),
+        message: t('admin.programCallsManager.modals.successCreate.message'),
+        confirmText: t('admin.programCallsManager.modals.genericButtons.okay'),
         danger: false,
       })
     }
@@ -171,9 +174,9 @@ async function handleSubmitCall() {
     loadData()
   } catch (e) {
     await useConfirm({
-      title: 'Error',
-      message: editingCallId.value ? 'Error updating call.' : 'Error creating call.',
-      confirmText: 'Okay',
+      title: t('admin.programCallsManager.modals.error.title'),
+      message: editingCallId.value ? t('admin.programCallsManager.modals.error.updateMessage') : t('admin.programCallsManager.modals.error.createMessage'),
+      confirmText: t('admin.programCallsManager.modals.genericButtons.okay'),
       danger: false,
     })
   } finally {
@@ -188,9 +191,9 @@ async function updateCallStatus(id: number, status: string) {
     loadData()
   } catch {
     await useConfirm({
-      title: 'Error',
-      message: 'Failed to update status',
-      confirmText: 'Okay',
+      title: t('admin.programCallsManager.modals.error.title'),
+      message: t('admin.programCallsManager.modals.error.statusMessage'),
+      confirmText: t('admin.programCallsManager.modals.genericButtons.okay'),
       danger: false,
     })
   }
@@ -198,10 +201,10 @@ async function updateCallStatus(id: number, status: string) {
 
 async function handleDeleteCall(id: number) {
   const confirmed = await useConfirm({
-    title: 'Delete Call',
-    message: 'Are you sure you want to delete this call?',
-    confirmText: 'Delete Now',
-    cancelText: 'Cancel',
+    title: t('admin.programCallsManager.modals.deleteConfirm.title'),
+    message: t('admin.programCallsManager.modals.deleteConfirm.message'),
+    confirmText: t('admin.programCallsManager.modals.deleteConfirm.confirm'),
+    cancelText: t('admin.programCallsManager.modals.deleteConfirm.cancel'),
     danger: true,
   })
   if (!confirmed) return
@@ -211,9 +214,9 @@ async function handleDeleteCall(id: number) {
     loadData()
   } catch {
     await useConfirm({
-      title: 'Error',
-      message: 'Call cannot be deleted (only Draft).',
-      confirmText: 'Okay',
+      title: t('admin.programCallsManager.modals.error.title'),
+      message: t('admin.programCallsManager.modals.error.deleteMessage'),
+      confirmText: t('admin.programCallsManager.modals.genericButtons.okay'),
       danger: false,
     })
   }
@@ -235,9 +238,9 @@ async function downloadCallsExport(format: 'csv' | 'xlsx' = 'xlsx') {
     document.body?.removeChild(link)
   } catch {
     await useConfirm({
-      title: 'Error',
-      message: 'Failed to download export.',
-      confirmText: 'Okay',
+      title: t('admin.programCallsManager.modals.error.title'),
+      message: t('admin.programCallsManager.modals.error.exportMessage'),
+      confirmText: t('admin.programCallsManager.modals.genericButtons.okay'),
       danger: false,
     })
   }
@@ -258,44 +261,44 @@ onMounted(() => {
   <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
     <div class="xl:col-span-1 border border-slate-800 bg-slate-900/40 rounded-2xl p-6">
       <h3 class="text-xl font-bold text-white mb-6">
-        {{ editingCallId ? 'Edit Program A Call' : 'New Program A Call' }}
+        {{ editingCallId ? t('admin.programCallsManager.form.titleEdit') : t('admin.programCallsManager.form.titleCreate') }}
       </h3>
       <form @submit.prevent="handleSubmitCall" class="space-y-4">
         <div>
-          <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Call Title</label>
+          <label class="block text-xs font-mono uppercase text-slate-400 mb-1">{{ t('admin.programCallsManager.form.labels.title') }}</label>
           <input type="text" v-model="newCall.title" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white focus:border-blue-600 outline-none" required />
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Opens At</label>
+            <label class="block text-xs font-mono uppercase text-slate-400 mb-1">{{ t('admin.programCallsManager.form.labels.opensAt') }}</label>
             <input type="date" v-model="newCall.opens_at" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white focus:border-blue-600 outline-none" />
           </div>
           <div>
-            <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Deadline</label>
+            <label class="block text-xs font-mono uppercase text-slate-400 mb-1">{{ t('admin.programCallsManager.form.labels.deadline') }}</label>
             <input type="date" v-model="newCall.deadline_at" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white focus:border-blue-600 outline-none" />
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Min Team</label>
+            <label class="block text-xs font-mono uppercase text-slate-400 mb-1">{{ t('admin.programCallsManager.form.labels.minTeam') }}</label>
             <input type="number" v-model="newCall.min_team_size" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white focus:border-blue-600 outline-none" />
           </div>
           <div>
-            <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Max Team</label>
+            <label class="block text-xs font-mono uppercase text-slate-400 mb-1">{{ t('admin.programCallsManager.form.labels.maxTeam') }}</label>
             <input type="number" v-model="newCall.max_team_size" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white focus:border-blue-600 outline-none" />
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-mono uppercase text-slate-400 mb-2">Required Documents</label>
+          <label class="block text-xs font-mono uppercase text-slate-400 mb-2">{{ t('admin.programCallsManager.form.labels.requiredDocuments') }}</label>
           <div class="space-y-3">
             <div v-for="(doc, index) in newCall.required_documents" :key="index" class="bg-slate-950 p-4 rounded-xl border border-slate-800">
-              <input v-model="doc.document_name" placeholder="Document Name" class="w-full bg-transparent border-b border-slate-700 mb-3 text-sm text-white focus:outline-none focus:border-blue-500" />
+              <input v-model="doc.document_name" :placeholder="t('admin.programCallsManager.form.placeholders.documentName')" class="w-full bg-transparent border-b border-slate-700 mb-3 text-sm text-white focus:outline-none focus:border-blue-500" />
               <div class="flex items-center justify-between">
                 <label class="flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
-                  <input type="checkbox" v-model="doc.is_mandatory" class="rounded bg-slate-900 border-slate-700 text-blue-600" /> Required
+                  <input type="checkbox" v-model="doc.is_mandatory" class="rounded bg-slate-900 border-slate-700 text-blue-600" /> {{ t('admin.programCallsManager.form.labels.requiredCheckbox') }}
                 </label>
                 <div class="flex items-center gap-2">
                   <input v-model.number="doc.max_size_mb" type="number" class="w-12 bg-slate-800 rounded px-1 py-0.5 text-center text-xs text-white" />
@@ -305,17 +308,17 @@ onMounted(() => {
               </div>
             </div>
             <button type="button" @click="addDocument" class="w-full py-2 text-xs border border-dashed border-slate-700 rounded-lg text-slate-400 hover:text-white hover:border-slate-500 transition">
-              + Add Document
+              {{ t('admin.programCallsManager.buttons.addDocument') }}
             </button>
           </div>
         </div>
 
         <div class="flex gap-3 pt-2">
           <button v-if="editingCallId" type="button" @click="cancelEdit" class="w-1/3 bg-slate-800 hover:bg-slate-700 text-white font-medium py-2.5 rounded-lg transition text-sm">
-            Cancel
+            {{ t('admin.programCallsManager.buttons.cancel') }}
           </button>
           <button type="submit" :disabled="isSubmitting" :class="editingCallId ? 'w-2/3' : 'w-full'" class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition text-sm">
-            {{ isSubmitting ? 'Saving...' : (editingCallId ? 'Update Call' : 'Create Call') }}
+            {{ isSubmitting ? t('admin.programCallsManager.buttons.saving') : (editingCallId ? t('admin.programCallsManager.buttons.update') : t('admin.programCallsManager.buttons.save')) }}
           </button>
         </div>
       </form>
@@ -324,13 +327,13 @@ onMounted(() => {
     <div class="xl:col-span-2 space-y-6">
       <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6">
         <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
-          <h3 class="text-xl font-bold text-white">Calls</h3>
+          <h3 class="text-xl font-bold text-white">{{ t('admin.programCallsManager.list.title') }}</h3>
           <div class="ml-4 flex-shrink-0 gap-2 flex">
             <button @click="downloadCallsExport('csv')" :disabled="isSubmitting" class="text-xs bg-green-900/40 hover:bg-green-900/60 px-3 py-1.5 rounded text-green-400 border border-green-800 transition-all font-mono">
-              Export CSV
+              {{ t('admin.programCallsManager.list.buttons.exportCsv') }}
             </button>
             <button @click="downloadCallsExport('xlsx')" :disabled="isSubmitting" class="text-xs bg-blue-900/40 hover:bg-blue-900/60 px-3 py-1.5 rounded text-blue-400 border border-blue-800 transition-all font-mono">
-              Export XLSX
+              {{ t('admin.programCallsManager.list.buttons.exportXlsx') }}
             </button>
           </div>
         </div>
@@ -340,7 +343,7 @@ onMounted(() => {
             <input 
               type="text" 
               v-model="searchQuery" 
-              placeholder="Search by title..." 
+              :placeholder="t('admin.programCallsManager.list.placeholders.search')" 
               class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white focus:border-blue-600 outline-none"
             />
           </div>
@@ -349,11 +352,11 @@ onMounted(() => {
               v-model="filterStatus" 
               class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white focus:border-blue-600 outline-none"
             >
-              <option value="">All Statuses</option>
-              <option value="draft">Draft</option>
-              <option value="open">Open</option>
-              <option value="closed">Closed</option>
-              <option value="archived">Archived</option>
+              <option value="">{{ t('admin.programCallsManager.list.statuses.all') }}</option>
+              <option value="draft">{{ t('admin.programCallsManager.list.statuses.draft') }}</option>
+              <option value="open">{{ t('admin.programCallsManager.list.statuses.open') }}</option>
+              <option value="closed">{{ t('admin.programCallsManager.list.statuses.closed') }}</option>
+              <option value="archived">{{ t('admin.programCallsManager.list.statuses.archived') }}</option>
             </select>
           </div>
           <div>
@@ -361,14 +364,14 @@ onMounted(() => {
               v-model="filterProgramType" 
               class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white focus:border-blue-600 outline-none"
             >
-              <option value="">All Program Types</option>
-              <option value="a">Program A</option>
-              <option value="b">Program B</option>
+              <option value="">{{ t('admin.programCallsManager.list.programs.all') }}</option>
+              <option value="a">{{ t('admin.programCallsManager.list.programs.a') }}</option>
+              <option value="b">{{ t('admin.programCallsManager.list.programs.b') }}</option>
             </select>
           </div>
         </div>
 
-        <div v-if="!filteredCalls.length" class="text-slate-500 italic text-sm py-6 text-center">No calls found.</div>
+        <div v-if="!filteredCalls.length" class="text-slate-500 italic text-sm py-6 text-center">{{ t('admin.programCallsManager.list.emptyState') }}</div>
 
         <div v-else class="space-y-3">
           <div
@@ -381,7 +384,7 @@ onMounted(() => {
               <div class="flex items-center gap-2 flex-wrap">
                 <span
                   class="text-xs font-mono px-2 py-1 rounded border"
-                  :class="getProgramLabel(c.program_id) === 'Program A'
+                  :class="getProgramLabel(c.program_id) === t('admin.programCallsManager.list.programs.a')
                     ? 'bg-blue-950/60 text-blue-400 border-blue-900'
                     : 'bg-slate-800 text-slate-400 border-slate-700'"
                 >
@@ -397,11 +400,11 @@ onMounted(() => {
                     'bg-amber-950/40 text-amber-500 border-amber-900': c.status === 'archived',
                   }"
                 >
-                  {{ c.status }}
+                  {{ t(`admin.programCallsManager.list.statuses.${c.status}`) }}
                 </span>
 
                 <span class="text-xs text-slate-500 font-mono">
-                  {{ c.min_team_size }}–{{ c.max_team_size || '∞' }} members
+                  {{ c.max_team_size ? t('admin.programCallsManager.list.labels.membersCount', { min: c.min_team_size, max: c.max_team_size }) : t('admin.programCallsManager.list.labels.infiniteMembersCount', { min: c.min_team_size }) }}
                 </span>
               </div>
             </div>
@@ -411,7 +414,7 @@ onMounted(() => {
                 @click="emit('view-applications', c.id)"
                 class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded border border-slate-700 text-slate-300 transition-all font-mono whitespace-nowrap"
               >
-                Applications
+                {{ t('admin.programCallsManager.list.buttons.applications') }}
               </button>
 
               <div class="relative" @click.stop>
@@ -420,7 +423,7 @@ onMounted(() => {
                   @click="toggleMenu(c.id)"
                   class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded border border-slate-700 text-yellow-400 transition-all font-mono whitespace-nowrap"
                 >
-                  Archived
+                  {{ t('admin.programCallsManager.list.statuses.archived') }}
                 </button>
 
                 <button
@@ -441,7 +444,7 @@ onMounted(() => {
                       @click="editCall(c)"
                       class="w-full text-left px-4 py-2.5 text-sm text-slate-200 hover:bg-slate-800 transition"
                     >
-                      Edit
+                      {{ t('admin.programCallsManager.list.actions.edit') }}
                     </button>
 
                     <button
@@ -449,7 +452,7 @@ onMounted(() => {
                       @click="updateCallStatus(c.id, 'draft')"
                       class="w-full text-left px-4 py-2.5 text-sm text-slate-400 hover:bg-slate-800 transition"
                     >
-                      Set Draft
+                      {{ t('admin.programCallsManager.list.actions.setDraft') }}
                     </button>
 
                     <button
@@ -457,7 +460,7 @@ onMounted(() => {
                       @click="updateCallStatus(c.id, 'open')"
                       class="w-full text-left px-4 py-2.5 text-sm text-emerald-400 hover:bg-slate-800 transition"
                     >
-                      Open
+                      {{ t('admin.programCallsManager.list.actions.open') }}
                     </button>
 
                     <button
@@ -465,7 +468,7 @@ onMounted(() => {
                       @click="updateCallStatus(c.id, 'closed')"
                       class="w-full text-left px-4 py-2.5 text-sm text-slate-400 hover:bg-slate-800 transition"
                     >
-                      Close
+                      {{ t('admin.programCallsManager.list.actions.close') }}
                     </button>
 
                     <button
@@ -473,7 +476,7 @@ onMounted(() => {
                       @click="updateCallStatus(c.id, 'archived')"
                       class="w-full text-left px-4 py-2.5 text-sm text-yellow-400 hover:bg-slate-800 transition"
                     >
-                      Archived
+                      {{ t('admin.programCallsManager.list.actions.archived') }}
                     </button>
 
                     <button
@@ -481,7 +484,7 @@ onMounted(() => {
                       @click="handleDeleteCall(c.id)"
                       class="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-slate-800 transition"
                     >
-                      Delete
+                      {{ t('admin.programCallsManager.list.actions.delete') }}
                     </button>
                   </div>
                 </div>

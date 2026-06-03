@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/features/auth/stores/auth'
+import { useI18n } from 'vue-i18n'
 import {
   getApplicationById,
   getApplicationDocuments,
@@ -17,6 +18,7 @@ import type { Team } from '@/features/student/types/teams'
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+const { t } = useI18n()
 
 const props = defineProps<{
   id: string
@@ -129,7 +131,7 @@ onMounted(async () => {
 
   } catch (err: any) {
     console.error('Failed to load lifecycle application context:', err)
-    error.value = 'Could not retrieve database parameters for this application.'
+    error.value = t('applications.edit.load_error')
   } finally {
     loading.value = false
   }
@@ -145,12 +147,12 @@ function onFileChange(key: string, event: Event): void {
 function nextStep(): void {
   error.value = ''
   if (programType.value === 'a') {
-    if (!selectedTeamId.value) { error.value = 'Please select a qualified team'; return }
-    if (!category.value) { error.value = 'Please select a focus category'; return }
-    if (!academicDeclaration.value) { error.value = 'You must confirm your academic eligibility declaration'; return }
+    if (!selectedTeamId.value) { error.value = t('applications.edit.validation.team'); return }
+    if (!category.value) { error.value = t('applications.edit.validation.category'); return }
+    if (!academicDeclaration.value) { error.value = t('applications.edit.validation.academic'); return }
   } else {
-    if (!projectTitle.value.trim()) { error.value = 'Please specify the project specifications title'; return }
-    if (!proposedSolution.value.trim()) { error.value = 'Please supply your proposed architectural concept outline'; return }
+    if (!projectTitle.value.trim()) { error.value = t('applications.edit.validation.title'); return }
+    if (!proposedSolution.value.trim()) { error.value = t('applications.edit.validation.solution'); return }
   }
   step.value = 2
 }
@@ -190,7 +192,7 @@ async function submit(): Promise<void> {
 
     router.push(`/applications/${applicationId}`)
   } catch (err: any) {
-    error.value = err?.response?.data?.message || 'Something went wrong while updating the context fields.'
+    error.value = err?.response?.data?.message || t('applications.edit.general_error')
   } finally {
     loading.value = false
   }
@@ -202,18 +204,20 @@ async function submit(): Promise<void> {
     <div class="w-full max-w-xl bg-slate-900/40 p-8 border border-slate-900 rounded-2xl relative backdrop-blur-md">
       
       <div v-if="loading" class="text-center py-10 text-sm text-slate-400">
-        Loading existing application parameters from database...
+        {{ t('applications.edit.loading_params') }}
       </div>
 
       <div v-else>
         <div class="mb-6">
           <span class="text-[10px] uppercase font-bold tracking-wider text-blue-400 block mb-1">
-            Editing Mode: Application #{{ applicationId }}
+            {{ t('applications.edit.mode_title', { id: applicationId }) }}
           </span>
           <h2 class="text-2xl font-bold text-white">
-            {{ programType === 'a' ? 'Program A Incubation' : 'Program B Challenge' }} Setup
+            {{ t('applications.edit.setup_title', { type: programType === 'a' ? t('applications.edit.program_a') : t('applications.edit.program_b') }) }}
           </h2>
-          <p class="text-xs text-slate-500 mt-1">Step {{ step }} of 2: Review and change metadata structures</p>
+          <p class="text-xs text-slate-500 mt-1">
+            {{ t('applications.edit.step_status', { current: step, total: 2 }) }}
+          </p>
         </div>
 
         <p v-if="error" class="text-red-400 text-sm mb-4 bg-red-950/60 p-3 rounded-xl border border-red-900/50">{{ error }}</p>
@@ -221,7 +225,7 @@ async function submit(): Promise<void> {
         <div v-if="step === 1" class="flex flex-col gap-5">
           
           <div>
-            <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">Assigned Team *</label>
+            <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">{{ t('applications.edit.assigned_team') }}</label>
             <select v-model="selectedTeamId" class="w-full bg-slate-950 border border-slate-800 h-11 px-3 rounded-lg text-white focus:border-blue-600 transition outline-none text-sm cursor-pointer">
               <option v-for="team in myTeams" :key="team.id" :value="team.id">
                 {{ team.name }} (Status: {{ team.status }})
@@ -231,9 +235,9 @@ async function submit(): Promise<void> {
 
           <template v-if="programType === 'a'">
             <div>
-              <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">Incubation Track Category *</label>
+              <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">{{ t('applications.edit.incubation_track') }}</label>
               <select v-model="category" class="w-full bg-slate-950 border border-slate-800 h-11 px-3 rounded-lg text-white focus:border-blue-600 transition outline-none text-sm cursor-pointer">
-                <option value="" disabled>Select a track</option>
+                <option value="" disabled>{{ t('applications.edit.select_track') }}</option>
                 <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
               </select>
             </div>
@@ -242,7 +246,7 @@ async function submit(): Promise<void> {
               <label class="flex items-start gap-3 cursor-pointer select-none">
                 <input v-model="academicDeclaration" type="checkbox" class="mt-1 accent-blue-500 rounded" />
                 <span class="text-xs text-gray-400 leading-normal">
-                  I declare that I have no carried-over courses and my average grade of core courses meets the required threshold. I understand this will be verified by the committee. *
+                  {{ t('applications.edit.academic_declaration') }}
                 </span>
               </label>
             </div>
@@ -250,49 +254,55 @@ async function submit(): Promise<void> {
 
           <template v-else>
             <div>
-              <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">Project Name / Specifications *</label>
+              <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">{{ t('applications.edit.project_name') }}</label>
               <input v-model="projectTitle" type="text" class="w-full bg-slate-950 border border-slate-800 h-11 px-3 rounded-lg text-white focus:border-blue-600 transition outline-none text-sm" />
             </div>
 
             <div>
-              <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">Solution Outline *</label>
+              <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">{{ t('applications.edit.solution_outline') }}</label>
               <textarea v-model="proposedSolution" rows="5" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-lg text-white resize-none focus:border-blue-600 transition outline-none text-sm"></textarea>
             </div>
           </template>
 
           <div class="flex gap-3 mt-2">
-            <button @click="router.push('/dashboard')" class="w-1/3 border border-slate-800 text-slate-400 h-11 rounded-lg hover:text-white transition text-sm font-medium">Cancel</button>
+            <button @click="router.push('/dashboard')" class="w-1/3 border border-slate-800 text-slate-400 h-11 rounded-lg hover:text-white transition text-sm font-medium">
+              {{ t('applications.edit.btn_cancel') }}
+            </button>
             <button @click="nextStep" class="flex-1 bg-blue-600 text-white h-11 rounded-lg font-medium hover:bg-blue-700 transition text-sm">
-              Next: Review Documentation
+              {{ t('applications.edit.btn_next') }}
             </button>
           </div>
         </div>
 
         <div v-else-if="step === 2" class="flex flex-col gap-4">
           <div class="p-3 bg-slate-950 border border-slate-900 rounded-xl text-xs text-slate-400 leading-relaxed">
-            Below, you can view the current documents or upload new files to the appropriate slots. Uploading new files will overwrite the previous versions.
+            {{ t('applications.edit.doc_instructions') }}
           </div>
 
           <div v-for="(label, key) in docLabels" :key="key" class="border border-slate-950 p-4 rounded-xl bg-slate-950/60">
             <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{{ label }}</label>
             
             <div class="text-[11px] text-blue-400 mb-2 flex items-center gap-1.5 font-medium">
-              <span>📋 Current file:</span>
+              <span>{{ t('applications.edit.current_file') }}</span>
               <span class="underline italic">
                 {{ 
-                  existingDocs.find(d => String(d.type).toLowerCase().replace(/\s+/g, '_') === String(key).toLowerCase().replace(/\s+/g, '_'))?.file_name || 'Не завантажено' 
+                  existingDocs.find(d => String(d.type).toLowerCase().replace(/\s+/g, '_') === String(key).toLowerCase().replace(/\s+/g, '_'))?.file_name || t('applications.edit.not_uploaded') 
                 }}
               </span>
             </div>
 
             <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx" @change="onFileChange(String(key), $event)" class="text-xs text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-950 file:text-blue-400 hover:file:bg-blue-900 file:cursor-pointer transition" />
-            <p v-if="files[key]" class="text-xs text-green-400 mt-2 font-medium">✓ Вибрано для заміни: {{ files[key]?.name }}</p>
+            <p v-if="files[key]" class="text-xs text-green-400 mt-2 font-medium">
+              {{ t('applications.edit.selected_replace', { name: files[key]?.name }) }}
+            </p>
           </div>
 
           <div class="flex gap-4 mt-4">
-            <button @click="step = 1" class="w-1/3 border border-slate-800 text-slate-400 h-11 rounded-lg hover:text-white transition text-sm font-medium">Back</button>
+            <button @click="step = 1" class="w-1/3 border border-slate-800 text-slate-400 h-11 rounded-lg hover:text-white transition text-sm font-medium">
+              {{ t('applications.edit.btn_back') }}
+            </button>
             <button @click="submit" :disabled="loading" class="flex-1 bg-blue-600 text-white h-11 rounded-lg font-medium hover:bg-blue-700 transition text-sm shadow-lg shadow-blue-950">
-              {{ loading ? 'Saving...' : 'Save Structural Changes' }}
+              {{ loading ? t('applications.edit.saving') : t('applications.edit.btn_save') }}
             </button>
           </div>
         </div>

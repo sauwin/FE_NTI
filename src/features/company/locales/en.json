@@ -1,0 +1,107 @@
+{
+  "company": {
+    "tabs": {
+      "profile": "Company Profile",
+      "tasks": "Project Tasks",
+      "approvals": "Manage Pending Approvals",
+      "members": "Manage Company Members",
+      "applications": "Manage Applications"
+    },
+    "roles": {
+      "owner": "Owner",
+      "contact": "Contact",
+      "evaluator": "Evaluator",
+      "mentor": "Mentor"
+    },
+    "common": {
+      "name": "Name",
+      "email": "Email",
+      "status": "Status",
+      "actions": "Actions",
+      "created": "Created",
+      "edit": "Edit",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "view": "View",
+      "description": "Description",
+      "website": "Website"
+    },
+    "membersTable": {
+      "noMembers": "No active company members found",
+      "roleInOrg": "Role in Org",
+      "kickOut": "Kick Out",
+      "prev": "Prev",
+      "next": "Next",
+      "pagination": "Page {current} of {total} ({count} users)"
+    },
+    "profile": {
+      "notFilledTitle": "Profile not filled in yet",
+      "notFilledDesc": "Fill in your company profile to submit projects.",
+      "saveSuccess": "Profile saved successfully",
+      "regNumber": "Registration Number (IČO)",
+      "sector": "Sector",
+      "fields": {
+        "nameLabel": "Company Name",
+        "namePlaceholder": "e.g. TechCorp s.r.o.",
+        "regPlaceholder": "12345678",
+        "sectorPlaceholder": "e.g. Software Development",
+        "webPlaceholder": "https://example.com",
+        "descPlaceholder": "Describe your company..."
+      },
+      "validation": {
+        "nameRequired": "Company name is required",
+        "fallbackError": "Failed to save"
+      },
+      "editProfile": "Edit Profile",
+      "createProfile": "Create Profile",
+      "saveChanges": "Save Changes"
+    },
+    "tasks": {
+      "title": "Our technical specifications",
+      "subtitle": "Requirements and Project Backlog Management in Program B",
+      "createBtn": "+ Create a task",
+      "noTasks": "You haven't added any assignments for students yet.",
+      "postFirst": "Post the first assignment now",
+      "noDesc": "No description provided.",
+      "publish": "Publish",
+      "budget": "Budget",
+      "program": "Program",
+      "notSpecified": "Not specified",
+      "confirmDeleteTitle": "Delete Innovation Challenge",
+      "confirmDeleteMsg": "Are you sure you want to permanently delete \"{title}\"? This will also remove the associated Call and all uploaded requirements from the disk.",
+      "deleting": "Deleting..."
+    },
+    "applications": {
+      "title": "Incoming Student Applications",
+      "subtitle": "Review student groups and project pitches submitted for your organization's challenges.",
+      "noApplications": "No applications have been submitted to your tasks yet.",
+      "idApplicant": "ID / Applicant",
+      "targetChallenge": "Target Challenge (Task)",
+      "submittedAt": "Submitted At",
+      "individualSolver": "Individual Solver",
+      "noEmail": "No email",
+      "unknownChallenge": "Unknown Challenge",
+      "callLabel": "Call: {name}",
+      "revision": "Revision",
+      "verify": "Verify",
+      "modalTitle": "Request Revision for #{id}",
+      "modalDesc": "Provide clear instructions or feedback on what the student team needs to correct, attach, or adjust in their application.",
+      "modalPlaceholder": "e.g., Please upload a clearer architecture chart and specify your experience with Docker...",
+      "sendToRevision": "Send to Revision",
+      "sending": "Sending..."
+    },
+    "approvals": {
+      "noPending": "No pending approvals",
+      "requestedRole": "Requested Role",
+      "approve": "Approve",
+      "reject": "Reject",
+      "confirmApproveTitle": "Approve Member",
+      "confirmApproveMsg": "Are you sure you want to approve {name}?",
+      "confirmRejectTitle": "Reject Request",
+      "confirmRejectMsg": "Reject request from {name}?",
+      "confirmKickTitle": "Remove Member",
+      "confirmKickMsg": "Remove {name} from organization?"
+    }
+  }
+}

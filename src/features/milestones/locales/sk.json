@@ -1,0 +1,33 @@
+{
+  "milestones": {
+    "heading": "Míľniky",
+    "btnCancel": "Zrušiť",
+    "btnAddMilestone": "+ Pridať míľnik",
+    "btnSaveMilestone": "Uložiť míľnik",
+    "btnSaving": "Ukladám...",
+    "loading": "Načítavam...",
+    "noMilestones": "Zatiaľ žiadne míľniky.",
+    "lblDue": "Termín: {date}",
+    "lblDueEmpty": "Termín: —",
+    "btnUploading": "Nahrávam...",
+    "btnUploadDoc": "↑ Nahrať dokument",
+    "placeholderTitle": "Názov *",
+    "placeholderDescription": "Popis (nepovinné)",
+    "status": {
+      "pending": "čaká na spracovanie",
+      "in_progress": "v procese",
+      "completed": "dokončené",
+      "overdue": "po termíne"
+    },
+    "errors": {
+      "loadFailed": "Nepodarilo sa načítať míľniky",
+      "createFailed": "Nepodarilo sa vytvoriť míľnik",
+      "updateFailed": "Nepodarilo sa aktualizovať stav",
+      "uploadFailed": "Nahrávanie zlyhalo"
+    },
+    "success": {
+      "created": "Míľnik bol vytvorený.",
+      "uploaded": "Dokument bol nahraný."
+    }
+  }
+}

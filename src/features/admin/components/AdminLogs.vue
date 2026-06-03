@@ -9,6 +9,9 @@ import {
   TextRun, WidthType, HeadingLevel
 } from 'docx'
 import Pagination from '@/shared/components/Pagination.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const logs = ref<any[]>([])
 const loading = ref(false)
@@ -23,15 +26,15 @@ const exportLoading = ref<string | null>(null)
 const adminUsers = ref<any[]>([])
 
 const actionOptions = [
-  { value: 'approve', label: 'Approve User' },
-  { value: 'block', label: 'Block User' },
-  { value: 'unblock', label: 'Unblock User' },
-  { value: 'assign', label: 'Assign Role' },
-  { value: 'remove', label: 'Remove Role' },
-  { value: 'delete', label: 'Delete Record' },
-  { value: 'create', label: 'Create Record' },
-  { value: 'export', label: 'Export Data' },
-  { value: 'bulk_notification', label: 'Bulk Notification' },
+  { value: 'approve', label: t('admin.logs.actions.approve') },
+  { value: 'block', label: t('admin.logs.actions.block') },
+  { value: 'unblock', label: t('admin.logs.actions.unblock') },
+  { value: 'assign', label: t('admin.logs.actions.assign') },
+  { value: 'remove', label: t('admin.logs.actions.remove') },
+  { value: 'delete', label: t('admin.logs.actions.delete') },
+  { value: 'create', label: t('admin.logs.actions.create') },
+  { value: 'export', label: t('admin.logs.actions.export') },
+  { value: 'bulk_notification', label: t('admin.logs.actions.bulk_notification') },
 ]
 
 async function fetchLogs() {
@@ -77,18 +80,18 @@ function buildExportRows(rawLogs: any[]): Record<string, string>[] {
   return rawLogs.map(log => {
     const adminName = log.user
       ? `${log.user.first_name ?? log.user.name ?? ''} ${log.user.last_name ?? ''}`.trim()
-      : 'System'
+      : t('admin.logs.system')
     const adminEmail = log.user?.email ?? '—'
     const flat = flattenDetails(log.details)
     const detailsStr = Object.entries(flat).map(([k, v]) => `${formatKey(k)}: ${v}`).join(' | ')
     return {
-      'Action': getBadgeText(log.action),
-      'Description': getActionTitle(log),
-      'Admin Name': adminName,
-      'Admin Email': adminEmail,
-      'IP Address': log.ip_address ?? '—',
-      'Date & Time': new Date(log.created_at).toLocaleString('sk-SK'),
-      'Details': detailsStr,
+      [t('admin.logs.exportHeaders.action')]: getBadgeText(log.action),
+      [t('admin.logs.exportHeaders.description')]: getActionTitle(log),
+      [t('admin.logs.exportHeaders.adminName')]: adminName,
+      [t('admin.logs.exportHeaders.adminEmail')]: adminEmail,
+      [t('admin.logs.exportHeaders.ipAddress')]: log.ip_address ?? '—',
+      [t('admin.logs.exportHeaders.dateTime')]: new Date(log.created_at).toLocaleString('sk-SK'),
+      [t('admin.logs.exportHeaders.details')]: detailsStr,
     }
   })
 }
@@ -120,7 +123,7 @@ async function exportXLSX() {
     const ws = XLSX.utils.json_to_sheet(rows)
     ws['!cols'] = [{ wch: 10 }, { wch: 28 }, { wch: 22 }, { wch: 28 }, { wch: 16 }, { wch: 20 }, { wch: 40 }]
     const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, 'Audit Logs')
+    XLSX.utils.book_append_sheet(wb, ws, t('admin.logs.title'))
     const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
     downloadBlob(new Blob([buf], { type: 'application/octet-stream' }), 'audit_logs.xlsx')
   } finally { exportLoading.value = null }
@@ -133,9 +136,9 @@ async function exportPDF() {
     const headers = Object.keys(rows[0] ?? {})
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
     doc.setFontSize(14); doc.setTextColor(40, 40, 40)
-    doc.text('NTI — Audit Log Report', 14, 15)
+    doc.text(t('admin.logs.reports.pdfTitle'), 14, 15)
     doc.setFontSize(9); doc.setTextColor(120, 120, 120)
-    doc.text(`Generated: ${new Date().toLocaleString('sk-SK')}`, 14, 21)
+    doc.text(t('admin.logs.reports.generated', { date: new Date().toLocaleString('sk-SK') }), 14, 21)
     autoTable(doc, {
       startY: 26, head: [headers], body: rows.map(r => headers.map(h => r[h] ?? '')),
       styles: { fontSize: 7.5, cellPadding: 2.5, overflow: 'linebreak' },
@@ -169,8 +172,8 @@ async function exportDOCX() {
     const doc = new Document({
       sections: [{
         children: [
-          new Paragraph({ text: 'NTI — Audit Log Report', heading: HeadingLevel.HEADING_1, spacing: { after: 120 } }),
-          new Paragraph({ children: [new TextRun({ text: `Generated: ${new Date().toLocaleString('sk-SK')}`, color: '64748B', size: 17 })], spacing: { after: 300 } }),
+          new Paragraph({ text: t('admin.logs.reports.pdfTitle'), heading: HeadingLevel.HEADING_1, spacing: { after: 120 } }),
+          new Paragraph({ children: [new TextRun({ text: t('admin.logs.reports.generated', { date: new Date().toLocaleString('sk-SK') }), color: '64748B', size: 17 })], spacing: { after: 300 } }),
           new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [headerRow, ...dataRows] }),
         ],
       }],
@@ -179,7 +182,7 @@ async function exportDOCX() {
   } finally { exportLoading.value = null }
 }
 
-const getBadgeText = (action: string) => action.includes('export') ? 'EXPORT' : action.toUpperCase()
+const getBadgeText = (action: string) => action.includes('export') ? t('admin.logs.actions.exportCaps') : action.toUpperCase()
 
 const getBadgeColor = (action: string) => {
   if (action.includes('export')) return 'bg-amber-950/40 text-amber-500 border-amber-900'
@@ -203,10 +206,18 @@ const getActionTitle = (log: any) => {
   if (log.action === 'export_users') { baseAction = 'export'; obj = 'users' }
   else if (log.action === 'export_applications') { baseAction = 'export'; obj = 'applications' }
   else if (log.action === 'export_calls') { baseAction = 'export'; obj = 'calls' }
+  
   const actionMap: Record<string, string> = {
-    export: 'Export Data', approve: 'Approve', block: 'Block', unblock: 'Unblock',
-    assign: 'Assign Role', remove: 'Remove Role', delete: 'Delete', create: 'Create',
-    reset_password: 'Reset Password', bulk_notification: 'Bulk Notification',
+    export: t('admin.logs.actions.exportData'), 
+    approve: t('admin.logs.actions.approveInline'), 
+    block: t('admin.logs.actions.blockInline'), 
+    unblock: t('admin.logs.actions.unblockInline'),
+    assign: t('admin.logs.actions.assignRoleInline'), 
+    remove: t('admin.logs.actions.removeRoleInline'), 
+    delete: t('admin.logs.actions.deleteInline'), 
+    create: t('admin.logs.actions.createInline'),
+    reset_password: t('admin.logs.actions.resetPasswordInline'), 
+    bulk_notification: t('admin.logs.actions.bulkNotificationInline'),
   }
   const title = actionMap[baseAction] || baseAction
   return obj ? `${title} (${obj})` : title
@@ -244,42 +255,40 @@ onMounted(async () => {
 <template>
   <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6 space-y-6">
 
-    <!-- Header -->
     <div class="flex flex-wrap justify-between items-center gap-3">
-      <h3 class="text-xl font-bold text-white">Audit Logs</h3>
+      <h3 class="text-xl font-bold text-white">{{ t('admin.logs.title') }}</h3>
       <div class="flex gap-2 flex-shrink-0">
         <button
           @click="exportCSV" :disabled="!!exportLoading"
           class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300 border border-slate-700 transition font-mono disabled:opacity-40"
         >
           <span v-if="exportLoading === 'csv'" class="animate-spin w-3 h-3 border border-slate-400 border-t-transparent rounded-full inline-block mr-1"></span>
-          Export CSV
+          {{ t('admin.logs.buttons.exportCSV') }}
         </button>
         <button
           @click="exportXLSX" :disabled="!!exportLoading"
           class="text-xs bg-green-900/40 hover:bg-green-900/60 px-3 py-1.5 rounded text-green-400 border border-green-800 transition font-mono disabled:opacity-40"
         >
           <span v-if="exportLoading === 'xlsx'" class="animate-spin w-3 h-3 border border-green-400 border-t-transparent rounded-full inline-block mr-1"></span>
-          Export XLSX
+          {{ t('admin.logs.buttons.exportXLSX') }}
         </button>
         <button
           @click="exportPDF" :disabled="!!exportLoading"
           class="text-xs bg-red-950/40 hover:bg-red-900/40 px-3 py-1.5 rounded text-red-400 border border-red-900 transition font-mono disabled:opacity-40"
         >
           <span v-if="exportLoading === 'pdf'" class="animate-spin w-3 h-3 border border-red-400 border-t-transparent rounded-full inline-block mr-1"></span>
-          Export PDF
+          {{ t('admin.logs.buttons.exportPDF') }}
         </button>
         <button
           @click="exportDOCX" :disabled="!!exportLoading"
           class="text-xs bg-blue-900/40 hover:bg-blue-900/60 px-3 py-1.5 rounded text-blue-400 border border-blue-800 transition font-mono disabled:opacity-40"
         >
           <span v-if="exportLoading === 'docx'" class="animate-spin w-3 h-3 border border-blue-400 border-t-transparent rounded-full inline-block mr-1"></span>
-          Export DOCX
+          {{ t('admin.logs.buttons.exportDOCX') }}
         </button>
       </div>
     </div>
 
-    <!-- Filters -->
     <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
       <div>
         <select
@@ -287,7 +296,7 @@ onMounted(async () => {
           @change="() => { page = 1; fetchLogs() }"
           class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white focus:border-blue-600 outline-none"
         >
-          <option value="">All Actions</option>
+          <option value="">{{ t('admin.logs.filters.allActions') }}</option>
           <option v-for="option in actionOptions" :key="option.value" :value="option.value" class="bg-slate-950">
             {{ option.label }}
           </option>
@@ -299,7 +308,7 @@ onMounted(async () => {
           @change="() => { page = 1; fetchLogs() }"
           class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white focus:border-blue-600 outline-none"
         >
-          <option value="">All Administrators</option>
+          <option value="">{{ t('admin.logs.filters.allAdministrators') }}</option>
           <option v-for="user in adminUsers" :key="user.id" :value="user.id" class="bg-slate-950">
             {{ user.first_name ?? user.name }} {{ user.last_name ?? '' }}
           </option>
@@ -322,29 +331,25 @@ onMounted(async () => {
           @click="resetFilters"
           class="bg-slate-800 hover:bg-slate-700 text-white font-medium px-3 py-1.5 rounded-lg transition text-sm"
         >
-          Reset
+          {{ t('admin.logs.buttons.reset') }}
         </button>
       </div>
     </div>
 
-    <!-- Loading -->
     <div v-if="loading" class="text-slate-500 italic text-sm py-6 text-center animate-pulse">
-      Loading logs...
+      {{ t('admin.logs.status.loading') }}
     </div>
 
-    <!-- Empty -->
     <div v-else-if="logs.length === 0" class="text-slate-500 italic text-sm py-6 text-center">
-      No logs found.
+      {{ t('admin.logs.status.empty') }}
     </div>
 
-    <!-- Log list -->
     <div v-else class="space-y-3">
       <div
         v-for="log in logs"
         :key="log.id"
         class="border border-slate-800 bg-slate-950 rounded-xl p-5 hover:border-slate-700 transition"
       >
-        <!-- Badge + title + timestamp -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
           <div class="flex items-center gap-3">
             <span :class="['text-xs font-mono px-2 py-1 rounded border uppercase', getBadgeColor(log.action)]">
@@ -357,18 +362,16 @@ onMounted(async () => {
           </span>
         </div>
 
-        <!-- Admin info + IP -->
         <div class="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-slate-400 font-mono mb-4 pb-4 border-b border-slate-800">
           <span>
-            By: <span class="text-slate-200">
-              {{ log.user ? `${log.user.first_name ?? log.user.name} ${log.user.last_name ?? ''}`.trim() : 'System' }}
+            {{ t('admin.logs.item.by') }} <span class="text-slate-200">
+              {{ log.user ? `${log.user.first_name ?? log.user.name} ${log.user.last_name ?? ''}`.trim() : t('admin.logs.system') }}
             </span>
           </span>
           <span v-if="log.user?.email" class="text-slate-500">{{ log.user.email }}</span>
           <span v-if="log.ip_address" class="ml-auto text-slate-600">{{ log.ip_address }}</span>
         </div>
 
-        <!-- Detail badges -->
         <div
           v-if="log.details && Object.keys(flattenDetails(log.details)).length > 0"
           class="flex flex-wrap gap-2"
@@ -385,7 +388,6 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- Pagination -->
     <Pagination
         :current-page="page"
         :total-pages="lastPage"

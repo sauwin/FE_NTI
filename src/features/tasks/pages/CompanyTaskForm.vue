@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { getPrograms } from '@/shared/api/programs'
 import { getCompanyTasks } from '@/features/company/api/company'
 import { createCallWithTask, updateCallWithTask } from '@/features/tasks/api/tasks'
 import type { Program } from '@/shared/types/programs'
 
-// Допоміжна функція для трансформації рядка у snake_case на фронтенді
+const { t } = useI18n()
+
+// Auxiliary function to transform text into snake_case on frontend
 function toSnakeCase(str: string): string {
   return str
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9_ ]/g, '') // Видаляємо спецсимволи (наприклад, дужки у "Pitch (PDF)")
-    .replace(/\s+/g, '_')        // Замінюємо пробіли на підкреслення
-    .replace(/_+/g, '_')         // Запобігаємо подвійним підкресленням
+    .replace(/[^a-z0-9_ ]/g, '') // Remove special characters
+    .replace(/\s+/g, '_')        // Replace spaces with underscores
+    .replace(/_+/g, '_')         // Prevent double underscores
 }
 
 interface TaskDocumentRequirement {
@@ -57,10 +60,7 @@ const callForm = ref({
   ] as TaskDocumentRequirement[]
 })
 
-// Зберігаємо оригінальні файли за їхніми згенерованими id у формі
 const files = ref<Record<string, File>>({})
-
-// Для режиму редагування зберігаємо раніше завантажені документи
 const existingDocuments = ref<Array<{ type: string, file_name: string }>>([])
 
 onMounted(async () => {
@@ -106,7 +106,6 @@ onMounted(async () => {
               : currentTask.call.required_documents
             
             if (Array.isArray(reqDocs)) {
-              // Якщо з бекенду прийшов масив рядків (напр. ["team_project_pitch"]), повертаємо їм "людський" вигляд для інпутів
               callForm.value.required_documents = reqDocs.map((docString: string, idx: number) => {
                 const humanName = docString
                   .split('_')
@@ -114,7 +113,7 @@ onMounted(async () => {
                   .join(' ')
 
                 return {
-                  id: docString, // Використовуємо snake_case рядок як ID для мапінгу файлів
+                  id: docString, 
                   document_name: humanName,
                   max_size_mb: 10
                 }
@@ -130,11 +129,11 @@ onMounted(async () => {
           }))
         }
       } else {
-        error.value = 'Task not found or access denied.'
+        error.value = t('tasks.form.errorNotFound')
       }
     }
   } catch (err: any) {
-    error.value = 'Failed to initialize form data.'
+    error.value = t('tasks.form.errorInit')
     console.error(err)
   } finally {
     loading.value = false
@@ -192,7 +191,6 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
     fd.append(`required_skills[${index}]`, skill)
   })
 
-  // 1. Формуємо чистий масив snake_case рядків для `required_documents`
   const snakeCaseDocs: string[] = []
   
   callForm.value.required_documents.forEach(d => {
@@ -200,8 +198,6 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
       const snakeKey = toSnakeCase(d.document_name)
       snakeCaseDocs.push(snakeKey)
 
-      // 2. Додаємо файл до FormData, прив'язуючи його до snake_case назви, яку очікує бекенд
-      // Перевіряємо за старим id з форми або вже за сформованим снейк-ключем
       const filePayload = files.value[d.id] || files.value[snakeKey]
       if (filePayload) {
         fd.append(`files[${snakeKey}]`, filePayload)
@@ -221,7 +217,7 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
     
     router.push('/dashboard')
   } catch (err: any) {
-    error.value = err.response?.data?.message || 'An error occurred while saving the challenge.'
+    error.value = err.response?.data?.message || t('tasks.form.errorSave')
     console.error(err)
   } finally {
     loading.value = false
@@ -233,10 +229,10 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
   <div class="max-w-4xl mx-auto py-10 px-4 text-white">
     <div class="mb-8">
       <h1 class="text-2xl font-bold tracking-tight">
-        {{ isEditMode ? 'Edit Innovation Challenge' : 'Launch New Innovation Challenge' }}
+        {{ isEditMode ? t('tasks.form.titleEdit') : t('tasks.form.titleCreate') }}
       </h1>
       <p class="text-sm text-gray-400 mt-1">
-        {{ isEditMode ? 'Modify your project requirements, goals and associated files.' : 'Formulate a business problem statement for tech teams and student groups.' }}
+        {{ isEditMode ? t('tasks.form.subtitleEdit') : t('tasks.form.subtitleCreate') }}
       </p>
     </div>
 
@@ -250,142 +246,161 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
 
     <form @submit.prevent class="space-y-8 bg-slate-900/40 border border-slate-800 p-8 rounded-2xl">
       
+      <!-- STEP 1 -->
       <div v-if="step === 1" class="space-y-6">
-        <h2 class="text-lg font-semibold border-b border-gray-800 pb-3 font-mono text-blue-400">01 / BASIC METADATA</h2>
+        <h2 class="text-lg font-semibold border-b border-gray-800 pb-3 font-mono text-blue-400">
+          {{ t('tasks.form.steps.metadata') }}
+        </h2>
         
         <div>
-          <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">Challenge Title</label>
-          <input v-model="taskForm.title" type="text" placeholder="e.g., AI-Driven Inventory Optimization System" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors" />
+          <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">{{ t('tasks.form.labels.title') }}</label>
+          <input v-model="taskForm.title" type="text" :placeholder="t('tasks.form.placeholders.title')" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors" />
         </div>
 
         <div>
-          <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">Short Teaser Description</label>
-          <textarea v-model="taskForm.short_description" rows="3" placeholder="A single paragraph summarizing the high-level challenge for external viewers..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors resize-none"></textarea>
+          <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">{{ t('tasks.form.labels.shortDescription') }}</label>
+          <textarea v-model="taskForm.short_description" rows="3" :placeholder="t('tasks.form.placeholders.shortDescription')" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors resize-none"></textarea>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">Budget Allocation (EUR)</label>
-            <input v-model="taskForm.budget" type="number" placeholder="Optional financial reward" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors" />
+            <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">{{ t('tasks.form.labels.budget') }}</label>
+            <input v-model="taskForm.budget" type="number" :placeholder="t('tasks.form.placeholders.budget')" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors" />
           </div>
           <div>
-            <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">Final Delivery Deadline</label>
+            <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">{{ t('tasks.form.labels.deadline') }}</label>
             <input v-model="taskForm.deadline" type="date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors" />
           </div>
         </div>
 
         <div class="flex justify-end pt-4">
-          <button type="button" @click="step = 2" :disabled="!taskForm.title || !taskForm.short_description" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-6 h-11 rounded-md transition-colors disabled:opacity-50 cursor-pointer">Continue &rarr;</button>
+          <button type="button" @click="step = 2" :disabled="!taskForm.title || !taskForm.short_description" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-6 h-11 rounded-md transition-colors disabled:opacity-50 cursor-pointer" v-html="t('tasks.form.continue')"></button>
         </div>
       </div>
 
+      <!-- STEP 2 -->
       <div v-if="step === 2" class="space-y-6">
-        <h2 class="text-lg font-semibold border-b border-gray-800 pb-3 font-mono text-blue-400">02 / PROBLEM STATEMENT & GOALS</h2>
+        <h2 class="text-lg font-semibold border-b border-gray-800 pb-3 font-mono text-blue-400">
+          {{ t('tasks.form.steps.goals') }}
+        </h2>
 
         <div>
-          <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">Project Vision & Strategic Goal</label>
-          <textarea v-model="taskForm.project_goal" rows="4" placeholder="What business problem are we trying to solve? What is the main driver behind this request?" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors resize-none"></textarea>
+          <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">{{ t('tasks.form.labels.projectGoal') }}</label>
+          <textarea v-model="taskForm.project_goal" rows="4" :placeholder="t('tasks.form.placeholders.projectGoal')" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors resize-none"></textarea>
         </div>
 
         <div>
-          <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">Expected Outcome & Success Metrics</label>
-          <textarea v-model="taskForm.expected_outcome" rows="4" placeholder="Describe what the final prototype or software stack must achieve to be considered successful..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors resize-none"></textarea>
+          <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">{{ t('tasks.form.labels.expectedOutcome') }}</label>
+          <textarea v-model="taskForm.expected_outcome" rows="4" :placeholder="t('tasks.form.placeholders.expectedOutcome')" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors resize-none"></textarea>
         </div>
 
         <div class="flex gap-3 pt-4">
-          <button type="button" @click="step = 1" class="border border-blue-900 text-gray-400 hover:text-white px-6 rounded-md text-sm cursor-pointer transition-colors">← Back</button>
-          <button type="button" @click="step = 3" :disabled="!taskForm.project_goal || !taskForm.expected_outcome" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-6 h-11 rounded-md transition-colors disabled:opacity-50 flex-1 cursor-pointer">Continue &rarr;</button>
+          <button type="button" @click="step = 1" class="border border-blue-900 text-gray-400 hover:text-white px-6 rounded-md text-sm cursor-pointer transition-colors">{{ t('tasks.form.back') }}</button>
+          <button type="button" @click="step = 3" :disabled="!taskForm.project_goal || !taskForm.expected_outcome" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-6 h-11 rounded-md transition-colors disabled:opacity-50 flex-1 cursor-pointer" v-html="t('tasks.form.continue')"></button>
         </div>
       </div>
 
+      <!-- STEP 3 -->
       <div v-if="step === 3" class="space-y-6">
-        <h2 class="text-lg font-semibold border-b border-gray-800 pb-3 font-mono text-blue-400">03 / TECHNICAL SPECIFICATIONS</h2>
+        <h2 class="text-lg font-semibold border-b border-gray-800 pb-3 font-mono text-blue-400">
+          {{ t('tasks.form.steps.technical') }}
+        </h2>
 
         <div>
-          <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">Detailed Functional Specifications</label>
-          <textarea v-model="taskForm.detailed_technical_description" rows="5" placeholder="List key features, specific user journeys, background cron-jobs, or analytical calculations needed..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors resize-none"></textarea>
+          <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">{{ t('tasks.form.labels.functionalSpecs') }}</label>
+          <textarea v-model="taskForm.detailed_technical_description" rows="5" :placeholder="t('tasks.form.placeholders.functionalSpecs')" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors resize-none"></textarea>
         </div>
 
         <div>
-          <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">Required Technologies (Comma separated)</label>
-          <input v-model="taskForm.required_technologies" type="text" placeholder="Vue 3, Node.js, PostgreSQL, Docker, Python" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors" />
+          <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">{{ t('tasks.form.labels.technologies') }}</label>
+          <input v-model="taskForm.required_technologies" type="text" :placeholder="t('tasks.form.placeholders.technologies')" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors" />
         </div>
 
         <div>
-          <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">Preferred Team Profile / Core Skills</label>
-          <input v-model="taskForm.required_skills" type="text" placeholder="REST APIs, State Management, Database Indexing" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors" />
+          <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">{{ t('tasks.form.labels.skills') }}</label>
+          <input v-model="taskForm.required_skills" type="text" :placeholder="t('tasks.form.placeholders.skills')" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors" />
         </div>
 
         <div class="flex gap-3 pt-4">
-          <button type="button" @click="step = 2" class="border border-blue-900 text-gray-400 hover:text-white px-6 rounded-md text-sm cursor-pointer transition-colors">← Back</button>
-          <button type="button" @click="step = 4" :disabled="!taskForm.detailed_technical_description" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-6 h-11 rounded-md transition-colors disabled:opacity-50 flex-1 cursor-pointer">Continue &rarr;</button>
+          <button type="button" @click="step = 2" class="border border-blue-900 text-gray-400 hover:text-white px-6 rounded-md text-sm cursor-pointer transition-colors">{{ t('tasks.form.back') }}</button>
+          <button type="button" @click="step = 4" :disabled="!taskForm.detailed_technical_description" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-6 h-11 rounded-md transition-colors disabled:opacity-50 flex-1 cursor-pointer" v-html="t('tasks.form.continue')"></button>
         </div>
       </div>
 
+      <!-- STEP 4 -->
       <div v-if="step === 4" class="space-y-6">
         <div class="flex justify-between items-center border-b border-gray-800 pb-3">
-          <h2 class="text-lg font-semibold font-mono text-blue-400">04 / APPLICATION REQUIREMENTS</h2>
-          <button type="button" @click="addDocumentRequirement" class="text-xs bg-blue-950 border border-blue-900 text-blue-400 px-3 py-1.5 rounded hover:bg-blue-900/30 transition-colors cursor-pointer">+ Add Document Type</button>
+          <h2 class="text-lg font-semibold font-mono text-blue-400">
+            {{ t('tasks.form.steps.requirements') }}
+          </h2>
+          <button type="button" @click="addDocumentRequirement" class="text-xs bg-blue-950 border border-blue-900 text-blue-400 px-3 py-1.5 rounded hover:bg-blue-900/30 transition-colors cursor-pointer">
+            {{ t('tasks.form.labels.addDocument') }}
+          </button>
         </div>
 
-        <p class="text-xs text-gray-400 font-mono">Define what files applying solver squads must upload in order to sign up for your challenge.</p>
+        <p class="text-xs text-gray-400 font-mono">{{ t('tasks.form.labels.requirementsDesc') }}</p>
 
         <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
           <div v-for="(doc, index) in callForm.required_documents" :key="doc.id" class="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-slate-950/60 p-4 border border-slate-800 rounded-xl">
             <div class="flex-1 w-full">
-              <label class="block text-[10px] font-mono uppercase text-gray-500 mb-1">Document Label</label>
-              <input v-model="doc.document_name" type="text" placeholder="e.g., Financial Blueprint Breakdown" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs focus:border-blue-500 outline-none text-white" />
+              <label class="block text-[10px] font-mono uppercase text-gray-500 mb-1">{{ t('tasks.form.labels.documentLabel') }}</label>
+              <input v-model="doc.document_name" type="text" :placeholder="t('tasks.form.placeholders.documentName')" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs focus:border-blue-500 outline-none text-white" />
             </div>
             <div class="w-28">
-              <label class="block text-[10px] font-mono uppercase text-gray-500 mb-1">Max Size (MB)</label>
+              <label class="block text-[10px] font-mono uppercase text-gray-500 mb-1">{{ t('tasks.form.labels.maxSize') }}</label>
               <input v-model="doc.max_size_mb" type="number" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs focus:border-blue-500 outline-none text-white" />
             </div>
-            <button v-if="callForm.required_documents.length > 1" type="button" @click="removeDocumentRequirement(doc.id)" class="text-xs text-red-400 hover:text-red-300 mt-4 sm:mt-0 pt-2 sm:pt-0 font-mono cursor-pointer">[Remove]</button>
+            <button v-if="callForm.required_documents.length > 1" type="button" @click="removeDocumentRequirement(doc.id)" class="text-xs text-red-400 hover:text-red-300 mt-4 sm:mt-0 pt-2 sm:pt-0 font-mono cursor-pointer">
+              {{ t('tasks.form.labels.remove') }}
+            </button>
           </div>
         </div>
 
         <div class="flex gap-3 pt-4">
-          <button type="button" @click="step = 3" class="border border-blue-900 text-gray-400 hover:text-white px-6 rounded-md text-sm cursor-pointer transition-colors">← Back</button>
-          <button type="button" @click="step = 5" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-6 h-11 rounded-md transition-colors flex-1 cursor-pointer">Continue &rarr;</button>
+          <button type="button" @click="step = 3" class="border border-blue-900 text-gray-400 hover:text-white px-6 rounded-md text-sm cursor-pointer transition-colors">{{ t('tasks.form.back') }}</button>
+          <button type="button" @click="step = 5" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-6 h-11 rounded-md transition-colors flex-1 cursor-pointer" v-html="t('tasks.form.continue')"></button>
         </div>
       </div>
 
+      <!-- STEP 5 -->
       <div v-if="step === 5" class="space-y-6">
-        <h2 class="text-lg font-semibold border-b border-gray-800 pb-3 font-mono text-blue-400">05 / COMPANY ATTACHMENTS & SUBMIT</h2>
+        <h2 class="text-lg font-semibold border-b border-gray-800 pb-3 font-mono text-blue-400">
+          {{ t('tasks.form.steps.attachments') }}
+        </h2>
 
-        <p class="text-xs text-gray-400 font-mono">Upload any extra guidelines, internal data models, architecture charts, or API files to assist teams.</p>
+        <p class="text-xs text-gray-400 font-mono">{{ t('tasks.form.labels.attachmentsDesc') }}</p>
 
         <div class="space-y-4">
           <div v-for="doc in callForm.required_documents.filter(d => d.document_name.trim())" :key="'upload_' + doc.id" class="bg-slate-950 p-4 border border-slate-800 rounded-xl space-y-2">
             <div class="flex justify-between items-center">
               <span class="text-xs font-medium text-gray-300 font-mono">{{ doc.document_name }}</span>
-              <span class="text-[10px] font-mono text-gray-500 uppercase">Attached Guideline File</span>
+              <span class="text-[10px] font-mono text-gray-500 uppercase">{{ t('tasks.form.labels.attachedGuideline') }}</span>
             </div>
 
             <div v-if="isEditMode && (getExistingFileName(doc.id) || getExistingFileName(toSnakeCase(doc.document_name)))" class="text-xs text-emerald-400 font-mono bg-emerald-950/20 border border-emerald-900/30 p-2 rounded flex justify-between items-center">
-              <span>📄 Current: {{ getExistingFileName(doc.id) || getExistingFileName(toSnakeCase(doc.document_name)) }}</span>
-              <span class="text-[10px] text-emerald-500 uppercase">(Already Uploaded)</span>
+              <span>{{ t('tasks.form.labels.currentFile', { name: getExistingFileName(doc.id) || getExistingFileName(toSnakeCase(doc.document_name)) }) }}</span>
+              <span class="text-[10px] text-emerald-500 uppercase">{{ t('tasks.form.labels.alreadyUploaded') }}</span>
             </div>
 
             <div class="relative h-11 border border-dashed border-slate-800 rounded-lg bg-slate-900/30 hover:bg-slate-900/60 transition-colors flex items-center px-4">
               <input type="file" :id="'file_' + doc.id" @change="handleFileChange(doc.id, $event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
               <label :for="'file_' + doc.id" class="flex justify-between w-full items-center cursor-pointer">
                 <span class="text-sm truncate pr-2" :class="files[doc.id] ? 'text-white font-medium' : 'text-gray-600'">
-                  {{ files[doc.id]?.name ?? (isEditMode && (getExistingFileName(doc.id) || getExistingFileName(toSnakeCase(doc.document_name))) ? 'Choose new file to replace...' : 'Choose file...') }}
+                  {{ files[doc.id]?.name ?? (isEditMode && (getExistingFileName(doc.id) || getExistingFileName(toSnakeCase(doc.document_name))) ? t('tasks.form.labels.replaceFile') : t('tasks.form.labels.chooseFile')) }}
                 </span>
-                <span class="text-xs bg-blue-900/50 text-blue-300 px-3 py-1 rounded font-mono">Browse</span>
+                <span class="text-xs bg-blue-900/50 text-blue-300 px-3 py-1 rounded font-mono">{{ t('tasks.form.labels.browse') }}</span>
               </label>
             </div>
           </div>
         </div>
 
         <div class="flex gap-3 mt-6">
-          <button type="button" @click="step = 4" class="border border-blue-900 text-gray-400 hover:text-white px-6 rounded-md text-sm cursor-pointer transition-colors">← Back</button>
+          <button type="button" @click="step = 4" class="border border-blue-900 text-gray-400 hover:text-white px-6 rounded-md text-sm cursor-pointer transition-colors">{{ t('tasks.form.back') }}</button>
           <button type="button" @click="submitChallenge('draft')" :disabled="loading" class="border border-blue-600 text-blue-400 hover:bg-blue-600/10 disabled:opacity-50 cursor-pointer flex-1 h-11 rounded-md text-sm font-medium transition-colors font-mono">
-            {{ loading ? 'Processing...' : (isEditMode ? 'Update as Draft' : 'Save as Draft') }}
+            {{ loading ? t('tasks.form.processing') : (isEditMode ? t('tasks.form.updateDraft') : t('tasks.form.saveDraft')) }}
           </button>
           <button type="button" @click="submitChallenge('published')" :disabled="loading" class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 cursor-pointer text-white flex-1 h-11 rounded-md text-sm font-medium transition-colors shadow-lg shadow-blue-900/20 font-mono">
-            {{ loading ? 'Publishing...' : (isEditMode ? 'Update & Publish' : 'Publish Challenge') }}
+            {{ loading ? t('tasks.form.publishing') : (isEditMode ? t('tasks.form.updatePublish') : t('tasks.form.publishChallenge')) }}
           </button>
         </div>
       </div>
@@ -393,30 +408,3 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
     </form>
   </div>
 </template>
-Тепер ваш бекенд (ApplicationService.php) працюватиме ідеально:
-Оскільки фронтенд Програми Б тепер надсилає чистий масив снейк-кейс рядків (наприклад, ["team_project_pitch", "cv", "motivation_letter"]), ваш оригінальний метод валідації на бекенді повністю оживе і не буде нічого блокувати:
-
-PHP
-private function validateRequiredDocuments(Application $application): void
-{
-    $call = Call::find($application->call_id);
-    if ($call && is_array($call->required_documents)) {
-        $uploadedTypes = DB::table('application_documents')
-            ->join('documents', 'documents.id', '=', 'application_documents.document_id')
-            ->where('application_documents.application_id', $application->id)
-            ->pluck('documents.type')
-            ->toArray();
-
-        foreach ($call->required_documents as $reqDoc) {
-            // Оскільки $reqDoc тепер завжди РЯДОК (як для А, так і для Б), Str::snake відпрацює як треба!
-            $docName = is_string($reqDoc) ? $reqDoc : ($reqDoc['document_name'] ?? $reqDoc['type'] ?? '');
-            $docTypeKey = Str::snake(trim($docName));
-
-            if (! in_array($docTypeKey, $uploadedTypes)) {
-                throw ValidationException::withMessages([
-                    'documents' => 'Chýba povinný dokument: '.(is_string($reqDoc) ? $reqDoc : ($reqDoc['document_name'] ?? $docTypeKey)),
-                ]);
-            }
-        }
-    }
-}

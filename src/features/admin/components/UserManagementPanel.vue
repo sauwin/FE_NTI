@@ -12,6 +12,9 @@ import {
 import type { AdminRole } from '@/features/admin/types/admin'
 import { useConfirm } from '@/shared/composables/useConfirm'
 import Pagination from '@/shared/components/Pagination.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 defineProps<{ isSuperAdmin?: boolean }>()
 const emit = defineEmits(['refresh'])
@@ -206,7 +209,7 @@ onMounted(loadUsers)
 </script>
 
 <template>
-  <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6"></div>
+  <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6">
     
     <div v-if="message" :class="[
       'p-3 rounded-lg text-sm mb-6 border',
@@ -310,7 +313,6 @@ onMounted(loadUsers)
               </div>
               <div class="text-xs text-slate-500 font-mono mt-0.5">
                 {{ user.email }}
-<!--                {{ console.log(user) }}-->
               </div>
             </td>
 
@@ -466,6 +468,7 @@ onMounted(loadUsers)
           {{ loading ? 'Processing...' : 'Confirm Assign' }}
         </button>
       </div>
+    </div>
     </div>
   </div>
 </template>

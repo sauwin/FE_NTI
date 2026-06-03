@@ -6,6 +6,9 @@ import type { AdminApplicationListItem } from '@/features/admin/types/admin'
 import { useRouter } from 'vue-router'
 import { useConfirm } from "@/shared/composables/useConfirm.ts"
 import Pagination from '@/shared/components/Pagination.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   filterCallId?: number | null
@@ -15,34 +18,34 @@ const emit = defineEmits(['clear-filter'])
 const router = useRouter()
 
 const ALL_STATUSES = [
-  { value: 'draft', label: 'Draft' },
-  { value: 'submitted', label: 'Submitted' },
-  { value: 'formally_verified', label: 'Formally Verified' },
-  { value: 'under_evaluation', label: 'Under Evaluation' },
-  { value: 'pending_revision', label: 'Pending Revision' },
-  { value: 'approved', label: 'Approved' },
-  { value: 'rejected', label: 'Rejected' },
-  { value: 'onboarding', label: 'Onboarding' },
-  { value: 'active', label: 'Active' },
-  { value: 'suspended', label: 'Suspended' },
-  { value: 'closed', label: 'Closed' },
+  { value: 'draft', label: t('admin.applicationsManager.statuses.draft') },
+  { value: 'submitted', label: t('admin.applicationsManager.statuses.submitted') },
+  { value: 'formally_verified', label: t('admin.applicationsManager.statuses.formally_verified') },
+  { value: 'under_evaluation', label: t('admin.applicationsManager.statuses.under_evaluation') },
+  { value: 'pending_revision', label: t('admin.applicationsManager.statuses.pending_revision') },
+  { value: 'approved', label: t('admin.applicationsManager.statuses.approved') },
+  { value: 'rejected', label: t('admin.applicationsManager.statuses.rejected') },
+  { value: 'onboarding', label: t('admin.applicationsManager.statuses.onboarding') },
+  { value: 'active', label: t('admin.applicationsManager.statuses.active') },
+  { value: 'suspended', label: t('admin.applicationsManager.statuses.suspended') },
+  { value: 'closed', label: t('admin.applicationsManager.statuses.closed') },
 ]
 
 const ALLOWED_ADMIN_ACTIONS = [
-  { value: 'submitted', label: 'Submitted' },
-  { value: 'formally_verified', label: 'Formally Verified' },
-  { value: 'under_evaluation', label: 'Under Evaluation' },
-  { value: 'approved', label: 'Approved' },
-  { value: 'rejected', label: 'Rejected' },
-  { value: 'onboarding', label: 'Onboarding' },
-  { value: 'active', label: 'Active' },
-  { value: 'suspended', label: 'Suspended' },
-  { value: 'closed', label: 'Closed' },
+  { value: 'submitted', label: t('admin.applicationsManager.statuses.submitted') },
+  { value: 'formally_verified', label: t('admin.applicationsManager.statuses.formally_verified') },
+  { value: 'under_evaluation', label: t('admin.applicationsManager.statuses.under_evaluation') },
+  { value: 'approved', label: t('admin.applicationsManager.statuses.approved') },
+  { value: 'rejected', label: t('admin.applicationsManager.statuses.rejected') },
+  { value: 'onboarding', label: t('admin.applicationsManager.statuses.onboarding') },
+  { value: 'active', label: t('admin.applicationsManager.statuses.active') },
+  { value: 'suspended', label: t('admin.applicationsManager.statuses.suspended') },
+  { value: 'closed', label: t('admin.applicationsManager.statuses.closed') },
 ]
 
 const PROGRAM_TYPES = [
-  { value: 'a', label: 'Program A' },
-  { value: 'b', label: 'Program B' },
+  { value: 'a', label: t('admin.applicationsManager.programs.programA') },
+  { value: 'b', label: t('admin.applicationsManager.programs.programB') },
 ]
 
 const applications = ref<AdminApplicationListItem[]>([])
@@ -110,7 +113,12 @@ async function handleStatusSelect(id: number, targetStatus: string) {
     const app = applications.value.find(a => a.id === id)
     if (app) app.status = targetStatus
   } catch {
-    await useConfirm({ title: 'Error', message: 'Error while changing status', confirmText: 'Okay', danger: false })
+    await useConfirm({ 
+      title: t('admin.applicationsManager.confirm.errorTitle'), 
+      message: t('admin.applicationsManager.confirm.statusError'), 
+      confirmText: t('admin.applicationsManager.confirm.okay'), 
+      danger: false 
+    })
     loadApplications()
   } finally {
     changingStatusId.value = null
@@ -128,7 +136,12 @@ async function submitRevision() {
     if (app) app.status = 'pending_revision'
     showRevisionModal.value = false
   } catch {
-    await useConfirm({ title: 'Error', message: 'Failed to submit revision request.', confirmText: 'Okay', danger: false })
+    await useConfirm({ 
+      title: t('admin.applicationsManager.confirm.errorTitle'), 
+      message: t('admin.applicationsManager.confirm.revisionError'), 
+      confirmText: t('admin.applicationsManager.confirm.okay'), 
+      danger: false 
+    })
   } finally {
     revisionLoading.value = false
   }
@@ -156,7 +169,12 @@ async function downloadExport(format: 'csv' | 'xlsx' = 'xlsx') {
     document.body.removeChild(link)
     window.URL.revokeObjectURL(url)
   } catch {
-    await useConfirm({ title: 'Error', message: 'Failed to download export.', confirmText: 'Okay', danger: false })
+    await useConfirm({ 
+      title: t('admin.applicationsManager.confirm.errorTitle'), 
+      message: t('admin.applicationsManager.confirm.exportError'), 
+      confirmText: t('admin.applicationsManager.confirm.okay'), 
+      danger: false 
+    })
   }
 }
 
@@ -187,14 +205,14 @@ watch(() => props.filterCallId, () => { currentPage.value = 1; loadApplications(
     <!-- Header -->
     <div class="flex flex-wrap justify-between items-start gap-3">
       <div>
-        <h3 class="text-xl font-bold text-white">Applications</h3>
+        <h3 class="text-xl font-bold text-white">{{ t('admin.applicationsManager.title') }}</h3>
         <p
           v-if="filterCallId"
           class="mt-2 inline-flex items-center gap-2 text-xs font-mono text-blue-400 bg-blue-950/30 border border-blue-900/50 px-2 py-1 rounded-md"
         >
-          <span>Filtered for Call ID: {{ filterCallId }}</span>
+          <span>{{ t('admin.applicationsManager.filterNotice', { id: filterCallId }) }}</span>
           <button @click="$emit('clear-filter')" class="text-slate-400 hover:text-white underline">
-            Clear filter
+            {{ t('admin.applicationsManager.buttons.clearFilter') }}
           </button>
         </p>
       </div>
@@ -205,14 +223,14 @@ watch(() => props.filterCallId, () => { currentPage.value = 1; loadApplications(
           :disabled="loading"
           class="text-xs bg-green-900/40 hover:bg-green-900/60 px-3 py-1.5 rounded text-green-400 border border-green-800 transition-all font-mono disabled:opacity-40"
         >
-          Export CSV
+          {{ t('admin.applicationsManager.buttons.exportCSV') }}
         </button>
         <button
           @click="downloadExport('xlsx')"
           :disabled="loading"
           class="text-xs bg-blue-900/40 hover:bg-blue-900/60 px-3 py-1.5 rounded text-blue-400 border border-blue-800 transition-all font-mono disabled:opacity-40"
         >
-          Export XLSX
+          {{ t('admin.applicationsManager.buttons.exportXLSX') }}
         </button>
       </div>
     </div>
@@ -223,7 +241,7 @@ watch(() => props.filterCallId, () => { currentPage.value = 1; loadApplications(
         <input
           v-model="searchQuery"
           @input="handleSearch"
-          placeholder="Search by name or email..."
+          :placeholder="t('admin.applicationsManager.filters.searchPlaceholder')"
           class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white placeholder:text-slate-600 focus:border-blue-600 outline-none"
         />
       </div>
@@ -233,7 +251,7 @@ watch(() => props.filterCallId, () => { currentPage.value = 1; loadApplications(
           @change="handleFilterChange"
           class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white focus:border-blue-600 outline-none"
         >
-          <option value="">All Program Types</option>
+          <option value="">{{ t('admin.applicationsManager.filters.allPrograms') }}</option>
           <option v-for="type in PROGRAM_TYPES" :key="type.value" :value="type.value" class="bg-slate-950">
             {{ type.label }}
           </option>
@@ -245,7 +263,7 @@ watch(() => props.filterCallId, () => { currentPage.value = 1; loadApplications(
           @change="handleFilterChange"
           class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white focus:border-blue-600 outline-none"
         >
-          <option value="">All Statuses</option>
+          <option value="">{{ t('admin.applicationsManager.filters.allStatuses') }}</option>
           <option v-for="s in ALL_STATUSES" :key="s.value" :value="s.value" class="bg-slate-950">
             {{ s.label }}
           </option>
@@ -255,13 +273,13 @@ watch(() => props.filterCallId, () => { currentPage.value = 1; loadApplications(
 
     <!-- Loading -->
     <div v-if="loading && applications.length === 0" class="text-slate-500 italic text-sm py-6 text-center animate-pulse">
-      Loading applications...
+      {{ t('admin.applicationsManager.status.loading') }}
     </div>
 
     <div v-else>
       <!-- Empty -->
       <div v-if="applications.length === 0" class="text-slate-500 italic text-sm py-6 text-center">
-        No applications found.
+        {{ t('admin.applicationsManager.status.empty') }}
       </div>
 
       <!-- Table -->
@@ -269,11 +287,11 @@ watch(() => props.filterCallId, () => { currentPage.value = 1; loadApplications(
         <table class="w-full text-left border-collapse text-sm">
           <thead>
             <tr class="bg-slate-900/80">
-              <th class="px-4 py-3 text-xs font-mono uppercase text-slate-500 tracking-wider">ID</th>
-              <th class="px-4 py-3 text-xs font-mono uppercase text-slate-500 tracking-wider">Applicant</th>
-              <th class="px-4 py-3 text-xs font-mono uppercase text-slate-500 tracking-wider">Program / Call</th>
-              <th class="px-4 py-3 text-xs font-mono uppercase text-slate-500 tracking-wider">Status</th>
-              <th class="px-4 py-3 text-xs font-mono uppercase text-slate-500 tracking-wider text-right">Actions</th>
+              <th class="px-4 py-3 text-xs font-mono uppercase text-slate-500 tracking-wider">{{ t('admin.applicationsManager.table.id') }}</th>
+              <th class="px-4 py-3 text-xs font-mono uppercase text-slate-500 tracking-wider">{{ t('admin.applicationsManager.table.applicant') }}</th>
+              <th class="px-4 py-3 text-xs font-mono uppercase text-slate-500 tracking-wider">{{ t('admin.applicationsManager.table.programCall') }}</th>
+              <th class="px-4 py-3 text-xs font-mono uppercase text-slate-500 tracking-wider">{{ t('admin.applicationsManager.table.status') }}</th>
+              <th class="px-4 py-3 text-xs font-mono uppercase text-slate-500 tracking-wider text-right">{{ t('admin.applicationsManager.table.actions') }}</th>
             </tr>
           </thead>
           <tbody class="bg-slate-950">
@@ -296,7 +314,7 @@ watch(() => props.filterCallId, () => { currentPage.value = 1; loadApplications(
                     ? 'bg-blue-950/60 text-blue-400 border-blue-900'
                     : 'bg-slate-800 text-slate-400 border-slate-700'"
                 >
-                  Program {{ application.program_type }}
+                  {{ t('admin.applicationsManager.programs.labelPrefix') }} {{ application.program_type }}
                 </span>
                 <div class="text-xs text-slate-500 font-mono mt-1">{{ application.call_name }}</div>
               </td>
@@ -317,14 +335,14 @@ watch(() => props.filterCallId, () => { currentPage.value = 1; loadApplications(
                     v-if="application.status == 'under_evaluation'"
                     class="text-sm bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded border border-blue-700 text-slate-300 transition font-mono"
                   >
-                    Final verdict
+                    {{ t('admin.applicationsManager.buttons.finalVerdict') }}
                   </button>
 
                   <button
                     @click="viewDetail(application.id)"
                     class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded border border-slate-700 text-slate-300 transition font-mono"
                   >
-                    Detail
+                    {{ t('admin.applicationsManager.buttons.detail') }}
                   </button>
 
                   <select
@@ -334,13 +352,13 @@ watch(() => props.filterCallId, () => { currentPage.value = 1; loadApplications(
                     class="text-xs bg-slate-950 border border-slate-800 text-slate-300 rounded px-2 py-2 outline-none focus:border-blue-600 transition disabled:opacity-40 font-mono"
                   >
                     <option value="" disabled class="text-slate-500">
-                      {{ application.status === 'draft' ? 'Draft (Read-only)' : 'Set status...' }}
+                      {{ application.status === 'draft' ? t('admin.applicationsManager.select.draftReadOnly') : t('admin.applicationsManager.select.placeholder') }}
                     </option>
                     <option v-for="s in ALLOWED_ADMIN_ACTIONS" :key="s.value" :value="s.value" class="bg-slate-950">
                       {{ s.label }}
                     </option>
                     <option value="request_revision" class="bg-slate-950 text-amber-400">
-                      Return for Revision
+                      {{ t('admin.applicationsManager.select.returnRevision') }}
                     </option>
                   </select>
                 </div>
@@ -368,13 +386,13 @@ watch(() => props.filterCallId, () => { currentPage.value = 1; loadApplications(
     class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
   >
     <div class="border border-slate-800 bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl">
-      <h3 class="text-xl font-bold text-white mb-1">Return for Revision</h3>
-      <p class="text-xs font-mono text-slate-500 mb-4">#{{ revisionAppId }} — provide clear instructions for the applicant.</p>
+      <h3 class="text-xl font-bold text-white mb-1">{{ t('admin.applicationsManager.modal.title') }}</h3>
+      <p class="text-xs font-mono text-slate-500 mb-4">#{{ revisionAppId }} — {{ t('admin.applicationsManager.modal.subtitle') }}</p>
 
       <textarea
         v-model="revisionMessage"
         rows="4"
-        placeholder="Describe what needs to be corrected or added..."
+        :placeholder="t('admin.applicationsManager.modal.placeholder')"
         class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white placeholder:text-slate-600 focus:border-blue-600 outline-none resize-none transition"
       ></textarea>
 
@@ -384,14 +402,14 @@ watch(() => props.filterCallId, () => { currentPage.value = 1; loadApplications(
           :disabled="revisionLoading"
           class="w-1/3 bg-slate-800 hover:bg-slate-700 text-white font-medium py-2.5 rounded-lg transition text-sm"
         >
-          Cancel
+          {{ t('admin.applicationsManager.modal.cancel') }}
         </button>
         <button
           @click="submitRevision"
           :disabled="revisionLoading || !revisionMessage.trim()"
           class="w-2/3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition text-sm"
         >
-          {{ revisionLoading ? 'Sending...' : 'Send to Revision' }}
+          {{ revisionLoading ? t('admin.applicationsManager.modal.sending') : t('admin.applicationsManager.modal.submit') }}
         </button>
       </div>
     </div>

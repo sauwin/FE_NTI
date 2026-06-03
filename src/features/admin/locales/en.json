@@ -1,0 +1,790 @@
+{
+  "admin": {
+    "dashboard": {
+      "totalUsers": "Total Users",
+      "totalCalls": "Total Calls",
+      "totalApplications": "Total Applications",
+      "title": "NTI Central Administration",
+      "description": "Centralized management of users, applications, programs and platform workflows.",
+      "tabLabels": {
+        "overview": "Overview",
+        "programsCalls": "Programs & Calls",
+        "applications": "Applications",
+        "evaluators": "Evaluators",
+        "mentorships": "Mentors",
+        "users": "Users",
+        "approvals": "Approvals",
+        "documents": "Documents",
+        "createAdmin": "Create Admin",
+        "logs": "Audit Logs",
+        "broadcastNotification": "Broadcast"
+      },
+      "errors": {
+        "metricsLoadFalied": "Failed to load dashboard metrics",
+        "usersLoadFailed": "Failed to load users",
+        "approvalsLoadFailed": "Failed to load approvals"
+      }
+    },
+    "overview": {
+      "title": "Platform Activity",
+      "description": "Overview of programs and workflow state.",
+      "openCalls": {
+        "title": "Open calls",
+        "description": "Currently open calls"
+      },
+      "applicationsSubmitted": {
+        "title": "Applications submitted",
+        "description": "Applications submitted for review"
+      },
+      "applicationsActive": {
+        "title": "Applications active",
+        "description": "The application is currently under development"
+      },
+      "applicationsClosed": {
+        "title": "Applications closed",
+        "description": "Historical archived applications"
+      },
+      "usersOverview": {
+        "title": "Users Overview",
+        "description": "Distribution of Administrative and User Groups",
+        "students": "Students",
+        "companyOwners": "Company owners",
+        "administration": "Administration",
+        "contentEditors": "Content editors",
+        "evaluators": "Evaluators",
+        "mentors": "Mentors"
+      }
+    },
+
+    "documentManager": {
+      "title": "Documents",
+      "filters": {
+        "searchLabel": "Search",
+        "searchPlaceholder": "Search by file name...",
+        "dateLabel": "Created Date",
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "table": {
+        "fileName": "File Name",
+        "size": "Size",
+        "uploaded": "Uploaded",
+        "actions": "Actions",
+        "loading": "Loading documents…",
+        "empty": "No documents found for the current filters."
+      },
+      "actions": {
+        "download": "Download",
+        "preview": "Preview"
+      },
+      "pagination": {
+        "page": "Page {info}",
+        "previous": "← Previous",
+        "next": "Next →"
+      },
+      "errors": {
+        "loadFailed": "Failed to load documents.",
+        "downloadFailed": "Download failed.",
+        "pdfOnly": "Preview is only available for PDF files.",
+        "previewFailed": "Preview failed."
+      }
+    },
+
+    "logs": {
+      "title": "Audit Logs",
+      "system": "System",
+      "buttons": {
+        "exportCSV": "Export CSV",
+        "exportXLSX": "Export XLSX",
+        "exportPDF": "Export PDF",
+        "exportDOCX": "Export DOCX",
+        "reset": "Reset"
+      },
+      "filters": {
+        "allActions": "All Actions",
+        "allAdministrators": "All Administrators"
+      },
+      "status": {
+        "loading": "Loading logs...",
+        "empty": "No logs found."
+      },
+      "item": {
+        "by": "By:"
+      },
+      "actions": {
+        "approve": "Approve User",
+        "block": "Block User",
+        "unblock": "Unblock User",
+        "assign": "Assign Role",
+        "remove": "Remove Role",
+        "delete": "Delete Record",
+        "create": "Create Record",
+        "export": "Export Data",
+        "bulk_notification": "Bulk Notification",
+        "exportCaps": "EXPORT",
+        "exportData": "Export Data",
+        "approveInline": "Approve",
+        "blockInline": "Block",
+        "unblockInline": "Unblock",
+        "assignRoleInline": "Assign Role",
+        "removeRoleInline": "Remove Role",
+        "deleteInline": "Delete",
+        "createInline": "Create",
+        "resetPasswordInline": "Reset Password",
+        "bulkNotificationInline": "Bulk Notification"
+      },
+      "exportHeaders": {
+        "action": "Action",
+        "description": "Description",
+        "adminName": "Admin Name",
+        "adminEmail": "Admin Email",
+        "ipAddress": "IP Address",
+        "dateTime": "Date & Time",
+        "details": "Details"
+      },
+      "reports": {
+        "pdfTitle": "NTI — Audit Log Report",
+        "generated": "Generated: {date}"
+      }
+    },
+
+    "mentorsManager": {
+      "title": "Application Mentors",
+      "dropdowns": {
+        "selectApp": "Select application...",
+        "selectMentor": "Select mentor to assign..."
+      },
+      "appFormat": {
+        "program": "Program"
+      },
+      "buttons": {
+        "assign": "Assign",
+        "remove": "Remove"
+      },
+      "status": {
+        "loading": "Loading mentors...",
+        "empty": "No mentors assigned to this application."
+      },
+      "table": {
+        "name": "Name",
+        "email": "Email",
+        "assignedAt": "Assigned at",
+        "action": "Action"
+      },
+      "success": {
+        "noticeOnboarding": " and status moved to Onboarding",
+        "noticeActive": " and status reverted to Active",
+        "assigned": "Mentor assigned{notice}.",
+        "removed": "Mentor removed{notice}."
+      },
+      "errors": {
+        "loadDataFailed": "Could not load data",
+        "loadMentorsFailed": "Could not load mentors",
+        "appNotFound": "Application not found",
+        "studentNotFound": "Could not determine student for this application",
+        "assignFailed": "Could not assign mentor",
+        "removeFailed": "Could not remove mentor"
+      }
+    },
+
+    "applicationsManager": {
+      "title": "Applications",
+      "filterNotice": "Filtered for Call ID: {id}",
+      "buttons": {
+        "clearFilter": "Clear filter",
+        "exportCSV": "Export CSV",
+        "exportXLSX": "Export XLSX",
+        "finalVerdict": "Final verdict",
+        "detail": "Detail"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by name or email...",
+        "allPrograms": "All Program Types",
+        "allStatuses": "All Statuses"
+      },
+      "status": {
+        "loading": "Loading applications...",
+        "empty": "No applications found."
+      },
+      "table": {
+        "id": "ID",
+        "applicant": "Applicant",
+        "programCall": "Program / Call",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "programs": {
+        "programA": "Program A",
+        "programB": "Program B",
+        "labelPrefix": "Program"
+      },
+      "select": {
+        "draftReadOnly": "Draft (Read-only)",
+        "placeholder": "Set status...",
+        "returnRevision": "Return for Revision"
+      },
+      "statuses": {
+        "draft": "Draft",
+        "submitted": "Submitted",
+        "formally_verified": "Formally Verified",
+        "under_evaluation": "Under Evaluation",
+        "pending_revision": "Pending Revision",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "onboarding": "Onboarding",
+        "active": "Active",
+        "suspended": "Suspended",
+        "closed": "Closed"
+      },
+      "modal": {
+        "title": "Return for Revision",
+        "subtitle": "provide clear instructions for the applicant.",
+        "placeholder": "Describe what needs to be corrected or added...",
+        "cancel": "Cancel",
+        "submit": "Send to Revision",
+        "sending": "Sending..."
+      },
+      "confirm": {
+        "errorTitle": "Error",
+        "okay": "Okay",
+        "statusError": "Error while changing status",
+        "revisionError": "Failed to submit revision request.",
+        "exportError": "Failed to download export."
+      }
+    },
+
+    "bulkNotificationPanel": {
+      "form": {
+        "title": "Bulk Notifications",
+        "description": "Send global dashboard system announcements and mass email blasts.",
+        "audienceLabel": "Recipient Audience *",
+        "callLabel": "Select Targeted Call *",
+        "callPlaceholder": "-- Select call filter window --",
+        "subjectLabel": "Subject Title *",
+        "subjectPlaceholder": "Subject heading...",
+        "messageLabel": "Message Core Content *",
+        "messagePlaceholder": "Write letter contents here...",
+        "btnSend": "Send Broadcast",
+        "btnSending": "Broadcasting..."
+      },
+      "history": {
+        "title": "Campaigns History",
+        "description": "View and export previously sent bulk notifications.",
+        "btnCsv": "Export CSV",
+        "btnXlsx": "Export XLSX",
+        "filterSubject": "Search by subject...",
+        "filterAllGroups": "All Groups",
+        "filterAllSenders": "All Senders",
+        "btnReset": "Reset",
+        "loading": "Loading historical transmission waves...",
+        "noHistory": "No mass broadcast events dispatched from this panel yet.",
+        "noResults": "No results match current filters."
+      },
+      "table": {
+        "date": "Sent Date",
+        "sender": "Sender",
+        "audience": "Group Audience",
+        "preview": "Subject & Text Preview",
+        "total": "Queued Total",
+        "users": "users"
+      },
+      "audiences": {
+        "all": "All Users",
+        "students": "Students",
+        "companies": "Companies",
+        "mentors": "Mentors",
+        "callSelector": "Specific Call Participants (Výzva)"
+      },
+      "jsMessages": {
+        "selectCallError": "Please select a specific Call window.",
+        "applicantsOfCall": "Applicants of Call: \"{name}\"",
+        "confirmTitle": "Send Emails",
+        "confirmMessage": "Are you sure you want to send this mass email to [ {group} ]?",
+        "confirmText": "Send Now",
+        "cancelText": "Cancel",
+        "successMessage": "Campaign saved & queued successfully for {count} users.",
+        "matchedFallback": "matched",
+        "exportSuccess": "Export successful ({format})",
+        "exportFailed": "Failed to export notifications as {format}"
+      }
+    },
+
+    "callCreate": {
+      "title": "Create Call (Výzva)",
+      "subtitle": "Configure lifecycle status and structure rules",
+      "labels": {
+        "program": "Target Core Program *",
+        "status": "Call Lifecycle Status *",
+        "minTeam": "Min Team Size *",
+        "maxTeam": "Max Team Size (Optional)",
+        "opensAt": "Opens At",
+        "deadlineAt": "Deadline At",
+        "documentsConfig": "Required Documents Config"
+      },
+      "placeholders": {
+        "unknownCode": "UNKNOWN CODE",
+        "noLimit": "No limit",
+        "docNameExample": "e.g. Passport scan, CV, Project Proposal"
+      },
+      "statusOptions": {
+        "draft": "draft",
+        "open": "open",
+        "closed": "closed",
+        "archived": "archived"
+      },
+      "buttons": {
+        "addDocType": "+ Add Document Type",
+        "mandatory": "Mandatory",
+        "cancel": "Cancel",
+        "save": "Save New Call Configuration",
+        "saving": "Creating..."
+      },
+      "errors": {
+        "programsLoadFailed": "Failed to load system programs.",
+        "assignProgram": "Please assign this call to a program.",
+        "docNamesRequired": "Please provide names for all required documents.",
+        "fallbackSaveError": "Something went wrong while creating the Call."
+      },
+      "defaults": {
+        "defaultDocName": "Team Project Pitch (PDF)"
+      }
+    },
+
+    "callEdit": {
+      "title": "Edit Call Configuration",
+      "subtitle": "Update lifecycle status, dates, and JSON schema",
+      "loadingConfigs": "Loading configurations...",
+      "labels": {
+        "programLocked": "Target Core Program (Locked)",
+        "status": "Call Lifecycle Status *",
+        "minTeam": "Min Team Size *",
+        "maxTeam": "Max Team Size (Optional)",
+        "opensAt": "Opens At",
+        "deadlineAt": "Deadline At",
+        "documentsConfig": "Required Documents Config"
+      },
+      "placeholders": {
+        "noTitle": "No Title",
+        "noLimit": "No limit",
+        "docNameExample": "e.g. CV, Pitch"
+      },
+      "statusOptions": {
+        "draft": "draft",
+        "open": "open",
+        "closed": "closed",
+        "archived": "archived"
+      },
+      "buttons": {
+        "addDocType": "+ Add Document Type",
+        "mandatory": "Mandatory",
+        "cancel": "Cancel",
+        "update": "Update Call Settings",
+        "saving": "Saving..."
+      },
+      "errors": {
+        "loadFailed": "Failed to load data for this Call.",
+        "docNamesRequired": "Please provide names for all required documents.",
+        "updateError": "Error updating Call configuration."
+      }
+    },
+
+    "callEvaluatorsManager": {
+      "title": "Call Evaluators & Evaluation Scheduling",
+      "selectCallLabel": "Select Call",
+      "chooseCallPlaceholder": "-- Choose a call --",
+      "errors": {
+        "loadDataFailed": "Could not load data",
+        "loadEvaluatorsFailed": "Could not load evaluators",
+        "assignFailed": "Could not assign evaluator",
+        "removeFailed": "Could not remove evaluator",
+        "validationChooseAndDate": "Please choose call and set date",
+        "validationChooseCall": "Please choose call",
+        "validationScheduleFirst": "Please schedule evaluation first",
+        "scheduleFailed": "Could not schedule evaluation",
+        "moveFailed": "Could not move applications to under_evaluation"
+      },
+      "success": {
+        "assigned": "Evaluator assigned.",
+        "removed": "Evaluator removed.",
+        "scheduled": "✓ Evaluation scheduled!",
+        "moved": "{count} applications moved to under_evaluation."
+      },
+      "scheduling": {
+        "title": "Schedule Commission Meeting",
+        "dateLabel": "Evaluation Date & Time",
+        "dateSublabel": "(when commission will meet)",
+        "btnScheduling": "Scheduling...",
+        "btnSetDate": "Set Date"
+      },
+      "stats": {
+        "title": "Applications Status",
+        "formallyVerified": "Formally Verified",
+        "underEvaluation": "Under Evaluation",
+        "total": "Total",
+        "willBeMoved": "will be moved from",
+        "noAppsToMove": "No applications in \"formally_verified\" status to move",
+        "btnMoving": "Moving...",
+        "btnMoveNow": "Move now"
+      },
+      "assignSection": {
+        "title": "Assign Evaluators",
+        "placeholder": "-- Select evaluator --",
+        "btnAssigning": "Assigning...",
+        "btnAssign": "Assign",
+        "assignedCountZero": "0 evaluators assigned",
+        "assignedCountOne": "1 evaluator assigned",
+        "assignedCountPlural": "{count} evaluators assigned",
+        "noEvaluators": "No evaluators assigned yet",
+        "btnRemove": "Remove"
+      }
+    },
+
+    "callsManagementPanel": {
+      "title": "System Calls (Výzva)",
+      "btnCreate": "+ Create New Call",
+      "tableHeaders": {
+        "program": "Program",
+        "status": "Status",
+        "deadline": "Deadline",
+        "requiredDocs": "Required Docs Count",
+        "actions": "Actions"
+      },
+      "tableRows": {
+        "noDeadline": "No deadline",
+        "rulesCount": "{count} rule | {count} rules",
+        "btnEdit": "Edit",
+        "btnDelete": "Delete"
+      },
+      "confirmDelete": {
+        "title": "Delete Draft",
+        "message": "Are you sure you want to delete this draft call?",
+        "confirmText": "Delete Now",
+        "cancelText": "Cancel"
+      },
+      "errorDialog": {
+        "title": "Error",
+        "defaultMessage": "Error deleting call",
+        "confirmText": "Okay"
+      }
+    },
+
+    "createAdminForm": {
+      "title": "New Admin",
+      "fields": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "password": "Password",
+        "adminRole": "Admin Role",
+        "selectRole": "Select a role"
+      },
+      "roles": {
+        "ntiAdmin": "NTI Admin",
+        "evaluator": "Evaluator",
+        "contentEditor": "Content Editor",
+        "mentor": "Mentor"
+      },
+      "buttons": {
+        "create": "Create Admin",
+        "creating": "Creating..."
+      },
+      "messages": {
+        "allFieldsRequired": "All fields required",
+        "passwordMinLength": "Password must be at least 8 characters",
+        "success": "Admin created successfully",
+        "failed": "Failed to create admin"
+      }
+    },
+
+    "evaluationCriteriaManager": {
+      "title": "Evaluation Criteria",
+      "description": "Define structured parameters and weights for proposal scoring.",
+      "buttons": {
+        "addCriterion": "+ Add Criterion",
+        "saveConfiguration": "Save Configuration",
+        "saving": "Saving..."
+      },
+      "weightSummary": {
+        "totalAllocated": "Total Allocated Weight:"
+      },
+      "emptyState": {
+        "noCriteria": "No evaluation criteria defined for this call yet. Click \"Add Criterion\" to start."
+      },
+      "labels": {
+        "slug": "Slug (Max 35 char)",
+        "criterionTitle": "Criterion Title",
+        "weight": "Weight (%)",
+        "description": "Description / Guidelines (Optional)",
+        "removeCriterion": "Remove criterion"
+      },
+      "placeholders": {
+        "slug": "e.g. tech_feasibility",
+        "criterionTitle": "e.g. Technical Feasibility & Innovation",
+        "weight": "0",
+        "description": "Describe what evaluators should look for when scoring this specific criterion..."
+      },
+      "messages": {
+        "nothingToSync": "Nothing to sync",
+        "success": "Criteria saved successfully",
+        "fetchError": "Error while fetching evaluation criteria",
+        "saveError": "Error while saving criteria"
+      }
+    },
+
+    "pendingApprovalTable": {
+      "emptyState": "No pending approvals",
+      "table": {
+        "headers": {
+          "name": "Name",
+          "email": "Email",
+          "requestedRole": "Requested Role",
+          "created": "Created",
+          "actions": "Actions"
+        }
+      },
+      "buttons": {
+        "approve": "Approve",
+        "reject": "Reject"
+      },
+      "modals": {
+        "approve": {
+          "title": "Approve Role",
+          "message": "Approve \"{role}\" role for this user?",
+          "confirm": "Approve",
+          "cancel": "Cancel"
+        },
+        "reject": {
+          "title": "Remove Role",
+          "message": "Remove \"{role}\" role from this user?",
+          "confirm": "Remove",
+          "cancel": "Cancel"
+        }
+      },
+      "messages": {
+        "approveSuccess": "Role approved for {role}",
+        "approveFailed": "Failed to approve role",
+        "rejectSuccess": "Role removed",
+        "rejectFailed": "Failed to remove role"
+      }
+    },
+
+    "programCallsManager": {
+      "form": {
+        "titleCreate": "New Program A Call",
+        "titleEdit": "Edit Program A Call",
+        "labels": {
+          "title": "Call Title",
+          "opensAt": "Opens At",
+          "deadline": "Deadline",
+          "minTeam": "Min Team",
+          "maxTeam": "Max Team",
+          "requiredDocuments": "Required Documents",
+          "requiredCheckbox": "Required"
+        },
+        "placeholders": {
+          "documentName": "Document Name"
+        }
+      },
+      "buttons": {
+        "addDocument": "+ Add Document",
+        "cancel": "Cancel",
+        "save": "Create Call",
+        "update": "Update Call",
+        "saving": "Saving..."
+      },
+      "list": {
+        "title": "Calls",
+        "emptyState": "No calls found.",
+        "placeholders": {
+          "search": "Search by title..."
+        },
+        "labels": {
+          "membersCount": "{min}–{max} members",
+          "infiniteMembersCount": "{min}–∞ members"
+        },
+        "buttons": {
+          "exportCsv": "Export CSV",
+          "exportXlsx": "Export XLSX",
+          "applications": "Applications"
+        },
+        "statuses": {
+          "all": "All Statuses",
+          "draft": "Draft",
+          "open": "Open",
+          "closed": "Closed",
+          "archived": "Archived"
+        },
+        "programs": {
+          "all": "All Program Types",
+          "a": "Program A",
+          "b": "Program B",
+          "fallback": "—"
+        },
+        "actions": {
+          "edit": "Edit",
+          "setDraft": "Set Draft",
+          "open": "Open",
+          "close": "Close",
+          "archived": "Archived",
+          "delete": "Delete"
+        }
+      },
+      "modals": {
+        "successCreate": {
+          "title": "Status change",
+          "message": "Call created successfully!"
+        },
+        "successUpdate": {
+          "title": "Status change",
+          "message": "Call updated successfully!"
+        },
+        "error": {
+          "title": "Error",
+          "createMessage": "Error creating call.",
+          "updateMessage": "Error updating call.",
+          "statusMessage": "Failed to update status",
+          "deleteMessage": "Call cannot be deleted (only Draft).",
+          "exportMessage": "Failed to download export."
+        },
+        "deleteConfirm": {
+          "title": "Delete Call",
+          "message": "Are you sure you want to delete this call?",
+          "confirm": "Delete Now",
+          "cancel": "Cancel"
+        },
+        "genericButtons": {
+          "okay": "Okay"
+        }
+      }
+    },
+
+    "userManagementPanel": {
+      "title": "Users Management",
+      "description": "Manage platform users, permissions and access.",
+      "exportCsv": "Export CSV",
+      "exportXlsx": "Export XLSX",
+      "searchPlaceholder": "Search by name or email...",
+      "allRoles": "All Roles",
+      "allStatuses": "All Statuses",
+      "statusActive": "Active",
+      "statusBlocked": "Blocked",
+      "loadingUsers": "Loading users...",
+      "tableHeaders": {
+        "user": "User",
+        "roles": "Roles",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "actions": {
+        "block": "Block",
+        "unblock": "Unblock",
+        "delete": "Delete",
+        "assignRole": "Assign Role"
+      },
+      "noUsersFound": "No users found.",
+      "modal": {
+        "title": "Company Role Details",
+        "description": "Please provide organization details to assign this role.",
+        "regNumberLabel": "Registration Number",
+        "regNumberPlaceholder": "Enter organization ID/Code...",
+        "roleInOrgLabel": "Role within Organization",
+        "cancel": "Cancel",
+        "confirm": "Confirm Assign",
+        "processing": "Processing..."
+      },
+      "rolesInOrg": {
+        "owner": "Owner",
+        "contact": "Contact",
+        "evaluator": "Evaluator",
+        "mentor": "Mentor"
+      },
+      "messages": {
+        "loadFailed": "Failed to load users",
+        "regNumberRequired": "Registration number is required",
+        "userBlocked": "User blocked",
+        "blockFailed": "Failed to block user",
+        "userUnblocked": "User unblocked",
+        "unblockFailed": "Failed to unblock user",
+        "userDeleted": "User deleted",
+        "deleteFailed": "Failed to delete user",
+        "roleRemoved": "Role removed",
+        "removeFailed": "Failed to remove role",
+        "roleAssigned": "Role \"{role}\" assigned",
+        "assignFailed": "Failed to assign role",
+        "exportSuccess": "Export successful ({format})",
+        "exportFailed": "Failed to export as {format}"
+      },
+      "confirm": {
+        "blockTitle": "Block User",
+        "blockMessage": "Block this user?",
+        "unblockTitle": "Unblock User",
+        "unblockMessage": "Unblock this user?",
+        "deleteTitle": "Delete User",
+        "deleteMessage": "Delete permanently? Cannot be undone.",
+        "removeRoleTitle": "Remove Role",
+        "removeRoleMessage": "Remove \"{role}\" role?"
+      }
+    },
+
+    "finalVerdictPanel": {
+      "navigation": {
+        "adminPanel": "Admin Panel"
+      },
+      "title": "Consolidated Verdict Panel",
+      "status": {
+        "reviewsStatus": "Reviews Status",
+        "done": "{reviews} / {total} Done",
+        "consolidatedScore": "Consolidated Score",
+        "scoreUnit": "{score} / 100 b"
+      },
+      "buttons": {
+        "saving": "Saving Verdict...",
+        "publish": "Publish Final Verdict",
+        "incomplete": "Committee Reviews Incomplete"
+      },
+      "loading": "Loading application evaluations and metadata...",
+      "sections": {
+        "specs": "Application Specs",
+        "attachments": "Submitted Team Attachments",
+        "peerSheets": "Committee Peer Evaluation Sheets",
+        "averageIndex": "Committee Average Index",
+        "overrideStatus": "Override Application System Status",
+        "resolution": "Internal Notes & Official Resolution"
+      },
+      "specsFields": {
+        "teamName": "Project / Team Name:",
+        "programTrack": "Program {track}",
+        "stackCategory": "Stack Category:",
+        "currentStatus": "Current Status:"
+      },
+      "peerSheetsFields": {
+        "recommendationApprove": "Approve",
+        "recommendationRevision": "Revision",
+        "reviewerStatement": "Reviewer Statement:",
+        "scoreUnit": "{score} b. ({weight}%)"
+      },
+      "averageIndexDesc": "Automatically generated mathematical arithmetic average",
+      "statusOptions": {
+        "approve": {
+          "title": "🟢 Approve",
+          "desc": "Admit into incubator"
+        },
+        "revision": {
+          "title": "🟡 Revision",
+          "desc": "Return to applicant"
+        },
+        "reject": {
+          "title": "🔴 Reject",
+          "desc": "Permanent dismissal"
+        }
+      },
+      "resolutionDesc": "This text content will be persistent in the application logs database and sent out to the team if a revision request triggers.",
+      "resolutionPlaceholder": "State the analytical summary or reasoning leading to this overriding status decision (e.g. alignment with program limits, fiscal review flags, contractual agreements)...",
+      "messages": {
+        "successSync": "Application status successfully synchronized to [{status}].",
+        "submitFailed": "Failed to record the final admin decision.",
+        "loadFailed": "Failed to load application data."
+      }
+    }
+  }
+}

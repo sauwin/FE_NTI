@@ -1,0 +1,107 @@
+{
+  "company": {
+    "tabs": {
+      "profile": "Profil spoločnosti",
+      "tasks": "Projektové úlohy",
+      "approvals": "Správa čakajúcich schválení",
+      "members": "Správa členov spoločnosti",
+      "applications": "Správa prihlášok"
+    },
+    "roles": {
+      "owner": "Vlastník",
+      "contact": "Kontaktná osoba",
+      "evaluator": "Hodnotiteľ",
+      "mentor": "Mentor"
+    },
+    "common": {
+      "name": "Meno",
+      "email": "Email",
+      "status": "Stav",
+      "actions": "Akcie",
+      "created": "Vytvorené",
+      "edit": "Upraviť",
+      "delete": "Vymazať",
+      "cancel": "Zrušiť",
+      "saving": "Ukladá sa...",
+      "view": "Zobraziť",
+      "description": "Popis",
+      "website": "Webstránka"
+    },
+    "membersTable": {
+      "noMembers": "Nenašli sa žiadni aktívni členovia spoločnosti",
+      "roleInOrg": "Rola v org.",
+      "kickOut": "Vyhodiť",
+      "prev": "Predch.",
+      "next": "Nasl.",
+      "pagination": "Strana {current} z {total} ({count} používateľov)"
+    },
+    "profile": {
+      "notFilledTitle": "Profil ešte nie je vyplnený",
+      "notFilledDesc": "Pre zadávanie projektov vyplňte profil vašej spoločnosti.",
+      "saveSuccess": "Profil bol úspešne uložený",
+      "regNumber": "IČO",
+      "sector": "Sektor",
+      "fields": {
+        "nameLabel": "Názov spoločnosti",
+        "namePlaceholder": "napr. TechCorp s.r.o.",
+        "regPlaceholder": "12345678",
+        "sectorPlaceholder": "napr. Vývoj softvéru",
+        "webPlaceholder": "https://example.com",
+        "descPlaceholder": "Popíšte vašu spoločnosť..."
+      },
+      "validation": {
+        "nameRequired": "Názov spoločnosti je povinný",
+        "fallbackError": "Uloženie zlyhalo"
+      },
+      "editProfile": "Upraviť profil",
+      "createProfile": "Vytvoriť profil",
+      "saveChanges": "Uložiť zmeny"
+    },
+    "tasks": {
+      "title": "Naše technické špecifikácie",
+      "subtitle": "Správa požiadaviek a projektového backlogu v Programe B",
+      "createBtn": "+ Vytvoriť úlohu",
+      "noTasks": "Zatiaľ ste pre študentov nepridali žiadne zadania.",
+      "postFirst": "Zverejnite prvé zadanie práve teraz",
+      "noDesc": "Popis chýba.",
+      "publish": "Zverejniť",
+      "budget": "Rozpočet",
+      "program": "Program",
+      "notSpecified": "Nešpecifikovaný",
+      "confirmDeleteTitle": "Vymazať inovačnú výzvu",
+      "confirmDeleteMsg": "Naozaj chcete natrvalo vymazať úlohu \"{title}\"? Týmto sa odstráni aj prislúchajúca Výzva a všetky nahrané požiadavky z disku.",
+      "deleting": "Maže sa..."
+    },
+    "applications": {
+      "title": "Prijaté študentské prihlášky",
+      "subtitle": "Prehľad študentských skupín a projektových zámerov odoslaných do výziev vašej organizácie.",
+      "noApplications": "Do vašich úloh zatiaľ neboli odoslané žiadne prihlášky.",
+      "idApplicant": "ID / Uchádzač",
+      "targetChallenge": "Cieľová výzva (Úloha)",
+      "submittedAt": "Odoslané dňa",
+      "individualSolver": "Individuálny riešiteľ",
+      "noEmail": "Bez emailu",
+      "unknownChallenge": "Neznáma výzva",
+      "callLabel": "Výzva: {name}",
+      "revision": "Revízia",
+      "verify": "Overiť",
+      "modalTitle": "Požiadať o revíziu pre #{id}",
+      "modalDesc": "Uveďte jasné pokyny alebo spätnú väzbu o tom, čo musí študentský tím vo svojej prihláške opraviť, priložiť alebo upraviť.",
+      "modalPlaceholder": "napr. Nahrajte jasnejšiu schému architektúry a špecifikujte vaše skúsenosti s Dockerom...",
+      "sendToRevision": "Odoslať na revíziu",
+      "sending": "Odosiela sa..."
+    },
+    "approvals": {
+      "noPending": "Žiadne čakajúce schválenia",
+      "requestedRole": "Požadovaná rola",
+      "approve": "Schváliť",
+      "reject": "Odmietnuť",
+      "confirmApproveTitle": "Schváliť člena",
+      "confirmApproveMsg": "Naozaj chcete schváliť používateľa {name}?",
+      "confirmRejectTitle": "Odmietnuť žiadosť",
+      "confirmRejectMsg": "Odmietnuť žiadosť od {name}?",
+      "confirmKickTitle": "Odstrániť člena",
+      "confirmKickMsg": "Odstrániť používateľa {name} z organizácie?"
+    }
+  }
+}

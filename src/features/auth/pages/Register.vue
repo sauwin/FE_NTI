@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { register } from '@/features/auth/api/auth'
 import { useAuthStore } from '../stores/auth'
 import type { RegisterPayload } from '@/features/auth/types/auth'
 
+const { t } = useI18n()
 const firstName = ref('')
 const lastName = ref('')
 const email = ref('')
@@ -26,8 +28,8 @@ const loading = ref(false)
 
 async function submit() {
   error.value = ''
-  if (!agreedTerms.value) { error.value = 'You must agree to the Terms and Conditions'; return }
-  if (!agreedGdpr.value) { error.value = 'You must agree to the processing of personal data (GDPR)'; return }
+  if (!agreedTerms.value) { error.value = t('register.errors.termsRequired'); return }
+  if (!agreedGdpr.value) { error.value = t('register.errors.gdprRequired'); return }
 
   try {
     const payload: RegisterPayload = {
@@ -42,7 +44,7 @@ async function submit() {
     }
 
     if (password.value !== passwordConfirm.value) {
-      error.value = 'Passwords are not identical'
+      error.value = t('register.errors.passwordsMismatch')
       return
     }
 
@@ -53,13 +55,13 @@ async function submit() {
           const id = Number(registrationNumber.value.trim())
 
           if (Number.isNaN(id)) {
-            error.value = 'Invalid organization ID'
+            error.value = t('register.errors.invalidOrgId')
             return
           } 
 
           payload.registration_number = id
         } else {
-          error.value = 'No registration id of your company provided'
+          error.value = t('register.errors.missingOrgId')
           return
         }
       }
@@ -71,7 +73,7 @@ async function submit() {
     router.push('/pending-verification')
   } catch (e: any) {
     fieldErrors.value = e.response?.data?.errors ?? {}
-    error.value = e.response?.data?.message ?? 'Registration failed'
+    error.value = e.response?.data?.message ?? t('register.errors.failed')
   } finally {
     loading.value = false
   }
@@ -83,9 +85,9 @@ async function submit() {
     <div class="max-w-md w-full space-y-6 bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-2xl p-8 shadow-2xl">
       
       <div>
-        <h1 class="font-bold text-3xl text-center text-white tracking-tight">Create an Account</h1>
+        <h1 class="font-bold text-3xl text-center text-white tracking-tight">{{ t('register.title') }}</h1>
         <p class="mt-2 text-center text-sm text-slate-400">
-          Join the NTI platform and start your journey
+          {{ t('register.subtitle') }}
         </p>
       </div>
 
@@ -96,7 +98,7 @@ async function submit() {
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">First Name</label>
+            <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('register.firstName') }}</label>
             <input 
               v-model="firstName" 
               type="text" 
@@ -107,7 +109,7 @@ async function submit() {
             <p v-if="fieldErrors.first_name?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.first_name[0] }}</p>
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Last Name</label>
+            <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('register.lastName') }}</label>
             <input 
               v-model="lastName" 
               type="text" 
@@ -120,7 +122,7 @@ async function submit() {
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Email Address</label>
+          <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('register.email') }}</label>
           <input 
             v-model="email" 
             type="email" 
@@ -132,7 +134,7 @@ async function submit() {
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Password</label>
+          <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('register.password') }}</label>
           <input 
             v-model="password" 
             type="password" 
@@ -144,7 +146,7 @@ async function submit() {
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Confirm Password</label>
+          <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('register.confirmPassword') }}</label>
           <input 
             v-model="passwordConfirm" 
             type="password" 
@@ -156,30 +158,30 @@ async function submit() {
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Type of Account</label>
+          <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('register.accountType') }}</label>
           <select 
             v-model="role" 
             class="mt-1 block w-full px-3 py-2 bg-slate-950/50 border border-slate-800/80 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition text-sm cursor-pointer"
           >
-            <option value="student" class="bg-slate-900">Student</option>
-            <option value="company" class="bg-slate-900">Company</option>
+            <option value="student" class="bg-slate-900">{{ t('register.student') }}</option>
+            <option value="company" class="bg-slate-900">{{ t('register.company') }}</option>
           </select>
         </div>
 
         <div v-if="isCompany" class="p-4 bg-blue-600/5 border border-blue-900/40 rounded-xl space-y-4 transition-all duration-300 ease-in-out">
           <div>
-            <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Company Registration Type</label>
+            <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('register.companyType') }}</label>
             <select 
               v-model="companyRole" 
               class="mt-1 block w-full px-3 py-2 bg-slate-950/50 border border-slate-800/80 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition text-sm cursor-pointer"
             >
-              <option value="owner" class="bg-slate-900">Company Owner</option>
-              <option value="member" class="bg-slate-900">Company Member</option>
+              <option value="owner" class="bg-slate-900">{{ t('register.owner') }}</option>
+              <option value="member" class="bg-slate-900">{{ t('register.member') }}</option>
             </select>
           </div>
           
           <div v-if="companyRole === 'member'">
-            <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Organization Registration Number</label>
+            <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('register.regNumber') }}</label>
             <input 
               v-model="registrationNumber" 
               type="text" 
@@ -204,8 +206,8 @@ async function submit() {
               />
             </div>
             <label for="terms" class="text-xs text-slate-400 cursor-pointer select-none leading-normal">
-              I have read and agree to the 
-              <router-link to="/terms" class="text-blue-400 hover:text-blue-300 hover:underline font-medium transition">Terms and Conditions</router-link>.
+              {{ t('register.termsText') }} 
+              <router-link to="/terms" class="text-blue-400 hover:text-blue-300 hover:underline font-medium transition">{{ t('register.termsLink') }}</router-link>.
             </label>
           </div>
 
@@ -219,9 +221,8 @@ async function submit() {
               />
             </div>
             <label for="gdpr" class="text-xs text-slate-400 cursor-pointer select-none leading-normal">
-              I agree to the processing of personal data in accordance with the 
-              <router-link to="/privacy" class="text-blue-400 hover:text-blue-300 hover:underline font-medium transition">Privacy Policy</router-link> (GDPR). 
-              My data will be used solely for NTI program management purposes.
+              {{ t('register.gdprText') }} 
+              <router-link to="/privacy" class="text-blue-400 hover:text-blue-300 hover:underline font-medium transition">{{ t('register.gdprLink') }}</router-link> {{ t('register.gdprSuffix') }}
             </label>
           </div>
         </div>
@@ -231,12 +232,12 @@ async function submit() {
           :disabled="loading"
           class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-blue-500 active:bg-blue-700 transition duration-150 ease-in-out mt-6"
         >
-          {{ loading ? 'Loading...' : 'Register' }}
+          {{ loading ? t('register.btnLoading') : t('register.btnRegister') }}
         </button>
 
         <div class="text-center text-xs text-slate-400 mt-4">
-          Already have an account? 
-          <router-link class="text-blue-400 hover:text-blue-300 font-medium transition" to="/auth/login">Log in</router-link>
+          {{ t('register.alreadyAccount') }} 
+          <router-link class="text-blue-400 hover:text-blue-300 font-medium transition" to="/auth/login">{{ t('register.logIn') }}</router-link>
         </div>
       </form>
     </div>

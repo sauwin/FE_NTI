@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { getOrganizationApplications, updateApplicationStatus } from '@/features/company/api/company'
 
 interface ApplicationItem {
@@ -28,6 +29,8 @@ interface ApplicationItem {
 }
 
 const router = useRouter()
+const { t, locale } = useI18n()
+
 const applications = ref<ApplicationItem[]>([])
 const loading = ref(false)
 const actionLoading = ref<number | null>(null)
@@ -49,7 +52,7 @@ async function fetchApplications() {
   } catch (err) {
     console.error('Failed to load applications:', err)
     applications.value = []
-  } collapse: {
+  } finally {
     loading.value = false
   }
 }
@@ -110,9 +113,9 @@ function viewApplicationDetails(id: number) {
 <template>
   <div class="space-y-6">
     <div class="border-b border-slate-900 pb-5">
-      <h3 class="text-xl font-bold text-white">Incoming Student Applications</h3>
+      <h3 class="text-xl font-bold text-white">{{ t('company.applications.title') }}</h3>
       <p class="text-xs text-slate-500 mt-1">
-        Review student groups and project pitches submitted for your organization's challenges.
+        {{ t('company.applications.subtitle') }}
       </p>
     </div>
 
@@ -121,18 +124,18 @@ function viewApplicationDetails(id: number) {
     </div>
 
     <div v-else-if="applications.length === 0" class="text-center py-16 border border-dashed border-slate-800 rounded-2xl bg-slate-900/20">
-      <p class="text-sm text-slate-500">No applications have been submitted to your tasks yet.</p>
+      <p class="text-sm text-slate-500">{{ t('company.applications.noApplications') }}</p>
     </div>
 
     <div v-else class="overflow-x-auto border border-slate-800 rounded-2xl bg-slate-900/10">
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="border-b border-slate-800 bg-slate-950/40 text-[11px] font-mono uppercase tracking-wider text-slate-500">
-            <th class="py-4 px-5">ID / Applicant</th>
-            <th class="py-4 px-5">Target Challenge (Task)</th>
-            <th class="py-4 px-5">Status</th>
-            <th class="py-4 px-5">Submitted At</th>
-            <th class="py-4 px-5 text-right">Actions</th>
+            <th class="py-4 px-5">{{ t('company.applications.idApplicant') }}</th>
+            <th class="py-4 px-5">{{ t('company.applications.targetChallenge') }}</th>
+            <th class="py-4 px-5">{{ t('company.common.status') }}</th>
+            <th class="py-4 px-5">{{ t('company.applications.submittedAt') }}</th>
+            <th class="py-4 px-5 text-right">{{ t('company.common.actions') }}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-800/60 text-sm">
@@ -144,19 +147,19 @@ function viewApplicationDetails(id: number) {
           >
             <td class="py-4 px-5">
               <div class="font-semibold text-white group-hover:text-blue-400 transition-colors">
-                {{ app.team?.name ?? app.student_profile?.user?.name ?? 'Individual Solver' }}
+                {{ app.team?.name ?? app.student_profile?.user?.name ?? t('company.applications.individualSolver') }}
               </div>
               <div class="text-xs text-slate-500 mt-0.5">
-                ID: #{{ app.id }} • {{ app.student_profile?.user?.email ?? 'No email' }}
+                ID: #{{ app.id }} • {{ app.student_profile?.user?.email ?? t('company.applications.noEmail') }}
               </div>
             </td>
 
             <td class="py-4 px-5 max-w-xs truncate">
               <span class="text-slate-300 block font-medium truncate">
-                {{ app.call?.task?.title ?? 'Unknown Challenge' }}
+                {{ app.call?.task?.title ?? t('company.applications.unknownChallenge') }}
               </span>
               <span class="text-[10px] text-slate-500 font-mono block truncate">
-                Call: {{ app.call?.name ?? '—' }}
+                {{ t('company.applications.callLabel', { name: app.call?.name ?? '—' }) }}
               </span>
             </td>
 
@@ -167,7 +170,7 @@ function viewApplicationDetails(id: number) {
             </td>
 
             <td class="py-4 px-5 text-xs text-slate-400 font-mono">
-              {{ app.created_at ? new Date(app.created_at).toLocaleDateString('uk-UA') : '—' }}
+              {{ app.created_at ? new Date(app.created_at).toLocaleDateString(locale === 'sk' ? 'sk-SK' : 'en-US') : '—' }}
             </td>
 
             <td class="py-4 px-5 text-right" @click.stop>
@@ -179,14 +182,14 @@ function viewApplicationDetails(id: number) {
                     :disabled="actionLoading === app.id"
                     class="text-xs bg-slate-800 hover:bg-rose-950/40 border border-slate-700 text-slate-400 hover:text-rose-400 px-3 py-1.5 rounded-lg transition font-medium cursor-pointer"
                   >
-                    Revision
+                    {{ t('company.applications.revision') }}
                   </button>
                   <button
                     @click="handleVerify(app.id)"
                     :disabled="actionLoading === app.id"
                     class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg transition font-medium shadow-sm shadow-blue-900/30 cursor-pointer"
                   >
-                    {{ actionLoading === app.id ? '...' : 'Verify' }}
+                    {{ actionLoading === app.id ? '...' : t('company.applications.verify') }}
                   </button>
                 </template>
 
@@ -195,7 +198,7 @@ function viewApplicationDetails(id: number) {
                   @click="viewApplicationDetails(app.id)"
                   class="text-xs text-slate-400 hover:text-white bg-slate-950/40 border border-slate-800 hover:border-slate-700 px-3 py-1.5 rounded-lg transition font-mono"
                 >
-                  View &rarr;
+                  {{ t('company.common.view') }} &rarr;
                 </button>
               </div>
             </td>
@@ -206,15 +209,15 @@ function viewApplicationDetails(id: number) {
 
     <div v-if="showRevisionModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 text-white shadow-2xl">
-        <h3 class="text-base font-bold text-white mb-2">Request Revision for #{{ revisionAppId }}</h3>
+        <h3 class="text-base font-bold text-white mb-2">{{ t('company.applications.modalTitle', { id: revisionAppId }) }}</h3>
         <p class="text-slate-400 text-xs mb-4">
-          Provide clear instructions or feedback on what the student team needs to correct, attach, or adjust in their application.
+          {{ t('company.applications.modalDesc') }}
         </p>
         
         <textarea
           v-model="revisionMessage"
           rows="4"
-          placeholder="e.g., Please upload a clearer architecture chart and specify your experience with Docker..."
+          :placeholder="t('company.applications.modalPlaceholder')"
           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-blue-600 outline-none transition-all resize-none"
         ></textarea>
 
@@ -224,14 +227,14 @@ function viewApplicationDetails(id: number) {
             :disabled="revisionLoading"
             class="px-4 py-2 text-xs border border-slate-800 text-slate-400 hover:text-white rounded-lg transition font-mono cursor-pointer"
           >
-            Cancel
+            {{ t('company.common.cancel') }}
           </button>
           <button
             @click="submitRevision"
             :disabled="revisionLoading || !revisionMessage.trim()"
             class="px-4 py-2 text-xs bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white rounded-lg transition font-semibold font-mono cursor-pointer"
           >
-            {{ revisionLoading ? 'Sending...' : 'Send to Revision' }}
+            {{ revisionLoading ? t('company.applications.sending') : t('company.applications.sendToRevision') }}
           </button>
         </div>
       </div>

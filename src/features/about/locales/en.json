@@ -1,0 +1,36 @@
+{
+  "about": {
+    "hero": {
+      "badge": "About",
+      "title": "About",
+      "highlight": "NTI",
+      "description": "Nitriansky technologický inkubátor is a student-focused innovation platform at UKF Nitra. We help students turn ideas into products and connect them with real companies."
+    },
+    "mission": {
+      "label": "Mission",
+      "title": "What we do",
+      "items": {
+        "education": {
+          "title": "Education",
+          "desc": "We provide practical workshops, seminars, and regular professional consultations."
+        },
+        "incubation": {
+          "title": "Incubation",
+          "desc": "We transform innovative ideas into viable solutions and starting businesses."
+        },
+        "networking": {
+          "title": "Networking",
+          "desc": "We bridge the gap between talented university students and tech companies."
+        }
+      }
+    },
+    "opportunities": {
+      "label": "Who we are",
+      "title": "Built for students, by UKF",
+      "students_title": "For Students",
+      "students_desc": "NTI is open to all students of UKF Nitra who want to work on real tech projects. Whether you have a startup idea or want to gain commercial experience — there's a program for you.",
+      "companies_title": "For Companies",
+      "companies_desc": "Companies can submit projects to our backlog. NTI matches them with motivated student teams, coordinates the process, and ensures quality output with mentor supervision."
+    }
+  }
+}

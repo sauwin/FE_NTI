@@ -1,0 +1,71 @@
+{
+  "evaluation": {
+    "untitled": "Bez názvu",
+    "unspecified": "Nezadaný",
+    "program": "Program {program}",
+    "errorLoadingData": "Chyba pri načítaní údajov pre komisiu.",
+    "errorLoadingDetails": "Vyskytla sa chyba pri načítaní údajov.",
+    "errorSaving": "Chyba pri ukladaní hodnotenia.",
+    "successSaving": "Hodnotenie bolo úspešne zaznamenané do auditnej stopy NTI.",
+    "saving": "Ukladám...",
+    "updateEvaluation": "Aktualizovať hodnotenie",
+    "submitVerdict": "Odoslať verdikt",
+    "loadingForm": "Načítavam posudkový hárok a študentskú dokumentáciu...",
+    "backToOverview": "← Späť na prehľad",
+    "assessmentOfApplication": "Posudzovanie prihlášky",
+    "boardStatus": "Stav hodnotiacej komisie",
+    "submittedCount": "Odovzdané: {completed} / {total}",
+    "waitingForMore": "Čaká sa na ešte {count} posudok(y)",
+    "allCompleted": "Všetci členovia komisie uzavreli hodnotenie",
+    "weightedAverage": "Vážený priemer",
+    "pointsShort": "{score} / 100 b",
+    "pointsLong": "{score} b.",
+    "weight": "Váha: {weight}%",
+    "criterionPlaceholder": "Špecifická poznámka ku kritériu (nepovinné)...",
+    "finalRecommendation": "Finálne odporúčanie komisie",
+    "approveIncubator": "Schváliť do inkubátora",
+    "requestRevision": "Vrátiť na doplnenie",
+    "rejectProject": "Zamietnuť projekt",
+    "overallJustification": "Celkové slovné odôvodnenie verdiktu",
+    "justificationSubtext": "Toto vyjadrenie bude zaznamenané v histórii a v prípade vrátenia sa zobrazí študentom.",
+    "justificationPlaceholder": "Zadajte podrobné oficiálne stanovisko komisie k celkovému hodnoteniu...",
+    "tabs": {
+      "overview": "Prehľad a Štatistiky",
+      "pending": "Čaká na hodnotenie",
+      "history": "História hodnotení"
+    },
+    "filter": {
+      "programLabel": "Program:",
+      "all": "Všetky",
+      "programX": "Program {p}"
+    },
+    "stats": {
+      "totalAssigned": "Celkovo priradené",
+      "awaitingEvaluation": "Čaká na hodnotenie",
+      "evaluated": "Ohodnotené"
+    },
+    "info": {
+      "basicInfo": "Základné informácie o projekte",
+      "teamName": "Názov tímu:",
+      "unknownTeam": "Neznámy tím",
+      "programType": "Typ programu:",
+      "phaseStatus": "Fáza/Stav:",
+      "academicSignals": "Podporné akademické signály",
+      "memberCount": "Počet členov v tíme:",
+      "memberCountValue": "{count} (Minimálne 3)",
+      "declaration": "Čestné vyhlásenie o prenášaní predmetov:",
+      "declarationOk": "V poriadku (Splnené)",
+      "documentation": "Priložená projektová dokumentácia",
+      "unnamedDocument": "Unnamed document",
+      "fileExtension": "SÚBOR",
+      "noDocuments": "K tejto prihláške neboli priložené žiadne dokumenty."
+    },
+    "completedTable": {
+      "noEvaluations": "Zatiaľ ste neohodnotili žiadne projekty.",
+      "editEvaluation": "Upraviť hodnotenie"
+    },
+    "pendingTable": {
+      "noPending": "Nemáte žiadne nespracované žiadosti vo vybranom filtri."
+    }
+  }
+}

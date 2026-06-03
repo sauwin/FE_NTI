@@ -1,0 +1,72 @@
+{
+  "evaluation": {
+    "untitled": "Untitled",
+    "unspecified": "Unspecified",
+    "program": "Program {program}",
+    "errorLoadingData": "An error occurred while loading board data.",
+    "errorLoadingDetails": "An error occurred while loading data.",
+    "errorSaving": "An error occurred while saving the evaluation.",
+    "successSaving": "The evaluation was successfully recorded in the NTI audit trail.",
+    "saving": "Saving...",
+    "updateEvaluation": "Update Evaluation",
+    "submitVerdict": "Submit Verdict",
+    "loadingForm": "Loading evaluation sheet and student documentation...",
+    "backToOverview": "← Back to overview",
+    "assessmentOfApplication": "Assessment of Application",
+    "boardStatus": "Evaluation Board Status",
+    "submittedCount": "Submitted: {completed} / {total}",
+    "waitingForMore": "Waiting for {count} more evaluation(s)",
+    "allCompleted": "All board members have closed their evaluations",
+    "weightedAverage": "Weighted average",
+    "pointsShort": "{score} / 100 p.",
+    "pointsLong": "{score} pts.",
+    "weight": "Weight: {weight}%",
+    "criterionPlaceholder": "Specific comment on criterion (optional)...",
+    "finalRecommendation": "Final Recommendation of the Board",
+    "approveIncubator": "Approve to incubator",
+    "requestRevision": "Return for revision",
+    "rejectProject": "Reject project",
+    "overallJustification": "Overall Verbal Justification of Verdict",
+    "justificationSubtext": "This statement will be recorded in the history and will be shown to students if returned.",
+    "justificationPlaceholder": "Enter a detailed official statement of the board regarding the overall evaluation...",
+    "tabs": {
+      "overview": "Overview & Stats",
+      "pending": "Awaiting Evaluation",
+      "history": "Evaluation History"
+    },
+    "filter": {
+      "programLabel": "Program:",
+      "all": "All",
+      "programX": "Program {p}"
+    },
+    "stats": {
+      "totalAssigned": "Total Assigned",
+      "awaitingEvaluation": "Awaiting Evaluation",
+      "evaluated": "Evaluated"
+    },
+    "info": {
+      "basicInfo": "Basic Project Information",
+      "teamName": "Team Name:",
+      "unknownTeam": "Unknown team",
+      "programType": "Program Type:",
+      "phaseStatus": "Phase/Status:",
+      "academicSignals": "Supporting Academic Signals",
+      "memberCount": "Number of members in team:",
+      "memberCountValue": "{count} (Minimum 3)",
+      "declaration": "Declaration on carrying over subjects:",
+      "declarationOk": "In order (Fulfilled)",
+      "documentation": "Attached Project Documentation",
+      "unnamedDocument": "Unnamed document",
+      "fileExtension": "FILE",
+      "noDocuments": "No documents were attached to this application."
+    },
+    "completedTable": {
+      "noEvaluations": "You have not evaluated any projects yet.",
+      "editEvaluation": "Edit evaluation"
+    },
+    "pendingTable": {
+      "noPending": "You have no unprocessed applications in the selected filter.",
+      "evaluateProject": "Evaluate project"
+    }
+  }
+}

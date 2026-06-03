@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getMyInvitations, respondToInvitation } from '../api/teams'
 import type { Invitation } from '../types/teams'
-import {useConfirm} from "@/shared/composables/useConfirm.ts";
+import { useConfirm } from "@/shared/composables/useConfirm.ts"
 
+const { t } = useI18n()
 const loading = ref(false)
 const invitations = ref<Invitation[]>([])
 const error = ref('')
@@ -15,7 +17,7 @@ async function fetchInvitations() {
     const res = await getMyInvitations()
     invitations.value = res.data
   } catch (e: any) {
-    error.value = e?.response?.data?.message ?? 'Failed to load invitations.'
+    error.value = e?.response?.data?.message ?? t('student.invitations.errLoad')
   } finally {
     loading.value = false
   }
@@ -27,10 +29,10 @@ async function respond(teamId: number, status: 'accepted' | 'rejected') {
     invitations.value = invitations.value.filter(inv => inv.id !== teamId)
   } catch (e: any) {
     await useConfirm({
-      title: 'Fail',
-      message: e?.response?.data?.message ?? 'Action failed.',
-      confirmText: 'Okay',
-      cancelText: 'Cancel',
+      title: t('student.common.fail'),
+      message: e?.response?.data?.message ?? t('student.common.actionFailed'),
+      confirmText: t('student.common.okay'),
+      cancelText: t('student.common.cancel'),
       danger: false,
     })
     await fetchInvitations()
@@ -42,28 +44,25 @@ onMounted(() => { fetchInvitations() })
 
 <template>
   <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6">
-    
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
       <div>
-        <h3 class="text-xl font-bold text-white">Team Invitations</h3>
-        <p class="text-sm text-slate-500 mt-1">
-          Here you can accept or decline requests to join other incubator teams.
-        </p>
+        <h3 class="text-xl font-bold text-white">{{ t('student.invitations.title') }}</h3>
+        <p class="text-sm text-slate-500 mt-1">{{ t('student.invitations.description') }}</p>
       </div>
     </div>
 
     <div v-if="error" class="p-3 rounded-lg text-sm mb-6 border bg-red-900/20 border-red-800 text-red-400 font-mono">
-      System Error: {{ error }}
+      {{ t('student.common.systemError', { error }) }}
     </div>
 
     <div v-if="loading" class="text-slate-500 animate-pulse py-12 text-center font-mono text-sm">
-      Loading invitations...
+      {{ t('student.common.loading') }}
     </div>
     
     <div v-else>
       <div v-if="invitations.length === 0" class="border border-slate-800 border-dashed rounded-2xl p-12 text-center bg-slate-900/10">
-        <p class="text-slate-400 text-base font-medium">No pending invitations.</p>
-        <p class="text-slate-600 text-xs mt-1.5">When someone invites you to a team container via email, it will appear here.</p>
+        <p class="text-slate-400 text-base font-medium">{{ t('student.invitations.noInvitations') }}</p>
+        <p class="text-slate-600 text-xs mt-1.5">{{ t('student.invitations.noInvitationsDesc') }}</p>
       </div>
 
       <div v-else class="space-y-4">
@@ -84,13 +83,13 @@ onMounted(() => { fetchInvitations() })
                 v-if="invite.status === 'ready'" 
                 class="text-xs px-2 py-0.5 rounded border font-mono uppercase bg-red-900/40 text-red-400 border-red-800"
               >
-                Locked Container
+                {{ t('student.invitations.lockedContainer') }}
               </span>
             </div>
             
             <div class="text-sm text-slate-400 flex flex-col sm:flex-row sm:items-stretch gap-1 sm:gap-3">
               <div class="flex items-center gap-1.5">
-                <span class="text-slate-500 font-mono text-xs uppercase">Team Leader:</span>
+                <span class="text-slate-500 font-mono text-xs uppercase">{{ t('student.invitations.teamLeader') }}</span>
                 <span class="text-slate-200 font-semibold">{{ invite.leader?.name }}</span>
               </div>
               <div class="hidden sm:flex items-center text-slate-700">|</div>
@@ -100,7 +99,7 @@ onMounted(() => { fetchInvitations() })
             </div>
             
             <p v-if="invite.status === 'ready'" class="text-xs font-mono text-red-400/90 bg-red-900/10 border border-red-900/30 px-3 py-2 rounded-lg max-w-xl mt-2">
-              Configuration Locked: You cannot append your user scope to this team because it has already locked its state layout for final application evaluation.
+              {{ t('student.invitations.lockedConfigDesc') }}
             </p>
           </div>
 
@@ -110,14 +109,14 @@ onMounted(() => { fetchInvitations() })
               :disabled="invite.status === 'ready'"
               class="text-xs px-3 py-1.5 rounded border bg-emerald-900/40 hover:bg-emerald-900/60 text-emerald-400 border-emerald-800 transition disabled:opacity-20 disabled:cursor-not-allowed font-mono uppercase cursor-pointer font-semibold"
             >
-              Accept
+              {{ t('student.invitations.accept') }}
             </button>
             
             <button 
               @click="respond(invite.id, 'rejected')"
               class="text-xs px-3 py-1.5 rounded border bg-slate-800 hover:bg-slate-700 text-white border-slate-700 transition font-mono uppercase cursor-pointer"
             >
-              {{ invite.status === 'ready' ? 'Dismiss' : 'Decline' }}
+              {{ invite.status === 'ready' ? t('student.invitations.dismiss') : t('student.invitations.decline') }}
             </button>
           </div>
         </div>

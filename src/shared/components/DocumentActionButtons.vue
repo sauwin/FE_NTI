@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { downloadDocumentBlob } from '@/shared/api/documents'
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const { t } = useI18n()
 const downloading = ref(false)
 const previewing = ref(false)
 const error = ref('')
@@ -28,7 +30,7 @@ const downloadBlob = (blob: Blob) => {
 const fetchBlob = async (endpoint: string) => {
   const response = await downloadDocumentBlob(endpoint)
   if (!response.data) {
-    throw new Error('Empty response from file server')
+    throw new Error(t('documents.errors.empty'))
   }
   return response.data as Blob
 }
@@ -41,7 +43,7 @@ const handleDownload = async () => {
     const blob = await fetchBlob(`/documents/${props.documentId}/download`)
     downloadBlob(blob)
   } catch (e: any) {
-    error.value = e?.response?.data?.message || e?.message || 'Download failed'
+    error.value = e?.response?.data?.message || e?.message || t('documents.errors.download_failed')
   } finally {
     downloading.value = false
   }
@@ -57,7 +59,7 @@ const handlePreview = async () => {
     window.open(url, '_blank')
     setTimeout(() => window.URL.revokeObjectURL(url), 10000)
   } catch (e: any) {
-    error.value = e?.response?.data?.message || e?.message || 'Preview failed'
+    error.value = e?.response?.data?.message || e?.message || t('documents.errors.preview_failed')
   } finally {
     previewing.value = false
   }
@@ -76,7 +78,7 @@ const isPdf = props.mimeType?.toLowerCase().startsWith('application/pdf')
         class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900 px-3 py-2 text-sm font-medium text-slate-100 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <span class="text-slate-400">⬇️</span>
-        <span>{{ downloading ? 'Downloading…' : 'Download' }}</span>
+        <span>{{ downloading ? t('documents.downloading') : t('documents.download') }}</span>
       </button>
 
       <button
@@ -87,7 +89,7 @@ const isPdf = props.mimeType?.toLowerCase().startsWith('application/pdf')
         class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900 px-3 py-2 text-sm font-medium text-slate-100 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <span class="text-slate-400">👁️</span>
-        <span>{{ previewing ? 'Opening…' : 'Preview' }}</span>
+        <span>{{ previewing ? t('documents.previewing') : t('documents.preview') }}</span>
       </button>
     </div>
     <p v-if="error" class="text-xs text-red-400">{{ error }}</p>

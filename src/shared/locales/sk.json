@@ -1,0 +1,153 @@
+{
+  "auth": {
+    "login": "Prihlásiť sa",
+    "logout": "Odhlásiť sa",
+    "register": "Registrovať sa"
+  },
+
+  "dashboard": {
+    "welcome": "Vitajte",
+    "status": {
+      "active": "aktívny",
+      "pending": "čaká na schválenie",
+      "unknown": "—"
+    },
+    "alerts": {
+      "pending_approval_title": "Rola čaká na schválenie",
+      "pending_approval_desc": "Administrátor NTI potvrdí vašu rolu. Budete informovaní e-mailom.",
+      "complete_profile_title": "Dokončite svoj profil",
+      "complete_profile_desc": "Pred začatím používania platformy vyplňte svoj profil",
+      "complete_now_btn": "Dokončiť teraz"
+    }
+  },
+
+  "home": {
+    "hero": {
+      "badge": "Nitriansky technologický inkubátor",
+      "title": "Zanechaj svoju stopu v",
+      "highlight": "technologickej budúcnosti",
+      "description": "A prispej k rozvoju nitrianskeho regiónu",
+      "btn_explore": "Preskúmať programy",
+      "btn_about": "O NTI"
+    },
+    "programs": {
+      "label": "Programy",
+      "title": "Dve cesty, jeden cieľ",
+      "prog_a_label": "Program A",
+      "prog_a_title": "Grantová inkubácia",
+      "prog_a_desc": "Máš vlastný nápad? Vybuduj startup s financovaním od NTI, odborným mentoringom a plnou technickou podporou.",
+      "prog_a_bullets": {
+        "team": "Min. 3 členovia tímu",
+        "rounds": "Kvartálne hodnotiace kolá",
+        "docs": "6 vyžadovaných dokumentov"
+      },
+      "prog_b_label": "Program B",
+      "prog_b_title": "Prax v reálnom čase",
+      "prog_b_desc": "Pracuj na reálnych projektoch od firiem. Získaj odmenu, naber skúsenosti a buduj si portfólio so skutočnými klientmi.",
+      "prog_b_bullets": {
+        "projects": "Reálne firemné projekty",
+        "comp": "Finančná kompenzácia",
+        "mentor": "Pridelený mentor NTI"
+      },
+      "fallback_label": "Program",
+      "learn_more": "Dozvedieť sa viac →"
+    },
+    "calls": {
+      "label": "Príležitosti",
+      "title": "Aktívne výzvy a termíny",
+      "empty": "Momentálne nie sú otvorené žiadne výzvy.",
+      "deadline": "Termín na podanie prihlášky:",
+      "no_deadline": "Bez termínu",
+      "min_team": "Min. tím:",
+      "max_team": "Max. tím:",
+      "btn_view": "Zobraziť výzvu",
+      "urgency": {
+        "ended": "Ukončené",
+        "days_left": "Zostáva {days} dní",
+        "time_left": "Zostáva {days}d {hours}h",
+        "closes_hours": "Končí o {hours}h!"
+      },
+      "status": {
+        "open": "otvorená",
+        "closed": "uzatvorená",
+        "draft": "koncept"
+      }
+    },
+    "news": {
+      "label": "Novinky",
+      "title": "Články"
+    }
+  },
+
+  "navbar": {
+    "logoAlt": "Logo NTI",
+    "home": "Domov",
+    "programA": "Program A",
+    "programB": "Program B",
+    "partners": "Partneri",
+    "about": "O nás",
+    "faq": "FAQ",
+    "notifications": "Oznámenia",
+    "markAllRead": "Označiť všetko ako prečítané",
+    "noNotifications": "Žiadne oznámenia",
+    "menu": "Menu",
+    "notificationFallback": "Oznámenie"
+  },
+
+  "cta": {
+    "logged_in": {
+      "title": "Chceš sa pridať?",
+      "description": "Pozri si naše programy a prihlás sa do najbližšej otvorenej výzvy"
+    },
+    "logged_out": {
+      "title": "Chceš začať?",
+      "description": "Vytvor si účet a prihlás sa do najbližšej otvorenej výzvy",
+      "btn_register": "Vytvoriť účet"
+    },
+    "program_a": "Program A",
+    "program_b": "Program B"
+  },
+
+  "documents": {
+    "download": "Stiahnuť",
+    "downloading": "Sťahuje se…",
+    "preview": "Náhľad",
+    "previewing": "Otvára sa…",
+    "errors": {
+      "empty": "Prázdna odpoveď zo súborového servera",
+      "download_failed": "Sťahovanie zlyhalo",
+      "preview_failed": "Zobrazenie náhľadu zlyhalo"
+    }
+  },
+
+  "footer": {
+    "name": "Nitriansky technologický inkubátor",
+    "privacy": "Ochrana osobných údajov",
+    "terms": "Podmienky používania",
+    "contact": "Kontakt"
+  },
+
+  "notifications": {
+    "default_subject": "Systémové oznámenie",
+    "default_message": "Nebol poskytnutý žiadny obsah.",
+    "recipient_prefix": "Pre:",
+    "fallback_recipient": "Používateľ platformy",
+    "btn_close": "Zatvoriť správu"
+  },
+
+  "pagination": {
+    "status": "Strana {current} z {total}",
+    "total_items": "· Celkom {count}",
+    "btn_prev": "← Predchádzajúce",
+    "btn_next": "Nasledujúce →"
+  },
+
+  "errors": {
+    "page_not_found": {
+      "title": "Stránka nenájdená",
+      "description": "Skontrolujte prosím URL adresu a skúste to znova neskôr",
+      "btn_back": "Ísť späť",
+      "btn_home": "Hlavná stránka"
+    }
+  }
+}

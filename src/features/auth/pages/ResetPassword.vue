@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { verifyResetToken, resetPassword } from '@/features/auth/api/auth'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const password = ref('')
@@ -23,7 +25,7 @@ let redirectTimeout: ReturnType<typeof setTimeout> | null = null
 
 onMounted(async () => {
   if (!token.value) {
-    error.value = 'Invalid reset link'
+    error.value = t('resetPassword.errors.invalidLink')
     return
   }
 
@@ -31,10 +33,10 @@ onMounted(async () => {
     const res = await verifyResetToken(token.value)
     tokenValid.value = res.data.valid
     if (!tokenValid.value) {
-      error.value = 'Reset link expired or invalid'
+      error.value = t('resetPassword.errors.expiredLink')
     }
   } catch {
-    error.value = 'Error verifying link'
+    error.value = t('resetPassword.errors.verifyError')
   } finally {
     checkingToken.value = false
   }
@@ -45,7 +47,7 @@ async function submit() {
   success.value = ''
 
   if (password.value !== passwordConfirm.value) {
-    error.value = 'Passwords do not match'
+    error.value = t('resetPassword.errors.passwordsMismatch')
     return
   }
 
@@ -57,15 +59,15 @@ async function submit() {
       password: password.value,
       password_confirmation: passwordConfirm.value
     })
-    success.value = 'Password reset successfully. Redirecting to login...'
+    success.value = t('resetPassword.success')
     redirectTimeout = setTimeout(() => router.push('/auth/login'), 2000)
   } catch (e: any) {
     if (e.response?.status === 400) {
-      error.value = 'Reset link expired. Request a new one.'
+      error.value = t('resetPassword.errors.expiredSubmission')
     } else if (e.response?.status == 429) {
-      error.value = 'Too many requests. Please try again later.'
+      error.value = t('resetPassword.errors.tooManyRequests')
     } else {
-      error.value = 'Error resetting password. Try again.'
+      error.value = t('resetPassword.errors.generic')
     }
   } finally {
     loading.value = false
@@ -80,19 +82,19 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <h1 class="font-bold text-4xl text-center p-4 mt-20">Reset Password</h1>
+  <h1 class="font-bold text-4xl text-center p-4 mt-20">{{ t('resetPassword.title') }}</h1>
 
-  <div v-if="checkingToken" class="flex justify-center">
-    <p class="text-white">Verifying reset link...</p>
+  <div class="flex justify-center" v-if="checkingToken">
+    <p class="text-white">{{ t('resetPassword.verifying') }}</p>
   </div>
 
-  <div v-else class="flex justify-center">
+  <div class="flex justify-center" v-else>
     <form v-if="tokenValid" class="flex flex-col gap-2 mt-5 w-96" @submit.prevent="submit">
       <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
       <p v-if="success" class="text-green-500 text-sm">{{ success }}</p>
 
       <div>
-        <label for="password" class="block text-white">New Password</label>
+        <label for="password" class="block text-white">{{ t('resetPassword.newPassword') }}</label>
         <input
             v-model="password"
             type="password"
@@ -102,7 +104,7 @@ onUnmounted(() => {
       </div>
 
       <div>
-        <label for="passwordConfirm" class="block text-white">Confirm Password</label>
+        <label for="passwordConfirm" class="block text-white">{{ t('resetPassword.confirmPassword') }}</label>
         <input
             v-model="passwordConfirm"
             type="password"
@@ -114,19 +116,19 @@ onUnmounted(() => {
       <input
           type="submit"
           :disabled="loading"
-          :value="loading ? 'Resetting...' : 'Reset Password'"
+          :value="loading ? t('resetPassword.btnResetting') : t('resetPassword.btnReset')"
           class="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 cursor-pointer text-white w-full h-10 mt-4 rounded" />
 
       <div class="text-center mt-4">
-        <router-link class="text-blue-500 hover:text-blue-600" to="/auth/login">Back to Login</router-link>
+        <router-link class="text-blue-500 hover:text-blue-600" to="/auth/login">{{ t('resetPassword.backToLogin') }}</router-link>
       </div>
     </form>
 
-    <div v-else class="flex justify-center">
+    <div class="flex justify-center" v-else>
       <div class="w-96 text-center">
-        <p class="text-red-500 mb-4">{{ error || 'Invalid or expired reset link' }}</p>
+        <p class="text-red-500 mb-4">{{ error || t('resetPassword.fallbackError') }}</p>
         <router-link class="text-blue-500 hover:text-blue-600" to="/auth/forgot-password">
-          Request a new reset link
+          {{ t('resetPassword.requestNewLink') }}
         </router-link>
       </div>
     </div>

@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getEvaluatorApplications, getMyEvaluations } from '@/features/evaluation/api/evaluations'
 import EvaluatorPendingTable from './EvaluatorPendingTable.vue'
 import EvaluatorCompletedTable from './EvaluatorCompletedTable.vue'
+
+const { t } = useI18n()
 
 const applications = ref<any[]>([])
 const myEvaluations = ref<any[]>([])
@@ -21,7 +24,7 @@ onMounted(async () => {
     applications.value = appsRes.data?.data ?? appsRes.data ?? []
     myEvaluations.value = evalsRes.data?.data ?? evalsRes.data ?? []
   } catch (err) {
-    error.value = 'Chyba pri načítaní údajov pre komisiu.'
+    error.value = t('evaluation.errorLoadingData')
   } finally {
     loading.value = false
   }
@@ -60,37 +63,37 @@ const completedApplications = computed(() => {
     <div v-else class="space-y-6">
       <div class="flex flex-wrap gap-2 border-b border-slate-800/60 pb-4">
         <button @click="activeTab = 'overview'" :class="[activeTab === 'overview' ? 'bg-blue-600/15 border-blue-500 text-blue-400' : 'text-slate-500 border-transparent hover:text-slate-300', 'px-4 py-2 text-sm font-medium transition rounded-xl border']">
-          Prehľad a Štatistiky
+          {{ t('evaluation.tabs.overview') }}
         </button>
         <button @click="activeTab = 'pending'" :class="[activeTab === 'pending' ? 'bg-blue-600/15 border-blue-500 text-blue-400' : 'text-slate-500 border-transparent hover:text-slate-300', 'px-4 py-2 text-sm font-medium transition rounded-xl border flex items-center gap-1.5']">
-          Čaká na hodnotenie
+          {{ t('evaluation.tabs.pending') }}
           <span v-if="stats.pending > 0" class="bg-blue-400 border-2 border-blue-500 text-slate-950 px-1 mt-0.5 rounded-full text-xs font-bold">{{ stats.pending }}</span>
         </button>
         <button @click="activeTab = 'completed'" :class="[activeTab === 'completed' ? 'bg-blue-600/15 border-blue-500 text-blue-400' : 'text-slate-500 border-transparent hover:text-slate-300', 'px-4 py-2 text-sm font-medium transition rounded-xl border']">
-          História hodnotení
+          {{ t('evaluation.tabs.history') }}
         </button>
       </div>
 
       <div v-if="activeTab !== 'overview'" class="flex items-center gap-3 bg-slate-900/20 border border-slate-800 p-4 rounded-xl">
-        <span class="text-xs font-mono uppercase text-slate-500">Program:</span>
+        <span class="text-xs font-mono uppercase text-slate-500">{{ t('evaluation.filter.programLabel') }}</span>
         <div class="flex gap-1.5">
           <button v-for="p in ['all', 'a', 'b'] as const" :key="p" @click="filterProgram = p" :class="['text-xs px-3 py-1.5 font-mono uppercase border rounded-lg transition', filterProgram === p ? 'bg-blue-600 border-blue-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700']">
-            {{ p === 'all' ? 'Všetky' : `Program ${p}` }}
+            {{ p === 'all' ? t('evaluation.filter.all') : t('evaluation.filter.programX', { p: p.toUpperCase() }) }}
           </button>
         </div>
       </div>
 
       <div v-show="activeTab === 'overview'" class="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div class="border border-slate-800 bg-slate-900/20 p-5 rounded-2xl">
-          <div class="text-xs text-slate-500 uppercase font-mono tracking-wider mb-1">Celkovo priradené</div>
+          <div class="text-xs text-slate-500 uppercase font-mono tracking-wider mb-1">{{ t('evaluation.stats.totalAssigned') }}</div>
           <div class="text-3xl font-mono font-bold text-white">{{ stats.total }}</div>
         </div>
         <div class="border border-slate-800 bg-slate-900/20 p-5 rounded-2xl">
-          <div class="text-xs text-slate-500 uppercase font-mono tracking-wider mb-1">Čaká na hodnotenie</div>
+          <div class="text-xs text-slate-500 uppercase font-mono tracking-wider mb-1">{{ t('evaluation.stats.awaitingEvaluation') }}</div>
           <div class="text-3xl font-mono font-bold text-amber-400">{{ stats.pending }}</div>
         </div>
         <div class="border border-slate-800 bg-slate-900/20 p-5 rounded-2xl">
-          <div class="text-xs text-slate-500 uppercase font-mono tracking-wider mb-1">Ohodnotené</div>
+          <div class="text-xs text-slate-500 uppercase font-mono tracking-wider mb-1">{{ t('evaluation.stats.evaluated') }}</div>
           <div class="text-3xl font-mono font-bold text-green-400">{{ stats.completed }}</div>
         </div>
       </div>

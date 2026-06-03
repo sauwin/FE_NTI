@@ -3,6 +3,9 @@ import { computed, onMounted, ref } from 'vue'
 import { getAdminDocuments } from '@/features/admin/api/admin'
 import { downloadDocumentBlob } from '@/shared/api/documents'
 import type { DocumentItem } from '@/features/admin/types/admin'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const search = ref<string>('')
 const date = ref<string>('')
@@ -33,7 +36,7 @@ const fetchDocuments = async () => {
     documents.value = response.data.data ?? response.data
     totalPages.value = response.data.last_page ?? 1
   } catch (e: any) {
-    error.value = e.response?.data?.message || 'Failed to load documents.'
+    error.value = e.response?.data?.message || t('admin.documentManager.errors.loadFailed')
   } finally {
     loading.value = false
   }
@@ -78,7 +81,7 @@ const downloadFile = async (docId: number, fileName: string) => {
     document.body.removeChild(link)
     window.URL.revokeObjectURL(objectUrl)
   } catch (e: any) {
-    error.value = e.response?.data?.message || 'Download failed.'
+    error.value = e.response?.data?.message || t('admin.documentManager.errors.downloadFailed')
   } finally {
     loading.value = false
   }
@@ -86,7 +89,7 @@ const downloadFile = async (docId: number, fileName: string) => {
 
 const previewFile = async (docId: number, mimeType: string) => {
   error.value = ''
-  if (!isPdf(mimeType)) { error.value = 'Preview is only available for PDF files.'; return }
+  if (!isPdf(mimeType)) { error.value = t('admin.documentManager.errors.pdfOnly'); return }
   loading.value = true
   try {
     const blob = await fetchBlob(`/documents/${docId}/preview`)
@@ -94,7 +97,7 @@ const previewFile = async (docId: number, mimeType: string) => {
     window.open(objectUrl, '_blank')
     setTimeout(() => window.URL.revokeObjectURL(objectUrl), 10000)
   } catch (e: any) {
-    error.value = e.response?.data?.message || 'Preview failed.'
+    error.value = e.response?.data?.message || t('admin.documentManager.errors.previewFailed')
   } finally {
     loading.value = false
   }
@@ -106,23 +109,22 @@ onMounted(() => fetchDocuments())
 <template>
   <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6">
     <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
-      <h3 class="text-xl font-bold text-white">Documents</h3>
+      <h3 class="text-xl font-bold text-white">{{ t('admin.documentManager.title') }}</h3>
     </div>
 
-    <!-- Filters -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
       <div class="sm:col-span-1">
-        <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Search</label>
+        <label class="block text-xs font-mono uppercase text-slate-400 mb-1">{{ t('admin.documentManager.filters.searchLabel') }}</label>
         <input
           v-model="search"
           @keyup.enter="handleSearch"
-          placeholder="Search by file name..."
+          :placeholder="t('admin.documentManager.filters.searchPlaceholder')"
           class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white placeholder:text-slate-600 focus:border-blue-600 outline-none"
         />
       </div>
 
       <div>
-        <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Created Date</label>
+        <label class="block text-xs font-mono uppercase text-slate-400 mb-1">{{ t('admin.documentManager.filters.dateLabel') }}</label>
         <input
           v-model="date"
           type="date"
@@ -137,19 +139,18 @@ onMounted(() => fetchDocuments())
           @click="handleSearch"
           class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 rounded-lg transition text-sm"
         >
-          Apply
+          {{ t('admin.documentManager.filters.apply') }}
         </button>
         <button
           type="button"
           @click="resetFilters"
           class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-medium py-1.5 rounded-lg transition text-sm"
         >
-          Reset
+          {{ t('admin.documentManager.filters.reset') }}
         </button>
       </div>
     </div>
 
-    <!-- Error -->
     <div
       v-if="error"
       class="mb-4 px-4 py-3 rounded-xl border border-red-900 bg-red-950/40 text-sm font-mono text-red-400"
@@ -157,26 +158,25 @@ onMounted(() => fetchDocuments())
       {{ error }}
     </div>
 
-    <!-- Table -->
     <div class="overflow-hidden rounded-xl border border-slate-800">
       <table class="min-w-full border-collapse text-left text-sm text-slate-200">
         <thead>
           <tr class="bg-slate-900/80">
-            <th class="px-5 py-3 text-xs font-mono uppercase text-slate-500 tracking-wider">File Name</th>
-            <th class="px-5 py-3 text-xs font-mono uppercase text-slate-500 tracking-wider">Size</th>
-            <th class="px-5 py-3 text-xs font-mono uppercase text-slate-500 tracking-wider">Uploaded</th>
-            <th class="px-5 py-3 text-xs font-mono uppercase text-slate-500 tracking-wider">Actions</th>
+            <th class="px-5 py-3 text-xs font-mono uppercase text-slate-500 tracking-wider">{{ t('admin.documentManager.table.fileName') }}</th>
+            <th class="px-5 py-3 text-xs font-mono uppercase text-slate-500 tracking-wider">{{ t('admin.documentManager.table.size') }}</th>
+            <th class="px-5 py-3 text-xs font-mono uppercase text-slate-500 tracking-wider">{{ t('admin.documentManager.table.uploaded') }}</th>
+            <th class="px-5 py-3 text-xs font-mono uppercase text-slate-500 tracking-wider">{{ t('admin.documentManager.table.actions') }}</th>
           </tr>
         </thead>
         <tbody class="bg-slate-950">
           <tr v-if="loading">
             <td colspan="4" class="px-5 py-6 text-center text-sm text-slate-500 italic animate-pulse">
-              Loading documents…
+              {{ t('admin.documentManager.table.loading') }}
             </td>
           </tr>
           <tr v-else-if="documents.length === 0">
             <td colspan="4" class="px-5 py-6 text-center text-sm text-slate-500 italic">
-              No documents found for the current filters.
+              {{ t('admin.documentManager.table.empty') }}
             </td>
           </tr>
           <tr
@@ -205,7 +205,7 @@ onMounted(() => fetchDocuments())
                   :disabled="loading"
                   class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded border border-slate-700 text-slate-300 transition-all font-mono disabled:opacity-50"
                 >
-                  Download
+                  {{ t('admin.documentManager.actions.download') }}
                 </button>
                 <button
                   v-if="document.mime_type && isPdf(document.mime_type)"
@@ -214,7 +214,7 @@ onMounted(() => fetchDocuments())
                   :disabled="loading"
                   class="text-sm bg-blue-900/40 hover:bg-blue-900/60 px-4 py-2 rounded border border-blue-800 text-blue-400 transition-all font-mono disabled:opacity-50"
                 >
-                  Preview
+                  {{ t('admin.documentManager.actions.preview') }}
                 </button>
               </div>
             </td>
@@ -223,12 +223,13 @@ onMounted(() => fetchDocuments())
       </table>
     </div>
 
-    <!-- Pagination -->
     <div
       v-if="totalPages > 1"
       class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
     >
-      <span class="text-xs font-mono text-slate-500">Page {{ pageInfo }}</span>
+      <span class="text-xs font-mono text-slate-500">
+        {{ t('admin.documentManager.pagination.page', { info: pageInfo }) }}
+      </span>
       <div class="flex items-center gap-2">
         <button
           type="button"
@@ -236,7 +237,7 @@ onMounted(() => fetchDocuments())
           :disabled="page === 1 || loading"
           class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded border border-slate-700 text-slate-300 transition font-mono disabled:opacity-50"
         >
-          ← Previous
+          {{ t('admin.documentManager.pagination.previous') }}
         </button>
         <button
           type="button"
@@ -244,7 +245,7 @@ onMounted(() => fetchDocuments())
           :disabled="page === totalPages || loading"
           class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded border border-slate-700 text-slate-300 transition font-mono disabled:opacity-50"
         >
-          Next →
+          {{ t('admin.documentManager.pagination.next') }}
         </button>
       </div>
     </div>

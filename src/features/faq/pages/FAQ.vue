@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getFaqItems, createFaqItem, updateFaqItem, deleteFaqItem } from '@/features/faq/api/faq'
 import type { FaqItem } from '@/features/faq/types/faq'
 import { useAuthStore } from '@/features/auth/stores/auth'
 import {useConfirm} from "@/shared/composables/useConfirm.ts";
 
+const { t } = useI18n()
 const auth = useAuthStore()
 const isAdmin = computed(() => auth.isAdmin)
 const open = ref<number | null>(null)
@@ -60,7 +62,7 @@ async function fetchFaqs() {
     const res = await getFaqItems({ page_context: 'general' })
     faqItems.value = res.data.data ?? res.data
   } catch {
-    error.value = 'Unable to load FAQ items.'
+    error.value = t('faq.errorLoad')
   }
 }
 
@@ -78,7 +80,7 @@ async function saveFaq() {
         is_active: formState.is_active,
         order_position: formState.order_position,
       })
-      success.value = 'FAQ updated successfully.'
+      success.value = t('faq.successUpdated')
     } else {
       await createFaqItem({
         page_context: formState.page_context,
@@ -87,12 +89,12 @@ async function saveFaq() {
         is_active: formState.is_active,
         order_position: formState.order_position,
       })
-      success.value = 'FAQ created successfully.'
+      success.value = t('faq.successCreated')
     }
     resetForm()
     await fetchFaqs()
   } catch {
-    error.value = 'Unable to save FAQ. Make sure you are logged in with admin access.'
+    error.value = t('faq.errorSave')
   } finally {
     isSaving.value = false
   }
@@ -100,10 +102,10 @@ async function saveFaq() {
 
 async function deleteFaq(id: number) {
   const confirmed = await useConfirm({
-    title: 'Delete FAQ',
-    message: 'Are you sure you want to delete this FAQ?',
-    confirmText: 'Delete',
-    cancelText: 'Cancel',
+    title: t('faq.admin.deleteTitle'),
+    message: t('faq.admin.deleteConfirm'),
+    confirmText: t('faq.admin.deleteBtn'),
+    cancelText: t('faq.admin.cancel'),
     danger: true,
   })
 
@@ -116,10 +118,10 @@ async function deleteFaq(id: number) {
 
   try {
     await deleteFaqItem(id)
-    success.value = 'FAQ deleted successfully.'
+    success.value = t('faq.successDeleted')
     await fetchFaqs()
   } catch {
-    error.value = 'Unable to delete FAQ. Make sure you are logged in with admin access.'
+    error.value = t('faq.errorDelete')
   }
 }
 
@@ -133,13 +135,13 @@ onMounted(() => {
 
   <div class="section-divider-md">
     <div class="inline-flex items-center gap-2 bg-blue-600/15 border border-blue-800 text-blue-400 text-xs font-bold tracking-widest uppercase py-1.5 px-4 rounded-full mb-4 sm:mb-6">
-      FAQ
+      {{ t('faq.titlePrefix') }}
     </div>
     <h1 class="font-bold text-3xl sm:text-5xl md:text-6xl leading-tight mb-5 sm:mb-7 break-words">
-      Frequently asked <span class="text-blue-400">questions</span>
+      <span v-html="t('faq.titleMain', { span: `<span class='text-blue-400'>${t('faq.titleSpan')}</span>` })"></span>
     </h1>
     <p class="text-gray-400 max-w-xl text-sm sm:text-base leading-relaxed">
-      Everything you need to know about NTI programs, applications, and the process.
+      {{ t('faq.subtitle') }}
     </p>
   </div>
 
@@ -147,11 +149,11 @@ onMounted(() => {
     <div v-if="isAdmin" class="rounded-2xl sm:rounded-3xl border border-slate-800 bg-slate-950 p-4 sm:p-6">
       <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 class="text-lg sm:text-xl font-semibold text-white">Admin FAQ editor</h2>
-          <p class="text-xs sm:text-sm text-slate-400">Create, update, and remove FAQ entries for the public FAQ page.</p>
+          <h2 class="text-lg sm:text-xl font-semibold text-white">{{ t('faq.admin.editorTitle') }}</h2>
+          <p class="text-xs sm:text-sm text-slate-400">{{ t('faq.admin.editorSubtitle') }}</p>
         </div>
         <button type="button" @click="showCreateForm" class="w-full sm:w-auto inline-flex items-center justify-center rounded-full bg-blue-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-400">
-          Add FAQ
+          {{ t('faq.admin.addFaq') }}
         </button>
       </div>
 
@@ -163,43 +165,43 @@ onMounted(() => {
       <form v-if="isFormVisible" @submit.prevent="saveFaq" class="mt-6 grid gap-4">
         <div class="grid gap-4 grid-cols-1 sm:grid-cols-2">
           <label class="space-y-2 text-sm text-slate-300">
-            <span class="block">Question</span>
-            <input v-model="formState.question" type="text" class="w-full rounded-xl sm:rounded-2xl border border-slate-700 bg-slate-900 px-4 py-2.5 sm:py-3 text-white focus:border-blue-400 focus:outline-none text-sm sm:text-base" placeholder="What is NTI?" required />
+            <span class="block">{{ t('faq.admin.labelQuestion') }}</span>
+            <input v-model="formState.question" type="text" class="w-full rounded-xl sm:rounded-2xl border border-slate-700 bg-slate-900 px-4 py-2.5 sm:py-3 text-white focus:border-blue-400 focus:outline-none text-sm sm:text-base" :placeholder="t('faq.admin.placeholderQuestion')" required />
           </label>
           <label class="space-y-2 text-sm text-slate-300">
-            <span class="block">Answer</span>
-            <textarea v-model="formState.answer" rows="4" class="w-full rounded-xl sm:rounded-2xl border border-slate-700 bg-slate-900 px-4 py-2.5 sm:py-3 text-white focus:border-blue-400 focus:outline-none text-sm sm:text-base" placeholder="NTI is ..." required />
+            <span class="block">{{ t('faq.admin.labelAnswer') }}</span>
+            <textarea v-model="formState.answer" rows="4" class="w-full rounded-xl sm:rounded-2xl border border-slate-700 bg-slate-900 px-4 py-2.5 sm:py-3 text-white focus:border-blue-400 focus:outline-none text-sm sm:text-base" :placeholder="t('faq.admin.placeholderAnswer')" required />
           </label>
         </div>
 
         <div class="grid gap-4 grid-cols-1 sm:grid-cols-3">
           <label class="space-y-2 text-sm text-slate-300">
-            <span class="block">Page context</span>
+            <span class="block">{{ t('faq.admin.labelContext') }}</span>
             <select v-model="formState.page_context" class="w-full rounded-xl sm:rounded-2xl border border-slate-700 bg-slate-900 px-4 py-2.5 sm:py-3 text-white focus:border-blue-400 focus:outline-none text-sm sm:text-base">
-              <option value="general">General</option>
-              <option value="program_a">Program A</option>
-              <option value="program_b">Program B</option>
+              <option value="general">{{ t('faq.admin.optionGeneral') }}</option>
+              <option value="program_a">{{ t('faq.admin.optionProgramA') }}</option>
+              <option value="program_b">{{ t('faq.admin.optionProgramB') }}</option>
             </select>
           </label>
           <label class="space-y-2 text-sm text-slate-300">
-            <span class="block">Active</span>
+            <span class="block">{{ t('faq.admin.labelActive') }}</span>
             <select v-model="formState.is_active" class="w-full rounded-xl sm:rounded-2xl border border-slate-700 bg-slate-900 px-4 py-2.5 sm:py-3 text-white focus:border-blue-400 focus:outline-none text-sm sm:text-base">
-              <option :value="true">Yes</option>
-              <option :value="false">No</option>
+              <option :value="true">{{ t('faq.admin.optionYes') }}</option>
+              <option :value="false">{{ t('faq.admin.optionNo') }}</option>
             </select>
           </label>
           <label class="space-y-2 text-sm text-slate-300">
-            <span class="block">Order position</span>
+            <span class="block">{{ t('faq.admin.labelOrder') }}</span>
             <input v-model.number="formState.order_position" type="number" min="0" class="w-full rounded-xl sm:rounded-2xl border border-slate-700 bg-slate-900 px-4 py-2.5 sm:py-3 text-white focus:border-blue-400 focus:outline-none text-sm sm:text-base" />
           </label>
         </div>
 
         <div class="flex flex-col sm:flex-row gap-3 pt-2">
           <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center rounded-full bg-blue-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-400" :disabled="isSaving">
-            {{ editingId ? 'Save changes' : 'Create FAQ' }}
+            {{ editingId ? t('faq.admin.saveChanges') : t('faq.admin.createFaq') }}
           </button>
           <button type="button" class="w-full sm:w-auto inline-flex items-center justify-center rounded-full border border-slate-700 px-6 py-2.5 text-sm font-semibold text-slate-300 transition hover:border-slate-500" @click="resetForm" :disabled="isSaving">
-            Cancel
+            {{ t('faq.admin.cancel') }}
           </button>
         </div>
       </form>
@@ -208,14 +210,14 @@ onMounted(() => {
     <div class="rounded-2xl sm:rounded-3xl border border-slate-800 bg-slate-950 p-4 sm:p-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6">
         <div>
-          <h2 class="text-xl sm:text-2xl font-semibold text-white">Current FAQ</h2>
-          <p class="text-xs sm:text-sm text-slate-400">Tap a question to expand the answer.</p>
+          <h2 class="text-xl sm:text-2xl font-semibold text-white">{{ t('faq.current.title') }}</h2>
+          <p class="text-xs sm:text-sm text-slate-400">{{ t('faq.current.subtitle') }}</p>
         </div>
-        <div v-if="isAdmin" class="text-xs text-blue-400 sm:text-slate-400">Editing enabled.</div>
+        <div v-if="isAdmin" class="text-xs text-blue-400 sm:text-slate-400">{{ t('faq.admin.editingEnabled') }}</div>
       </div>
 
       <div v-if="faqItems.length === 0" class="rounded-2xl border border-slate-800 bg-slate-900 px-4 py-10 text-center text-slate-500 text-sm">
-        No FAQ items found.
+        {{ t('faq.current.noItems') }}
       </div>
 
       <div v-for="faq in faqItems" :key="faq.id" class="border-b border-slate-800 last:border-b-0">
@@ -230,8 +232,8 @@ onMounted(() => {
           </div>
 
           <div v-if="isAdmin" class="flex gap-2 mt-3 sm:mt-2 justify-end">
-            <button type="button" @click="editFaq(faq)" class="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs sm:text-sm text-slate-200 transition hover:border-blue-500">Edit</button>
-            <button type="button" @click="deleteFaq(faq.id)" class="rounded-full border border-red-700 bg-red-950 px-3 py-1 text-xs sm:text-sm text-red-300 transition hover:bg-red-900">Delete</button>
+            <button type="button" @click="editFaq(faq)" class="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs sm:text-sm text-slate-200 transition hover:border-blue-500">{{ t('faq.current.btnEdit') }}</button>
+            <button type="button" @click="deleteFaq(faq.id)" class="rounded-full border border-red-700 bg-red-950 px-3 py-1 text-xs sm:text-sm text-red-300 transition hover:bg-red-900">{{ t('faq.current.btnDelete') }}</button>
           </div>
 
           <div v-if="open === faq.id" class="mt-3 text-xs sm:text-sm text-gray-400 leading-relaxed break-words">

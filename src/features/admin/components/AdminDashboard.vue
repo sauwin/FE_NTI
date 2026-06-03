@@ -2,6 +2,7 @@
 import { ref, onMounted, computed, defineAsyncComponent } from 'vue'
 import { getDashboardStats, getAdminUsers, getPendingApprovals } from '@/features/admin/api/admin'
 import type { DashboardStats } from '@/features/admin/types/admin'
+import { useI18n } from 'vue-i18n'
 
 const ProgramCallsManager = defineAsyncComponent(() => import('@/features/admin/components/ProgramCallsManager.vue'))
 const ApplicationsManager = defineAsyncComponent(() => import('@/features/admin/components/ApplicationsManager.vue'))
@@ -17,6 +18,8 @@ const BulkNotificationPanel = defineAsyncComponent(() => import('@/features/admi
 const props = defineProps<{
   userRole?: string
 }>()
+
+const { t } = useI18n()
 
 const activeTab = ref('overview')
 const error = ref('')
@@ -45,9 +48,9 @@ const users = ref<any[]>([])
 const pendingUsers = ref<any[]>([])
 
 const quickStats = computed(() => [
-  { label: 'Total Users', value: stats.value.total_users, color: 'text-white', border: 'border-slate-800', bg: 'bg-slate-900/40' },
-  { label: 'Total Calls', value: stats.value.total_calls, color: 'text-white', border: 'border-slate-800', bg: 'bg-slate-900/40' },
-  { label: 'Total Applications', value: stats.value.total_applications, color: 'text-white', border: 'border-slate-800', bg: 'bg-slate-900/40' },
+  { label: t('admin.dashboard.totalUsers'), value: stats.value.total_users, color: 'text-white', border: 'border-slate-800', bg: 'bg-slate-900/40' },
+  { label: t('admin.dashboard.totalCalls'), value: stats.value.total_calls, color: 'text-white', border: 'border-slate-800', bg: 'bg-slate-900/40' },
+  { label: t('admin.dashboard.totalApplications'), value: stats.value.total_applications, color: 'text-white', border: 'border-slate-800', bg: 'bg-slate-900/40' },
 ])
 
 async function loadAggregatedStats() {
@@ -71,7 +74,7 @@ async function loadAggregatedStats() {
     }
     error.value = ''
   } catch (e: any) {
-    error.value = e.response?.data?.message || 'Failed to load dashboard metrics'
+    error.value = e.response?.data?.message || t('admin.dashboard.errors.metricsLoadFailed')
   } finally {
     loadingStats.value = false
   }
@@ -82,7 +85,7 @@ async function loadUserData() {
     const res = await getAdminUsers()
     users.value = res.data ?? []
   } catch (e: any) {
-    error.value = e.response?.data?.message || 'Failed to load users'
+    error.value = e.response?.data?.message || t('admin.dashboard.errors.usersLoadFailed')
   }
 }
 
@@ -91,7 +94,7 @@ async function loadPendingApprovals() {
     const appRes = await getPendingApprovals()
     pendingUsers.value = appRes.data ?? []
   } catch (e: any) {
-    error.value = e.response?.data?.message || 'Failed to load approvals'
+    error.value = e.response?.data?.message || t('admin.dashboard.errors.approvalsLoadFailed')
   }
 }
 
@@ -122,26 +125,26 @@ onMounted(() => {
     <div class="mb-8">
       <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 mb-5">
         <div>
-          <h2 class="text-3xl font-bold text-white">NTI Central Administration</h2>
+          <h2 class="text-3xl font-bold text-white">{{ t('admin.dashboard.title')}}</h2>
           <p class="text-sm text-slate-500 mt-2">
-            Centralized management of users, applications, programs and platform workflows.
+            {{ t('admin.dashboard.description')}}
           </p>
         </div>
       </div>
 
       <div class="flex flex-wrap gap-2 border-b border-slate-800 pb-2">
         <button v-for="tab in [
-          { id: 'overview', name: 'Overview' },
-          { id: 'programs-calls', name: 'Programs & Calls' },
-          { id: 'applications', name: 'Applications' },
-          { id: 'evaluators', name: 'Evaluators' },
-          { id: 'mentorships', name: 'Mentors' },
-          { id: 'users', name: 'Users' },
-          { id: 'approvals', name: 'Approvals' },
-          { id: 'documents', name: 'Documents' },
-          ...(isSuperAdmin ? [{ id: 'create-admin', name: 'Create Admin' }] : []),
-          { id: 'logs', name: 'Audit Logs' },
-          { id: 'broadcast-notification', name: 'Broadcast' }
+          { id: 'overview', name: t('admin.dashboard.tabLabels.overview') },
+          { id: 'programs-calls', name: t('admin.dashboard.tabLabels.programsCalls') },
+          { id: 'applications', name: t('admin.dashboard.tabLabels.applications') },
+          { id: 'evaluators', name: t('admin.dashboard.tabLabels.evaluators') },
+          { id: 'mentorships', name: t('admin.dashboard.tabLabels.mentorships') },
+          { id: 'users', name: t('admin.dashboard.tabLabels.users') },
+          { id: 'approvals', name: t('admin.dashboard.tabLabels.approvals') },
+          { id: 'documents', name: t('admin.dashboard.tabLabels.documents') },
+          ...(isSuperAdmin ? [{ id: 'create-admin', name: t('admin.dashboard.tabLabels.createAdmin') }] : []),
+          { id: 'logs', name: t('admin.dashboard.tabLabels.logs') },
+          { id: 'broadcast-notification', name: t('admin.dashboard.tabLabels.broadcastNotification') }
         ]" 
         :key="tab.id"
         @click="handleTabChange(tab.id)"
@@ -186,40 +189,40 @@ onMounted(() => {
           <div class="xl:col-span-2 border border-slate-800 bg-slate-900/40 rounded-2xl p-6">
             <div class="flex items-center justify-between mb-6">
               <div>
-                <h3 class="text-lg font-semibold text-white">Platform Activity</h3>
-                <p class="text-sm text-slate-500 mt-1">Overview of programs and workflow state.</p>
+                <h3 class="text-lg font-semibold text-white">{{ t('admin.overview.title')}}</h3>
+                <p class="text-sm text-slate-500 mt-1">{{ t('admin.overview.description')}}</p>
               </div>
             </div>
 
             <div class="space-y-4">
               <div class="flex items-center justify-between bg-slate-950/60 border border-slate-800 rounded-xl p-4">
                 <div>
-                  <div class="text-sm text-white">Open calls</div>
-                  <div class="text-xs text-slate-500 mt-1">Currently open calls</div>
+                  <div class="text-sm text-white">{{ t('admin.overview.openCalls.title')}}</div>
+                  <div class="text-xs text-slate-500 mt-1">{{ t('admin.overview.openCalls.description') }}</div>
                 </div>
                 <div class="text-2xl font-bold text-white">{{ stats.open_calls }}</div>
               </div>
 
               <div class="flex items-center justify-between bg-slate-950/60 border border-slate-800 rounded-xl p-4">
                 <div>
-                  <div class="text-sm text-white">Applications submitted</div>
-                  <div class="text-xs text-slate-500 mt-1">Applications submitted for review</div>
+                  <div class="text-sm text-white">{{ t('admin.overview.applicationsSubmitted.title')}}</div>
+                  <div class="text-xs text-slate-500 mt-1">{{ t('admin.overview.applicationsSubmitted.description') }}</div>
                 </div>
                 <div class="text-2xl font-bold text-white">{{ stats.application_submitted }}</div>
               </div>
 
               <div class="flex items-center justify-between bg-slate-950/60 border border-slate-800 rounded-xl p-4">
                 <div>
-                  <div class="text-sm text-white">Applications active</div>
-                  <div class="text-xs text-slate-500 mt-1">The application is currently under development</div>
+                  <div class="text-sm text-white">{{ t('admin.overview.applicationsActive.title')}}</div>
+                  <div class="text-xs text-slate-500 mt-1">{{ t('admin.overview.applicationsActive.description') }}</div>
                 </div>
                 <div class="text-2xl font-bold text-white">{{ stats.application_active }}</div>
               </div>
 
               <div class="flex items-center justify-between bg-slate-950/60 border border-slate-800 rounded-xl p-4">
                 <div>
-                  <div class="text-sm text-white">Applications closed</div>
-                  <div class="text-xs text-slate-500 mt-1">Historical archived applications</div>
+                  <div class="text-sm text-white">{{ t('admin.overview.applicationsClosed.title')}}</div>
+                  <div class="text-xs text-slate-500 mt-1">{{ t('admin.overview.applicationsClosed.description') }}</div>
                 </div>
                 <div class="text-2xl font-bold text-white">{{ stats.application_closed }}</div>
               </div>
@@ -228,22 +231,22 @@ onMounted(() => {
 
           <div class="border border-slate-800 bg-slate-900/40 rounded-2xl p-6">
             <div class="mb-6">
-              <h3 class="text-lg font-semibold text-white">Users Overview</h3>
-              <p class="text-sm text-slate-500 mt-1">Distribution of Administrative and User Groups</p>
+              <h3 class="text-lg font-semibold text-white">{{ t('admin.overview.usersOverview.title') }}</h3>
+              <p class="text-sm text-slate-500 mt-1">{{ t('admin.overview.usersOverview.description') }}</p>
             </div>
 
             <div class="space-y-4">
-              <div class="flex items-center justify-between"><span class="text-sm text-white">Students</span><span class="text-lg font-semibold text-white">{{ stats.students }}</span></div>
+              <div class="flex items-center justify-between"><span class="text-sm text-white">{{ t('admin.overview.usersOverview.students') }}</span><span class="text-lg font-semibold text-white">{{ stats.students }}</span></div>
               <div class="border-t border-slate-800"></div>
-              <div class="flex items-center justify-between"><span class="text-sm text-white">Company owners</span><span class="text-lg font-semibold text-white">{{ stats.company_owners }}</span></div>
+              <div class="flex items-center justify-between"><span class="text-sm text-white">{{ t('admin.overview.usersOverview.companyOwners') }}</span><span class="text-lg font-semibold text-white">{{ stats.company_owners }}</span></div>
               <div class="border-t border-slate-800"></div>
-              <div class="flex items-center justify-between"><span class="text-sm text-white">Administration</span><span class="text-lg font-semibold text-white">{{ stats.admins }}</span></div>
+              <div class="flex items-center justify-between"><span class="text-sm text-white">{{ t('admin.overview.usersOverview.administration') }}</span><span class="text-lg font-semibold text-white">{{ stats.admins }}</span></div>
               <div class="border-t border-slate-800"></div>
-              <div class="flex items-center justify-between"><span class="text-sm text-white">Content editors</span><span class="text-lg font-semibold text-white">{{ stats.content_editors }}</span></div>
+              <div class="flex items-center justify-between"><span class="text-sm text-white">{{ t('admin.overview.usersOverview.contentEditors') }}</span><span class="text-lg font-semibold text-white">{{ stats.content_editors }}</span></div>
               <div class="border-t border-slate-800"></div>
-              <div class="flex items-center justify-between"><span class="text-sm text-white">Evaluators</span><span class="text-lg font-semibold text-white">{{ stats.evaluators }}</span></div>
+              <div class="flex items-center justify-between"><span class="text-sm text-white">{{ t('admin.overview.usersOverview.evaluators') }}</span><span class="text-lg font-semibold text-white">{{ stats.evaluators }}</span></div>
               <div class="border-t border-slate-800"></div>
-              <div class="flex items-center justify-between"><span class="text-sm text-white">Mentors</span><span class="text-lg font-semibold text-white">{{ stats.mentors }}</span></div>
+              <div class="flex items-center justify-between"><span class="text-sm text-white">{{ t('admin.overview.usersOverview.mentors') }}</span><span class="text-lg font-semibold text-white">{{ stats.mentors }}</span></div>
               <div class="border-t border-slate-800"></div>
             </div>
           </div>

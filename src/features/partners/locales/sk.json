@@ -1,0 +1,15 @@
+{
+  "partners": {
+    "hero": {
+      "badge": "Partneri",
+      "title": "Naši strategickí",
+      "highlight": "Partneri",
+      "description": "Náš projekt je realizovaný vďaka podpore odhodlaných organizácií a jednotlivcov, ktorí zdieľajú našu víziu a pomáhajú nám vytvárať zmysluplné príležitosti pre účastníkov."
+    },
+    "states": {
+      "loading": "Načítavam...",
+      "error": "Nepodarilo sa načítať partnerov.",
+      "empty": "Zatiaľ žiadni partneri."
+    }
+  }
+}

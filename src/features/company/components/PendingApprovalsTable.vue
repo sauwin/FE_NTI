@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t, locale } = useI18n()
 
 const props = defineProps<{
   pendingUsers: any[]
@@ -23,18 +26,18 @@ const hasPending = computed(() => props.pendingUsers && props.pendingUsers.lengt
     </div>
 
     <div v-else-if="!hasPending" class="bg-slate-900/40 border border-slate-800 rounded-2xl text-center py-10 text-slate-500 text-sm">
-      No pending approvals
+      {{ t('company.approvals.noPending') }}
     </div>
 
     <div v-else class="overflow-x-auto border border-slate-800 rounded-2xl bg-slate-900/40">
       <table class="w-full text-sm">
         <thead class="border-b border-slate-800 bg-slate-900/50">
           <tr class="text-left text-slate-400 font-mono text-xs uppercase tracking-wider">
-            <th class="py-3.5 px-5">Name</th>
-            <th class="py-3.5 px-5">Email</th>
-            <th class="py-3.5 px-5">Requested Role</th>
-            <th class="py-3.5 px-5">Created</th>
-            <th class="py-3.5 px-5 text-right">Actions</th>
+            <th class="py-3.5 px-5">{{ t('company.common.name') }}</th>
+            <th class="py-3.5 px-5">{{ t('company.common.email') }}</th>
+            <th class="py-3.5 px-5">{{ t('company.approvals.requestedRole') }}</th>
+            <th class="py-3.5 px-5">{{ t('company.common.created') }}</th>
+            <th class="py-3.5 px-5 text-right">{{ t('company.common.actions') }}</th>
           </tr>
         </thead>
 
@@ -56,7 +59,7 @@ const hasPending = computed(() => props.pendingUsers && props.pendingUsers.lengt
               </span>
             </td>
             <td class="py-4 px-5 text-xs text-slate-400 font-mono">
-              {{ new Date(user.created_at).toLocaleDateString('uk-UA') }}
+              {{ new Date(user.created_at).toLocaleDateString(locale === 'sk' ? 'sk-SK' : 'en-US') }}
             </td>
             <td class="py-4 px-5 text-right">
               <div class="flex gap-2 justify-end">
@@ -64,13 +67,13 @@ const hasPending = computed(() => props.pendingUsers && props.pendingUsers.lengt
                   @click="$emit('approve', user)"
                   class="text-xs bg-green-950/20 hover:bg-green-900/30 text-green-400 border border-green-900/40 px-3 py-1.5 rounded-lg transition font-medium"
                 >
-                  Approve
+                  {{ t('company.approvals.approve') }}
                 </button>
                 <button
                   @click="$emit('reject', user)"
                   class="text-xs bg-red-950/20 hover:bg-red-900/30 text-red-400 border border-red-900/40 px-3 py-1.5 rounded-lg transition font-medium"
                 >
-                  Reject
+                  {{ t('company.approvals.reject') }}
                 </button>
               </div>
             </td>

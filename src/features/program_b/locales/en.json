@@ -1,0 +1,70 @@
+{
+  "programB": {
+    "view": {
+      "badge": "Program B",
+      "title": "Real-world",
+      "highlight": "Industry Practice",
+
+      "technicalSpecifications": "Our Technical Specifications",
+      "createNewTask": "+ Create New Task",
+      "loadingChallenges": "Loading your challenges...",
+      "noMyChallenges": "You haven't added any challenges yet.",
+      "availableTasks": "Available Industry Tasks",
+      "loadingCatalog": "Loading catalog...",
+      "noTasks": "No available challenges at the moment.",
+      "budgetNotSpecified": "Not specified",
+      "applyBefore": "Apply before:",
+      "applyDeadline": "Apply Deadline:",
+      "viewEditDetails": "View & Edit Details",
+      "viewDetailedSpecs": "View Detailed Specifications",
+      "requiredTeam": "Required Team: {min}-{max} persons",
+      "unknownCompany": "Unknown Company",
+      "noDescription": "No description available.",
+      "noDescriptionProvided": "No description provided.",
+      "noDeadline": "No deadline"
+    },
+    "upload": {
+      "applyingFor": "You are applying for:",
+      "partner": "Program partner",
+      "submittingApp": "Submitting Application...",
+      "step1Title": "Application for Participation",
+      "step1Sub": "Step 1 of 2: Project Description and Team Selection",
+      "step2Title": "Required Documentation",
+      "step2Sub": "Step 2 of 2: Uploading accompanying files specified by the call",
+      "successTitle": "Application Successfully Submitted!",
+      "successSub": "Your application has been registered. You can track its assessment status inside your student account management panel.",
+      "backCatalog": "Back to Catalog",
+      "errors": {
+        "selectTeam": "Please select or create a team",
+        "projectName": "Please enter the project name",
+        "solutionConcept": "Please describe the concept behind your solution",
+        "missingDoc": "Please upload the required document: {name}",
+        "noCallId": "No call ID identified",
+        "genericError": "Something went wrong while submitting the form.",
+        "criticalUrlError": "Critical error: Target Call ID not found or invalid in URL.",
+        "loadDetailsError": "The program application details could not be found for this call context."
+      },
+      "form": {
+        "applicantType": "Applicant Type *",
+        "chooseTeam": "Choose your team *",
+        "noTeamsWarning": "You don't belong to any teams yet. First, you need to {link} or wait to be accepted into an existing team.",
+        "createOne": "create one",
+        "projectNameLabel": "Project Name / Specifications *",
+        "solutionOutlineLabel": "Solution Outline *",
+        "solutionPlaceholder": "Describe your team’s vision for implementing the technical specifications and your architectural approach...",
+        "cancel": "Cancel",
+        "nextDoc": "Next: Documentation",
+        "selectedFile": "✓ Selected: {name}",
+        "back": "Back",
+        "submitFinal": "Submit Final Application"
+      },
+      "defaultLabels": {
+        "cv": "CV (All team members in a single file)",
+        "motivation_letter": "Motivation Letter",
+        "technical_proposal": "Technical Proposal / Solution Concept",
+        "fallbackDoc": "Document Requirement #{key}",
+        "genericDoc": "Document {key}"
+      }
+    }
+  }
+}

@@ -3,6 +3,9 @@
   import { changeCallEvaluationCriteria } from '../api/admin';
   import { getCallEvaluationCriteria } from '@/shared/api/calls';
   import type { Call, EvaluationCriterion, EvaluationCriterionPayload } from '../types/admin';
+  import { useI18n } from 'vue-i18n'
+
+  const { t } = useI18n()
 
   const props = defineProps<{
     selectedCall: Call
@@ -48,7 +51,7 @@
       loading.value = true
 
       if (!criteria.value?.length) {
-        displayError('Nothing to sync')
+        displayError(t('admin.evaluationCriteriaManager.messages.nothingToSync'))
         clearMessage(8)
         return
       }
@@ -65,7 +68,7 @@
       }
 
       const res = await changeCallEvaluationCriteria(props.selectedCall.id, payload)
-      displaySuccess('Criteria saved successfully')
+      displaySuccess(t('admin.evaluationCriteriaManager.messages.success'))
       criteria.value = res.data
     }
     catch(e: any) {
@@ -76,7 +79,7 @@
         displayError(e.message)
       } 
       else {
-        displayError('Error while saving criteria')
+        displayError(t('admin.evaluationCriteriaManager.messages.saveError'))
       }
     }
     finally {
@@ -91,7 +94,7 @@
       criteria.value = res.data
     } catch {
       criteria.value = []
-      displayError('Error while fetching evaluation criteria')
+      displayError(t('admin.evaluationCriteriaManager.messages.fetchError'))
     }
   })
 
@@ -102,15 +105,19 @@
   <div class="pt-6 border-t border-slate-800 space-y-4">
     <div class="flex items-center justify-between">
       <div>
-        <h4 class="text-lg font-semibold text-white">Evaluation Criteria</h4>
-        <p class="text-xs text-slate-400 mt-0.5">Define structured parameters and weights for proposal scoring.</p>
+        <h4 class="text-lg font-semibold text-white">
+          {{ t('admin.evaluationCriteriaManager.title') }}
+        </h4>
+        <p class="text-xs text-slate-400 mt-0.5">
+          {{ t('admin.evaluationCriteriaManager.description') }}
+        </p>
       </div>
       <button
         type="button"
         @click="addCriterion"
         class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-slate-500 text-white rounded-lg text-xs font-mono transition"
       >
-        + Add Criterion
+        {{ t('admin.evaluationCriteriaManager.buttons.addCriterion') }}
       </button>
     </div>
 
@@ -123,14 +130,14 @@
           : 'bg-amber-950/20 border-amber-900/40 text-amber-400'
       "
     >
-      <span>Total Allocated Weight:</span>
+      <span>{{ t('admin.evaluationCriteriaManager.weightSummary.totalAllocated') }}</span>
       <span class="font-bold text-sm">
         {{ criteria && criteria.reduce((sum, c) => sum + (Number(c.weight) || 0), 0) }}% / 100%
       </span>
     </div>
 
     <div v-if="!criteria || criteria.length === 0" class="text-xs text-slate-500 italic py-2">
-      No evaluation criteria defined for this call yet. Click "Add Criterion" to start.
+      {{ t('admin.evaluationCriteriaManager.emptyState.noCriteria') }}
     </div>
 
     <div v-else class="space-y-3">
@@ -141,34 +148,40 @@
       >
         <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
           <div class="md:col-span-3">
-            <label class="block text-[10px] uppercase font-mono tracking-wider text-slate-500 mb-1">Slug (Max 35 char)</label>
+            <label class="block text-[10px] uppercase font-mono tracking-wider text-slate-500 mb-1">
+              {{ t('admin.evaluationCriteriaManager.labels.slug') }}
+            </label>
             <input
               v-model="criterion.slug"
               type="text"
-              placeholder="e.g. tech_feasibility"
+              :placeholder="t('admin.evaluationCriteriaManager.placeholders.slug')"
               maxlength="35"
               class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white focus:border-blue-600 outline-none font-mono"
             />
           </div>
 
           <div class="md:col-span-6">
-            <label class="block text-[10px] uppercase font-mono tracking-wider text-slate-500 mb-1">Criterion Title</label>
+            <label class="block text-[10px] uppercase font-mono tracking-wider text-slate-500 mb-1">
+              {{ t('admin.evaluationCriteriaManager.labels.criterionTitle') }}
+            </label>
             <input
               v-model="criterion.title"
               type="text"
-              placeholder="e.g. Technical Feasibility & Innovation"
+              :placeholder="t('admin.evaluationCriteriaManager.placeholders.criterionTitle')"
               class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white focus:border-blue-600 outline-none"
             />
           </div>
 
           <div class="md:col-span-2">
-            <label class="block text-[10px] uppercase font-mono tracking-wider text-slate-500 mb-1">Weight (%)</label>
+            <label class="block text-[10px] uppercase font-mono tracking-wider text-slate-500 mb-1">
+              {{ t('admin.evaluationCriteriaManager.labels.weight') }}
+            </label>
             <input
               v-model.number="criterion.weight"
               type="number"
               min="0"
               max="100"
-              placeholder="0"
+              :placeholder="t('admin.evaluationCriteriaManager.placeholders.weight')"
               class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white focus:border-blue-600 outline-none font-mono"
             />
           </div>
@@ -178,7 +191,7 @@
               type="button"
               @click="criteria.splice(index, 1)"
               class="p-1.5 text-slate-500 hover:text-red-400 border border-transparent hover:border-red-950 hover:bg-red-950/20 rounded-md transition mb-0.5"
-              title="Remove criterion"
+              :title="t('admin.evaluationCriteriaManager.labels.removeCriterion')"
             >
               ✕
             </button>
@@ -186,11 +199,13 @@
         </div>
 
         <div>
-          <label class="block text-[10px] uppercase font-mono tracking-wider text-slate-500 mb-1">Description / Guidelines (Optional)</label>
+          <label class="block text-[10px] uppercase font-mono tracking-wider text-slate-500 mb-1">
+            {{ t('admin.evaluationCriteriaManager.labels.description') }}
+          </label>
           <textarea
             v-model="criterion.comment"
             rows="1"
-            placeholder="Describe what evaluators should look for when scoring this specific criterion..."
+            :placeholder="t('admin.evaluationCriteriaManager.placeholders.description')"
             class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white focus:border-blue-600 outline-none resize-none"
           />
         </div>
@@ -215,7 +230,7 @@
         @click="syncCriteria"
         class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-800 disabled:text-slate-500 disabled:border-slate-800 border border-blue-500/20 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition"
       >
-        {{ loading ? 'Saving...' : 'Save Configuration' }}
+        {{ loading ? t('admin.evaluationCriteriaManager.buttons.saving') : t('admin.evaluationCriteriaManager.buttons.saveConfiguration') }}
       </button>
     </div>
   </div>

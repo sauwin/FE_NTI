@@ -1,0 +1,153 @@
+{
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register"
+  },
+
+  "dashboard": {
+    "welcome": "Welcome",
+    "status": {
+      "active": "active",
+      "pending": "pending",
+      "unknown": "—"
+    },
+    "alerts": {
+      "pending_approval_title": "Role pending approval",
+      "pending_approval_desc": "An NTI administrator will confirm your role. You will be notified by email.",
+      "complete_profile_title": "Complete your profile",
+      "complete_profile_desc": "Fill in your profile before using the full platform",
+      "complete_now_btn": "Complete now"
+    }
+  },
+
+  "home": {
+    "hero": {
+      "badge": "Nitra Technology Incubator",
+      "title": "Leave your mark in the",
+      "highlight": "technological future",
+      "description": "And contribute to the development of the Nitra region.",
+      "btn_explore": "Explore Programs",
+      "btn_about": "About NTI"
+    },
+    "programs": {
+      "label": "Programs",
+      "title": "Two paths, one goal",
+      "prog_a_label": "Program A",
+      "prog_a_title": "Grant Incubation",
+      "prog_a_desc": "Have your own idea? Build a startup with NTI funding, expert mentoring, and full technical support.",
+      "prog_a_bullets": {
+        "team": "Min. 3 team members",
+        "rounds": "Quarterly evaluation rounds",
+        "docs": "6 required documents"
+      },
+      "prog_b_label": "Program B",
+      "prog_b_title": "Live Practice",
+      "prog_b_desc": "Work on real projects from companies. Get paid, gain experience, and build your portfolio with actual clients.",
+      "prog_b_bullets": {
+        "projects": "Real company projects",
+        "comp": "Financial compensation",
+        "mentor": "NTI mentor assigned"
+      },
+      "fallback_label": "Program",
+      "learn_more": "Learn more →"
+    },
+    "calls": {
+      "label": "Opportunities",
+      "title": "Active Calls & Deadlines",
+      "empty": "There are currently no active calls.",
+      "deadline": "Application deadline:",
+      "no_deadline": "No deadline",
+      "min_team": "Min team:",
+      "max_team": "Max team:",
+      "btn_view": "View Call",
+      "urgency": {
+        "ended": "Ended",
+        "days_left": "{days} days left",
+        "time_left": "{days}d {hours}h left",
+        "closes_hours": "Closes in {hours}h!"
+      },
+      "status": {
+        "open": "open",
+        "closed": "closed",
+        "draft": "draft"
+      }
+    },
+    "news": {
+      "label": "News",
+      "title": "Articles"
+    }
+  },
+
+  "cta": {
+    "logged_in": {
+      "title": "Want to join?",
+      "description": "Check out our programs and apply for the next open call"
+    },
+    "logged_out": {
+      "title": "Ready to start?",
+      "description": "Create your account and apply for the next open call",
+      "btn_register": "Create Account"
+    },
+    "program_a": "Program A",
+    "program_b": "Program B"
+  },
+
+  "documents": {
+    "download": "Download",
+    "downloading": "Downloading…",
+    "preview": "Preview",
+    "previewing": "Opening…",
+    "errors": {
+      "empty": "Empty response from file server",
+      "download_failed": "Download failed",
+      "preview_failed": "Preview failed"
+    }
+  },
+
+  "footer": {
+    "name": "Nitra Technology Incubator",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "contact": "Contact"
+  },
+
+  "notifications": {
+    "default_subject": "System Notification",
+    "default_message": "No content provided.",
+    "recipient_prefix": "To:",
+    "fallback_recipient": "Platform User",
+    "btn_close": "Close Message"
+  },
+
+  "pagination": {
+    "status": "Page {current} of {total}",
+    "total_items": "· {count} total",
+    "btn_prev": "← Previous",
+    "btn_next": "Next →"
+  },
+
+  "errors": {
+    "page_not_found": {
+      "title": "Page Not Found",
+      "description": "Please check your URL and try again later",
+      "btn_back": "Go Back",
+      "btn_home": "Home Page"
+    }
+  },
+
+  "navbar": {
+    "logoAlt": "NTI logo",
+    "home": "Home",
+    "programA": "Program A",
+    "programB": "Program B",
+    "partners": "Partners",
+    "about": "About",
+    "faq": "FAQ",
+    "notifications": "Notifications",
+    "markAllRead": "Mark all read",
+    "noNotifications": "No notifications",
+    "menu": "Menu",
+    "notificationFallback": "Notification"
+  }
+}

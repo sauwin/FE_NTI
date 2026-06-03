@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/features/auth/stores/auth'
 import { getMentorProfile, updateMentorProfile } from '@/features/mentor/api/profile'
 import type { MentorProfile } from '@/features/mentor/types/profile'
 
 const router = useRouter()
 const auth = useAuthStore()
+const { t } = useI18n()
+
 const loading = ref(true)
 const saving = ref(false)
 const error = ref('')
@@ -65,7 +68,7 @@ async function save() {
     setTimeout(() => success.value = false, 3000)
   } catch (e: any) {
     fieldErrors.value = e.response?.data?.errors ?? {}
-    error.value = e?.response?.data?.message || 'Failed to save'
+    error.value = e?.response?.data?.message || t('mentor.errors.saveFailed')
   } finally {
     saving.value = false
   }
@@ -75,94 +78,94 @@ async function save() {
 <template>
   <div class="bg-blue-950 absolute rounded-full h-96 w-96 -z-10 -right-20 -top-10 blur-sm"></div>
 
-  <div v-if="loading" class="text-slate-500 text-sm">Loading...</div>
+  <div v-if="loading" class="text-slate-500 text-sm">{{ t('mentor.table.loading') }}</div>
   <div v-else>
 
     <div class="mb-10 flex items-start justify-between gap-6">
       <div>
         <button @click="router.push('/dashboard')"
-          class="text-xs text-slate-500 hover:text-slate-300 transition mb-4 block">← Back to Dashboard</button>
+          class="text-xs text-slate-500 hover:text-slate-300 transition mb-4 block">{{ t('mentor.profile.backDashboard') }}</button>
         <div class="inline-flex items-center bg-blue-600/15 border border-blue-800 text-blue-400 text-xs font-bold tracking-widest uppercase py-1.5 px-4 rounded-full mb-4">
-          Mentor Profile
+          {{ t('mentor.profile.badge') }}
         </div>
-        <h1 class="font-bold text-5xl leading-tight">My <span class="text-blue-400">Profile</span></h1>
+        <h1 class="font-bold text-5xl leading-tight">{{ t('mentor.profile.title') }} <span class="text-blue-400">{{ t('mentor.profile.titleSpan') }}</span></h1>
       </div>
       <div class="flex gap-3 pt-10">
         <button v-if="!editMode" @click="editMode = true"
           class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition">
-          Edit Profile
+          {{ t('mentor.profile.btnEdit') }}
         </button>
         <template v-else>
           <button v-if="!isNew" @click="editMode = false; error = ''"
             class="border border-slate-700 hover:border-slate-500 text-gray-400 hover:text-white px-6 py-2.5 rounded-lg text-sm font-medium transition">
-            Cancel
+            {{ t('mentor.profile.btnCancel') }}
           </button>
           <button @click="save" :disabled="saving"
             class="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition">
-            {{ saving ? 'Saving...' : (isNew ? 'Create Profile' : 'Save Changes') }}
+            {{ saving ? t('mentor.profile.btnSaving') : (isNew ? t('mentor.profile.btnCreate') : t('mentor.profile.btnSave')) }}
           </button>
         </template>
       </div>
     </div>
 
     <div v-if="isNew" class="border border-yellow-800/50 bg-yellow-900/10 rounded-xl px-6 py-4 mb-8">
-      <div class="text-sm font-semibold text-yellow-400 mb-1">Profile not filled in yet</div>
-      <div class="text-muted-sm">Fill in your mentor profile to appear in the system</div>
+      <div class="text-sm font-semibold text-yellow-400 mb-1">{{ t('mentor.profile.notFilledTitle') }}</div>
+      <div class="text-muted-sm">{{ t('mentor.profile.notFilledSubtitle') }}</div>
     </div>
     <div v-if="success" class="border border-green-800/50 bg-green-900/10 rounded-xl px-6 py-3 mb-8">
-      <span class="text-green-400 text-sm font-medium">Profile saved successfully</span>
+      <span class="text-green-400 text-sm font-medium">{{ t('mentor.success.profileSaved') }}</span>
     </div>
     <p v-if="error" class="text-red-400 text-sm mb-6">{{ error }}</p>
 
     <!-- VIEW -->
     <div v-if="!editMode" class="flex flex-col gap-10">
       <section>
-        <div class="section-label">Info</div>
+        <div class="section-label">{{ t('mentor.profile.sectInfo') }}</div>
         <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5 flex items-center justify-between mb-4">
           <div>
-            <div class="label-hint">Availability</div>
+            <div class="label-hint">{{ t('mentor.profile.lblAvailability') }}</div>
             <div :class="profile.available ? 'text-green-400' : 'text-red-400'" class="font-medium text-sm">
-              {{ profile.available ? 'Available for projects' : 'Not available' }}
+              {{ profile.available ? t('mentor.profile.statusAvailable') : t('mentor.profile.statusUnavailable') }}
             </div>
           </div>
           <div :class="['w-3 h-3 rounded-full', profile.available ? 'bg-green-500' : 'bg-red-500']"></div>
         </div>
         <div v-if="profile.bio" class="card">
-          <div class="text-xs text-slate-500 uppercase tracking-wide mb-2">Bio</div>
+          <div class="text-xs text-slate-500 uppercase tracking-wide mb-2">{{ t('mentor.profile.lblBio') }}</div>
           <div class="text-slate-300 text-sm leading-relaxed">{{ profile.bio }}</div>
         </div>
       </section>
       <section>
-        <div class="section-label">Expertise</div>
+        <div class="section-label">{{ t('mentor.profile.sectExpertise') }}</div>
         <div v-if="profile.expertise_areas.length" class="flex flex-wrap gap-2">
           <span v-for="area in profile.expertise_areas" :key="area"
             class="text-xs font-medium px-3 py-1.5 rounded-full border text-blue-400 bg-blue-900/30 border-blue-800">
             {{ area }}
           </span>
         </div>
-        <div v-else class="text-slate-600 text-sm">No expertise areas added yet.</div>
+        <div v-else class="text-slate-600 text-sm">{{ t('mentor.profile.noExpertise') }}</div>
       </section>
     </div>
 
     <!-- EDIT -->
     <div v-else class="flex flex-col gap-8">
       <section>
-        <div class="section-label">Info</div>
+        <div class="section-label">{{ t('mentor.profile.sectInfo') }}</div>
         <div>
-          <label class="label">Bio</label>
-          <textarea v-model="profile.bio" rows="4" placeholder="Describe your background..."
+          <label class="label">{{ t('mentor.profile.lblBio') }}</label>
+          <textarea v-model="profile.bio" rows="4" :placeholder="t('mentor.profile.placeholderBio')"
             class="textarea"></textarea>
           <p v-if="fieldErrors.bio?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.bio[0] }}</p>
         </div>
         <div class="mt-4">
           <label class="flex items-center gap-3 cursor-pointer">
             <input v-model="profile.available" type="checkbox" class="accent-blue-500" />
-            <span class="text-sm text-gray-300">Available for new projects</span>
+            <span class="text-sm text-gray-300">{{ t('mentor.profile.chkAvailable') }}</span>
           </label>
         </div>
       </section>
       <section>
-        <div class="section-label">Expertise Areas</div>
+        <div class="section-label">{{ t('mentor.profile.sectExpertise') }}</div>
         <div class="flex flex-wrap gap-2 mb-3">
           <span v-for="(area, i) in profile.expertise_areas" :key="area"
             class="text-xs font-medium px-3 py-1.5 rounded-full border text-blue-400 bg-blue-900/30 border-blue-800 flex items-center gap-1.5">
@@ -171,11 +174,11 @@ async function save() {
           </span>
         </div>
         <div class="flex gap-2">
-          <input v-model="newExpertise" type="text" placeholder="e.g. Machine Learning"
+          <input v-model="newExpertise" type="text" :placeholder="t('mentor.profile.placeholderExpertise')"
             @keydown.enter.prevent="addExpertise"
             class="bg-blue-600/10 border border-blue-900 rounded-md h-9 px-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 flex-1" />
           <button @click="addExpertise" type="button"
-            class="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded-md text-sm transition">Add</button>
+            class="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded-md text-sm transition">{{ t('mentor.profile.btnAdd') }}</button>
         </div>
         <p v-if="fieldErrors.expertise_areas?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.expertise_areas[0] }}</p>
       </section>
