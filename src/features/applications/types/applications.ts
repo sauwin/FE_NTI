@@ -32,11 +32,13 @@ export interface StudentApplication {
   call_id?: number
   team_id?: number | null
   status: string
+  category: string | null
   program_type: string
   applicant_type: string
   created_at?: string
   call?: { name?: string; deadline_at?: string }
   team?: { name: string }
+  total_evaluators_count?: number
 }
 
 export interface ApplicationRevisionRequest {
@@ -47,4 +49,23 @@ export interface ApplicationRevisionRequest {
   message: string
   requested_by: number
   resolved_at: string | null
+}
+
+export interface ApplicationDocument {
+  id: number
+  uploaded_by: number
+  type: string
+  classification: string
+  version: number
+
+  file_path: string
+  file_name: string
+  mime_type: string
+
+  file_size_bytes: number
+  created_at: string
+  pivot?: {
+    application_id: number
+    document_id: number
+  }
 }

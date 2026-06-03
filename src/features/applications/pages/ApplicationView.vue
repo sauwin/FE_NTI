@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useConfirm } from '@/shared/composables/useConfirm'
 import DocumentActionButtons from '@/shared/components/DocumentActionButtons.vue'
 import MilestonesPanel from '@/features/milestones/components/MilestonesPanel.vue'
 import { useAuthStore } from '@/features/auth/stores/auth'
-import type { ApplicationRevisionRequest } from '../types/applications'
+import type { ApplicationRevisionRequest, ApplicationDocument } from '../types/applications'
 
 import { 
   getApplicationById, 
@@ -19,7 +19,7 @@ const route = useRoute()
 const router = useRouter()
 const id = route.params.id as string
 const app = ref<any>(null)
-const docs = ref<any[]>([])
+const docs = ref<ApplicationDocument[]>([])
 const revision = ref<ApplicationRevisionRequest | null>(null)
 const error = ref('')
 const deleting = ref(false)
@@ -136,6 +136,12 @@ async function deleteApp() {
     deleting.value = false
   }
 }
+
+const documentsMap = computed(() =>
+  Object.fromEntries(
+    docs.value.map(doc => [doc.type, doc])
+  )
+)
 </script>
 
 <template>
@@ -218,10 +224,10 @@ async function deleteApp() {
                     {{ req.document_name }}
                     <span v-if="req.is_mandatory" class="text-gray-300 text-xs">*</span>
                   </p>
-                  <p class="text-gray-500 text-[11px] mt-0.5">Max size: {{ req.max_size_mb }} MB</p>
+                  <p class="text-gray-500 text-[11px] mt-0.5">File size: {{ documentsMap[req] ? (documentsMap[req].file_size_bytes / (1024 * 1024)).toFixed(2) : '-'  }} MB</p>
                 </div>
 
-                <span v-if="docs.find(d => d.type === req.document_name || d.type === req.id)" class="text-[10px] bg-emerald-950/50 text-emerald-400 border border-emerald-900 px-2 py-0.5 rounded font-mono uppercase">
+                <span v-if="documentsMap[req]" class="text-[10px] bg-emerald-950/50 text-emerald-400 border border-emerald-900 px-2 py-0.5 rounded font-mono uppercase">
                   Uploaded
                 </span>
                 <span v-else class="text-[10px] bg-rose-950/30 text-rose-400/70 border border-rose-950 px-2 py-0.5 rounded font-mono uppercase">
@@ -229,14 +235,14 @@ async function deleteApp() {
                 </span>
               </div>
 
-              <div v-if="docs.find(d => d.type === req.document_name || d.type === req.id)" class="pt-2 border-t border-slate-800/60">
+              <div v-if="documentsMap[req]" class="pt-2 border-t border-slate-800/60">
                 <p class="text-xs text-slate-400 mb-2 font-mono truncate">
-                  File: {{ docs.find(d => d.type === req.document_name || d.type === req.id).file_name }}
+                  File: {{ documentsMap[req]!.file_name }}
                 </p>
                 <DocumentActionButtons
-                  :documentId="docs.find(d => d.type === req.document_name || d.type === req.id).id"
-                  :fileName="docs.find(d => d.type === req.document_name || d.type === req.id).file_name"
-                  :mimeType="docs.find(d => d.type === req.document_name || d.type === req.id).mime_type"
+                  :documentId="documentsMap[req]!.id"
+                  :fileName="documentsMap[req]!.file_name"
+                  :mimeType="documentsMap[req]!.mime_type"
                 />
               </div>
             </div>

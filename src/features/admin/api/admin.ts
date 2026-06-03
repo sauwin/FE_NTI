@@ -1,5 +1,13 @@
 import api from '@/shared/api/axios'
-import type { AdminCall, AdminProgram, BulkNotificationPayload, CallPayload, CreateAdminPayload, EvaluationCriterionPayload } from '@/features/admin/types/admin'
+import type { 
+  AdminCall, 
+  AdminProgram, 
+  BulkNotificationPayload, 
+  CallPayload, 
+  CreateAdminPayload, 
+  EvaluationCriterionPayload, 
+  FinalizeEvaluationPayload 
+} from '@/features/admin/types/admin'
 
 export function getDashboardStats() {
   return api.get('/admin/reporting/dashboard-stats')
@@ -148,3 +156,12 @@ export function getCallEvaluationInfo(callId: number) {
 export function changeCallEvaluationCriteria(callId: number, payload: EvaluationCriterionPayload) {
   return api.put(`admin/calls/${callId}/criteria`, payload)
 }
+
+export function getApplicationEvaluations(applicationId: number) {
+  return api.get(`admin/applications/${applicationId}/evaluations`)
+}
+
+export function finalizeEvaluation(applicationId: number, payload: FinalizeEvaluationPayload) {
+  return api.post(`admin/applications/${applicationId}/finalize-evaluation`, payload)
+}
+

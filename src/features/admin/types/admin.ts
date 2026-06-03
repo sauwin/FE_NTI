@@ -171,3 +171,8 @@ export interface EvaluationCriterionPayloadItem {
 export interface EvaluationCriterionPayload {
   criteria: EvaluationCriterionPayloadItem[]
 }
+
+export interface FinalizeEvaluationPayload {
+  status: string
+  comment: string | null
+}

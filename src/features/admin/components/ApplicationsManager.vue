@@ -278,55 +278,63 @@ watch(() => props.filterCallId, () => { currentPage.value = 1; loadApplications(
           </thead>
           <tbody class="bg-slate-950">
             <tr
-              v-for="app in applications"
-              :key="app.id"
+              v-for="application in applications"
+              :key="application.id"
               class="border-t border-slate-800 hover:bg-slate-900/40 transition"
             >
-              <td class="px-4 py-4 font-mono text-xs text-slate-500">#{{ app.id }}</td>
+              <td class="px-4 py-4 font-mono text-xs text-slate-500">#{{ application.id }}</td>
 
               <td class="px-4 py-4">
-                <div class="font-semibold text-white text-sm">{{ app.applicant_name }}</div>
-                <div class="text-xs text-slate-500 font-mono mt-0.5">{{ app.applicant_email }}</div>
+                <div class="font-semibold text-white text-sm">{{ application.applicant_name }}</div>
+                <div class="text-xs text-slate-500 font-mono mt-0.5">{{ application.applicant_email }}</div>
               </td>
 
               <td class="px-4 py-4">
                 <span
                   class="text-xs font-mono px-2 py-1 rounded border uppercase"
-                  :class="app.program_type?.toLowerCase() === 'a'
+                  :class="application.program_type?.toLowerCase() === 'a'
                     ? 'bg-blue-950/60 text-blue-400 border-blue-900'
                     : 'bg-slate-800 text-slate-400 border-slate-700'"
                 >
-                  Program {{ app.program_type }}
+                  Program {{ application.program_type }}
                 </span>
-                <div class="text-xs text-slate-500 font-mono mt-1">{{ app.call_name }}</div>
+                <div class="text-xs text-slate-500 font-mono mt-1">{{ application.call_name }}</div>
               </td>
 
               <td class="px-4 py-4">
                 <span
-                  :class="statusColor(app.status)"
+                  :class="statusColor(application.status)"
                   class="text-xs font-mono px-2 py-1 rounded border uppercase"
                 >
-                  {{ changingStatusId === app.id ? '...' : app.status }}
+                  {{ changingStatusId === application.id ? '...' : application.status }}
                 </span>
               </td>
 
-              <td class="px-4 py-4 text-right">
+              <td class="pr-4 py-4 text-right">
                 <div class="flex items-center justify-end gap-2">
                   <button
-                    @click="viewDetail(app.id)"
+                    @click="router.push(`/evaluations/application/${application.id}/final-verdict`)"
+                    v-if="application.status == 'under_evaluation'"
+                    class="text-sm bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded border border-blue-700 text-slate-300 transition font-mono"
+                  >
+                    Final verdict
+                  </button>
+
+                  <button
+                    @click="viewDetail(application.id)"
                     class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded border border-slate-700 text-slate-300 transition font-mono"
                   >
                     Detail
                   </button>
 
                   <select
-                    :value="app.status === 'draft' || app.status === 'pending_revision' ? '' : app.status"
-                    @change="handleStatusSelect(app.id, ($event.target as HTMLSelectElement).value)"
-                    :disabled="changingStatusId === app.id || app.status === 'draft'"
+                    :value="application.status === 'draft' || application.status === 'pending_revision' ? '' : application.status"
+                    @change="handleStatusSelect(application.id, ($event.target as HTMLSelectElement).value)"
+                    :disabled="changingStatusId === application.id || application.status === 'draft'"
                     class="text-xs bg-slate-950 border border-slate-800 text-slate-300 rounded px-2 py-2 outline-none focus:border-blue-600 transition disabled:opacity-40 font-mono"
                   >
                     <option value="" disabled class="text-slate-500">
-                      {{ app.status === 'draft' ? 'Draft (Read-only)' : 'Set status...' }}
+                      {{ application.status === 'draft' ? 'Draft (Read-only)' : 'Set status...' }}
                     </option>
                     <option v-for="s in ALLOWED_ADMIN_ACTIONS" :key="s.value" :value="s.value" class="bg-slate-950">
                       {{ s.label }}
