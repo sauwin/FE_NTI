@@ -532,6 +532,8 @@
     },
 
     "pendingApprovalTable": {
+      "title": "Pending Approvals",
+      "subtitle": "Users awaiting role confirmation",
       "emptyState": "No pending approvals",
       "table": {
         "headers": {

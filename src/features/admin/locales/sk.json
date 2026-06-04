@@ -532,6 +532,8 @@
     },
 
     "pendingApprovalTable": {
+      "title": "Čakajúce schválenia",
+      "subtitle": "Používatelia čakajúci na potvrdenie roly",
       "emptyState": "Žiadne čakajúce schválenia",
       "table": {
         "headers": {

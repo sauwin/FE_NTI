@@ -46,6 +46,7 @@ const stats = ref<DashboardStats>({
 
 const users = ref<any[]>([])
 const pendingUsers = ref<any[]>([])
+const pendingCount = ref(0)
 
 const quickStats = computed(() => [
   { label: t('admin.dashboard.totalUsers'), value: stats.value.total_users, color: 'text-white', border: 'border-slate-800', bg: 'bg-slate-900/40' },
@@ -92,7 +93,8 @@ async function loadUserData() {
 async function loadPendingApprovals() {
   try {
     const appRes = await getPendingApprovals()
-    pendingUsers.value = appRes.data ?? []
+    pendingUsers.value = appRes.data.data ?? []
+    pendingCount.value = appRes.data.count ?? 0
   } catch (e: any) {
     error.value = e.response?.data?.message || t('admin.dashboard.errors.approvalsLoadFailed')
   }
@@ -275,7 +277,7 @@ onMounted(() => {
     </div>
 
     <div v-if="activeTab === 'approvals'">
-      <PendingApprovalsTable :pending-users="pendingUsers" @refresh="loadPendingApprovals" />
+      <PendingApprovalsTable :pending-users="pendingUsers" :pending-count="pendingCount" @refresh="loadPendingApprovals" />
     </div>
 
     <div v-if="activeTab === 'documents'">

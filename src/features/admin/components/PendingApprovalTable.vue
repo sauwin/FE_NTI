@@ -8,6 +8,7 @@ const { t } = useI18n()
 
 const props = defineProps<{
   pendingUsers: any[]
+  pendingCount: number
 }>()
 const emit = defineEmits(['refresh'])
 
@@ -31,7 +32,7 @@ async function approveRole(userId: number, roleName: string) {
     success.value = true
     message.value = t('admin.pendingApprovalTable.messages.approveSuccess', { role: roleName })
     emit('refresh')
-    setTimeout(() => success.value = false, 3000)
+    setTimeout(() => { message.value = '' }, 3000)
   } catch (e: any) {
     success.value = false
     message.value = e.response?.data?.message || t('admin.pendingApprovalTable.messages.approveFailed')
@@ -56,7 +57,7 @@ async function rejectRole(userId: number, roleSlug: string) {
     success.value = true
     message.value = t('admin.pendingApprovalTable.messages.rejectSuccess')
     emit('refresh')
-    setTimeout(() => success.value = false, 3000)
+    setTimeout(() => { message.value = '' }, 3000)
   } catch (e: any) {
     success.value = false
     message.value = e.response?.data?.message || t('admin.pendingApprovalTable.messages.rejectFailed')
@@ -68,55 +69,104 @@ async function rejectRole(userId: number, roleSlug: string) {
 
 <template>
   <div class="border border-slate-800 bg-slate-900/20 rounded-2xl p-6">
-    <div v-if="message" :class="[
-      'p-3 rounded-lg text-sm mb-4',
-      success
-      ? 'bg-green-900/20 border border-green-800 text-green-400'
-      : 'bg-red-900/20 border border-red-800 text-red-400'
-      ]">
+
+    <!-- Flash message -->
+    <div
+      v-if="message"
+      :class="[
+        'p-3 rounded-lg text-sm mb-6 border',
+        success
+          ? 'bg-green-900/20 border-green-800 text-green-400'
+          : 'bg-red-900/20 border-red-800 text-red-400',
+      ]"
+    >
       {{ message }}
     </div>
 
-    <div v-if="pendingUsers.length === 0" class="text-center py-8 text-slate-500 text-sm">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+      <div>
+        <h3 class="text-xl font-bold text-white">
+          {{ t('admin.pendingApprovalTable.title') }}
+        </h3>
+        <p class="text-sm text-slate-500 mt-1">
+          {{ t('admin.pendingApprovalTable.subtitle') }}
+          <span
+            v-if="pendingCount > 0"
+            class="ml-1.5 text-xs font-mono px-1.5 py-0.5 rounded border bg-yellow-950/40 text-yellow-400 border-yellow-900"
+          >
+            {{ pendingCount }}
+          </span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div
+      v-if="pendingUsers.length === 0"
+      class="text-center py-10 text-slate-500 italic text-sm"
+    >
       {{ t('admin.pendingApprovalTable.emptyState') }}
     </div>
 
+    <!-- Table -->
     <div v-else class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead class="border-b border-slate-800">
-        <tr class="text-left text-slate-400">
-          <th class="py-2 px-4">{{ t('admin.pendingApprovalTable.table.headers.name') }}</th>
-          <th class="py-2 px-4">{{ t('admin.pendingApprovalTable.table.headers.email') }}</th>
-          <th class="py-2 px-4">{{ t('admin.pendingApprovalTable.table.headers.requestedRole') }}</th>
-          <th class="py-2 px-4">{{ t('admin.pendingApprovalTable.table.headers.created') }}</th>
-          <th class="py-2 px-4">{{ t('admin.pendingApprovalTable.table.headers.actions') }}</th>
-        </tr>
+      <table class="w-full text-left text-sm text-slate-300">
+        <thead class="text-xs text-slate-400 uppercase bg-slate-900/50 font-mono">
+          <tr>
+            <th class="px-4 py-3 rounded-tl-lg">{{ t('admin.pendingApprovalTable.table.headers.name') }}</th>
+            <th class="px-4 py-3">{{ t('admin.pendingApprovalTable.table.headers.email') }}</th>
+            <th class="px-4 py-3">{{ t('admin.pendingApprovalTable.table.headers.requestedRole') }}</th>
+            <th class="px-4 py-3">{{ t('admin.pendingApprovalTable.table.headers.created') }}</th>
+            <th class="px-4 py-3 rounded-tr-lg text-right">{{ t('admin.pendingApprovalTable.table.headers.actions') }}</th>
+          </tr>
         </thead>
-        <tbody class="text-slate-300">
-        <tr v-for="user in pendingUsers" :key="`${user.id}-${user.role_slug}`" class="border-b border-slate-800 hover:bg-slate-800/30">
-          <td class="py-3 px-4">{{ user.first_name }} {{ user.last_name }}</td>
-          <td class="py-3 px-4 text-slate-500">{{ user.email }}</td>
-          <td class="py-3 px-4">
-            <span class="text-xs bg-yellow-600/30 border border-yellow-700 text-yellow-300 px-2 py-1 rounded">
-            {{ user.role_slug }}
-            </span>
-          </td>
-          <td class="py-3 px-4 text-xs text-slate-400">
-            {{ new Date(user.created_at).toLocaleDateString() }}
-          </td>
-          <td class="py-3 px-4">
-            <div class="flex gap-2">
-              <button @click="approveRole(user.id, user.role_name)" :disabled="loading" class="text-xs bg-green-600/30 hover:bg-green-600/50 disabled:opacity-50 text-green-400 px-2 py-1 rounded transition">
-                {{ t('admin.pendingApprovalTable.buttons.approve') }}
-              </button>
-              <button @click="rejectRole(user.id, user.role_slug)" :disabled="loading" class="text-xs bg-red-600/30 hover:bg-red-600/50 disabled:opacity-50 text-red-400 px-2 py-1 rounded transition">
-                {{ t('admin.pendingApprovalTable.buttons.reject') }}
-              </button>
-            </div>
-          </td>
-        </tr>
+        <tbody>
+          <tr
+            v-for="user in pendingUsers"
+            :key="`${user.id}-${user.role_slug}`"
+            class="border-b border-slate-800 hover:bg-slate-800/30 transition"
+          >
+            <td class="px-4 py-3">
+              <div class="font-semibold text-white text-sm">
+                {{ user.first_name }} {{ user.last_name }}
+              </div>
+            </td>
+            <td class="px-4 py-3">
+              <div class="text-xs text-slate-500 font-mono">{{ user.email }}</div>
+            </td>
+            <td class="px-4 py-3">
+              <span class="text-xs font-mono px-2 py-1 rounded border uppercase bg-yellow-950/40 text-yellow-400 border-yellow-900">
+                {{ user.role_slug }}
+              </span>
+            </td>
+            <td class="px-4 py-3">
+              <span class="text-xs text-slate-500 font-mono">
+                {{ new Date(user.created_at).toLocaleDateString() }}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-right whitespace-nowrap">
+              <div class="flex items-center justify-end gap-2">
+                <button
+                  @click="approveRole(user.id, user.role_name)"
+                  :disabled="loading"
+                  class="text-xs px-3 py-1 rounded border bg-emerald-900/40 hover:bg-emerald-900/60 text-emerald-400 border-emerald-800 transition disabled:opacity-50 cursor-pointer"
+                >
+                  {{ t('admin.pendingApprovalTable.buttons.approve') }}
+                </button>
+                <button
+                  @click="rejectRole(user.id, user.role_slug)"
+                  :disabled="loading"
+                  class="text-xs px-3 py-1 rounded border bg-red-900/40 hover:bg-red-900/60 text-red-400 border-red-800 transition disabled:opacity-50 cursor-pointer"
+                >
+                  {{ t('admin.pendingApprovalTable.buttons.reject') }}
+                </button>
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
+
   </div>
 </template>
