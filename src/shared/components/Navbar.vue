@@ -335,14 +335,14 @@ const selectedLanguage = computed({
         </button>
       </template>
 
-      <!-- LANGUAGE SELECTOR -->
-      <select
-        v-model="selectedLanguage"
-        class="bg-[#080f1e]/90 text-slate-400 hover:text-white text-xs rounded-lg px-2 py-1 transition"
+      <!-- DESKTOP LANGUAGE TOGGLE BUTTON -->
+      <button 
+        @click="selectedLanguage = selectedLanguage === 'en' ? 'sk' : 'en'"
+        class="px-2.5 py-1 text-xs font-bold tracking-wider rounded-lg border 
+               bg-[#0d1527]/60 border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 transition uppercase"
       >
-        <option value="en">EN</option>
-        <option value="sk">SK</option>
-      </select>
+        {{ selectedLanguage }}
+      </button>
     </div>
 
     <!-- MOBILE ACTIONS -->
@@ -457,6 +457,15 @@ const selectedLanguage = computed({
           </div>
         </div>
       </template>
+
+      <!-- MOBILE LANGUAGE TOGGLE BUTTON -->
+      <button 
+        @click="selectedLanguage = selectedLanguage === 'en' ? 'sk' : 'en'"
+        class="mx-1 px-2.5 py-1 text-[11px] font-bold tracking-wider rounded-lg border 
+               bg-[#0d1527]/60 border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 transition uppercase"
+      >
+        {{ selectedLanguage }}
+      </button>
 
       <!-- MOBILE MENU BUTTON -->
       <button
