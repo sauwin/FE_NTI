@@ -70,16 +70,19 @@ const filteredCalls = computed(() => {
   return calls.value.filter(c => {
     const matchesSearch = (c.name || '').toLowerCase().includes(searchQuery.value.toLowerCase())
     const matchesStatus = !filterStatus.value || c.status === filterStatus.value
-    const program = programs.value.find(p => p.id === c.program_id)
-    const currentCallType = program?.code === 'program_b' ? 'b' : 'a'
+    const program = programs.value.find(p => p.id === (c as any).program)
+    const currentCallType = typeof c.program === 'string' ? (c.program === 'b' ? 'b' : 'a') : (program?.code === 'program_b' ? 'b' : 'a')
     const matchesProgramType = !filterProgramType.value || currentCallType === filterProgramType.value
 
     return matchesSearch && matchesStatus && matchesProgramType;
   })
 })
 
-function getProgramLabel(programId: number): string {
-  const program = programs.value.find(p => p.id === programId)
+function getProgramLabel(programOrId: number | string): string {
+  if (typeof programOrId === 'string') {
+    return programOrId === 'b' ? t('admin.programCallsManager.list.programs.b') : t('admin.programCallsManager.list.programs.a')
+  }
+  const program = programs.value.find(p => p.id === programOrId)
   if (!program) return t('admin.programCallsManager.list.programs.fallback')
   if (program.code === 'program_a') return t('admin.programCallsManager.list.programs.a')
   if (program.code === 'program_b') return t('admin.programCallsManager.list.programs.b')
@@ -120,7 +123,7 @@ async function loadData() {
 function editCall(call: AdminCall) {
   editingCallId.value = call.id
   closeMenu()
-  const program = programs.value.find(p => p.id === call.program_id)
+  const program = programs.value.find(p => p.id === (call as any).program)
 
   let parsedDocs = defaultCallState.required_documents
   if (call.form_config) {
@@ -128,7 +131,7 @@ function editCall(call: AdminCall) {
   }
 
   newCall.value = {
-    program_type: program?.code === 'program_b' ? 'b' : 'a',
+    program_type: typeof call.program === 'string' ? (call.program === 'b' ? 'b' : 'a') : (program?.code === 'program_b' ? 'b' : 'a'),
     title: call.name,
     status: call.status,
     opens_at: call.opens_at ? call.opens_at.substring(0, 10) : '',
@@ -246,8 +249,9 @@ async function downloadCallsExport(format: 'csv' | 'xlsx' = 'xlsx') {
   }
 }
 
-function isProgramB(programId: number): boolean {
-  const program = programs.value.find(p => p.id === programId)
+function isProgramB(programOrId: number | string): boolean {
+  if (typeof programOrId === 'string') return programOrId === 'b'
+  const program = programs.value.find(p => p.id === programOrId)
   return program?.code === 'program_b'
 }
 
@@ -384,11 +388,11 @@ onMounted(() => {
               <div class="flex items-center gap-2 flex-wrap">
                 <span
                   class="text-xs font-mono px-2 py-1 rounded border"
-                  :class="getProgramLabel(c.program_id) === t('admin.programCallsManager.list.programs.a')
+                  :class="getProgramLabel(c.program) === t('admin.programCallsManager.list.programs.a')
                     ? 'bg-blue-950/60 text-blue-400 border-blue-900'
                     : 'bg-slate-800 text-slate-400 border-slate-700'"
                 >
-                  {{ getProgramLabel(c.program_id) }}
+                  {{ getProgramLabel(c.program) }}
                 </span>
 
                 <span
@@ -419,7 +423,7 @@ onMounted(() => {
 
               <div class="relative" @click.stop>
                 <button
-                  v-if="isProgramB(c.program_id)"
+                  v-if="isProgramB(c.program)"
                   @click="toggleMenu(c.id)"
                   class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded border border-slate-700 text-yellow-400 transition-all font-mono whitespace-nowrap"
                 >
@@ -427,7 +431,7 @@ onMounted(() => {
                 </button>
 
                 <button
-                  v-if="!isProgramB(c.program_id)"
+                  v-if="!isProgramB(c.program)"
                   @click="toggleMenu(c.id)"
                   class="flex items-center justify-center w-8 h-8 rounded-md border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-all text-sm leading-none"
                 >
@@ -480,7 +484,7 @@ onMounted(() => {
                     </button>
 
                     <button
-                      v-if="!isProgramB(c.program_id)"
+                      v-if="!isProgramB(c.program)"
                       @click="handleDeleteCall(c.id)"
                       class="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-slate-800 transition"
                     >
