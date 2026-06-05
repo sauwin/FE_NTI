@@ -15,7 +15,7 @@
         "users": "Používatelia",
         "approvals": "Schvaľovania",
         "documents": "Dokumenty",
-        "createAdmin": "Vytvoriť Admina",
+        "createAdmin": "Pridať pracovníka",
         "logs": "Audít",
         "broadcastNotification": "Hromadné správy"
       },
@@ -102,7 +102,7 @@
       },
       "filters": {
         "allActions": "Všetky akcie",
-        "allAdministrators": "Všetci administrátori"
+        "allAdministrators": "Všetci technické pracovníci"
       },
       "status": {
         "loading": "Načítavanie záznamov...",
@@ -469,13 +469,13 @@
     },
 
     "createAdminForm": {
-      "title": "Nový administrátor",
+      "title": "Nový Technický Pracovník",
       "fields": {
         "firstName": "Meno",
         "lastName": "Priezvisko",
         "email": "E-mail",
         "password": "Heslo",
-        "adminRole": "Administrátorská rola",
+        "adminRole": "Rola",
         "selectRole": "Vyberte rolu"
       },
       "roles": {
@@ -485,7 +485,7 @@
         "mentor": "Mentor"
       },
       "buttons": {
-        "create": "Vytvoriť administrátora",
+        "create": "Vytvoriť používateľa",
         "creating": "Vytvára sa..."
       },
       "messages": {

@@ -15,7 +15,7 @@
         "users": "Users",
         "approvals": "Approvals",
         "documents": "Documents",
-        "createAdmin": "Create Admin",
+        "createAdmin": "Create Staff",
         "logs": "Audit Logs",
         "broadcastNotification": "Broadcast"
       },
@@ -102,7 +102,7 @@
       },
       "filters": {
         "allActions": "All Actions",
-        "allAdministrators": "All Administrators"
+        "allAdministrators": "All Staff"
       },
       "status": {
         "loading": "Loading logs...",
@@ -469,13 +469,13 @@
     },
 
     "createAdminForm": {
-      "title": "New Admin",
+      "title": "New Technical User",
       "fields": {
         "firstName": "First Name",
         "lastName": "Last Name",
         "email": "Email",
         "password": "Password",
-        "adminRole": "Admin Role",
+        "adminRole": "Role",
         "selectRole": "Select a role"
       },
       "roles": {
@@ -485,7 +485,7 @@
         "mentor": "Mentor"
       },
       "buttons": {
-        "create": "Create Admin",
+        "create": "Create User",
         "creating": "Creating..."
       },
       "messages": {

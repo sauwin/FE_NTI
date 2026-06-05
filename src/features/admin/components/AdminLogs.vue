@@ -257,7 +257,7 @@ onMounted(async () => {
 
     <div class="flex flex-wrap justify-between items-center gap-3">
       <h3 class="text-xl font-bold text-white">{{ t('admin.logs.title') }}</h3>
-      <div class="flex gap-2 flex-shrink-0">
+      <div class="flex gap-2 shrink-0">
         <button
           @click="exportCSV" :disabled="!!exportLoading"
           class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300 border border-slate-700 transition font-mono disabled:opacity-40"
@@ -310,7 +310,7 @@ onMounted(async () => {
         >
           <option value="">{{ t('admin.logs.filters.allAdministrators') }}</option>
           <option v-for="user in adminUsers" :key="user.id" :value="user.id" class="bg-slate-950">
-            {{ user.first_name ?? user.name }} {{ user.last_name ?? '' }}
+            {{ user.first_name ?? user.name }} {{ user.last_name ?? '' }} ({{ user.roles[0].name ?? 'Unknown role' }})
           </option>
         </select>
       </div>

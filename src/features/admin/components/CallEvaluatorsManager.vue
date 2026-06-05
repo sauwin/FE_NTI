@@ -39,7 +39,7 @@ onMounted(async () => {
       getAdminUsers(),
     ])
     calls.value = Array.isArray(callsRes.data) ? callsRes.data : (callsRes.data as { data?: unknown[] })?.data ?? []
-    allUsers.value = (usersRes.data ?? []).filter((u: any) =>
+    allUsers.value = (usersRes.data.data ?? []).filter((u: any) =>
         u.roles?.some((r: any) => r.slug === 'evaluator')
     )
   } catch (e) {
