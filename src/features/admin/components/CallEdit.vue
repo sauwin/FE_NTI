@@ -42,7 +42,12 @@ onMounted(async () => {
     const callRes = await getAdminCallById(callId)
     const call = callRes.data
 
-    programId.value = call.program_id
+    if (typeof call.program === 'string') {
+      const prog = programs.value.find(p => p.code === `program_${call.program}`)
+      programId.value = prog?.id ?? null
+    } else {
+      programId.value = call.program
+    }
     status.value = call.status
     opensAt.value = formatDateTime(call.opens_at)
     deadlineAt.value = formatDateTime(call.deadline_at)

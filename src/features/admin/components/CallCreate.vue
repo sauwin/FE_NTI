@@ -70,8 +70,11 @@ async function submitCall() {
   error.value = ''
 
   try {
+    const selected = programs.value.find(p => p.id === programId.value)
+    const program_type = selected?.code === 'program_b' ? 'b' : 'a'
+
     await createAdminCall({
-      program_id: programId.value,
+      program_type,
       status: status.value,
       opens_at: opensAt.value ? new Date(opensAt.value).toISOString() : null,
       deadline_at: deadlineAt.value ? new Date(deadlineAt.value).toISOString() : null,

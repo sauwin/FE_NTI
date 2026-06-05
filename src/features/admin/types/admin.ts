@@ -8,7 +8,7 @@ export interface AdminProgram {
 
 export interface AdminCall {
   id: number
-  program_id: number
+  program: 'a' | 'b' | string | number
   name: string
   status: 'draft' | 'open' | 'closed' | 'archived'
   opens_at: string | null

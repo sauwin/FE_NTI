@@ -30,14 +30,13 @@ export interface ActiveCall {
   evaluation_scheduled_at: string | null
 
   created_by: number
-  program_id: number
+  program: 'a' | 'b'
 
   min_team_size: number
   max_team_size: number
 
   required_documents: string[]
   evaluation_criteria: Record<string, number>
-  program: Program
 }
 
 export interface CallData {
