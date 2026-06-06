@@ -35,7 +35,8 @@ const categories = [
   { key: 'IoT & Embedded Systems', labelKey: 'programA.upload.categories.iotEmbeddedSystems' },
 ]
 
-function docKey(name: string): string {
+function docKey(input: string | DocumentRequirement): string {
+  const name = typeof input === 'string' ? input : (input.type || input.document_name)
   return name.toLowerCase().replace(/\s+/g, '_')
 }
 
@@ -91,7 +92,7 @@ onMounted(async () => {
       })
 
       requiredDocuments.value.forEach(doc => { 
-        files.value[docKey(doc.document_name)] = null 
+        files.value[docKey(doc)] = null 
       })
     } else {
       error.value = t('programA.upload.errors.noDocsConfigured')
@@ -138,7 +139,7 @@ async function submit(mode: 'draft' | 'final' = 'final') {
     const applicationId = appRes.data.application_id
 
     for (const doc of requiredDocuments.value) {
-      const key = docKey(doc.document_name)
+      const key = docKey(doc)
       const file = files.value[key]
 
       if (mode === 'final' && !file && doc.is_mandatory) {
@@ -269,6 +270,7 @@ async function submit(mode: 'draft' | 'final' = 'final') {
           </template>
 
           <template v-if="step === 2">
+            {{ console.log(requiredDocuments) }}
             <div class="space-y-4">
               <div v-for="doc in requiredDocuments" :key="doc.document_name" class="border border-slate-950 p-4 rounded-xl bg-slate-950/60">
                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">

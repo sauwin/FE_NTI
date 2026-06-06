@@ -51,6 +51,7 @@
       "no_docs_required": "No specific documents required for this challenge.",
       "file_size": "File size: {size} MB",
       "uploaded_badge": "Uploaded",
+      "optional_badge": "Optional",
       "missing_badge": "Missing",
       "file_label": "File: {name}",
       "btn_edit": "Edit Application",

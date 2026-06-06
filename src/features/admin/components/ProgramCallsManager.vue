@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
 import {
-  getAdminPrograms,
   getAdminCalls,
   createAdminCall,
   updateAdminCall,
@@ -109,12 +108,8 @@ const emit = defineEmits(['view-applications'])
 
 async function loadData() {
   try {
-    const [progRes, callRes] = await Promise.all([
-      getAdminPrograms(),
-      getAdminCalls(),
-    ])
-    programs.value = progRes.data
-    calls.value = callRes.data
+    const res = await getAdminCalls()
+    calls.value = res.data
   } catch (e) {
     console.error('Error loading data', e)
   }
