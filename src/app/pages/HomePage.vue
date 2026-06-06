@@ -238,7 +238,7 @@
           </div>
 
           <div class="text-xs text-slate-500 font-mono">
-            {{ programLabel(call.program?.code) }}
+            {{ programLabel(call.program) }}
           </div>
         </div>
 

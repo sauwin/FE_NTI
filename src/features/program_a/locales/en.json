@@ -33,7 +33,9 @@
         }
       },
       "attachmentsTitle": "Attachments configuration",
-      "requiredDocs": "Required documentation according to current open call"
+      "requiredDocs": "Required documentation according to current open call",
+      "mandatory": "Mandatory",
+      "maxSize": "Max size: {size}MB"
     },
     "upload": {
       "loadingParams": "Loading program parameters...",

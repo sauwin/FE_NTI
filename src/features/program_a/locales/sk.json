@@ -33,7 +33,9 @@
         }
       },
       "attachmentsTitle": "Konfigurácia príloh",
-      "requiredDocs": "Požadovaná dokumentácia podľa aktuálnej otvorenej výzvy"
+      "requiredDocs": "Požadovaná dokumentácia podľa aktuálnej otvorenej výzvy",
+      "mandatory": "Povinný",
+      "maxSize": "Maximálny rozmer: {size}MB"
     },
     "upload": {
       "loadingParams": "Načítavanie parametrov programu...",
