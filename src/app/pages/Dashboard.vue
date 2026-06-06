@@ -4,7 +4,6 @@ import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/features/auth/stores/auth'
 import { getRoleStatus } from '@/features/auth/api/auth'
-import type { AuthUser } from '@/features/auth/types/auth'
 
 import StudentDashboard from '@/features/student/components/StudentDashboard.vue'
 import CompanyDashboard from '@/features/company/components/CompanyDashboard.vue'
@@ -79,14 +78,6 @@ onMounted(() => { fetchData() })
   <div v-if="success" class="border border-green-800/50 bg-green-900/10 rounded-xl px-6 py-4 mb-8 flex items-center justify-between gap-4">
     <div class="text-sm text-green-400">{{ success }}</div>
     <button @click="success = ''" class="text-green-400 hover:text-green-300">×</button>
-  </div>
-
-  <div v-if="!roleApproved"
-        class="border border-orange-800/50 bg-orange-900/10 rounded-xl px-6 py-4 flex items-center justify-between gap-4 mb-8">
-    <div>
-      <div class="text-sm font-semibold text-orange-400 mb-1">{{ t('dashboard.alerts.pending_approval_title') }}</div>
-      <div class="text-muted-sm">{{ t('dashboard.alerts.pending_approval_desc') }}</div>
-    </div>
   </div>
 
   <div v-if="roleApproved && !profileComplete && roleSlug && ['student','mentor','company'].includes(roleSlug)"

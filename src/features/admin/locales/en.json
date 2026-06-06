@@ -531,45 +531,6 @@
       }
     },
 
-    "pendingApprovalTable": {
-      "title": "Pending Approvals",
-      "subtitle": "Users awaiting role confirmation",
-      "emptyState": "No pending approvals",
-      "table": {
-        "headers": {
-          "name": "Name",
-          "email": "Email",
-          "requestedRole": "Requested Role",
-          "created": "Created",
-          "actions": "Actions"
-        }
-      },
-      "buttons": {
-        "approve": "Approve",
-        "reject": "Reject"
-      },
-      "modals": {
-        "approve": {
-          "title": "Approve Role",
-          "message": "Approve \"{role}\" role for this user?",
-          "confirm": "Approve",
-          "cancel": "Cancel"
-        },
-        "reject": {
-          "title": "Remove Role",
-          "message": "Remove \"{role}\" role from this user?",
-          "confirm": "Remove",
-          "cancel": "Cancel"
-        }
-      },
-      "messages": {
-        "approveSuccess": "Role approved for {role}",
-        "approveFailed": "Failed to approve role",
-        "rejectSuccess": "Role removed",
-        "rejectFailed": "Failed to remove role"
-      }
-    },
-
     "programCallsManager": {
       "form": {
         "titleCreate": "New Program A Call",

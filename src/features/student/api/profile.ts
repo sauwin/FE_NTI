@@ -16,3 +16,10 @@ export function updateProfile(payload: StudentProfile) {
 export function completeStudentProfile(payload: StudentProfileCompletePayload) {
   return api.post('/profile/student', payload)
 }
+
+// Confirm for successfull request must be DELETE MY ACCOUNT
+export function anonymizeStudentAccount(payload: { confirm: string }) {
+  return api.delete('gdpr/account', {
+    data: payload,
+  })
+}

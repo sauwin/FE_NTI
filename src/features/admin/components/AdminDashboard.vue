@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, defineAsyncComponent } from 'vue'
-import { getDashboardStats, getAdminUsers, getPendingApprovals } from '@/features/admin/api/admin'
+import { getDashboardStats, getAdminUsers } from '@/features/admin/api/admin'
 import type { DashboardStats } from '@/features/admin/types/admin'
 import { useI18n } from 'vue-i18n'
 
@@ -9,7 +9,6 @@ const ApplicationsManager = defineAsyncComponent(() => import('@/features/admin/
 const CallEvaluatorsManager = defineAsyncComponent(() => import('@/features/admin/components/CallEvaluatorsManager.vue'))
 const ApplicationMentorsManager = defineAsyncComponent(() => import('@/features/admin/components/ApplicationMentorsManager.vue'))
 const UserManagementPanel = defineAsyncComponent(() => import('@/features/admin/components/UserManagementPanel.vue'))
-const PendingApprovalsTable = defineAsyncComponent(() => import('./PendingApprovalTable.vue'))
 const AdminDocumentManager = defineAsyncComponent(() => import('@/features/admin/components/AdminDocumentManager.vue'))
 const CreateAdminForm = defineAsyncComponent(() => import('./CreateAdminForm.vue'))
 const AdminLogs = defineAsyncComponent(() => import('./AdminLogs.vue'))
@@ -90,22 +89,11 @@ async function loadUserData() {
   }
 }
 
-async function loadPendingApprovals() {
-  try {
-    const appRes = await getPendingApprovals()
-    pendingUsers.value = appRes.data.data ?? []
-    pendingCount.value = appRes.data.count ?? 0
-  } catch (e: any) {
-    error.value = e.response?.data?.message || t('admin.dashboard.errors.approvalsLoadFailed')
-  }
-}
-
 const handleTabChange = (tab: string) => {
   activeTab.value = tab
 
   if (tab === 'overview') loadAggregatedStats()
   if (tab === 'logs') loadUserData()
-  if (tab === 'approvals') loadPendingApprovals()
 
   if (tab !== 'applications') {
     selectedCallIdForApps.value = null
@@ -142,7 +130,6 @@ onMounted(() => {
           { id: 'evaluators', name: t('admin.dashboard.tabLabels.evaluators') },
           { id: 'mentorships', name: t('admin.dashboard.tabLabels.mentorships') },
           { id: 'users', name: t('admin.dashboard.tabLabels.users') },
-          { id: 'approvals', name: t('admin.dashboard.tabLabels.approvals') },
           { id: 'documents', name: t('admin.dashboard.tabLabels.documents') },
           ...(isSuperAdmin ? [{ id: 'create-admin', name: t('admin.dashboard.tabLabels.createAdmin') }] : []),
           { id: 'logs', name: t('admin.dashboard.tabLabels.logs') },
@@ -274,10 +261,6 @@ onMounted(() => {
 
     <div v-if="activeTab === 'users'">
       <UserManagementPanel :is-super-admin="isSuperAdmin" @refresh="loadUserData" />
-    </div>
-
-    <div v-if="activeTab === 'approvals'">
-      <PendingApprovalsTable :pending-users="pendingUsers" :pending-count="pendingCount" @refresh="loadPendingApprovals" />
     </div>
 
     <div v-if="activeTab === 'documents'">

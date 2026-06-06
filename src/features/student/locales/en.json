@@ -200,6 +200,18 @@
         "intermediate": "Intermediate",
         "advanced": "Advanced"
       }
+    },
+    "dangerZone": {
+      "label": "Danger Zone",
+      "anonymizationDescription": "Anonymize account data. This action cannot be undone and after that you will lose access to your account",
+      "anonymizeButton": "Anonymize data",
+      "areYouSure": "Are you sure?",
+      "confirmDescription": {
+        "firstPart": "You are about to make your profile completely anonymous and delete it. Please enter ",
+        "secondPart": "below to confirm."
+      },
+      "confirmButtonLoadingMessage": "Deleting...",
+      "confirmButtonMessage": "Confirm delete"
     }
   }
 }
