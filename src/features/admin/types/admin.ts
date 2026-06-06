@@ -22,6 +22,7 @@ export interface RequiredDocument {
   document_name: string
   is_mandatory: boolean
   max_size_mb: number
+  type?: string
 }
 
 export interface DashboardStats {

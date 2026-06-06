@@ -216,10 +216,12 @@ const documentsMap = computed(() =>
 
           <div v-else class="flex flex-col gap-3">
             <div 
-              v-for="req in (typeof app.call.required_documents === 'string' ? JSON.parse(app.call.required_documents) : app.call.required_documents)" 
-              :key="req.id"
+              v-for="(req, idx) in (typeof app.call.required_documents === 'string' ? JSON.parse(app.call.required_documents) : app.call.required_documents)" 
+              :key="`${req.document_name}-${idx}`"
               class="flex flex-col gap-3 border border-slate-700/60 rounded-lg px-4 py-3 bg-slate-950/40"
             >
+              {{ console.log(req) }}
+              {{ console.log(docs) }}
               <div class="flex items-start justify-between">
                 <div>
                   <p class="text-white text-sm font-medium">
@@ -227,26 +229,29 @@ const documentsMap = computed(() =>
                     <span v-if="req.is_mandatory" class="text-gray-300 text-xs">*</span>
                   </p>
                   <p class="text-gray-500 text-[11px] mt-0.5">
-                    {{ t('applications.view.file_size', { size: documentsMap[req] ? (documentsMap[req].file_size_bytes / (1024 * 1024)).toFixed(2) : '-' }) }}
+                    {{ t('applications.view.file_size', { size: documentsMap[req.type]?.file_size_bytes ? (documentsMap[req.type]!.file_size_bytes / (1024 * 1024)).toFixed(2) : '_' }) }}
                   </p>
                 </div>
 
-                <span v-if="documentsMap[req]" class="text-[10px] bg-emerald-950/50 text-emerald-400 border border-emerald-900 px-2 py-0.5 rounded font-mono uppercase">
+                <span v-if="documentsMap[req.type]" class="text-[10px] bg-emerald-950/50 text-emerald-400 border border-emerald-900 px-2 py-0.5 rounded font-mono uppercase">
                   {{ t('applications.view.uploaded_badge') }}
+                </span>
+                <span v-else-if="!req.is_mandatory" class="text-[10px] bg-amber-950/30 text-amber-400/70 border border-amber-950 px-2 py-0.5 rounded font-mono uppercase">
+                  {{ t('applications.view.optional_badge') }}
                 </span>
                 <span v-else class="text-[10px] bg-rose-950/30 text-rose-400/70 border border-rose-950 px-2 py-0.5 rounded font-mono uppercase">
                   {{ t('applications.view.missing_badge') }}
                 </span>
               </div>
 
-              <div v-if="documentsMap[req]" class="pt-2 border-t border-slate-800/60">
+              <div v-if="documentsMap[req.type]" class="pt-2 border-t border-slate-800/60">
                 <p class="text-xs text-slate-400 mb-2 font-mono truncate">
-                  {{ t('applications.view.file_label', { name: documentsMap[req]!.file_name }) }}
+                  {{ t('applications.view.file_label', { name: documentsMap[req.type]!.file_name }) }}
                 </p>
                 <DocumentActionButtons
-                  :documentId="documentsMap[req]!.id"
-                  :fileName="documentsMap[req]!.file_name"
-                  :mimeType="documentsMap[req]!.mime_type"
+                  :documentId="documentsMap[req.type]!.id"
+                  :fileName="documentsMap[req.type]!.file_name"
+                  :mimeType="documentsMap[req.type]!.mime_type"
                 />
               </div>
             </div>

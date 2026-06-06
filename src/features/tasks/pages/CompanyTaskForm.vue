@@ -22,7 +22,9 @@ function toSnakeCase(str: string): string {
 interface TaskDocumentRequirement {
   id: string
   document_name: string
+  is_mandatory: boolean
   max_size_mb: number
+  type?: string
 }
 
 const router = useRouter()
@@ -106,16 +108,30 @@ onMounted(async () => {
               : currentTask.call.required_documents
             
             if (Array.isArray(reqDocs)) {
-              callForm.value.required_documents = reqDocs.map((docString: string, idx: number) => {
-                const humanName = docString
-                  .split('_')
-                  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                  .join(' ')
+              callForm.value.required_documents = reqDocs.map((doc: any, idx: number) => {
+                // Handle both old string format and new object format
+                if (typeof doc === 'string') {
+                  const humanName = doc
+                    .split('_')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ')
 
-                return {
-                  id: docString, 
-                  document_name: humanName,
-                  max_size_mb: 10
+                  return {
+                    id: doc, 
+                    document_name: humanName,
+                    is_mandatory: true,
+                    max_size_mb: 10,
+                    type: doc
+                  }
+                } else {
+                  // Already an object with document_name, is_mandatory, max_size_mb, optionally type
+                  return {
+                    id: `doc-${idx}-${Date.now()}`,
+                    document_name: doc.document_name || '',
+                    is_mandatory: doc.is_mandatory ?? true,
+                    max_size_mb: doc.max_size_mb || 10,
+                    type: doc.type || toSnakeCase(doc.document_name || ''),
+                  }
                 }
               })
             }
@@ -151,6 +167,7 @@ function addDocumentRequirement() {
   callForm.value.required_documents.push({
     id: Date.now().toString(),
     document_name: '',
+    is_mandatory: true,
     max_size_mb: 10
   })
 }
@@ -191,12 +208,19 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
     fd.append(`required_skills[${index}]`, skill)
   })
 
-  const snakeCaseDocs: string[] = []
+  const snakeCaseDocs: any[] = []
   
   callForm.value.required_documents.forEach(d => {
     if (d.document_name.trim().length > 0) {
-      const snakeKey = toSnakeCase(d.document_name)
-      snakeCaseDocs.push(snakeKey)
+      const snakeKey = d.type ?? toSnakeCase(d.document_name)
+      
+      // Store the full object structure, including type when present
+      snakeCaseDocs.push({
+        document_name: d.document_name,
+        is_mandatory: d.is_mandatory,
+        max_size_mb: d.max_size_mb,
+        type: snakeKey,
+      })
 
       const filePayload = files.value[d.id] || files.value[snakeKey]
       if (filePayload) {
@@ -350,6 +374,12 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
               <label class="block text-[10px] font-mono uppercase text-gray-500 mb-1">{{ t('tasks.form.labels.maxSize') }}</label>
               <input v-model="doc.max_size_mb" type="number" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs focus:border-blue-500 outline-none text-white" />
             </div>
+            <div class="flex items-center gap-2">
+              <label class="flex items-center gap-2 text-xs text-gray-400 cursor-pointer">
+                <input v-model="doc.is_mandatory" type="checkbox" class="rounded border-slate-700 text-blue-500 focus:ring-blue-500" />
+                <span>{{ t('tasks.form.labels.mandatory') }}</span>
+              </label>
+            </div>
             <button v-if="callForm.required_documents.length > 1" type="button" @click="removeDocumentRequirement(doc.id)" class="text-xs text-red-400 hover:text-red-300 mt-4 sm:mt-0 pt-2 sm:pt-0 font-mono cursor-pointer">
               {{ t('tasks.form.labels.remove') }}
             </button>
@@ -377,8 +407,8 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
               <span class="text-[10px] font-mono text-gray-500 uppercase">{{ t('tasks.form.labels.attachedGuideline') }}</span>
             </div>
 
-            <div v-if="isEditMode && (getExistingFileName(doc.id) || getExistingFileName(toSnakeCase(doc.document_name)))" class="text-xs text-emerald-400 font-mono bg-emerald-950/20 border border-emerald-900/30 p-2 rounded flex justify-between items-center">
-              <span>{{ t('tasks.form.labels.currentFile', { name: getExistingFileName(doc.id) || getExistingFileName(toSnakeCase(doc.document_name)) }) }}</span>
+            <div v-if="isEditMode && (getExistingFileName(doc.type ?? doc.id) || getExistingFileName(doc.type ?? toSnakeCase(doc.document_name)))" class="text-xs text-emerald-400 font-mono bg-emerald-950/20 border border-emerald-900/30 p-2 rounded flex justify-between items-center">
+              <span>{{ t('tasks.form.labels.currentFile', { name: getExistingFileName(doc.type ?? doc.id) || getExistingFileName(doc.type ?? toSnakeCase(doc.document_name)) }) }}</span>
               <span class="text-[10px] text-emerald-500 uppercase">{{ t('tasks.form.labels.alreadyUploaded') }}</span>
             </div>
 

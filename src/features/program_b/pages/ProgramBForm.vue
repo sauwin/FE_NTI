@@ -60,7 +60,7 @@ const docLabels = computed<Record<string, string>>(() => {
         labels[item] = defaultDocLabels.value[item] || `${item.replace(/_/g, ' ').toUpperCase()}`
       } 
       else if (typeof item === 'object') {
-        const systemKey = String(item.id || item.slug || item.key || JSON.stringify(item))
+        const systemKey = String(item.type || item.id || item.slug || item.key || item.document_name || String(item.id))
         const visualLabel = item.name || item.document_name || item.label || defaultDocLabels.value[systemKey] || t('programB.upload.defaultLabels.genericDoc', { key: systemKey })
         
         labels[systemKey] = visualLabel

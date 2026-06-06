@@ -51,6 +51,7 @@
       "no_docs_required": "Pre túto výzvu nie sú požadované žiadne špecifické dokumenty.",
       "file_size": "Veľkosť súboru: {size} MB",
       "uploaded_badge": "Nahrané",
+      "optional_badge": "Nepovinné",
       "missing_badge": "Chýba",
       "file_label": "Súbor: {name}",
       "btn_edit": "Upraviť žiadosť",
