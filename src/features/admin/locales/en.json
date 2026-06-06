@@ -747,7 +747,8 @@
         "successSync": "Application status successfully synchronized to [{status}].",
         "submitFailed": "Failed to record the final admin decision.",
         "loadFailed": "Failed to load application data."
-      }
+      },
+      "noComment": "No comment"
     }
   }
 }

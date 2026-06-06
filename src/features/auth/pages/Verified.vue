@@ -13,7 +13,7 @@ const auth = useAuthStore()
       {{ t('verified.descPrefix') }}
       {{ auth.isStudent ? t('verified.completeProfile') : t('verified.waitApproval') }}.
     </p>
-    <router-link :to="auth.isStudent ? '/profile/complete' : '/'" class="bg-blue-700 text-white px-6 py-2 rounded">
+    <router-link :to="auth.isStudent ? '/profile' : '/'" class="bg-blue-700 text-white px-6 py-2 rounded">
       {{ auth.isStudent ? t('verified.btnComplete') : t('verified.btnHome') }}
     </router-link>
   </div>

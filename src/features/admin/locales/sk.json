@@ -786,7 +786,8 @@
         "successSync": "Stav žiadosti bol úspešne synchronizovaný na [{status}].",
         "submitFailed": "Nepodarilo sa zaznamenať konečné rozhodnutie administrátora.",
         "loadFailed": "Nepodarilo sa načítať dáta žiadosti."
-      }
+      },
+      "noComment": "Žiadny komentár"
     }
   }
 }

@@ -29,6 +29,7 @@
     "overallJustification": "Overall Verbal Justification of Verdict",
     "justificationSubtext": "This statement will be recorded in the history and will be shown to students if returned.",
     "justificationPlaceholder": "Enter a detailed official statement of the board regarding the overall evaluation...",
+    "noCriteriaDescription": "No description",
     "tabs": {
       "overview": "Overview & Stats",
       "pending": "Awaiting Evaluation",

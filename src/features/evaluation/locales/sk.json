@@ -29,6 +29,7 @@
     "overallJustification": "Celkové slovné odôvodnenie verdiktu",
     "justificationSubtext": "Toto vyjadrenie bude zaznamenané v histórii a v prípade vrátenia sa zobrazí študentom.",
     "justificationPlaceholder": "Zadajte podrobné oficiálne stanovisko komisie k celkovému hodnoteniu...",
+    "noCriteriaDescription": "Žiadny popis",
     "tabs": {
       "overview": "Prehľad a Štatistiky",
       "pending": "Čaká na hodnotenie",

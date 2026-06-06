@@ -42,7 +42,7 @@
   })
 
   // Admin final verdict fields 
-  const finalStatus = ref<'approved' | 'rejected' | 'needs_revision'>('approved')
+  const finalStatus = ref<'approved' | 'rejected' | 'pending_revision'>('approved')
   const internalNotes = ref('') 
 
   // Submitting final decision
@@ -205,8 +205,8 @@
                       
                       <div class="relative group/tooltip inline-block cursor-help">
                         <span class="text-[12px] text-slate-600 hover:text-blue-400 font-bold px-0.5">ⓘ</span>
-                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-slate-900 border border-slate-700 text-slate-300 text-[10px] rounded p-2 opacity-0 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:pointer-events-auto transition-all duration-200 shadow-xl z-50 normal-case font-sans">
-                          {{ s.comment }}
+                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-none whitespace-nowrap bg-slate-900 border border-slate-700 text-slate-300 text-[10px] rounded p-2 opacity-0 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:pointer-events-auto transition-all duration-200 shadow-xl z-50 normal-case font-sans">
+                          {{ s.comment ?? t('admin.finalVerdictPanel.noComment') }}
                           <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900"></div>
                         </div>
                       </div>
@@ -262,9 +262,9 @@
               </button>
 
               <button 
-                @click="finalStatus = 'needs_revision'"
+                @click="finalStatus = 'pending_revision'"
                 :class="['px-4 py-3 rounded-xl text-xs font-bold border capitalize transition flex flex-col items-center gap-1 justify-center', 
-                  finalStatus === 'needs_revision' ? 'bg-amber-500/10 border-amber-500 text-amber-400 shadow-md shadow-amber-500/5' : 'border-slate-800 bg-slate-900/20 text-slate-400 hover:border-slate-700'
+                  finalStatus === 'pending_revision' ? 'bg-amber-500/10 border-amber-500 text-amber-400 shadow-md shadow-amber-500/5' : 'border-slate-800 bg-slate-900/20 text-slate-400 hover:border-slate-700'
                 ]"
               >
                 <span>{{ t('admin.finalVerdictPanel.statusOptions.revision.title') }}</span>
