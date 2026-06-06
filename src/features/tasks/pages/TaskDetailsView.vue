@@ -19,7 +19,7 @@ const error = ref<string>('')
 const downloadLoadingId = ref<number | null>(null)
 
 onMounted(async () => {
-  const taskId = route.params.id
+  const taskId = route.params.id as string
   try {
     const res = await getTaskById(taskId)
     task.value = res.data
