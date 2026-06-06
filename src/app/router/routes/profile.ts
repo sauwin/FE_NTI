@@ -38,7 +38,7 @@ export const profileRoutes: RouteRecordRaw = {
 
       meta: {
         requiresAuth: true,
-        role: 'company',
+        role: 'student',
       },
     },
   ]

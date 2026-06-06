@@ -54,38 +54,35 @@ test('Scenario 3: company creates task, student applies to Program B', async ({ 
     await page.goto('/')
     await setAuthState(page, 'company')
     await page.goto('/programs/b/create-task')
-    await page.waitForSelector('input[placeholder*="AI Recruitment"]', { timeout: 15000 })
+    await page.waitForSelector('input[placeholder*="AI-Driven"]', { timeout: 15000 })
 
 // Step 1
-    await page.locator('input[placeholder*="AI Recruitment"]').fill('NTI E2E Test Task')
-    await page.locator('textarea[placeholder*="Brief summary"]').fill('Test task description for E2E.')
+    await page.locator('input[placeholder*="AI-Driven"]').fill('NTI E2E Test Task')
+    await page.locator('textarea[placeholder*="single paragraph"]').fill('Test task description for E2E.')
     await page.locator('input[type="number"]').first().fill('3000')
     const deadline = new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0]
     await page.locator('input[type="date"]').first().fill(deadline)
-    await page.locator('button[type="submit"]', { hasText: /Tech Specs/ }).click()
+    await page.locator('button[type="button"]').filter({ hasText: 'Continue' }).click()
 
-// Step 2
-    await page.waitForSelector('textarea[placeholder*="problem"]', { timeout: 5000 })
-    await page.locator('textarea[placeholder*="problem"]').fill('Automate student intake.')
-    await page.locator('textarea[placeholder*="deliverables"]').fill('Working web app.')
-    await page.locator('button[type="submit"]', { hasText: /Application Window/ }).click()
+    // Step 2 — goals
+    await page.waitForSelector('[data-testid="project-goal"]', { timeout: 5000 })
+    await page.locator('[data-testid="project-goal"]').fill('Automate student intake.')
+    await page.locator('[data-testid="expected-outcome"]').fill('Working web app.')
+    await page.locator('button[type="button"]').filter({ hasText: 'Continue' }).click()
 
-// Step 3
-    await page.waitForSelector('input[type="date"]', { timeout: 5000 })
-    const opensAt = new Date().toISOString().split('T')[0]
-    const closesAt = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0]
-    await page.locator('input[type="date"]').nth(0).fill(opensAt)
-    await page.locator('input[type="date"]').nth(1).fill(closesAt)
-    await page.locator('button[type="submit"]', { hasText: /Document Rules/ }).click()
+// Step 3 — technical specs
+    await page.waitForSelector('[data-testid="functional-specs"]', { timeout: 5000 })
+    await page.locator('[data-testid="functional-specs"]').fill('Standard web stack.')
+    await page.locator('button[type="button"]').filter({ hasText: 'Continue' }).click()
 
 // Step 4
-    await page.locator('button[type="submit"]', { hasText: /Final Uploads/ }).click()
+    await page.locator('button[type="button"]').filter({ hasText: 'Continue' }).click()
 
 // Step 5 — publish
     await page.waitForSelector('button:has-text("Publish Challenge")', { timeout: 5000 })
-    await page.locator('button', { hasText: 'Publish Challenge' }).click()
+    await page.locator('button[type="button"]').filter({ hasText: 'Publish Challenge' }).click()
 
-    await expect(page.locator('text=/successfully submitted/i')).toBeVisible({ timeout: 10000 })
+    await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 })
 
 // --- Student: apply to Program B ---
     const studentPage = await context.newPage()
@@ -106,7 +103,7 @@ test('Scenario 3: company creates task, student applies to Program B', async ({ 
     await studentPage.locator('button', { hasText: /View|Detail|Open|See/ }).first().click()
     await studentPage.waitForURL(/programs\/b\/tasks\/\d+/, { timeout: 10000 })
 
-    await studentPage.locator('button', { hasText: /Apply with team/ }).click()
+    await studentPage.locator('button', { hasText: /Submit Application/ }).click()
     await studentPage.waitForURL(/programs\/b\/apply\/\d+/, { timeout: 10000 })
 
 // Step 1 — pick team + describe solution

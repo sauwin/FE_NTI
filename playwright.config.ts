@@ -1,28 +1,42 @@
 import { defineConfig, devices } from '@playwright/test'
 
-export default defineConfig
-(
-    {
-        testDir: './tests/e2e',
-        projects: [{
+const RESPONSIVE = process.env.RESPONSIVE === '1'
+
+export default defineConfig({
+    testDir: './tests/e2e',
+    workers: RESPONSIVE ? 4 : 3,
+    projects: RESPONSIVE ? [
+        {
+            name: 'mobile',
+            use: { ...devices['iPhone 13'] },
+            testMatch: '**/responsive/**',
+        },
+        {
+            name: 'tablet',
+            use: { ...devices['iPad (gen 7)'] },
+            testMatch: '**/responsive/**',
+        },
+        {
+            name: 'desktop',
+            use: { ...devices['Desktop Chrome'] },
+            testMatch: '**/responsive/**',
+        },
+    ] : [
+        {
             name: 'webkit',
             use: { ...devices['Desktop Safari'] },
-        }],
-        use: {
-            baseURL: /*process.env.BASE_URL ?? */'http://localhost:5173',
-            headless: true,
-            screenshot: 'only-on-failure',
-            video: 'retain-on-failure',
+            testIgnore: '**/responsive/**',
         },
-        // webServer: {
-        //     command: 'php artisan serve --port=8000',
-        //     port: 8000,
-        //     reuseExistingServer: true,
-        // },
-        webServer: {
-            command: 'npm run dev',
-            port: 5173,
-            reuseExistingServer: true,
-        }
-    }
-)
+    ],
+    use: {
+        baseURL: 'http://localhost:5173',
+        headless: true,
+        screenshot: 'only-on-failure',
+        video: RESPONSIVE ? 'on' : 'retain-on-failure',
+    },
+    webServer: {
+        command: 'npm run dev',
+        port: 5173,
+        reuseExistingServer: true,
+    },
+})

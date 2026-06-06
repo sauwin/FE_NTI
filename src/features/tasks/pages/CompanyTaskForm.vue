@@ -286,12 +286,12 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
 
         <div>
           <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">{{ t('tasks.form.labels.projectGoal') }}</label>
-          <textarea v-model="taskForm.project_goal" rows="4" :placeholder="t('tasks.form.placeholders.projectGoal')" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors resize-none"></textarea>
+          <textarea data-testid="project-goal" v-model="taskForm.project_goal" rows="4" :placeholder="t('tasks.form.placeholders.projectGoal')" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors resize-none"></textarea>
         </div>
 
         <div>
           <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">{{ t('tasks.form.labels.expectedOutcome') }}</label>
-          <textarea v-model="taskForm.expected_outcome" rows="4" :placeholder="t('tasks.form.placeholders.expectedOutcome')" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors resize-none"></textarea>
+          <textarea data-testid="expected-outcome" v-model="taskForm.expected_outcome" rows="4" :placeholder="t('tasks.form.placeholders.expectedOutcome')" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors resize-none"></textarea>
         </div>
 
         <div class="flex gap-3 pt-4">
@@ -308,7 +308,7 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
 
         <div>
           <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">{{ t('tasks.form.labels.functionalSpecs') }}</label>
-          <textarea v-model="taskForm.detailed_technical_description" rows="5" :placeholder="t('tasks.form.placeholders.functionalSpecs')" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors resize-none"></textarea>
+          <textarea data-testid="functional-specs" v-model="taskForm.detailed_technical_description" rows="5" :placeholder="t('tasks.form.placeholders.functionalSpecs')" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors resize-none"></textarea>
         </div>
 
         <div>
