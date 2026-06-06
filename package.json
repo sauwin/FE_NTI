@@ -29,6 +29,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tsconfig/node22": "^22.0.5",
     "@tsconfig/node24": "^24.0.4",
     "@types/node": "^24.12.2",
