@@ -35,8 +35,8 @@ export default defineConfig({
         video: RESPONSIVE ? 'on' : 'retain-on-failure',
     },
     webServer: {
-        command: 'npm run dev',
+        command: 'npm run build && npm run preview -- --port 5173',
         port: 5173,
-        reuseExistingServer: true,
+        reuseExistingServer: !process.env.CI,
     },
 })
