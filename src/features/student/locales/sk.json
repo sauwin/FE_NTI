@@ -195,11 +195,24 @@
       "errProgram": "Študijný program je povinný",
       "errYear": "Ročník štúdia je povinný",
       "errSave": "Nepodarilo sa uložiť",
+      "anonymizeButton": "Zmazať konto a údaje",
       "levels": {
         "beginner": "Začiatočník",
         "intermediate": "Pokročilý",
         "advanced": "Expert"
       }
+    },
+    "dangerZone": {
+      "label": "Nebezpečná zóna",
+      "anonymizationDescription": "Anonymizovať údaje účtu. Táto akcia je nevratná a po jej vykonaní stratíte prístup k svojmu účtu.",
+      "anonymizeButton": "Anonymizovať údaje",
+      "areYouSure": "Ste si istý/á?",
+      "confirmDescription": {
+        "firstPart": "Chystáte sa úplne anonymizovať a odstrániť svoj profil. Pre potvrdenie zadajte ",
+        "secondPart": " nižšie."
+      },
+      "confirmButtonLoadingMessage": "Odstraňuje sa...",
+      "confirmButtonMessage": "Potvrdiť odstránenie"
     }
   }
 }

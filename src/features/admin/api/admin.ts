@@ -17,14 +17,6 @@ export function getAdminUsers(params?: Record<string, any>) {
   return api.get('/admin/users', { params })
 }
 
-export function getPendingApprovals() {
-  return api.get('/admin/approvals')
-}
-
-export function approveUser(userId: number | string) {
-  return api.post(`/admin/approve/${userId}`)
-}
-
 export function blockUser(userId: number | string) {
   return api.post(`/admin/block/${userId}`)
 }

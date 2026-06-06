@@ -112,10 +112,6 @@ const resolveLevelText = (level: string) => {
             class="border border-slate-700 hover:border-slate-500 text-gray-400 hover:text-white px-6 py-2.5 rounded-lg text-sm font-medium transition">
             {{ t('student.common.cancel') }}
           </button>
-          <button @click="save" :disabled="saving"
-            class="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition">
-            {{ saving ? t('student.common.saving') : (isNew ? t('student.profileView.btnCreate') : t('student.profileView.btnSave')) }}
-          </button>
         </template>
       </div>
     </div>
@@ -270,9 +266,16 @@ const resolveLevelText = (level: string) => {
       </section>
     </div>
 
-    <button @click="router.push('/dashboard')"
-      class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition mt-12 mb-10">
-      {{ t('student.profileView.backToDashboard') }}
-    </button>
+    <div class="mt-10 flex gap-3">
+      <button @click="save" :disabled="saving"
+        v-if="editMode"
+        class="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition">
+        {{ saving ? t('student.common.saving') : (isNew ? t('student.profileView.btnCreate') : t('student.profileView.btnSave')) }}
+      </button>
+      <button @click="router.push('/dashboard')"
+        class="border border-slate-700 hover:border-slate-500 text-gray-400 hover:text-white px-6 py-2.5 rounded-lg text-sm font-medium transition">
+        {{ t('student.profileView.backToDashboard') }}
+      </button>
+    </div>
   </div>
 </template>

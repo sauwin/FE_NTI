@@ -19,15 +19,17 @@ const { t } = useI18n()
 defineProps<{ isSuperAdmin?: boolean }>()
 const emit = defineEmits(['refresh'])
 
+// Roles nti_admin can update
 const AVAILABLE_ROLES = ['student', 'company', 'mentor']
-const SUPER_ADMIN_ROLES = ['student', 'company', 'mentor', 'evaluator', 'content_editor']
+// Roles super_admin can update
+const SUPER_ADMIN_ROLES = ['student', 'company', 'mentor', 'evaluator', 'content_editor', 'nti_admin']
 const filterRoles = ['student', 'company', 'mentor', 'evaluator', 'content_editor', 'nti_admin', 'super_admin']
 
 const roleInOrgOptions = [
-  { value: 'owner', label: 'Owner' },
-  { value: 'contact', label: 'Contact' },
-  { value: 'evaluator', label: 'Evaluator' },
-  { value: 'mentor', label: 'Mentor' },
+  { value: 'owner', label: t('admin.userManagementPanel.rolesInOrg.owner') },
+  { value: 'contact', label: t('admin.userManagementPanel.rolesInOrg.contact') },
+  { value: 'evaluator', label: t('admin.userManagementPanel.rolesInOrg.evaluator') },
+  { value: 'mentor', label: t('admin.userManagementPanel.rolesInOrg.mentor') },
 ]
 
 const users = ref<any[]>([])
@@ -68,7 +70,7 @@ async function loadUsers() {
       totalItems.value = users.value.length
     }
   } catch (e: any) {
-    setMessage(false, e.response?.data?.message || 'Failed to load users')
+    setMessage(false, e.response?.data?.message || t('admin.userManagementPanel.messages.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -86,7 +88,7 @@ function setMessage(ok: boolean, text: string) {
 }
 
 function canManage(user: any) {
-  const adminOnlyRoles = ['nti_admin', 'super_admin', 'evaluator', 'content_editor']
+  const adminOnlyRoles = ['super_admin']
   return !user.roles?.some((r: AdminRole) => adminOnlyRoles.includes(r.slug))
 }
 
@@ -105,54 +107,82 @@ function onRoleSelect(userId: number, roleSlug: string) {
 }
 
 async function blockUser(userId: number) {
-  if (!await useConfirm({ title: 'Block User', message: 'Block this user?', confirmText: 'Block', cancelText: 'Cancel', danger: true })) return
+  if (!await useConfirm({ 
+    title: t('admin.userManagementPanel.confirm.blockTitle'), 
+    message: t('admin.userManagementPanel.confirm.blockMessage'), 
+    confirmText: t('admin.userManagementPanel.actions.block'), 
+    cancelText: t('admin.userManagementPanel.modal.cancel'), 
+    danger: true 
+  })) return
+  
   loading.value = true
   try {
     await blockUserApi(userId)
-    setMessage(true, 'User blocked')
+    setMessage(true, t('admin.userManagementPanel.messages.userBlocked'))
     emit('refresh')
     loadUsers()
   } catch (e: any) {
-    setMessage(false, e.response?.data?.message || 'Failed to block user')
+    setMessage(false, e.response?.data?.message || t('admin.userManagementPanel.messages.blockFailed'))
   } finally { loading.value = false }
 }
 
 async function unblockUser(userId: number) {
-  if (!await useConfirm({ title: 'Unblock User', message: 'Unblock this user?', confirmText: 'Unblock', cancelText: 'Cancel', danger: false })) return
+  if (!await useConfirm({ 
+    title: t('admin.userManagementPanel.confirm.unblockTitle'), 
+    message: t('admin.userManagementPanel.confirm.unblockMessage'), 
+    confirmText: t('admin.userManagementPanel.actions.unblock'), 
+    cancelText: t('admin.userManagementPanel.modal.cancel'), 
+    danger: false 
+  })) return
+  
   loading.value = true
   try {
     await unblockUserApi(userId)
-    setMessage(true, 'User unblocked')
+    setMessage(true, t('admin.userManagementPanel.messages.userUnblocked'))
     emit('refresh')
     loadUsers()
   } catch (e: any) {
-    setMessage(false, e.response?.data?.message || 'Failed to unblock user')
+    setMessage(false, e.response?.data?.message || t('admin.userManagementPanel.messages.unblockFailed'))
   } finally { loading.value = false }
 }
 
 async function deleteUser(userId: number) {
-  if (!await useConfirm({ title: 'Delete User', message: 'Delete permanently? Cannot be undone.', confirmText: 'Delete', cancelText: 'Cancel', danger: true })) return
+  if (!await useConfirm({ 
+    title: t('admin.userManagementPanel.confirm.deleteTitle'), 
+    message: t('admin.userManagementPanel.confirm.deleteMessage'), 
+    confirmText: t('admin.userManagementPanel.actions.delete'), 
+    cancelText: t('admin.userManagementPanel.modal.cancel'), 
+    danger: true 
+  })) return
+  
   loading.value = true
   try {
     await deleteAdminUser(userId)
-    setMessage(true, 'User deleted')
+    setMessage(true, t('admin.userManagementPanel.messages.userDeleted'))
     emit('refresh')
     loadUsers()
   } catch (e: any) {
-    setMessage(false, e.response?.data?.message || 'Failed to delete user')
+    setMessage(false, e.response?.data?.message || t('admin.userManagementPanel.messages.deleteFailed'))
   } finally { loading.value = false }
 }
 
 async function removeRole(userId: number, roleSlug: string) {
-  if (!await useConfirm({ title: 'Remove Role', message: `Remove "${roleSlug}" role?`, confirmText: 'Remove', cancelText: 'Cancel', danger: true })) return
+  if (!await useConfirm({ 
+    title: t('admin.userManagementPanel.confirm.removeRoleTitle'), 
+    message: t('admin.userManagementPanel.confirm.removeRoleMessage', { role: roleSlug }), 
+    confirmText: t('admin.userManagementPanel.actions.delete'), 
+    cancelText: t('admin.userManagementPanel.modal.cancel'), 
+    danger: true 
+  })) return
+  
   loading.value = true
   try {
     await removeUserRole(userId, roleSlug)
-    setMessage(true, 'Role removed')
+    setMessage(true, t('admin.userManagementPanel.messages.roleRemoved'))
     emit('refresh')
     loadUsers()
   } catch (e: any) {
-    setMessage(false, e.response?.data?.message || 'Failed to remove role')
+    setMessage(false, e.response?.data?.message || t('admin.userManagementPanel.messages.removeFailed'))
   } finally { loading.value = false }
 }
 
@@ -165,16 +195,21 @@ async function assignRole(userId: number, roleSlug: string, extraData?: { regist
     const rolesToRemove = currentRoles.filter((r: string) => replaceableRoles.includes(r))
     for (const role of rolesToRemove) await removeUserRole(userId, role)
     await addUserRole(userId, { role: roleSlug, ...extraData })
-    setMessage(true, `Role "${roleSlug}" assigned`)
+    setMessage(true, t('admin.userManagementPanel.messages.roleAssigned', { role: roleSlug }))
     emit('refresh')
     loadUsers()
   } catch (e: any) {
-    setMessage(false, e.response?.data?.message || 'Failed to assign role')
-  } finally { loading.value = false }
+    setMessage(false, e.response?.data?.message || t('admin.userManagementPanel.messages.assignFailed'))
+  } finally {
+    loading.value = false
+  }
 }
 
 async function confirmCompanyRole() {
-  if (!companyForm.value.registration_number) { setMessage(false, 'Registration number is required'); return }
+  if (!companyForm.value.registration_number) { 
+    setMessage(false, t('admin.userManagementPanel.messages.regNumberRequired'))
+    return 
+  }
   await assignRole(companyForm.value.userId!, companyForm.value.roleSlug, {
     registration_number: companyForm.value.registration_number,
     role_in_org: companyForm.value.role_in_org,
@@ -199,11 +234,27 @@ async function exportUsers(format: 'csv' | 'xlsx' = 'csv') {
     link.click()
     document.body.removeChild(link)
     window.URL.revokeObjectURL(url)
-    setMessage(true, `Export successful (${format.toUpperCase()})`)
+    setMessage(true, t('admin.userManagementPanel.messages.exportSuccess', { format: format.toUpperCase() }))
   } catch (e: any) {
-    setMessage(false, e.response?.data?.message || `Failed to export as ${format.toUpperCase()}`)
+    setMessage(false, e.response?.data?.message || t('admin.userManagementPanel.messages.exportFailed', { format: format.toUpperCase() }))
   } finally { loading.value = false }
 }
+
+let timeout: number
+
+watch(searchQuery, () => {
+  clearTimeout(timeout)
+
+  timeout = window.setTimeout(() => {
+    currentPage.value = 1
+    handleFilterChange()
+  }, 500)
+})
+
+watch([selectedRole, selectedStatus], () => {
+  currentPage.value = 1
+  handleFilterChange()
+})
 
 onMounted(loadUsers)
 </script>
@@ -223,9 +274,9 @@ onMounted(loadUsers)
     <div class="flex flex-col gap-4 mb-6">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h3 class="text-xl font-bold text-white">Users Management</h3>
+          <h3 class="text-xl font-bold text-white">{{ t('admin.userManagementPanel.title') }}</h3>
           <p class="text-sm text-slate-500 mt-1">
-            Manage platform users, permissions and access.
+            {{ t('admin.userManagementPanel.description') }}
           </p>
         </div>
 
@@ -235,7 +286,7 @@ onMounted(loadUsers)
             :disabled="loading"
             class="text-xs bg-green-900/40 hover:bg-green-900/60 px-3 py-1.5 rounded text-green-400 border border-green-800 transition-all font-mono"
           >
-            Export CSV
+            {{ t('admin.userManagementPanel.exportCsv') }}
           </button>
 
           <button
@@ -243,7 +294,7 @@ onMounted(loadUsers)
             :disabled="loading"
             class="text-xs bg-blue-900/40 hover:bg-blue-900/60 px-3 py-1.5 rounded text-blue-400 border border-blue-800 transition-all font-mono"
           >
-            Export XLSX
+            {{ t('admin.userManagementPanel.exportXlsx') }}
           </button>
         </div>
       </div>
@@ -252,7 +303,7 @@ onMounted(loadUsers)
         <div class="sm:col-span-1">
           <input
             v-model="searchQuery"
-            placeholder="Search by name or email..."
+            :placeholder="t('admin.userManagementPanel.searchPlaceholder')"
             class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none transition-all"
           />
         </div>
@@ -262,7 +313,7 @@ onMounted(loadUsers)
             v-model="selectedRole"
             class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-300 focus:border-blue-600 outline-none transition-all cursor-pointer"
           >
-            <option value="">All Roles</option>
+            <option value="">{{ t('admin.userManagementPanel.allRoles') }}</option>
             <option
               v-for="role in filterRoles"
               :key="role"
@@ -278,32 +329,32 @@ onMounted(loadUsers)
             v-model="selectedStatus"
             class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-300 focus:border-blue-600 outline-none transition-all cursor-pointer"
           >
-            <option value="">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="blocked">Blocked</option>
+            <option value="">{{ t('admin.userManagementPanel.allStatuses') }}</option>
+            <option value="active">{{ t('admin.userManagementPanel.statusActive') }}</option>
+            <option value="blocked">{{ t('admin.userManagementPanel.statusBlocked') }}</option>
           </select>
         </div>
       </div>
     </div>
 
     <div v-if="loading" class="text-slate-500 animate-pulse py-4 font-mono text-sm">
-      Loading users...
+      {{ t('admin.userManagementPanel.loadingUsers') }}
     </div>
 
     <div v-else class="overflow-x-auto">
       <table class="w-full text-left text-sm text-slate-300">
         <thead class="text-xs text-slate-400 uppercase bg-slate-900/50 font-mono">
           <tr>
-            <th class="px-4 py-3 rounded-tl-lg">User</th>
-            <th class="px-4 py-3">Roles</th>
-            <th class="px-4 py-3">Status</th>
-            <th class="px-4 py-3 rounded-tr-lg text-right">Actions</th>
+            <th class="px-4 py-3 rounded-tl-lg">{{ t('admin.userManagementPanel.tableHeaders.user') }}</th>
+            <th class="px-4 py-3">{{ t('admin.userManagementPanel.tableHeaders.roles') }}</th>
+            <th class="px-4 py-3">{{ t('admin.userManagementPanel.tableHeaders.status') }}</th>
+            <th class="px-4 py-3 rounded-tr-lg text-right">{{ t('admin.userManagementPanel.tableHeaders.actions') }}</th>
           </tr>
         </thead>
 
         <tbody>
           <tr
-              v-for="user in users"
+            v-for="user in users"
             :key="user.id"
             class="border-b border-slate-800 hover:bg-slate-800/30 transition"
           >
@@ -323,7 +374,7 @@ onMounted(loadUsers)
                   :key="role.id"
                   class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded border font-mono uppercase bg-blue-900/40 text-blue-400 border-blue-800"
                 >
-                  {{ role.slug=='company' ? `${role.slug} (${user.role_in_org})` : role.slug }}
+                  {{ role.slug=='company' ? `${role.slug} (${t(`admin.userManagementPanel.rolesInOrg.${user.role_in_org}`)})` : role.slug }}
                   <button
                     v-if="!['nti_admin', 'super_admin'].includes(role.slug) && canManage(user)"
                     @click="removeRole(user.id, role.slug)"
@@ -342,7 +393,7 @@ onMounted(loadUsers)
                   : 'bg-yellow-900/40 text-yellow-400 border-yellow-800'"
                 class="text-xs px-2 py-1 rounded border font-mono uppercase whitespace-nowrap"
               >
-                {{ user.status }}
+                {{ user.status === 'active' ? t('admin.userManagementPanel.statusActive') : t('admin.userManagementPanel.statusBlocked') }}
               </span>
             </td>
 
@@ -354,7 +405,7 @@ onMounted(loadUsers)
                   :disabled="loading"
                   class="text-xs px-3 py-1 rounded border bg-yellow-900/40 hover:bg-yellow-900/60 text-yellow-400 border-yellow-800 transition disabled:opacity-50 cursor-pointer"
                 >
-                  Block
+                  {{ t('admin.userManagementPanel.actions.block') }}
                 </button>
 
                 <button
@@ -363,7 +414,7 @@ onMounted(loadUsers)
                   :disabled="loading"
                   class="text-xs px-3 py-1 rounded border bg-green-900/40 hover:bg-green-900/60 text-green-400 border-green-800 transition disabled:opacity-50 cursor-pointer"
                 >
-                  Unblock
+                  {{ t('admin.userManagementPanel.actions.unblock') }}
                 </button>
 
                 <button
@@ -372,17 +423,18 @@ onMounted(loadUsers)
                   :disabled="loading"
                   class="text-xs px-3 py-1 rounded border bg-red-900/40 hover:bg-red-900/60 text-red-400 border-red-800 transition disabled:opacity-50 cursor-pointer"
                 >
-                  Delete
+                  {{ t('admin.userManagementPanel.actions.delete') }}
                 </button>
 
                 <select
-                  v-if="canManage(user)"
                   value=""
-                  @change="onRoleSelect(user.id, ($event.target as HTMLSelectElement).value)"
+                  @change="onRoleSelect(user.id, ($event.target as HTMLSelectElement).value); ($event.target as HTMLSelectElement).value = ''"
                   :disabled="loading"
                   class="text-xs px-3 py-1 rounded border bg-blue-900/40 hover:bg-blue-900/60 text-blue-400 border-blue-800 cursor-pointer outline-none transition disabled:opacity-50"
                 >
-                  <option value="" disabled selected class="bg-slate-900 text-slate-300">Assign Role</option>
+                  <option value="" disabled selected class="bg-slate-900 text-slate-300">
+                    {{ t('admin.userManagementPanel.actions.assignRole') }}
+                  </option>
                   <option
                     v-for="role in getAvailableRolesToAssign(isSuperAdmin)"
                     :key="role"
@@ -398,7 +450,7 @@ onMounted(loadUsers)
 
           <tr v-if="users.length === 0">
             <td colspan="4" class="px-4 py-10 text-center text-slate-500 italic text-sm">
-              No users found.
+              {{ t('admin.userManagementPanel.noUsersFound') }}
             </td>
           </tr>
         </tbody>
@@ -414,61 +466,65 @@ onMounted(loadUsers)
         class="mt-6"
     />
 
-  <div v-if="showCompanyModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-      <h3 class="text-xl font-bold text-white mb-2">Company Role Details</h3>
-      <p class="text-slate-400 text-sm mb-6">Please provide organization details to assign this role.</p>
+    <div v-if="showCompanyModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+        <h3 class="text-xl font-bold text-white mb-2">{{ t('admin.userManagementPanel.modal.title') }}</h3>
+        <p class="text-slate-400 text-sm mb-6">{{ t('admin.userManagementPanel.modal.description') }}</p>
 
-      <div class="space-y-5">
-        <div>
-          <label class="block text-xs font-mono uppercase text-slate-500 mb-2">Registration Number</label>
-          <input 
-            v-model="companyForm.registration_number"
-            type="text"
-            placeholder="Enter organization ID/Code..."
-            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-blue-600 transition-all"
-          />
-        </div>
+        <div class="space-y-5">
+          <div>
+            <label class="block text-xs font-mono uppercase text-slate-500 mb-2">
+              {{ t('admin.userManagementPanel.modal.regNumberLabel') }}
+            </label>
+            <input 
+              v-model="companyForm.registration_number"
+              type="text"
+              :placeholder="t('admin.userManagementPanel.modal.regNumberPlaceholder')"
+              class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-blue-600 transition-all"
+            />
+          </div>
 
-        <div>
-          <label class="block text-xs font-mono uppercase text-slate-500 mb-2">Role within Organization</label>
-          <div class="grid grid-cols-2 gap-2">
-            <button 
-              v-for="opt in roleInOrgOptions" 
-              :key="opt.value"
-              @click="companyForm.role_in_org = opt.value"
-              type="button"
-              :class="[
-                'px-3 py-2 text-xs font-mono uppercase border rounded-lg transition-all',
-                companyForm.role_in_org === opt.value 
-                  ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20' 
-                  : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'
-              ]"
-            >
-              {{ opt.label }}
-            </button>
+          <div>
+            <label class="block text-xs font-mono uppercase text-slate-500 mb-2">
+              {{ t('admin.userManagementPanel.modal.roleInOrgLabel') }}
+            </label>
+            <div class="grid grid-cols-2 gap-2">
+              <button 
+                v-for="opt in roleInOrgOptions" 
+                :key="opt.value"
+                @click="companyForm.role_in_org = opt.value"
+                type="button"
+                :class="[
+                  'px-3 py-2 text-xs font-mono uppercase border rounded-lg transition-all',
+                  companyForm.role_in_org === opt.value 
+                    ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20' 
+                    : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'
+                ]"
+              >
+                {{ opt.label }}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="flex gap-3 mt-8">
-        <button 
-          @click="showCompanyModal = false"
-          type="button"
-          class="flex-1 px-4 py-2 text-sm font-semibold text-slate-400 hover:text-white transition"
-        >
-          Cancel
-        </button>
-        <button 
-          @click="confirmCompanyRole"
-          type="button"
-          :disabled="!companyForm.registration_number || loading"
-          class="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-lg shadow-blue-900/20"
-        >
-          {{ loading ? 'Processing...' : 'Confirm Assign' }}
-        </button>
+        <div class="flex gap-3 mt-8">
+          <button 
+            @click="showCompanyModal = false"
+            type="button"
+            class="flex-1 px-4 py-2 text-sm font-semibold text-slate-400 hover:text-white transition"
+          >
+            {{ t('admin.userManagementPanel.modal.cancel') }}
+          </button>
+          <button 
+            @click="confirmCompanyRole"
+            type="button"
+            :disabled="!companyForm.registration_number || loading"
+            class="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-lg shadow-blue-900/20"
+          >
+            {{ loading ? t('admin.userManagementPanel.modal.processing') : t('admin.userManagementPanel.modal.confirm') }}
+          </button>
+        </div>
       </div>
-    </div>
     </div>
   </div>
 </template>
