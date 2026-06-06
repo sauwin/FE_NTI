@@ -1,20 +1,21 @@
 import type { Program } from '@/shared/types/programs'
 
+export interface DocumentRequirement {
+  document_name: string
+  is_mandatory: boolean
+  max_size_mb: number
+  type?: string
+}
+
 export interface CallShortInfo {
   id: number
   name: string
-  required_documents?: string[] | Record<string, string> | null
+  required_documents?: DocumentRequirement[] | null
   task?: {
     id: number
     title: string
     organization?: { name: string }
   } | null
-}
-
-export interface DocumentRequirement {
-  document_name: string
-  is_mandatory: boolean
-  max_size_mb: number
 }
 
 export interface ActiveCall {
@@ -35,7 +36,7 @@ export interface ActiveCall {
   min_team_size: number
   max_team_size: number
 
-  required_documents: string[]
+  required_documents: DocumentRequirement[]
   evaluation_criteria: Record<string, number>
 }
 

@@ -45,10 +45,6 @@ export function createAdmin(payload: CreateAdminPayload) {
   return api.post('/admin/create-admin', payload)
 }
 
-export function getAdminPrograms() {
-  return api.get<AdminProgram[]>('/admin/programs')
-}
-
 export function getAdminCalls() {
   return api.get<AdminCall[]>('/admin/calls')
 }

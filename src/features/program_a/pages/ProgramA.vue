@@ -3,14 +3,14 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { getActiveCalls } from '@/shared/api/calls'
-import type { ActiveCall } from '@/shared/types/calls'
+import type { ActiveCall, DocumentRequirement } from '@/shared/types/calls'
 
 import PageHero from '@/shared/ui/PageHero.vue'
 
 const { t } = useI18n()
 const router = useRouter()
 const activeCall = ref<ActiveCall | null>(null)
-const parsedDocuments = ref<string[]>([])
+const parsedDocuments = ref<DocumentRequirement[]>([])
 const loading = ref(true)
 
 onMounted(async () => {
@@ -23,7 +23,20 @@ onMounted(async () => {
       
       if (callData && callData.status === 'open') {
         activeCall.value = callData
-        parsedDocuments.value = callData.required_documents || []
+        const docs = callData.required_documents || []
+        parsedDocuments.value = Array.isArray(docs)
+          ? docs.map((doc: any) => {
+              if (typeof doc === 'string') {
+                return {
+                  document_name: doc.replace(/_/g, ' ').toUpperCase(),
+                  is_mandatory: true,
+                  max_size_mb: 10,
+                  type: doc,
+                }
+              }
+              return doc
+            })
+          : []
       } else {
         activeCall.value = null
         parsedDocuments.value = []
@@ -47,13 +60,6 @@ const formatDate = (dateStr: string | null) => {
     hour: '2-digit',
     minute: '2-digit'
   })
-}
-
-const parseDocName = (docName: string) => {
-  return docName
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
 }
 </script>
 
@@ -156,7 +162,7 @@ const parseDocName = (docName: string) => {
 
     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       <div 
-        v-for="(docName, index) in parsedDocuments" 
+        v-for="(doc, index) in parsedDocuments" 
         :key="index" 
         class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 flex items-start gap-4 transition hover:border-slate-700"
       >
@@ -164,8 +170,14 @@ const parseDocName = (docName: string) => {
           {{ index + 1 }}
         </div>
         
-        <div class="pt-1.5">
-          <h3 class="text-base font-bold text-white leading-snug">{{ parseDocName(docName) }}</h3>
+        <div class="pt-1.5 flex-1">
+          <h3 class="text-base font-bold text-white leading-snug">{{ doc.document_name }}</h3>
+          <div class="flex items-center gap-2 mt-2 flex-wrap">
+            <span v-if="doc.is_mandatory" class="text-xs bg-red-950/50 text-red-300 border border-red-900/50 rounded px-2 py-1 font-mono uppercase">
+              {{ t('programA.view.mandatory') }}
+            </span>
+            <span class="text-xs text-slate-400 font-mono">{{ t('programA.view.maxSize', { size: doc.max_size_mb }) }}</span>
+          </div>
         </div>
       </div>
     </div>

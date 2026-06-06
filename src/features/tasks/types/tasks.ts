@@ -44,4 +44,5 @@ export interface DocumentRequirement {
   document_name: string
   is_mandatory: boolean
   max_size_mb: number
+  type?: string
 }

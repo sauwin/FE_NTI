@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { getAdminPrograms, getAdminCallById, updateAdminCall } from '@/features/admin/api/admin'
+import { getAdminCallById, updateAdminCall } from '@/features/admin/api/admin'
 import type { AdminProgram, RequiredDocument } from '@/features/admin/types/admin'
 import { useI18n } from 'vue-i18n'
 
@@ -19,7 +19,7 @@ const programs = ref<AdminProgram[]>([])
 const loading = ref<boolean>(false)
 const error = ref<string>('')
 
-const programId = ref<number | null>(null)
+const program = ref<string>('a')
 const status = ref<'draft' | 'open' | 'closed' | 'archived'>('draft')
 const opensAt = ref<string>('')
 const deadlineAt = ref<string>('')
@@ -36,18 +36,9 @@ const formatDateTime = (isoString: string | null) => {
 onMounted(async () => {
   loading.value = true
   try {
-    const progRes = await getAdminPrograms()
-    programs.value = progRes.data
-
     const callRes = await getAdminCallById(callId)
     const call = callRes.data
-
-    if (typeof call.program === 'string') {
-      const prog = programs.value.find(p => p.code === `program_${call.program}`)
-      programId.value = prog?.id ?? null
-    } else {
-      programId.value = call.program
-    }
+    
     status.value = call.status
     opensAt.value = formatDateTime(call.opens_at)
     deadlineAt.value = formatDateTime(call.deadline_at)
@@ -120,10 +111,8 @@ async function updateCall() {
       <div v-else class="flex flex-col gap-5">
         <div>
           <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">{{ $t('admin.callEdit.labels.programLocked') }}</label>
-          <select v-model="programId" disabled class="w-full bg-slate-900 border border-slate-800 rounded-md h-10 px-3 text-gray-500 opacity-60">
-            <option v-for="prog in programs" :key="prog.id" :value="prog.id">
-              {{ prog.code?.toUpperCase().replace('_', ' ') }} ({{ prog.title || prog.name || $t('admin.callEdit.placeholders.noTitle') }})
-            </option>
+          <select v-model="program" disabled class="w-full bg-slate-900 border border-slate-800 rounded-md h-10 px-3 text-gray-500 opacity-60">
+            <option key="a" value="a"></option>
           </select>
         </div>
 
