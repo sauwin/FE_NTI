@@ -120,7 +120,6 @@
       "pending": "Čaká na schválenie",
       "remove": "Odstrániť",
       "inviteLabel": "Pozvať nového člena cez E-mail",
-      "placeholderEmail": "student@priklad.com",
       "btnSend": "Odoslať pozvánku",
       "processing": "Spracováva sa...",
       "successInvite": "Pozvánka bola úspešne odoslaná na adresu {email}",

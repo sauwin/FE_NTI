@@ -75,6 +75,7 @@ async function handleRemoveMember(userId: number) {
       </div>
       
       <div class="space-y-3">
+        {{ console.log(team) }}
         <div 
           v-for="member in (team.members ?? [])" 
           :key="member.id" 
@@ -128,7 +129,7 @@ async function handleRemoveMember(userId: number) {
           <input 
             v-model="email" 
             type="email" 
-            :placeholder="t('student.members.placeholderEmail')" 
+            placeholder="student@example.com" 
             class="bg-slate-950 border border-slate-600 rounded-lg px-4 py-2 text-sm text-white focus:border-white outline-none transition-all placeholder:text-slate-500 flex-1 font-mono"
           />
           <button 

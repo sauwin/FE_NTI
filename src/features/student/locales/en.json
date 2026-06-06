@@ -120,7 +120,6 @@
       "pending": "Pending",
       "remove": "Remove",
       "inviteLabel": "Invite new member by Email",
-      "placeholderEmail": "student@example.com",
       "btnSend": "Send Invitation",
       "processing": "Processing...",
       "successInvite": "Invitation successfully dispatched to {email}",

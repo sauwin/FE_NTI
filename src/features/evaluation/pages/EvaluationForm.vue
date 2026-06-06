@@ -33,6 +33,7 @@
     {
       id: 1,
       call_id: 1,
+      comment: 'some comment',
       slug: 'overall_score',
       title: 'Overall score',
       weight: 100,
@@ -40,7 +41,7 @@
   ])
 
   const criteriaToEmptyScores = () => {
-    return criteria.value.map(c => ({ criterion_id: c.id, score: 50, title: c.title, weight_at_moment: c.weight, comment: '' }))
+    return criteria.value.map(c => ({ criterion_id: c.id, score: 50, description: c.comment ?? t('evaluation.noCriterionDescription'), title: c.title, weight_at_moment: c.weight, comment: '' }))
   }
 
   const scores = ref(
@@ -96,6 +97,7 @@
             return {
               criterion_id: s.criterion_id,
               title: meta?.title ?? 'No title', 
+              description: meta?.comment ?? t('evaluation.noCriterionDescription'),
               score: s.score,
               weight_at_moment: s.weight_at_moment,
               comment: s.comment ?? '',
@@ -244,7 +246,19 @@
         <div class="space-y-6 mb-6">
           <div v-for="row in scores" :key="row.criterion_id" class="bg-slate-900/40 border border-slate-800 p-5 rounded-xl">
             <div class="flex items-start justify-between gap-2 mb-2">
-              <div><h3 class="text-sm font-semibold text-white">{{ row.title }}</h3></div>
+              <div>
+                <h3 class="text-sm font-semibold text-white">
+                  {{ row.title }}
+
+                  <div class="relative group/tooltip inline-block cursor-help">
+                    <span class="text-[12px] text-slate-600 hover:text-blue-400 font-bold px-0.5">ⓘ</span>
+                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-none whitespace-nowrap bg-slate-900 border border-slate-700 text-slate-300 text-[10px] rounded p-2 opacity-0 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:pointer-events-auto transition-all duration-200 shadow-xl z-50 normal-case font-sans">
+                      {{ row.description }}
+                      <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900"></div>
+                    </div>
+                  </div>
+                </h3>
+              </div>
               <span class="text-[11px] font-medium bg-slate-800 text-slate-400 px-2 py-0.5 rounded">{{ t('evaluation.weight', { weight: row.weight_at_moment }) }}</span>
             </div>
             <div class="mt-4">

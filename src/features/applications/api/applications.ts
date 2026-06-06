@@ -42,7 +42,6 @@ export function applyApplicationChanges(id: number | string) {
 }
 
 export function getApplicationLastRevision(id: number | string) {
-  return api.post(`/applications/${id}/last_revision`)
+  return api.get(`/applications/${id}/last_revision`)
 }
-
 

@@ -57,7 +57,7 @@
         "noTeamsWarning": "⚠️ Nenašli sa žiadne vyhovujúce tímy. Musíte byť vedúcim tímu a minimálne 3 členovia už museli prijať vašu pozvánku.",
         "focusCategoryLabel": "Zameranie kategórie *",
         "selectCategoryPlaceholder": "Vyberte kategóriu...",
-        "declaration": "Čestne vyhlasujem, že neprenášam žiadne predmety a môj priemerný prospech z profilových predmetov spĺňa požadovanú hranicu. Beriem na vedomie, že táto skutočnosť bude overená komisiou. *",
+        "declaration": "Čestne vyhlasujem, že neprenášal som žiadne predmety a môj priemer z profilových predmetov spĺňa požadovanú hranicu. Beriem na vedomie, že táto skutočnosť bude overená komisiou. *",
         "cancel": "Zrušiť",
         "continue": "Pokračovať na dokumenty →",
         "chooseFile": "Vybrať súbor...",
@@ -66,7 +66,7 @@
         "saving": "Ukladá sa...",
         "saveDraft": "Uložiť koncept",
         "submitting": "Odosiela sa...",
-        "submitFinal": "Odoslať na finálne hodnotenie"
+        "submitFinal": "Odoslať"
       },
       "success": {
         "title": "Prihláška úspešne odoslaná!",
