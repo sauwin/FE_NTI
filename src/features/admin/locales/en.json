@@ -43,7 +43,8 @@
         "company": "Company",
         "registrationNumber": "Registration number",
         "status": "Status",
-        "actions": "Actions"
+        "actions": "Actions",
+        "publicPartner": "Public partner"
       },
       "actions": {
         "details": "Details",
@@ -87,7 +88,9 @@
         "deleted": "Company deleted.",
         "deleteFailed": "Failed to delete company.",
         "exportSuccess": "Export successful ({format})",
-        "exportFailed": "Export failed ({format})"
+        "exportFailed": "Export failed ({format})",
+        "statusUpdated": "Status successfully updated",
+        "statusUpdateFailed": "Unable to update status"
       },
       "status": {
         "active": "Active",

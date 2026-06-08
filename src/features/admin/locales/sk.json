@@ -43,7 +43,8 @@
         "company": "Organizácia",
         "registrationNumber": "Registračné číslo",
         "status": "Stav",
-        "actions": "Akcie"
+        "actions": "Akcie",
+        "publicPartner": "Verejný partner"
       },
       "actions": {
         "details": "Detaily",
@@ -87,7 +88,9 @@
         "deleted": "Spoločnosť vymazaná.",
         "deleteFailed": "Nepodarilo sa vymazať spoločnosť.",
         "exportSuccess": "Export bol úspešný ({format})",
-        "exportFailed": "Nepodarilo sa exportovať ({format})"
+        "exportFailed": "Nepodarilo sa exportovať ({format})",
+        "statusUpdated": "Stav bol úspešne aktualizovaný",
+        "statusUpdateFailed": "Stav sa nedá aktualizovať"
       },
       "status": {
         "active": "Aktívna",

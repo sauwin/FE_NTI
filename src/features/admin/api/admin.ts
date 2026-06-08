@@ -180,3 +180,7 @@ export function deleteCompany(companyId: number) {
 export function exportCompanies(params: Record<string, unknown>) {
   return api.get('/admin/export/company', { params, responseType: 'blob' })
 }
+
+export function updateCompanyPartnerStatus(companyId: number, payload: Record<string, unknown>) {
+  return api.post(`/admin/company/partner-status/${companyId}`, payload)
+}
