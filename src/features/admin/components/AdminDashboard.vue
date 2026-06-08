@@ -13,6 +13,7 @@ const AdminDocumentManager = defineAsyncComponent(() => import('@/features/admin
 const CreateAdminForm = defineAsyncComponent(() => import('./CreateAdminForm.vue'))
 const AdminLogs = defineAsyncComponent(() => import('./AdminLogs.vue'))
 const BulkNotificationPanel = defineAsyncComponent(() => import('@/features/admin/components/BulkNotificationPanel.vue'))
+const OrganizationManager = defineAsyncComponent(() => import('@/features/admin/components/OrganizationManager.vue'))
 
 const props = defineProps<{
   userRole?: string
@@ -130,6 +131,7 @@ onMounted(() => {
           { id: 'evaluators', name: t('admin.dashboard.tabLabels.evaluators') },
           { id: 'mentorships', name: t('admin.dashboard.tabLabels.mentorships') },
           { id: 'users', name: t('admin.dashboard.tabLabels.users') },
+          { id: 'organization-manager', name: t('admin.dashboard.tabLabels.company') },
           { id: 'documents', name: t('admin.dashboard.tabLabels.documents') },
           ...(isSuperAdmin ? [{ id: 'create-admin', name: t('admin.dashboard.tabLabels.createAdmin') }] : []),
           { id: 'logs', name: t('admin.dashboard.tabLabels.logs') },
@@ -141,7 +143,7 @@ onMounted(() => {
           activeTab === tab.id
             ? 'bg-blue-600/15 border-blue-500 text-blue-400'
             : 'text-slate-500 hover:text-slate-300 border-transparent hover:border-slate-700',
-          'px-4 py-2 text-sm font-medium transition rounded-xl border'
+          'px-3 py-2 text-sm font-medium transition rounded-xl border'
         ]">
           {{ tab.name }}
         </button>
@@ -261,6 +263,10 @@ onMounted(() => {
 
     <div v-if="activeTab === 'users'">
       <UserManagementPanel :is-super-admin="isSuperAdmin" @refresh="loadUserData" />
+    </div>
+
+    <div v-if="activeTab === 'organization-manager'">
+      <OrganizationManager />
     </div>
 
     <div v-if="activeTab === 'documents'">

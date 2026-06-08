@@ -13,7 +13,7 @@
         "evaluators": "Hodnotitelia",
         "mentorships": "Mentori",
         "users": "Používatelia",
-        "approvals": "Schvaľovania",
+        "company": "Organizácie",
         "documents": "Dokumenty",
         "createAdmin": "Pridať pracovníka",
         "logs": "Audít",
@@ -23,6 +23,76 @@
         "metricsLoadFalied": "Nepodarilo sa načítať metriky nástenky",
         "usersLoadFailed": "Nepodarilo sa načítať používateľov",
         "approvalsLoadFailed": "Nepodarilo sa načítať schvaľovania"
+      }
+    },
+
+    "companyManagement": {
+      "title": "Organizácie",
+      "description": "Spravovať registrácie organizácie a ich stav.",
+      "exportCsv": "Exportovať CSV",
+      "exportXlsx": "Exportovať XLSX",
+      "searchNamePlaceholder": "Hľadať podľa názvu organizácie...",
+      "searchNumberPlaceholder": "Hľadať podľa čísla organizácie...",
+      "allStatuses": "Všetky stavy",
+      "statusActive": "Aktívne",
+      "statusPending": "Čakajúce",
+      "statusInactive": "Neaktívne",
+      "loadingCompanies": "Načítavanie organizácie...",
+      "noCompaniesFound": "Nenašli sa žiadne firmy.",
+      "tableHeaders": {
+        "company": "Organizácia",
+        "registrationNumber": "Registračné číslo",
+        "status": "Stav",
+        "actions": "Akcie"
+      },
+      "actions": {
+        "details": "Detaily",
+        "deactivate": "Deaktivovať",
+        "approve": "Schváliť",
+        "reject": "Zamietnuť",
+        "activate": "Aktivovať",
+        "delete": "Vymazať"
+      },
+      "modal": {
+        "detailsTitle": "Detaily organizácie",
+        "nameLabel": "Názov",
+        "websiteLabel": "Web",
+        "regNumberLabel": "Registračné číslo",
+        "statusLabel": "Stav",
+        "close": "Zavrieť",
+        "cancel": "Zrušiť"
+      },
+      "confirm": {
+        "approveTitle": "Schváliť spoločnosť",
+        "approveMessage": "Naozaj chcete schváliť túto spoločnosť? To aktivuje organizáciu a účet vlastníka.",
+        "rejectTitle": "Zamietnuť spoločnosť",
+        "rejectMessage": "Naozaj chcete zamietnuť túto spoločnosť? Táto akcia odstráni organizáciu a zablokuje účet vlastníka.",
+        "deactivateTitle": "Deaktivovať spoločnosť",
+        "deactivateMessage": "Naozaj chcete deaktivovať túto spoločnosť? Používatelia stratia prístup, kým nebude opäť aktivovaná.",
+        "activateTitle": "Aktivovať spoločnosť",
+        "activateMessage": "Naozaj chcete aktivovať túto spoločnosť?",
+        "deleteTitle": "Vymazať spoločnosť",
+        "deleteMessage": "Týmto sa organizácia natrvalo vymaže. Naozaj pokračovať?"
+      },
+      "messages": {
+        "loadFailed": "Nepodarilo sa načítať firmy.",
+        "approved": "Spoločnosť schválená.",
+        "approveFailed": "Nepodarilo sa schváliť spoločnosť.",
+        "rejected": "Spoločnosť zamietnutá.",
+        "rejectFailed": "Nepodarilo sa zamietnuť spoločnosť.",
+        "deactivated": "Spoločnosť deaktivovaná.",
+        "deactivateFailed": "Nepodarilo sa deaktivovať spoločnosť.",
+        "activated": "Spoločnosť aktivovaná.",
+        "activateFailed": "Nepodarilo sa aktivovať spoločnosť.",
+        "deleted": "Spoločnosť vymazaná.",
+        "deleteFailed": "Nepodarilo sa vymazať spoločnosť.",
+        "exportSuccess": "Export bol úspešný ({format})",
+        "exportFailed": "Nepodarilo sa exportovať ({format})"
+      },
+      "status": {
+        "active": "Aktívna",
+        "pending": "Čakajúca",
+        "inactive": "Neaktívna"
       }
     },
     "overview": {
