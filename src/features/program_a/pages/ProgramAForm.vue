@@ -4,8 +4,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { getTeams } from '@/features/student/api/teams'
 import { useAuthStore } from '@/features/auth/stores/auth'
-import { getActiveCall, createApplication } from '@/features/applications/api/applications'
-import { uploadDocument } from '@/shared/api/documents'
+import { getActiveCall, createApplicationWithDocuments } from '@/features/applications/api/applications'
 import type { DocumentRequirement } from '@/shared/types/calls'
 
 const { t } = useI18n()
@@ -132,32 +131,40 @@ async function submit(mode: 'draft' | 'final' = 'final') {
       program_type: 'a' as const,
       team_id: selectedTeamId.value,
       category: category.value,
-      submit_type: mode
+      submit_type: mode,
+      academic_declaration: academicDeclaration.value ? 1 : 0,
     }
 
-    const appRes = await createApplication(payload)
-    const applicationId = appRes.data.application_id
+    const formData = new FormData()
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        formData.append(key, String(value))
+      }
+    })
 
-    for (const doc of requiredDocuments.value) {
+    requiredDocuments.value.forEach((doc, index) => {
       const key = docKey(doc)
       const file = files.value[key]
 
       if (mode === 'final' && !file && doc.is_mandatory) {
         error.value = t('programA.upload.errors.missingDoc', { name: doc.document_name })
-        loading.value = false
+      }
+
+      if (!file) {
         return
       }
 
-      if (!file) continue
+      formData.append(`documents[${index}][type]`, key)
+      formData.append(`documents[${index}][classification]`, 'confidential')
+      formData.append(`documents[${index}][file]`, file)
+    })
 
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('type', key)
-      formData.append('classification', 'confidential')
-      formData.append('application_id', String(applicationId))
-
-      await uploadDocument(formData)
+    if (error.value) {
+      loading.value = false
+      return
     }
+
+    await createApplicationWithDocuments(formData)
 
     if (mode === 'draft') {
       router.push('/dashboard')

@@ -156,9 +156,6 @@ const documentsMap = computed(() =>
             <h1 class="text-3xl font-bold text-white">
               {{ t('applications.view.title', { id: app.id }) }}
             </h1>
-            <p class="text-gray-500 text-sm mt-1">
-              {{ app.submitted_at ? t('applications.view.submitted_at', { date: formatDate(app.submitted_at) }) : t('applications.view.not_submitted') }}
-            </p>
           </div>
           <span :class="['text-xs px-3 py-1 rounded-full border capitalize font-mono', statusColor(app.status)]">
             {{ app.status?.replace(/_/g, ' ') }}
@@ -190,7 +187,7 @@ const documentsMap = computed(() =>
           <div class="grid grid-cols-2 gap-4 text-sm">
             <div>
               <p class="text-gray-500">{{ t('applications.view.category') }}</p>
-              <p class="text-white capitalize">{{ app.category }}</p>
+              <p class="text-white capitalize">{{ app.category ?? '-' }}</p>
             </div>
             <div>
               <p class="text-gray-500">{{ t('applications.view.program') }}</p>
@@ -220,8 +217,6 @@ const documentsMap = computed(() =>
               :key="`${req.document_name}-${idx}`"
               class="flex flex-col gap-3 border border-slate-700/60 rounded-lg px-4 py-3 bg-slate-950/40"
             >
-              {{ console.log(req) }}
-              {{ console.log(docs) }}
               <div class="flex items-start justify-between">
                 <div>
                   <p class="text-white text-sm font-medium">

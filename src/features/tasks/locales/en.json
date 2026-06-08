@@ -27,7 +27,10 @@
         "title": "Challenge Title",
         "shortDescription": "Short Teaser Description",
         "budget": "Budget Allocation (EUR)",
-        "deadline": "Final Delivery Deadline",
+        "minTeam": "Min team size",
+        "maxTeam": "Max team size",
+        "opensAt": "Start Date",
+        "deadlineAt": "End Date",
         "projectGoal": "Project Vision & Strategic Goal",
         "expectedOutcome": "Expected Outcome & Success Metrics",
         "functionalSpecs": "Detailed Functional Specifications",
@@ -37,6 +40,8 @@
         "maxSize": "Max Size (MB)",
         "remove": "[Remove]",
         "addDocument": "+ Add Document Type",
+        "addAttachment": "+ Add Attachment",
+        "noAttachments": "No company attachments have been added yet.",
         "requirementsDesc": "Define what files applying solver squads must upload in order to sign up for your challenge.",
         "attachmentsDesc": "Upload any extra guidelines, internal data models, architecture charts, or API files to assist teams.",
         "attachedGuideline": "Attached Guideline File",
@@ -44,7 +49,8 @@
         "alreadyUploaded": "(Already Uploaded)",
         "chooseFile": "Choose file...",
         "replaceFile": "Choose new file to replace...",
-        "browse": "Browse"
+        "browse": "Browse",
+        "mandatory": "is mandatory"
       },
       "placeholders": {
         "title": "e.g., AI-Driven Inventory Optimization System",

@@ -2,8 +2,6 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { createAdminCall } from '@/features/admin/api/admin'
-import { getPrograms } from '@/shared/api/programs'
-import type { Program } from '@/shared/types/programs'
 import type { RequiredDocument } from '@/features/admin/types/admin'
 import { useI18n } from 'vue-i18n'
 
@@ -15,11 +13,10 @@ interface CallDocumentRequirement extends RequiredDocument {
 
 const router = useRouter()
 
-const programs = ref<Program[]>([])
 const loading = ref<boolean>(false)
 const error = ref<string>('')
 
-const programId = ref<number | null>(null)
+const programName = ref<number | null>(null)
 const status = ref<'draft' | 'open' | 'closed' | 'archived'>('draft')
 const opensAt = ref<string>('')
 const deadlineAt = ref<string>('')
@@ -28,19 +25,6 @@ const maxTeamSize = ref<number | null>(null)
 const requiredDocuments = ref<CallDocumentRequirement[]>([
     { id: '1', document_name: t('admin.callCreate.defaults.defaultDocName'), is_mandatory: true, max_size_mb: 10 }
 ])
-
-onMounted(async () => {
-  try {
-    const res = await getPrograms()
-    programs.value = res.data.filter(p => p.is_active)
-    const firstProgram = programs.value[0]
-    if (firstProgram) {
-      programId.value = firstProgram.id
-    }
-  } catch {
-    error.value = t('admin.callCreate.errors.programsLoadFailed')
-  }
-})
 
 const addDocumentRule = () => {
   requiredDocuments.value.push({
@@ -56,7 +40,7 @@ const removeDocumentRule = (index: number) => {
 }
 
 async function submitCall() {
-  if (!programId.value) {
+  if (!programName.value) {
     error.value = t('admin.callCreate.errors.assignProgram')
     return
   }
@@ -70,8 +54,7 @@ async function submitCall() {
   error.value = ''
 
   try {
-    const selected = programs.value.find(p => p.id === programId.value)
-    const program_type = selected?.code === 'program_b' ? 'b' : 'a'
+    const program_type = programName.value
 
     await createAdminCall({
       program_type,
@@ -107,9 +90,9 @@ async function submitCall() {
       <div class="flex flex-col gap-5">
         <div>
           <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">{{ $t('admin.callCreate.labels.program') }}</label>
-          <select v-model="programId" class="w-full bg-slate-900 border border-blue-900 rounded-md h-10 px-3 text-white focus:outline-none">
-            <option v-for="prog in programs" :key="prog.id" :value="prog.id">
-              {{ prog.code?.toUpperCase().replace('_', ' ') || $t('admin.callCreate.placeholders.unknownCode') }} ({{ prog.type }})
+          <select v-model="programName" class="w-full bg-slate-900 border border-blue-900 rounded-md h-10 px-3 text-white focus:outline-none">
+            <option key="a" value="a">
+              a
             </option>
           </select>
         </div>

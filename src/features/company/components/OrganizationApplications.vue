@@ -106,7 +106,7 @@ function getStatusColor(status: string) {
 }
 
 function viewApplicationDetails(id: number) {
-  router.push(`/organization/applications/${id}`)
+  router.push(`/applications/${id}`)
 }
 </script>
 
@@ -132,7 +132,7 @@ function viewApplicationDetails(id: number) {
         <thead>
           <tr class="border-b border-slate-800 bg-slate-950/40 text-[11px] font-mono uppercase tracking-wider text-slate-500">
             <th class="py-4 px-5">{{ t('company.applications.idApplicant') }}</th>
-            <th class="py-4 px-5">{{ t('company.applications.targetChallenge') }}</th>
+            <th class="py-4 px-5">{{ t('company.applications.targetCall') }}</th>
             <th class="py-4 px-5">{{ t('company.common.status') }}</th>
             <th class="py-4 px-5">{{ t('company.applications.submittedAt') }}</th>
             <th class="py-4 px-5 text-right">{{ t('company.common.actions') }}</th>
@@ -142,11 +142,10 @@ function viewApplicationDetails(id: number) {
           <tr 
             v-for="app in applications" 
             :key="app.id"
-            @click="viewApplicationDetails(app.id)"
-            class="hover:bg-slate-900/30 transition cursor-pointer group"
+            class="hover:bg-slate-900/30 group"
           >
             <td class="py-4 px-5">
-              <div class="font-semibold text-white group-hover:text-blue-400 transition-colors">
+              <div class="font-semibold text-white">
                 {{ app.team?.name ?? app.student_profile?.user?.name ?? t('company.applications.individualSolver') }}
               </div>
               <div class="text-xs text-slate-500 mt-0.5">
@@ -156,10 +155,7 @@ function viewApplicationDetails(id: number) {
 
             <td class="py-4 px-5 max-w-xs truncate">
               <span class="text-slate-300 block font-medium truncate">
-                {{ app.call?.task?.title ?? t('company.applications.unknownChallenge') }}
-              </span>
-              <span class="text-[10px] text-slate-500 font-mono block truncate">
-                {{ t('company.applications.callLabel', { name: app.call?.name ?? '—' }) }}
+                {{ app.call?.name ?? '—'  }}
               </span>
             </td>
 
@@ -177,6 +173,13 @@ function viewApplicationDetails(id: number) {
               <div class="flex items-center justify-end gap-2">
                 
                 <template v-if="app.status === 'submitted'">
+                  <button
+                    @click="viewApplicationDetails(app.id)"
+                    :disabled="actionLoading === app.id"
+                    class="text-xs bg-slate-800 hover:bg-slate-600 border border-slate-700 text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-lg transition font-medium cursor-pointer"
+                  >
+                    {{ t('company.applications.details') }}
+                  </button>
                   <button
                     @click="openRevisionModal(app.id)"
                     :disabled="actionLoading === app.id"

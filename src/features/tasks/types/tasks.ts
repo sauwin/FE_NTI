@@ -34,7 +34,10 @@ export interface TaskDetails {
   required_experience: string | null
   expected_duration: string | null
   milestones: string | null
-  deadline: string | null
+  min_team_size: number | string
+  max_team_size: number | string
+  opens_at: string | null
+  deadline_at: string | null
   call?: CallData
   organization?: Organization
   documents?: AttachedDocument[]

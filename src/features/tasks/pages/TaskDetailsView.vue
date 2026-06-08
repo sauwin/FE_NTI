@@ -8,7 +8,7 @@ import { downloadDocument as downloadDocumentFile } from '@/shared/api/documents
 import type { AttachedDocument, TaskDetails } from '@/features/tasks/types/tasks'
 import { useConfirm } from "@/shared/composables/useConfirm.ts"
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
@@ -69,7 +69,8 @@ const goBack = () => {
 
 const formatDate = (dateString: string | null | undefined): string => {
   if (!dateString) return t('tasks.details.notSpecified')
-  return new Date(dateString).toLocaleDateString('uk-UA', {
+  const currentLang = locale.value === 'sk' ? 'sk-SK' : 'en-US'
+  return new Date(dateString).toLocaleDateString(currentLang, {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
@@ -238,7 +239,7 @@ const formatDate = (dateString: string | null | undefined): string => {
           <div class="flex justify-between items-center text-sm border-t border-slate-900 pt-4">
             <span class="text-amber-400 font-medium">{{ t('tasks.details.submissionDeadline') }}</span>
             <span class="text-amber-400 font-bold">
-              {{ formatDate(task.call?.deadline_at || task.deadline) }}
+              {{ formatDate(task.call?.deadline_at) ?? '-' }}
             </span>
           </div>
         </div>

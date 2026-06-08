@@ -38,7 +38,7 @@ export function updateMemberRole(userId: number | string, roleInOrg: string) {
 }
 
 export function getOrganizationApplications() {
-  return api.get('/organization/applications')
+  return api.get('/applications')
 }
 
 export function updateApplicationStatus(applicationId: number | string, status: string, comment?: string) {

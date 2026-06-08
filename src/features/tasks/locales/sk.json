@@ -37,6 +37,8 @@
         "maxSize": "Max. veľkosť (MB)",
         "remove": "[Odstrániť]",
         "addDocument": "+ Pridať typ dokumentu",
+        "addAttachment": "+ Pridať prílohu",
+        "noAttachments": "Zatiaľ neboli pridané žiadne prílohy spoločnosti.",
         "requirementsDesc": "Definujte, aké súbory musia prihlasujúce sa tímy nahrať, aby sa mohli zaregistrovať do vašej výzvy.",
         "attachmentsDesc": "Nahrajte akékoľvek dodatočné usmernenia, interné dátové modely, diagramy architektúry alebo súbory API, ktoré tímom pomôžu.",
         "attachedGuideline": "Priložený metodický súbor",
@@ -44,7 +46,8 @@
         "alreadyUploaded": "(Už nahrané)",
         "chooseFile": "Vybrať súbor...",
         "replaceFile": "Vybrať nový súbor na nahradenie...",
-        "browse": "Prehliadať"
+        "browse": "Prehliadať",
+        "mandatory": "je povinný"
       },
       "placeholders": {
         "title": "napr. Systém optimalizácie zásob riadený AI",
