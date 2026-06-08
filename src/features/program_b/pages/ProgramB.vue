@@ -43,7 +43,6 @@ const goToTaskDetails = (taskId: number): void => {
 const formatDate = (dateString: string | null | undefined): string => {
   if (!dateString) return t('programB.view.noDeadline')
   
-  // Use the active runtime language to match correct context parsing
   const currentLang = locale.value === 'sk' ? 'sk-SK' : 'en-US'
   return new Date(dateString).toLocaleDateString(currentLang, {
     day: 'numeric',

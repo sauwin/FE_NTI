@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { getAdminApplications, updateAdminApplicationStatus, exportApplications } from '@/features/admin/api/admin'
-import api from '@/shared/api/axios'
+import { requestApplicationRevision } from '@/features/applications/api/applications'
 import type { AdminApplicationListItem } from '@/features/admin/types/admin'
 import { useRouter } from 'vue-router'
 import { useConfirm } from "@/shared/composables/useConfirm.ts"
@@ -129,9 +129,7 @@ async function submitRevision() {
   if (!revisionMessage.value.trim() || !revisionAppId.value) return
   revisionLoading.value = true
   try {
-    await api.post(`/admin/applications/${revisionAppId.value}/revisions`, {
-      message: revisionMessage.value.trim()
-    })
+    await requestApplicationRevision(revisionAppId.value, revisionMessage.value.trim())
     const app = applications.value.find(a => a.id === revisionAppId.value)
     if (app) app.status = 'pending_revision'
     showRevisionModal.value = false

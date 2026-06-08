@@ -1,5 +1,3 @@
-import type { Program } from '@/shared/types/programs'
-
 export interface DocumentRequirement {
   document_name: string
   is_mandatory: boolean
@@ -45,5 +43,7 @@ export interface CallData {
   name: string
   min_team_size: number
   max_team_size: number | null
+  opens_at?: string | null
   deadline_at: string | null
+  required_documents?: DocumentRequirement[] | null
 }

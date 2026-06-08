@@ -3,10 +3,9 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/features/auth/stores/auth'
-import { createApplication } from '@/features/applications/api/applications'
+import { createApplicationWithDocuments } from '@/features/applications/api/applications'
 import { getCallById } from '@/shared/api/calls'
-import type { CallShortInfo } from '@/shared/types/calls'
-import { uploadDocument } from '@/shared/api/documents'
+import type { CallShortInfo, DocumentRequirement } from '@/shared/types/calls'
 import { getTeams } from '@/features/student/api/teams'
 import type { Team } from '@/features/student/types/teams'
 
@@ -22,6 +21,7 @@ const urlId = computed<number | null>(() => {
 
 const resolvedCallId = ref<number | null>(null)
 const currentCall = ref<CallShortInfo | null>(null)
+const requiredDocuments = ref<DocumentRequirement[]>([])
 const myTeams = ref<Team[]>([])
 const selectedTeamId = ref<number | null>(null)
 const applicantType = ref<'student' | 'team'>('team')
@@ -43,39 +43,71 @@ const defaultDocLabels = computed<Record<string, string>>(() => ({
   technical_proposal: t('programB.upload.defaultLabels.technical_proposal'),
 }))
 
+function documentKey(doc: string | DocumentRequirement): string {
+  const raw = typeof doc === 'string' ? doc : doc.type || doc.document_name || ''
+  return String(raw).toLowerCase().replace(/\s+/g, '_')
+}
+
+function normalizeRequiredDocuments(raw: any): DocumentRequirement[] {
+  if (!raw) {
+    return []
+  }
+
+  const docs = typeof raw === 'string' ? JSON.parse(raw) : raw
+  if (!Array.isArray(docs)) {
+    return []
+  }
+
+  return docs.map((item: any) => {
+    if (!item) {
+      return {
+        document_name: t('programB.upload.defaultLabels.genericDoc', { key: 'document' }),
+        is_mandatory: true,
+        max_size_mb: 10,
+        type: 'document',
+      }
+    }
+
+    if (typeof item === 'string') {
+      return {
+        document_name: item.replace(/_/g, ' ').replace(/\b\w/g, (char: string) => char.toUpperCase()),
+        is_mandatory: true,
+        max_size_mb: 10,
+        type: documentKey(item),
+      }
+    }
+
+    const name = item.document_name || item.name || item.label || String(item.type || item.slug || item.key || 'document')
+    const key = String(item.type || item.slug || item.key || item.document_name || item.name || name)
+
+    return {
+      document_name: name,
+      is_mandatory: item.is_mandatory ?? true,
+      max_size_mb: item.max_size_mb ?? 10,
+      type: documentKey(key),
+    }
+  })
+}
+
+function getDocumentRequirements(): DocumentRequirement[] {
+  if (requiredDocuments.value.length > 0) {
+    return requiredDocuments.value
+  }
+
+  return Object.keys(docLabels.value).map((key) => ({
+    document_name: docLabels.value[key] ?? 'undefined_document',
+    type: key,
+    is_mandatory: true,
+    max_size_mb: 10,
+  }))
+}
+
 const docLabels = computed<Record<string, string>>(() => {
-  if (!currentCall.value || !currentCall.value.required_documents) {
-    return defaultDocLabels.value
-  }
-
-  const reqDocs = currentCall.value.required_documents
-
-  if (Array.isArray(reqDocs)) {
-    const labels: Record<string, string> = {}
-    
-    reqDocs.forEach((item: any) => {
-      if (!item) return
-
-      if (typeof item === 'string') {
-        labels[item] = defaultDocLabels.value[item] || `${item.replace(/_/g, ' ').toUpperCase()}`
-      } 
-      else if (typeof item === 'object') {
-        const systemKey = String(item.type || item.id || item.slug || item.key || item.document_name || String(item.id))
-        const visualLabel = item.name || item.document_name || item.label || defaultDocLabels.value[systemKey] || t('programB.upload.defaultLabels.genericDoc', { key: systemKey })
-        
-        labels[systemKey] = visualLabel
-      }
-      else {
-        const key = String(item)
-        labels[key] = defaultDocLabels.value[key] || t('programB.upload.defaultLabels.fallbackDoc', { key: key })
-      }
-    })
-    
-    return labels
-  }
-
-  if (typeof reqDocs === 'object') {
-    return reqDocs as Record<string, string>
+  if (requiredDocuments.value.length > 0) {
+    return requiredDocuments.value.reduce((labels: Record<string, string>, doc: DocumentRequirement) => {
+      labels[documentKey(doc)] = doc.document_name || defaultDocLabels.value[documentKey(doc)] || t('programB.upload.defaultLabels.fallbackDoc', { key: documentKey(doc) })
+      return labels
+    }, {})
   }
 
   return defaultDocLabels.value
@@ -116,7 +148,12 @@ onMounted(async () => {
     const callRes = await getCallById(urlId.value)
     currentCall.value = callRes.data
     resolvedCallId.value = callRes.data.id
-    
+    requiredDocuments.value = normalizeRequiredDocuments(callRes.data.required_documents)
+
+    if (requiredDocuments.value.length === 0 && callRes.data.required_documents) {
+      console.warn('Program B call returned required_documents but normalization failed:', callRes.data.required_documents)
+    }
+
     if (callRes.data && callRes.data.task) {
       projectTitle.value = callRes.data.task.title || ''
     }
@@ -149,37 +186,47 @@ async function submit(): Promise<void> {
   fieldErrors.value = {}
   loading.value = true
 
-  for (const key of Object.keys(docLabels.value)) {
-    if (!files.value[key]) {
-      error.value = t('programB.upload.errors.missingDoc', { name: docLabels.value[key] })
+  const requiredDocs = getDocumentRequirements()
+
+  for (const doc of requiredDocs) {
+    const key = documentKey(doc)
+    if (doc.is_mandatory && !files.value[key]) {
+      error.value = t('programB.upload.errors.missingDoc', { name: doc.document_name })
       loading.value = false
       return
     }
   }
 
   try {
-    const applicationPayload = {
+    const payload = {
       applicant_type: applicantType.value,
       program_type: 'b' as const,
       call_id: resolvedCallId.value,
-      team_id: applicantType.value == 'team' ? selectedTeamId.value : null, 
+      team_id: applicantType.value == 'team' ? selectedTeamId.value : null,
       project_title: projectTitle.value,
-      proposed_solution: proposedSolution.value
+      proposed_solution: proposedSolution.value,
     }
 
-    const appRes = await createApplication(applicationPayload)
-    const applicationId = appRes.data.application_id || appRes.data.id || 0
+    const formData = new FormData()
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        formData.append(key, String(value))
+      }
+    })
 
-    for (const [type, file] of Object.entries(files.value)) {
-      if (!file) continue
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('type', type)
-      formData.append('classification', 'confidential')
-      formData.append('application_id', String(applicationId))
+    requiredDocs.forEach((doc, index) => {
+      const key = documentKey(doc)
+      const file = files.value[key]
+      if (!file) {
+        return
+      }
 
-      await uploadDocument(formData)
-    }
+      formData.append(`documents[${index}][type]`, doc.type || key)
+      formData.append(`documents[${index}][classification]`, 'confidential')
+      formData.append(`documents[${index}][file]`, file)
+    })
+
+    await createApplicationWithDocuments(formData)
 
     step.value = 3
   } catch (e: any) {

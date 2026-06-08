@@ -2,10 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { getPrograms } from '@/shared/api/programs'
-import { getCompanyTasks } from '@/features/company/api/company'
-import { createCallWithTask, updateCallWithTask } from '@/features/tasks/api/tasks'
-import type { Program } from '@/shared/types/programs'
+import { createCallWithTask, getTaskById, updateCallWithTask } from '@/features/tasks/api/tasks'
 
 const { t } = useI18n()
 
@@ -15,8 +12,8 @@ function toSnakeCase(str: string): string {
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9_ ]/g, '') // Remove special characters
-    .replace(/\s+/g, '_')        // Replace spaces with underscores
-    .replace(/_+/g, '_')         // Prevent double underscores
+    .replace(/\s+/g, '_') // Replace spaces with underscores
+    .replace(/_+/g, '_') // Prevent double underscores
 }
 
 interface TaskDocumentRequirement {
@@ -25,6 +22,13 @@ interface TaskDocumentRequirement {
   is_mandatory: boolean
   max_size_mb: number
   type?: string
+}
+
+interface TaskAttachment {
+  id: string
+  document_name: string
+  type: string
+  file_name?: string
 }
 
 const router = useRouter()
@@ -37,8 +41,6 @@ const error = ref('')
 const taskId = computed(() => route.params.id as string | undefined)
 const isEditMode = computed(() => !!taskId.value)
 
-const programBId = ref<number | null>(null)
-
 const taskForm = ref({
   title: '',
   short_description: '',
@@ -49,7 +51,10 @@ const taskForm = ref({
   architecture_requirements: '',
   required_skills: '',
   budget: null as number | null,
-  deadline: '',
+  min_team_size: 3,
+  max_team_size: 5,
+  opens_at: '',
+  deadline_at: '',
 })
 
 const callForm = ref({
@@ -58,8 +63,9 @@ const callForm = ref({
   min_team_size: 3,
   max_team_size: null as number | null,
   required_documents: [
-    { id: Date.now().toString(), document_name: 'Team Project Pitch', max_size_mb: 10 }
-  ] as TaskDocumentRequirement[]
+    { id: Date.now().toString(), document_name: 'Team Project Pitch', is_mandatory: true, max_size_mb: 10 }
+  ] as TaskDocumentRequirement[],
+  attachments: [] as TaskAttachment[]
 })
 
 const files = ref<Record<string, File>>({})
@@ -68,17 +74,9 @@ const existingDocuments = ref<Array<{ type: string, file_name: string }>>([])
 onMounted(async () => {
   loading.value = true
   try {
-    const res = await getPrograms()
-    const progs = res.data ?? []
-    const progB = progs.find((p: Program) => p.code === 'program_b')
-    if (progB) {
-      programBId.value = progB.id
-    }
-
     if (isEditMode.value && taskId.value) {
-      const tasksRes = await getCompanyTasks()
-      const allTasks = tasksRes.data?.data ?? tasksRes.data ?? []
-      const currentTask = allTasks.find((t: any) => String(t.id) === String(taskId.value))
+      const taskRes = await getTaskById(taskId.value)
+      const currentTask = taskRes.data
 
       if (currentTask) {
         taskForm.value = {
@@ -87,29 +85,31 @@ onMounted(async () => {
           project_goal: currentTask.project_goal || '',
           expected_outcome: currentTask.expected_outcome || '',
           detailed_technical_description: currentTask.detailed_technical_description || '',
-          required_technologies: Array.isArray(currentTask.required_technologies) 
-            ? currentTask.required_technologies.join(', ') 
+          required_technologies: Array.isArray(currentTask.required_technologies)
+            ? currentTask.required_technologies.join(', ')
             : currentTask.required_technologies || '',
           architecture_requirements: currentTask.architecture_requirements || '',
-          required_skills: Array.isArray(currentTask.required_skills) 
-            ? currentTask.required_skills.join(', ') 
+          required_skills: Array.isArray(currentTask.required_skills)
+            ? currentTask.required_skills.join(', ')
             : currentTask.required_skills || '',
           budget: currentTask.budget ? Number(currentTask.budget) : null,
-          deadline: currentTask.deadline ? currentTask.deadline.split('T')[0] : '',
+          min_team_size: currentTask.min_team_size ? Number(currentTask.min_team_size) : 0,
+          max_team_size: currentTask.max_team_size ? Number(currentTask.max_team_size) : 0,
+          opens_at: currentTask.opens_at?.split('T')[0] ?? '',
+          deadline_at: currentTask.deadline_at?.split('T')[0] ?? '',
         }
 
         if (currentTask.call) {
-          callForm.value.opens_at = currentTask.call.start_date ? currentTask.call.start_date.split('T')[0] : ''
-          callForm.value.deadline_at = currentTask.call.end_date ? currentTask.call.end_date.split('T')[0] : ''
-          
+          callForm.value.opens_at = currentTask.call.opens_at?.split('T')[0] ?? ''
+          callForm.value.deadline_at = currentTask.call.deadline_at?.split('T')[0] ?? ''
+
           if (currentTask.call.required_documents) {
             const reqDocs = typeof currentTask.call.required_documents === 'string'
               ? JSON.parse(currentTask.call.required_documents)
               : currentTask.call.required_documents
-            
+
             if (Array.isArray(reqDocs)) {
               callForm.value.required_documents = reqDocs.map((doc: any, idx: number) => {
-                // Handle both old string format and new object format
                 if (typeof doc === 'string') {
                   const humanName = doc
                     .split('_')
@@ -117,14 +117,13 @@ onMounted(async () => {
                     .join(' ')
 
                   return {
-                    id: doc, 
+                    id: doc,
                     document_name: humanName,
                     is_mandatory: true,
                     max_size_mb: 10,
                     type: doc
                   }
                 } else {
-                  // Already an object with document_name, is_mandatory, max_size_mb, optionally type
                   return {
                     id: `doc-${idx}-${Date.now()}`,
                     document_name: doc.document_name || '',
@@ -142,6 +141,13 @@ onMounted(async () => {
           existingDocuments.value = currentTask.documents.map((d: any) => ({
             type: d.type,
             file_name: d.file_name
+          }))
+
+          callForm.value.attachments = currentTask.documents.map((d: any, idx: number) => ({
+            id: `attachment-${idx}-${Date.now()}`,
+            document_name: d.file_name || d.type || `Attachment ${idx + 1}`,
+            type: d.type || `attachment_${idx}`,
+            file_name: d.file_name,
           }))
         }
       } else {
@@ -177,6 +183,23 @@ function removeDocumentRequirement(id: string) {
   delete files.value[id]
 }
 
+function addAttachment() {
+  callForm.value.attachments.push({
+    id: `attachment-${Date.now()}`,
+    document_name: '',
+    type: `attachment_${Date.now()}`,
+  })
+}
+
+function removeAttachment(id: string) {
+  const attachment = callForm.value.attachments.find(a => a.id === id)
+  if (attachment) {
+    delete files.value[attachment.id]
+    delete files.value[attachment.type]
+  }
+  callForm.value.attachments = callForm.value.attachments.filter(a => a.id !== id)
+}
+
 function getExistingFileName(typeKey: string): string | null {
   const doc = existingDocuments.value.find(d => d.type === typeKey)
   return doc ? doc.file_name : null
@@ -199,7 +222,11 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
   fd.append('detailed_technical_description', taskForm.value.detailed_technical_description)
   fd.append('architecture_requirements', taskForm.value.architecture_requirements)
   fd.append('budget', taskForm.value.budget ? String(taskForm.value.budget) : '')
-  fd.append('deadline', taskForm.value.deadline)
+  fd.append('max_team_size', String(taskForm.value.max_team_size))
+  fd.append('min_team_size', String(taskForm.value.min_team_size))
+  fd.append('opens_at', taskForm.value.opens_at)
+  fd.append('deadline_at', taskForm.value.deadline_at)
+  fd.append('program_type', 'b')
 
   techArray.forEach((tech, index) => {
     fd.append(`required_technologies[${index}]`, tech)
@@ -214,22 +241,26 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
     if (d.document_name.trim().length > 0) {
       const snakeKey = d.type ?? toSnakeCase(d.document_name)
       
-      // Store the full object structure, including type when present
       snakeCaseDocs.push({
         document_name: d.document_name,
         is_mandatory: d.is_mandatory,
         max_size_mb: d.max_size_mb,
         type: snakeKey,
       })
-
-      const filePayload = files.value[d.id] || files.value[snakeKey]
-      if (filePayload) {
-        fd.append(`files[${snakeKey}]`, filePayload)
-      }
     }
   })
   
   fd.append('required_documents', JSON.stringify(snakeCaseDocs))
+
+  callForm.value.attachments.forEach(a => {
+    if (a.document_name.trim().length > 0) {
+      const payloadKey = a.type || a.id
+      const filePayload = files.value[a.id] || files.value[payloadKey]
+      if (filePayload) {
+        fd.append(`files[${payloadKey}]`, filePayload)
+      }
+    }
+  })
 
   try {
     if (isEditMode.value && taskId.value) {
@@ -286,14 +317,30 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
           <textarea v-model="taskForm.short_description" rows="3" :placeholder="t('tasks.form.placeholders.shortDescription')" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors resize-none"></textarea>
         </div>
 
+        <div>
+          <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">{{ t('tasks.form.labels.budget') }}</label>
+          <input v-model="taskForm.budget" type="number" :placeholder="t('tasks.form.placeholders.budget')" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors" />
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">{{ t('tasks.form.labels.budget') }}</label>
-            <input v-model="taskForm.budget" type="number" :placeholder="t('tasks.form.placeholders.budget')" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors" />
+            <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">{{ t('tasks.form.labels.minTeam') }}</label>
+            <input v-model="taskForm.min_team_size" type="number" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors" />
           </div>
           <div>
-            <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">{{ t('tasks.form.labels.deadline') }}</label>
-            <input v-model="taskForm.deadline" type="date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors" />
+            <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">{{ t('tasks.form.labels.maxTeam') }}</label>
+            <input v-model="taskForm.max_team_size" type="number" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">{{ t('tasks.form.labels.opensAt') }}</label>
+            <input v-model="taskForm.opens_at" type="date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors" />
+          </div>
+          <div>
+            <label class="block text-xs uppercase font-mono tracking-wider text-gray-400 mb-2">{{ t('tasks.form.labels.deadlineAt') }}</label>
+            <input v-model="taskForm.deadline_at" type="date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none transition-colors" />
           </div>
         </div>
 
@@ -394,29 +441,41 @@ async function submitChallenge(frontendStatus: 'draft' | 'published') {
 
       <!-- STEP 5 -->
       <div v-if="step === 5" class="space-y-6">
-        <h2 class="text-lg font-semibold border-b border-gray-800 pb-3 font-mono text-blue-400">
-          {{ t('tasks.form.steps.attachments') }}
-        </h2>
+        <div class="flex justify-between items-center border-b border-gray-800 pb-3">
+          <h2 class="text-lg font-semibold font-mono text-blue-400">
+            {{ t('tasks.form.steps.attachments') }}
+          </h2>
+          <button type="button" @click="addAttachment" class="text-xs bg-blue-950 border border-blue-900 text-blue-400 px-3 py-1.5 rounded hover:bg-blue-900/30 transition-colors cursor-pointer">
+            {{ t('tasks.form.labels.addAttachment') }}
+          </button>
+        </div>
 
         <p class="text-xs text-gray-400 font-mono">{{ t('tasks.form.labels.attachmentsDesc') }}</p>
 
         <div class="space-y-4">
-          <div v-for="doc in callForm.required_documents.filter(d => d.document_name.trim())" :key="'upload_' + doc.id" class="bg-slate-950 p-4 border border-slate-800 rounded-xl space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="text-xs font-medium text-gray-300 font-mono">{{ doc.document_name }}</span>
-              <span class="text-[10px] font-mono text-gray-500 uppercase">{{ t('tasks.form.labels.attachedGuideline') }}</span>
+          <div v-if="!callForm.attachments.length" class="text-sm text-slate-400 italic bg-slate-950 border border-slate-800 p-4 rounded-xl">
+            {{ t('tasks.form.labels.noAttachments') }}
+          </div>
+
+          <div v-for="attachment in callForm.attachments" :key="attachment.id" class="bg-slate-950 p-4 border border-slate-800 rounded-xl space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-start">
+              <div>
+                <label class="block text-[10px] font-mono uppercase text-gray-500 mb-1">{{ t('tasks.form.labels.documentLabel') }}</label>
+                <input v-model="attachment.document_name" type="text" :placeholder="t('tasks.form.placeholders.documentName')" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs focus:border-blue-500 outline-none text-white" />
+              </div>
+              <button type="button" @click="removeAttachment(attachment.id)" class="text-xs text-red-400 hover:text-red-300 font-mono self-center">{{ t('tasks.form.labels.remove') }}</button>
             </div>
 
-            <div v-if="isEditMode && (getExistingFileName(doc.type ?? doc.id) || getExistingFileName(doc.type ?? toSnakeCase(doc.document_name)))" class="text-xs text-emerald-400 font-mono bg-emerald-950/20 border border-emerald-900/30 p-2 rounded flex justify-between items-center">
-              <span>{{ t('tasks.form.labels.currentFile', { name: getExistingFileName(doc.type ?? doc.id) || getExistingFileName(doc.type ?? toSnakeCase(doc.document_name)) }) }}</span>
+            <div v-if="isEditMode && getExistingFileName(attachment.type)" class="text-xs text-emerald-400 font-mono bg-emerald-950/20 border border-emerald-900/30 p-2 rounded flex justify-between items-center">
+              <span>{{ t('tasks.form.labels.currentFile', { name: getExistingFileName(attachment.type) }) }}</span>
               <span class="text-[10px] text-emerald-500 uppercase">{{ t('tasks.form.labels.alreadyUploaded') }}</span>
             </div>
 
             <div class="relative h-11 border border-dashed border-slate-800 rounded-lg bg-slate-900/30 hover:bg-slate-900/60 transition-colors flex items-center px-4">
-              <input type="file" :id="'file_' + doc.id" @change="handleFileChange(doc.id, $event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-              <label :for="'file_' + doc.id" class="flex justify-between w-full items-center cursor-pointer">
-                <span class="text-sm truncate pr-2" :class="files[doc.id] ? 'text-white font-medium' : 'text-gray-600'">
-                  {{ files[doc.id]?.name ?? (isEditMode && (getExistingFileName(doc.id) || getExistingFileName(toSnakeCase(doc.document_name))) ? t('tasks.form.labels.replaceFile') : t('tasks.form.labels.chooseFile')) }}
+              <input type="file" :id="'attachment_file_' + attachment.id" @change="handleFileChange(attachment.id, $event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+              <label :for="'attachment_file_' + attachment.id" class="flex justify-between w-full items-center cursor-pointer">
+                <span class="text-sm truncate pr-2" :class="files[attachment.id] ? 'text-white font-medium' : 'text-gray-600'">
+                  {{ files[attachment.id]?.name ?? (isEditMode && getExistingFileName(attachment.type) ? t('tasks.form.labels.replaceFile') : t('tasks.form.labels.chooseFile')) }}
                 </span>
                 <span class="text-xs bg-blue-900/50 text-blue-300 px-3 py-1 rounded font-mono">{{ t('tasks.form.labels.browse') }}</span>
               </label>

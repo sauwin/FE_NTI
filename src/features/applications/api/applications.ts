@@ -21,6 +21,12 @@ export function createApplication(payload: ApplicationPayload) {
   return api.post('/applications', payload)
 }
 
+export function createApplicationWithDocuments(formData: FormData) {
+  return api.post('/applications', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+}
+
 export function updateApplication(id: number | string, payload: Partial<ApplicationPayload> & Record<string, unknown>) {
   return api.patch(`/applications/${id}`, payload)
 }
@@ -43,5 +49,9 @@ export function applyApplicationChanges(id: number | string) {
 
 export function getApplicationLastRevision(id: number | string) {
   return api.get(`/applications/${id}/last_revision`)
+}
+
+export function requestApplicationRevision(id: number | string, message: string) {
+  return api.post(`/applications/${id}/revisions`, { message })
 }
 

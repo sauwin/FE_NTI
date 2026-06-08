@@ -17,7 +17,7 @@ export function createCallWithTask(formData: FormData) {
 }
 
 export function updateCallWithTask(taskId: number | string, formData: FormData) {
-  return api.post(`/calls-with-tasks/${taskId}`, formData, {
+  return api.put(`/calls-with-tasks/${taskId}`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   })
 }
