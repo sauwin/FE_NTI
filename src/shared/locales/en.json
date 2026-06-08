@@ -10,7 +10,8 @@
     "status": {
       "active": "active",
       "pending": "pending",
-      "unknown": "—"
+      "unknown": "—",
+      "pending_approval": "Pending Approval"
     },
     "alerts": {
       "pending_approval_title": "Role pending approval",

@@ -92,7 +92,8 @@
       "status": {
         "active": "Aktívna",
         "pending": "Čakajúca",
-        "inactive": "Neaktívna"
+        "inactive": "Neaktívna",
+        "pending_approval": "Čaká na schválenie"
       }
     },
     "overview": {
@@ -740,6 +741,8 @@
       "allStatuses": "Všetky stavy",
       "statusActive": "Aktívny",
       "statusBlocked": "Zablokovaný",
+      "statusPendingApproval": "Čaká na schválenie",
+      "statusPendingVerification": "Čaká na overenie",
       "loadingUsers": "Načítavanie používateľov...",
       "tableHeaders": {
         "user": "Používateľ",
