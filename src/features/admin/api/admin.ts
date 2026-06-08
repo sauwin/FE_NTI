@@ -153,3 +153,30 @@ export function finalizeEvaluation(applicationId: number, payload: FinalizeEvalu
   return api.post(`admin/applications/${applicationId}/finalize-evaluation`, payload)
 }
 
+export function getAdminCompanies(params?: Record<string, unknown>) {
+  return api.get('admin/company', { params })
+}
+
+export function approveCompany(companyId: number) {
+  return api.post(`admin/company/approve/${companyId}`)
+}
+
+export function rejectCompany(companyId: number) {
+  return api.post(`admin/company/reject/${companyId}`)
+}
+
+export function activateCompany(companyId: number) {
+  return api.post(`admin/company/activate/${companyId}`)
+}
+
+export function deactivateCompany(companyId: number) {
+  return api.post(`admin/company/deactivate/${companyId}`)
+}
+
+export function deleteCompany(companyId: number) {
+  return api.delete(`admin/company/delete/${companyId}`)
+}
+
+export function exportCompanies(params: Record<string, unknown>) {
+  return api.get('/admin/export/company', { params, responseType: 'blob' })
+}

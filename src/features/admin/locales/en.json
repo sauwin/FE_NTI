@@ -13,7 +13,7 @@
         "evaluators": "Evaluators",
         "mentorships": "Mentors",
         "users": "Users",
-        "approvals": "Approvals",
+        "company": "Company",
         "documents": "Documents",
         "createAdmin": "Create Staff",
         "logs": "Audit Logs",
@@ -23,6 +23,76 @@
         "metricsLoadFalied": "Failed to load dashboard metrics",
         "usersLoadFailed": "Failed to load users",
         "approvalsLoadFailed": "Failed to load approvals"
+      }
+    },
+
+    "companyManagement": {
+      "title": "Company",
+      "description": "Manage company registrations and statuses.",
+      "exportCsv": "Export CSV",
+      "exportXlsx": "Export XLSX",
+      "searchNamePlaceholder": "Search by company name...",
+      "searchNumberPlaceholder": "Search by company number...",
+      "allStatuses": "All Statuses",
+      "statusActive": "Active",
+      "statusPending": "Pending",
+      "statusInactive": "Inactive",
+      "loadingCompanies": "Loading companies...",
+      "noCompaniesFound": "No companies found.",
+      "tableHeaders": {
+        "company": "Company",
+        "registrationNumber": "Registration number",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "actions": {
+        "details": "Details",
+        "deactivate": "Deactivate",
+        "approve": "Approve",
+        "reject": "Reject",
+        "activate": "Activate",
+        "delete": "Delete"
+      },
+      "modal": {
+        "detailsTitle": "Company Details",
+        "nameLabel": "Name",
+        "websiteLabel": "Website",
+        "regNumberLabel": "Registration Number",
+        "statusLabel": "Status",
+        "close": "Close",
+        "cancel": "Cancel"
+      },
+      "confirm": {
+        "approveTitle": "Approve Company",
+        "approveMessage": "Are you sure you want to approve this company? This will activate the organization and the owner account.",
+        "rejectTitle": "Reject Company",
+        "rejectMessage": "Are you sure you want to reject this company? This action will remove the organization and block the owner account.",
+        "deactivateTitle": "Deactivate Company",
+        "deactivateMessage": "Are you sure you want to deactivate this company? Users will lose access until reactivated.",
+        "activateTitle": "Activate Company",
+        "activateMessage": "Are you sure you want to activate this company?",
+        "deleteTitle": "Delete Company",
+        "deleteMessage": "This will permanently delete the organization. Are you sure?"
+      },
+      "messages": {
+        "loadFailed": "Failed to load companies.",
+        "approved": "Company approved.",
+        "approveFailed": "Failed to approve company.",
+        "rejected": "Company rejected.",
+        "rejectFailed": "Failed to reject company.",
+        "deactivated": "Company deactivated.",
+        "deactivateFailed": "Failed to deactivate company.",
+        "activated": "Company activated.",
+        "activateFailed": "Failed to activate company.",
+        "deleted": "Company deleted.",
+        "deleteFailed": "Failed to delete company.",
+        "exportSuccess": "Export successful ({format})",
+        "exportFailed": "Export failed ({format})"
+      },
+      "status": {
+        "active": "Active",
+        "pending": "Pending",
+        "inactive": "Inactive"
       }
     },
     "overview": {
