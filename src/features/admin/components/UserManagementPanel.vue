@@ -87,6 +87,34 @@ function setMessage(ok: boolean, text: string) {
   setTimeout(() => { message.value = '' }, 3000)
 }
 
+function getStatusClass(status: string) {
+  switch (status) {
+    case 'active':
+      return 'bg-emerald-900/40 text-emerald-400 border-emerald-800'
+    case 'pending_approval':
+      return 'bg-blue-900/40 text-blue-400 border-blue-800'
+    case 'pending_verification':
+      return 'bg-amber-900/40 text-amber-400 border-amber-800'
+    case 'blocked':
+    default:
+      return 'bg-yellow-900/40 text-yellow-400 border-yellow-800'
+  }
+}
+
+function getStatusLabel(status: string) {
+  switch (status) {
+    case 'active':
+      return t('admin.userManagementPanel.statusActive')
+    case 'pending_approval':
+      return t('admin.userManagementPanel.statusPendingApproval', 'Pending Approval')
+    case 'pending_verification':
+      return t('admin.userManagementPanel.statusPendingVerification', 'Pending Verification')
+    case 'blocked':
+    default:
+      return t('admin.userManagementPanel.statusBlocked')
+  }
+}
+
 function canManage(user: any) {
   const adminOnlyRoles = ['super_admin']
   return !user.roles?.some((r: AdminRole) => adminOnlyRoles.includes(r.slug))
@@ -331,6 +359,8 @@ onMounted(loadUsers)
           >
             <option value="">{{ t('admin.userManagementPanel.allStatuses') }}</option>
             <option value="active">{{ t('admin.userManagementPanel.statusActive') }}</option>
+            <option value="pending_approval">{{ t('admin.userManagementPanel.statusPendingApproval', 'Pending Approval') }}</option>
+            <option value="pending_verification">{{ t('admin.userManagementPanel.statusPendingVerification', 'Pending Verification') }}</option>
             <option value="blocked">{{ t('admin.userManagementPanel.statusBlocked') }}</option>
           </select>
         </div>
@@ -341,7 +371,7 @@ onMounted(loadUsers)
       {{ t('admin.userManagementPanel.loadingUsers') }}
     </div>
 
-    <div v-else class="overflow-x-auto">
+    <div class="overflow-x-auto" v-else>
       <table class="w-full text-left text-sm text-slate-300">
         <thead class="text-xs text-slate-400 uppercase bg-slate-900/50 font-mono">
           <tr>
@@ -388,12 +418,10 @@ onMounted(loadUsers)
 
             <td class="px-4 py-3">
               <span
-                :class="user.status === 'active'
-                  ? 'bg-emerald-900/40 text-emerald-400 border-emerald-800'
-                  : 'bg-yellow-900/40 text-yellow-400 border-yellow-800'"
+                :class="getStatusClass(user.status)"
                 class="text-xs px-2 py-1 rounded border font-mono uppercase whitespace-nowrap"
               >
-                {{ user.status === 'active' ? t('admin.userManagementPanel.statusActive') : t('admin.userManagementPanel.statusBlocked') }}
+                {{ getStatusLabel(user.status) }}
               </span>
             </td>
 

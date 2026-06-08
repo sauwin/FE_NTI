@@ -10,7 +10,8 @@
     "status": {
       "active": "aktívny",
       "pending": "čaká na schválenie",
-      "unknown": "—"
+      "unknown": "—",
+      "pending_approval": "Čaká na schválenie"
     },
     "alerts": {
       "pending_approval_title": "Rola čaká na schválenie",

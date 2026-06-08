@@ -92,7 +92,9 @@
       "status": {
         "active": "Active",
         "pending": "Pending",
-        "inactive": "Inactive"
+        "inactive": "Inactive",
+        "pending_approval": "Pending Approval"
+        
       }
     },
     "overview": {
@@ -701,6 +703,8 @@
       "allStatuses": "All Statuses",
       "statusActive": "Active",
       "statusBlocked": "Blocked",
+      "statusPendingApproval": "Pending Approval",
+      "statusPendingVerification": "Pending Verification",
       "loadingUsers": "Loading users...",
       "tableHeaders": {
         "user": "User",
