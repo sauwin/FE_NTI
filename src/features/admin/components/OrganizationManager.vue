@@ -8,6 +8,7 @@ import {
   deactivateCompany,
   deleteCompany,
   exportCompanies,
+  updateCompanyPartnerStatus,
 } from '@/features/admin/api/admin'
 import { useConfirm } from '@/shared/composables/useConfirm'
 import Pagination from '@/shared/components/Pagination.vue'
@@ -31,6 +32,8 @@ const selectedStatus = ref('')
 
 const showDetailsModal = ref(false)
 const selectedCompany = ref<any>(null)
+
+const updatingStatusIds = ref<number[]>([])
 
 async function loadCompanies() {
   loading.value = true
@@ -56,6 +59,42 @@ async function loadCompanies() {
     setMessage(false, e.response?.data?.message || t('admin.companyManagement.messages.loadFailed'))
   } finally {
     loading.value = false
+  }
+}
+
+async function handleTogglePublicPartner(company: any) {
+  const targetValue = company.is_public_partner === 1 ? 0 : 1
+  const companyId = company.id
+  
+  updatingStatusIds.value.push(companyId)
+  
+  try {
+    await updateCompanyPartnerStatus(companyId, { is_public_partner: targetValue })
+
+    const foundCompany = companies.value.find(c => c.id === companyId)
+    if (foundCompany) {
+      foundCompany.is_public_partner = targetValue
+    }
+
+    if (selectedCompany.value && selectedCompany.value.id === companyId) {
+      selectedCompany.value.is_public_partner = targetValue
+    }
+    
+    setMessage(true, t('admin.companyManagement.messages.statusUpdated'))
+    emit('refresh')
+  } catch (e: any) {
+    setMessage(false, e.response?.data?.message || t('admin.companyManagement.messages.statusUpdateFailed'))
+    
+    await loadCompanies() 
+    
+    if (selectedCompany.value && selectedCompany.value.id === companyId) {
+      const refreshedCompany = companies.value.find(c => c.id === companyId)
+      if (refreshedCompany) {
+        selectedCompany.value = refreshedCompany
+      }
+    }
+  } finally {
+    updatingStatusIds.value = updatingStatusIds.value.filter(id => id !== companyId)
   }
 }
 
@@ -295,6 +334,7 @@ onMounted(loadCompanies)
             <th class="px-4 py-3 rounded-tl-lg">{{ t('admin.companyManagement.tableHeaders.company') }}</th>
             <th class="px-4 py-3">{{ t('admin.companyManagement.tableHeaders.registrationNumber') }}</th>
             <th class="px-4 py-3">{{ t('admin.companyManagement.tableHeaders.status') }}</th>
+            <th class="px-4 py-3 text-center">{{ t('admin.companyManagement.tableHeaders.publicPartner') }}</th>
             <th class="px-4 py-3 rounded-tr-lg text-right">{{ t('admin.companyManagement.tableHeaders.actions') }}</th>
           </tr>
         </thead>
@@ -329,6 +369,16 @@ onMounted(loadCompanies)
               >
                 {{ t(`admin.companyManagement.status.${company.status}`) }}
               </span>
+            </td>
+
+            <td class="px-4 py-3 text-center">
+              <input
+                type="checkbox"
+                :checked="company.is_public_partner === 1"
+                :disabled="updatingStatusIds.includes(company.id)"
+                @change="handleTogglePublicPartner(company)"
+                class="w-4 h-4 rounded bg-slate-950 border-slate-800 text-blue-600 focus:ring-blue-600 focus:ring-offset-slate-900 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              />
             </td>
 
             <td class="px-4 py-3 text-right whitespace-nowrap">
@@ -389,7 +439,7 @@ onMounted(loadCompanies)
           </tr>
 
           <tr v-if="companies.length === 0">
-            <td colspan="4" class="px-4 py-10 text-center text-slate-500 italic text-sm">
+            <td colspan="5" class="px-4 py-10 text-center text-slate-500 italic text-sm">
               {{ t('admin.companyManagement.noCompaniesFound') }}
             </td>
           </tr>
@@ -439,6 +489,25 @@ onMounted(loadCompanies)
             </span>
             <div class="bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm font-mono">
               {{ selectedCompany.registration_number || '—' }}
+            </div>
+          </div>
+
+          <div>
+            <span class="block text-xs font-mono uppercase text-slate-500 mb-1">
+              {{ t('admin.companyManagement.tableHeaders.publicPartner') }}
+            </span>
+            <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm">
+              <input
+                id="modalPublicPartner"
+                type="checkbox"
+                :checked="selectedCompany.is_public_partner === 1"
+                :disabled="updatingStatusIds.includes(selectedCompany.id)"
+                @change="handleTogglePublicPartner(selectedCompany)"
+                class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-blue-600 cursor-pointer disabled:opacity-40"
+              />
+              <label for="modalPublicPartner" class="text-slate-300 text-xs select-none cursor-pointer">
+                {{ selectedCompany.is_public_partner === 1 ? 'Так (1)' : 'Ні (0)' }}
+              </label>
             </div>
           </div>
 
