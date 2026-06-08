@@ -2,14 +2,19 @@
   "partners": {
     "hero": {
       "badge": "Partneri",
-      "title": "Naši strategickí",
+      "title": "Naša stratégia",
       "highlight": "Partneri",
-      "description": "Náš projekt je realizovaný vďaka podpore odhodlaných organizácií a jednotlivcov, ktorí zdieľajú našu víziu a pomáhajú nám vytvárať zmysluplné príležitosti pre účastníkov."
+      "description": "Náš projekt je realizovaný vďaka podpore oddaných organizácií a jednotlivcov, ktorí zdieľajú našu víziu a pomáhajú nám vytvárať zmysluplné príležitosti pre účastníkov."
+    },
+    "labels": {
+      "contacts": "Kontaktné osoby"
     },
     "states": {
-      "loading": "Načítavam...",
+      "loading": "Načítava sa...",
       "error": "Nepodarilo sa načítať partnerov.",
-      "empty": "Zatiaľ žiadni partneri."
+      "empty": "Zatiaľ žiadni partneri.",
+      "noContacts": "Nie sú k dispozícii žiadne kontaktné osoby",
+      "noWebsite": "Webová stránka nie je k dispozícii"
     }
   }
 }

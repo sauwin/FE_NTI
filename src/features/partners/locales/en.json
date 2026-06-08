@@ -6,10 +6,15 @@
       "highlight": "Partners",
       "description": "Our project is made possible through the support of dedicated organizations and individuals who share our vision and help us create meaningful opportunities for participants."
     },
+    "labels": {
+      "contacts": "Contact Persons"
+    },
     "states": {
       "loading": "Loading...",
       "error": "Failed to load partners.",
-      "empty": "No partners yet."
+      "empty": "No partners yet.",
+      "noContacts": "No contact persons available",
+      "noWebsite": "No website available"
     }
   }
 }
