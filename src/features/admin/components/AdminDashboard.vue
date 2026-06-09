@@ -14,7 +14,6 @@ const CreateAdminForm = defineAsyncComponent(() => import('./CreateAdminForm.vue
 const AdminLogs = defineAsyncComponent(() => import('./AdminLogs.vue'))
 const BulkNotificationPanel = defineAsyncComponent(() => import('@/features/admin/components/BulkNotificationPanel.vue'))
 const OrganizationManager = defineAsyncComponent(() => import('@/features/admin/components/OrganizationManager.vue'))
-const BacklogManager = defineAsyncComponent(() => import('@/features/admin/components/BacklogManager.vue'))
 
 const props = defineProps<{
   userRole?: string
@@ -149,7 +148,6 @@ onMounted(() => {
           { id: 'mentorships', name: t('admin.dashboard.tabLabels.mentorships') },
           { id: 'users', name: t('admin.dashboard.tabLabels.users') },
           { id: 'organization-manager', name: t('admin.dashboard.tabLabels.company') },
-          { id: 'backlog', name: t('admin.dashboard.tabLabels.backlog') },
           { id: 'documents', name: t('admin.dashboard.tabLabels.documents') },
           ...(isSuperAdmin ? [{ id: 'create-admin', name: t('admin.dashboard.tabLabels.createAdmin') }] : []),
           { id: 'logs', name: t('admin.dashboard.tabLabels.logs') },
@@ -297,10 +295,6 @@ onMounted(() => {
 
     <div v-if="activeTab === 'organization-manager'">
       <OrganizationManager />
-    </div>
-
-    <div v-if="activeTab === 'backlog'">
-      <BacklogManager />
     </div>
 
     <div v-if="activeTab === 'documents'">

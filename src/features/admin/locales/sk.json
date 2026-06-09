@@ -17,8 +17,7 @@
         "documents": "Dokumenty",
         "createAdmin": "Pridať pracovníka",
         "logs": "Audít",
-        "broadcastNotification": "Hromadné správy",
-        "backlog": "Backlog"
+        "broadcastNotification": "Hromadné správy"
       },
       "exportCsv": "Exportovať CSV",
       "exportXlsx": "Exportovať XLSX",
@@ -862,55 +861,6 @@
         "loadFailed": "Nepodarilo sa načítať dáta žiadosti."
       },
       "noComment": "Žiadny komentár"
-    },
-    "backlog": {
-      "title": "Backlog úloh",
-      "subtitle": "Spravujte životný cyklus firemných úloh od zverejnenia po uzavretie.",
-      "totalTasks": "úloh",
-      "filterAll": "Všetky stavy",
-      "exportCsv": "Exportovať CSV",
-      "exportXlsx": "Exportovať XLSX",
-      "searchPlaceholder": "Hľadať úlohy...",
-      "allStatuses": "Všetky stavy",
-      "loadingTasks": "Načítavam úlohy...",
-      "noTasksFound": "Nenašli sa žiadne úlohy.",
-      "deadline": "Termín",
-      "override": "Prepísať",
-      "cancel": "Zrušiť",
-      "confirmAdvanceTitle": "Posunúť stav úlohy",
-      "confirmAdvanceMsg": "Presunúť túto úlohu do stavu {status}?",
-      "poModalTitle": "Priradiť produktového vlastníka",
-      "poModalSubtitle": "Vyberte používateľa ako produktového vlastníka pri priraďovaní tímu.",
-      "loadingUsers": "Načítavanie používateľov...",
-      "poNone": "Bez produktového vlastníka",
-      "confirmAssign": "Potvrdiť a posunúť",
-      "overrideModalTitle": "Prepísať stav",
-      "confirmOverride": "Nastaviť stav",
-      "noTasks": "Pre vybraný filter sa nenašli žiadne úlohy.",
-      "tableHeaders": {
-        "task": "Úloha",
-        "organization": "Organizácia",
-        "status": "Stav",
-        "budget": "Rozpočet",
-        "po": "PO",
-        "deadline": "Termín",
-        "actions": "Akcie"
-      },
-      "actions": {
-        "override": "Prepísať"
-      },
-      "messages": {
-        "exportSuccess": "Úlohy boli exportované ako {format}.",
-        "exportFailed": "Export zlyhal."
-      },
-      "status": {
-        "draft": "Koncept",
-        "published": "Publikované",
-        "in_matching": "V zhode",
-        "assigned": "Priradené",
-        "in_progress": "V riešení",
-        "closed": "Uzavreté"
-      }
     }
   }
 }

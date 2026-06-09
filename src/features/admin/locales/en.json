@@ -17,8 +17,7 @@
         "documents": "Documents",
         "createAdmin": "Create Staff",
         "logs": "Audit Logs",
-        "broadcastNotification": "Broadcast",
-        "backlog": "Backlog"
+        "broadcastNotification": "Broadcast"
       },
       "exportCsv": "Export CSV",
       "exportXlsx": "Export XLSX",
@@ -824,55 +823,6 @@
         "loadFailed": "Failed to load application data."
       },
       "noComment": "No comment"
-    },
-    "backlog": {
-      "title": "Task Backlog",
-      "subtitle": "Manage the company task lifecycle from published to closed.",
-      "totalTasks": "tasks",
-      "filterAll": "All statuses",
-      "exportCsv": "Export CSV",
-      "exportXlsx": "Export XLSX",
-      "searchPlaceholder": "Search tasks...",
-      "allStatuses": "All statuses",
-      "loadingTasks": "Loading tasks...",
-      "noTasksFound": "No tasks found.",
-      "deadline": "Deadline",
-      "override": "Override",
-      "cancel": "Cancel",
-      "confirmAdvanceTitle": "Advance task status",
-      "confirmAdvanceMsg": "Move this task to {status}?",
-      "poModalTitle": "Assign Product Owner",
-      "poModalSubtitle": "Select a user to set as Product Owner when assigning the team.",
-      "loadingUsers": "Loading users...",
-      "poNone": "No Product Owner",
-      "confirmAssign": "Confirm & Advance",
-      "overrideModalTitle": "Override status",
-      "confirmOverride": "Set status",
-      "noTasks": "No tasks found for the selected filter.",
-      "tableHeaders": {
-        "task": "Task",
-        "organization": "Organization",
-        "status": "Status",
-        "budget": "Budget",
-        "po": "PO",
-        "deadline": "Deadline",
-        "actions": "Actions"
-      },
-      "actions": {
-        "override": "Override"
-      },
-      "messages": {
-        "exportSuccess": "Tasks exported as {format}.",
-        "exportFailed": "Export failed."
-      },
-      "status": {
-        "draft": "Draft",
-        "published": "Published",
-        "in_matching": "In matching",
-        "assigned": "Assigned",
-        "in_progress": "In progress",
-        "closed": "Closed"
-      }
     }
   }
 }

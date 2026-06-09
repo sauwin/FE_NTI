@@ -133,7 +133,42 @@
     :label="t('home.calls.label')"
     :title="t('home.calls.title')"
   >
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div
+      v-if="loadingCalls"
+      class="grid grid-cols-1 lg:grid-cols-2 gap-6"
+    >
+      <div
+        v-for="i in 2"
+        :key="i"
+        class="card-glowing p-6 animate-pulse"
+      >
+        <div class="h-5 w-24 bg-slate-800 rounded mb-5"></div>
+        <div class="h-7 w-2/3 bg-slate-800 rounded mb-4"></div>
+        <div class="h-4 w-full bg-slate-800 rounded mb-2"></div>
+        <div class="h-4 w-4/5 bg-slate-800 rounded mb-6"></div>
+        <div class="h-10 w-full bg-slate-800 rounded-xl"></div>
+      </div>
+    </div>
+
+    <div
+      v-else-if="sortedCalls.length === 0"
+      class="card-glowing p-12 text-center max-w-2xl mx-auto flex flex-col items-center justify-center border border-dashed border-slate-800"
+    >
+      <div class="h-12 w-12 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center mb-4 text-slate-500 text-xl">
+        🔔
+      </div>
+      <h4 class="text-lg font-semibold text-white mb-2">
+        {{ t('home.calls.empty_title', 'No Active Calls') }}
+      </h4>
+      <p class="text-sm text-slate-400 max-w-sm leading-relaxed mb-1">
+        {{ t('home.calls.empty') }}
+      </p>
+    </div>
+
+    <div
+      v-else
+      class="grid grid-cols-1 lg:grid-cols-2 gap-6"
+    >
       <div
         v-for="call in sortedCalls"
         :key="call.id"
