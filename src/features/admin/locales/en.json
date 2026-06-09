@@ -8,7 +8,7 @@
       "description": "Centralized management of users, applications, programs and platform workflows.",
       "tabLabels": {
         "overview": "Overview",
-        "programsCalls": "Programs & Calls",
+        "programsCalls": "Calls",
         "applications": "Applications",
         "evaluators": "Evaluators",
         "mentorships": "Mentors",
@@ -17,7 +17,8 @@
         "documents": "Documents",
         "createAdmin": "Create Staff",
         "logs": "Audit Logs",
-        "broadcastNotification": "Broadcast"
+        "broadcastNotification": "Broadcast",
+        "backlog": "Backlog"
       },
       "errors": {
         "metricsLoadFalied": "Failed to load dashboard metrics",
@@ -25,7 +26,6 @@
         "approvalsLoadFailed": "Failed to load approvals"
       }
     },
-
     "companyManagement": {
       "title": "Company",
       "description": "Manage company registrations and statuses.",
@@ -97,7 +97,6 @@
         "pending": "Pending",
         "inactive": "Inactive",
         "pending_approval": "Pending Approval"
-        
       }
     },
     "overview": {
@@ -130,7 +129,6 @@
         "mentors": "Mentors"
       }
     },
-
     "documentManager": {
       "title": "Documents",
       "filters": {
@@ -164,7 +162,6 @@
         "previewFailed": "Preview failed."
       }
     },
-
     "logs": {
       "title": "Audit Logs",
       "system": "System",
@@ -222,7 +219,6 @@
         "generated": "Generated: {date}"
       }
     },
-
     "mentorsManager": {
       "title": "Application Mentors",
       "dropdowns": {
@@ -261,7 +257,6 @@
         "removeFailed": "Could not remove mentor"
       }
     },
-
     "applicationsManager": {
       "title": "Applications",
       "filterNotice": "Filtered for Call ID: {id}",
@@ -327,7 +322,6 @@
         "exportError": "Failed to download export."
       }
     },
-
     "bulkNotificationPanel": {
       "form": {
         "title": "Bulk Notifications",
@@ -383,7 +377,6 @@
         "exportFailed": "Failed to export notifications as {format}"
       }
     },
-
     "callCreate": {
       "title": "Create Call (Výzva)",
       "subtitle": "Configure lifecycle status and structure rules",
@@ -424,7 +417,6 @@
         "defaultDocName": "Team Project Pitch (PDF)"
       }
     },
-
     "callEdit": {
       "title": "Edit Call Configuration",
       "subtitle": "Update lifecycle status, dates, and JSON schema",
@@ -462,7 +454,6 @@
         "updateError": "Error updating Call configuration."
       }
     },
-
     "callEvaluatorsManager": {
       "title": "Call Evaluators & Evaluation Scheduling",
       "selectCallLabel": "Select Call",
@@ -513,7 +504,6 @@
         "btnRemove": "Remove"
       }
     },
-
     "callsManagementPanel": {
       "title": "System Calls (Výzva)",
       "btnCreate": "+ Create New Call",
@@ -542,7 +532,6 @@
         "confirmText": "Okay"
       }
     },
-
     "createAdminForm": {
       "title": "New Technical User",
       "fields": {
@@ -570,7 +559,6 @@
         "failed": "Failed to create admin"
       }
     },
-
     "evaluationCriteriaManager": {
       "title": "Evaluation Criteria",
       "description": "Define structured parameters and weights for proposal scoring.",
@@ -605,7 +593,6 @@
         "saveError": "Error while saving criteria"
       }
     },
-
     "programCallsManager": {
       "form": {
         "titleCreate": "New Program A Call",
@@ -695,7 +682,6 @@
         }
       }
     },
-
     "userManagementPanel": {
       "title": "Users Management",
       "description": "Manage platform users, permissions and access.",
@@ -765,7 +751,6 @@
         "removeRoleMessage": "Remove \"{role}\" role?"
       }
     },
-
     "finalVerdictPanel": {
       "navigation": {
         "adminPanel": "Admin Panel"
@@ -806,15 +791,15 @@
       "averageIndexDesc": "Automatically generated mathematical arithmetic average",
       "statusOptions": {
         "approve": {
-          "title": "🟢 Approve",
+          "title": "Approve",
           "desc": "Admit into incubator"
         },
         "revision": {
-          "title": "🟡 Revision",
+          "title": "Revision",
           "desc": "Return to applicant"
         },
         "reject": {
-          "title": "🔴 Reject",
+          "title": "Reject",
           "desc": "Permanent dismissal"
         }
       },
@@ -826,6 +811,55 @@
         "loadFailed": "Failed to load application data."
       },
       "noComment": "No comment"
+    },
+    "backlog": {
+      "title": "Task Backlog",
+      "subtitle": "Manage the company task lifecycle from published to closed.",
+      "totalTasks": "tasks",
+      "filterAll": "All statuses",
+      "exportCsv": "Export CSV",
+      "exportXlsx": "Export XLSX",
+      "searchPlaceholder": "Search tasks...",
+      "allStatuses": "All statuses",
+      "loadingTasks": "Loading tasks...",
+      "noTasksFound": "No tasks found.",
+      "deadline": "Deadline",
+      "override": "Override",
+      "cancel": "Cancel",
+      "confirmAdvanceTitle": "Advance task status",
+      "confirmAdvanceMsg": "Move this task to {status}?",
+      "poModalTitle": "Assign Product Owner",
+      "poModalSubtitle": "Select a user to set as Product Owner when assigning the team.",
+      "loadingUsers": "Loading users...",
+      "poNone": "No Product Owner",
+      "confirmAssign": "Confirm & Advance",
+      "overrideModalTitle": "Override status",
+      "confirmOverride": "Set status",
+      "noTasks": "No tasks found for the selected filter.",
+      "tableHeaders": {
+        "task": "Task",
+        "organization": "Organization",
+        "status": "Status",
+        "budget": "Budget",
+        "po": "PO",
+        "deadline": "Deadline",
+        "actions": "Actions"
+      },
+      "actions": {
+        "override": "Override"
+      },
+      "messages": {
+        "exportSuccess": "Tasks exported as {format}.",
+        "exportFailed": "Export failed."
+      },
+      "status": {
+        "draft": "Draft",
+        "published": "Published",
+        "in_matching": "In matching",
+        "assigned": "Assigned",
+        "in_progress": "In progress",
+        "closed": "Closed"
+      }
     }
   }
 }

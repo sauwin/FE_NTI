@@ -177,3 +177,46 @@ export interface FinalizeEvaluationPayload {
   status: string
   comment: string | null
 }
+
+export type AdminTaskStatus =
+  | 'draft'
+  | 'published'
+  | 'in_matching'
+  | 'assigned'
+  | 'in_progress'
+  | 'closed'
+
+export interface AdminTaskOrganization {
+  id: number
+  name: string
+}
+
+export interface AdminTaskProductOwner {
+  id: number
+  email: string
+  first_name?: string | null
+  last_name?: string | null
+}
+
+export interface AdminTaskCall {
+  id: number
+  deadline_at?: string | null
+  opens_at?: string | null
+}
+
+export interface AdminTask {
+  id: number
+  title: string
+  brief?: string | null
+  short_description?: string | null
+  budget?: string | null
+  status: AdminTaskStatus
+  product_owner_user_id?: number | null
+  organization_id?: number
+  call_id?: number
+  created_at?: string
+  updated_at?: string
+  organization?: AdminTaskOrganization
+  product_owner?: AdminTaskProductOwner
+  call?: AdminTaskCall
+}

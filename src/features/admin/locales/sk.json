@@ -8,7 +8,7 @@
       "description": "Centralizovaná správa používateľov, žiadostí, programov a pracovných postupov platformy.",
       "tabLabels": {
         "overview": "Prehľad",
-        "programsCalls": "Programy a výzvy",
+        "programsCalls": "Výzvy",
         "applications": "Žiadosti",
         "evaluators": "Hodnotitelia",
         "mentorships": "Mentori",
@@ -17,7 +17,8 @@
         "documents": "Dokumenty",
         "createAdmin": "Pridať pracovníka",
         "logs": "Audít",
-        "broadcastNotification": "Hromadné správy"
+        "broadcastNotification": "Hromadné správy",
+        "backlog": "Backlog"
       },
       "errors": {
         "metricsLoadFalied": "Nepodarilo sa načítať metriky nástenky",
@@ -25,7 +26,6 @@
         "approvalsLoadFailed": "Nepodarilo sa načítať schvaľovania"
       }
     },
-
     "companyManagement": {
       "title": "Organizácie",
       "description": "Spravovať registrácie organizácie a ich stav.",
@@ -129,7 +129,6 @@
         "mentors": "Mentori"
       }
     },
-
     "documentManager": {
       "title": "Dokumenty",
       "filters": {
@@ -163,7 +162,6 @@
         "previewFailed": "Náhľad zlyhal."
       }
     },
-
     "logs": {
       "title": "Audítorské záznamy",
       "system": "Systém",
@@ -221,7 +219,6 @@
         "generated": "Generované: {date}"
       }
     },
-
     "mentorsManager": {
       "title": "Mentori žiadostí",
       "dropdowns": {
@@ -260,7 +257,6 @@
         "removeFailed": "Nepodarilo sa odobrať mentora"
       }
     },
-
     "applicationsManager": {
       "title": "Žiadosti",
       "filterNotice": "Filtrované pre ID výzvy: {id}",
@@ -326,7 +322,6 @@
         "exportError": "Nepodarilo sa stiahnuť export."
       }
     },
-
     "bulkNotificationPanel": {
       "form": {
         "title": "Hromadné oznámenia",
@@ -382,7 +377,6 @@
         "exportFailed": "Nepodarilo sa exportovať oznámenia vo formáte {format}"
       }
     },
-
     "callCreate": {
       "title": "Vytvoriť výzvu",
       "subtitle": "Nakonfigurujte stav životného cyklu a štrukturálne pravidlá",
@@ -423,7 +417,6 @@
         "defaultDocName": "Prezentácia projektu tímu (PDF)"
       }
     },
-
     "callEdit": {
       "title": "Upraviť konfiguráciu výzvy",
       "subtitle": "Aktualizujte stav životného cyklu, dátumy a JSON schému",
@@ -461,7 +454,6 @@
         "updateError": "Chyba pri aktualizácii konfigurácie výzvy."
       }
     },
-
     "callEvaluatorsManager": {
       "title": "Hodnotitelia výzvy a plánovanie hodnotenia",
       "selectCallLabel": "Vybrať výzvu",
@@ -512,7 +504,6 @@
         "btnRemove": "Odobrať"
       }
     },
-
     "callsManagementPanel": {
       "title": "Systémové výzvy",
       "btnCreate": "+ Vytvoriť novú výzvu",
@@ -541,7 +532,6 @@
         "confirmText": "V poriadku"
       }
     },
-
     "createAdminForm": {
       "title": "Nový Technický Pracovník",
       "fields": {
@@ -569,7 +559,6 @@
         "failed": "Nepodarilo sa vytvoriť administrátora"
       }
     },
-
     "evaluationCriteriaManager": {
       "title": "Kritériá hodnotenia",
       "description": "Definujte štruktúrované parametre a váhy pre bodovanie návrhov.",
@@ -604,7 +593,6 @@
         "saveError": "Chyba pri ukladaní kritérií"
       }
     },
-
     "pendingApprovalTable": {
       "title": "Čakajúce schválenia",
       "subtitle": "Používatelia čakajúci na potvrdenie roly",
@@ -643,7 +631,6 @@
         "rejectFailed": "Nepodarilo sa odobrať rolu"
       }
     },
-
     "programCallsManager": {
       "form": {
         "titleCreate": "Nová výzva Programu A",
@@ -733,7 +720,6 @@
         }
       }
     },
-
     "userManagementPanel": {
       "title": "Správa používateľov",
       "description": "Správa používateľov platformy, oprávnení a prístupu.",
@@ -803,7 +789,6 @@
         "removeRoleMessage": "Odobrať rolu \"{role}\"?"
       }
     },
-
     "finalVerdictPanel": {
       "navigation": {
         "adminPanel": "Administrátorský panel"
@@ -844,15 +829,15 @@
       "averageIndexDesc": "Automaticky generovaný matematický aritmetický priemer",
       "statusOptions": {
         "approve": {
-          "title": "🟢 Schváliť",
+          "title": "Schváliť",
           "desc": "Prijať do inkubátora"
         },
         "revision": {
-          "title": "🟡 Prepracovať",
+          "title": "Prepracovať",
           "desc": "Vrátiť žiadateľovi"
         },
         "reject": {
-          "title": "🔴 Zamietnuť",
+          "title": "Zamietnuť",
           "desc": "Trvalé vyradenie"
         }
       },
@@ -864,6 +849,55 @@
         "loadFailed": "Nepodarilo sa načítať dáta žiadosti."
       },
       "noComment": "Žiadny komentár"
+    },
+    "backlog": {
+      "title": "Backlog úloh",
+      "subtitle": "Spravujte životný cyklus firemných úloh od zverejnenia po uzavretie.",
+      "totalTasks": "úloh",
+      "filterAll": "Všetky stavy",
+      "exportCsv": "Exportovať CSV",
+      "exportXlsx": "Exportovať XLSX",
+      "searchPlaceholder": "Hľadať úlohy...",
+      "allStatuses": "Všetky stavy",
+      "loadingTasks": "Načítavam úlohy...",
+      "noTasksFound": "Nenašli sa žiadne úlohy.",
+      "deadline": "Termín",
+      "override": "Prepísať",
+      "cancel": "Zrušiť",
+      "confirmAdvanceTitle": "Posunúť stav úlohy",
+      "confirmAdvanceMsg": "Presunúť túto úlohu do stavu {status}?",
+      "poModalTitle": "Priradiť produktového vlastníka",
+      "poModalSubtitle": "Vyberte používateľa ako produktového vlastníka pri priraďovaní tímu.",
+      "loadingUsers": "Načítavanie používateľov...",
+      "poNone": "Bez produktového vlastníka",
+      "confirmAssign": "Potvrdiť a posunúť",
+      "overrideModalTitle": "Prepísať stav",
+      "confirmOverride": "Nastaviť stav",
+      "noTasks": "Pre vybraný filter sa nenašli žiadne úlohy.",
+      "tableHeaders": {
+        "task": "Úloha",
+        "organization": "Organizácia",
+        "status": "Stav",
+        "budget": "Rozpočet",
+        "po": "PO",
+        "deadline": "Termín",
+        "actions": "Akcie"
+      },
+      "actions": {
+        "override": "Prepísať"
+      },
+      "messages": {
+        "exportSuccess": "Úlohy boli exportované ako {format}.",
+        "exportFailed": "Export zlyhal."
+      },
+      "status": {
+        "draft": "Koncept",
+        "published": "Publikované",
+        "in_matching": "V zhode",
+        "assigned": "Priradené",
+        "in_progress": "V riešení",
+        "closed": "Uzavreté"
+      }
     }
   }
 }

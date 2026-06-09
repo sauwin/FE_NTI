@@ -150,5 +150,52 @@
     "noNotifications": "No notifications",
     "menu": "Menu",
     "notificationFallback": "Notification"
+  },
+
+  "admin": {
+    "backlog": {
+      "title": "Task Backlog",
+      "subtitle": "Review tasks, assign product owners, and advance work items.",
+      "exportCsv": "Export CSV",
+      "exportXlsx": "Export XLSX",
+      "searchPlaceholder": "Search tasks...",
+      "allStatuses": "All statuses",
+      "loadingTasks": "Loading tasks...",
+      "noTasksFound": "No tasks found.",
+      "tableHeaders": {
+        "task": "Task",
+        "organization": "Organization",
+        "status": "Status",
+        "budget": "Budget",
+        "po": "PO",
+        "deadline": "Deadline",
+        "actions": "Actions"
+      },
+      "actions": {
+        "override": "Override"
+      },
+      "status": {
+        "draft": "Draft",
+        "published": "Published",
+        "in_matching": "In Matching",
+        "assigned": "Assigned",
+        "in_progress": "In Progress",
+        "closed": "Closed"
+      },
+      "confirmAdvanceTitle": "Advance task status?",
+      "confirmAdvanceMsg": "Move this task to {status}?",
+      "poModalTitle": "Assign product owner",
+      "poModalSubtitle": "Choose a product owner before advancing the task.",
+      "loadingUsers": "Loading users...",
+      "poNone": "No product owner",
+      "cancel": "Cancel",
+      "confirmAssign": "Assign",
+      "overrideModalTitle": "Override task status",
+      "confirmOverride": "Save status",
+      "messages": {
+        "exportSuccess": "Tasks exported as {format}.",
+        "exportFailed": "Export failed."
+      }
+    }
   }
 }
