@@ -46,6 +46,7 @@
       "tabDocuments": "Dokumenty",
       "errors": {
         "selectTeam": "Prosím, vyberte spôsobilý tím.",
+        "projectTitle": "Prosím, zadajte názov projektu.",
         "selectCategory": "Prosím, vyberte zameranie kategórie.",
         "confirmDeclaration": "Musíte potvrdiť vyhlásenie o akademickom statuse.",
         "noDocsConfigured": "Aktívna výzva nemá nakonfigurované žiadne požadované dokumenty.",
@@ -57,6 +58,7 @@
         "selectTeamLabel": "Vyberte svoj tím *",
         "chooseTeamPlaceholder": "Vyberte tím...",
         "noTeamsWarning": "⚠️ Nenašli sa žiadne vyhovujúce tímy. Musíte byť vedúcim tímu a minimálne 3 členovia už museli prijať vašu pozvánku.",
+        "projectTitleLabel": "Názov projektu / Špecifikácia *",
         "focusCategoryLabel": "Zameranie kategórie *",
         "selectCategoryPlaceholder": "Vyberte kategóriu...",
         "declaration": "Čestne vyhlasujem, že neprenášal som žiadne predmety a môj priemer z profilových predmetov spĺňa požadovanú hranicu. Beriem na vedomie, že táto skutočnosť bude overená komisiou. *",

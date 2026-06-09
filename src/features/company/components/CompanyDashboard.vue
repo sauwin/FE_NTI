@@ -7,6 +7,9 @@ import ActiveMembersTable from './ActiveMembersTable.vue'
 import PendingApprovalsTable from './PendingApprovalsTable.vue'
 import OrganizationApplications from './OrganizationApplications.vue'
 
+import EvaluatorPendingTable from '@/features/evaluation/components/EvaluatorPendingTable.vue'
+import EvaluatorCompletedTable from '@/features/evaluation/components/EvaluatorCompletedTable.vue'
+
 import {
   getPendingMembers,
   getActiveMembers,

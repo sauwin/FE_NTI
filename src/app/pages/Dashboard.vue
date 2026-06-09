@@ -96,9 +96,9 @@ onMounted(() => { fetchData() })
 
   <MentorDashboard v-if="roleSlug === 'mentor'"/>
     
-  <EvaluatorDashboard v-if="roleSlug === 'evaluator'"/>
+  <EvaluatorDashboard v-if="roleSlug === 'evaluator' || (isCompany && roleInOrg == 'evaluator')"/>
 
-  <CompanyDashboard v-if="isCompany" :role-in-org="roleInOrg"/>
+  <CompanyDashboard v-if="isCompany && ['owner', 'contact'].includes(roleInOrg)" :role-in-org="roleInOrg"/>
 
   <AdminDashboard v-if="isAdmin" :user-role="roleSlug" />
 </template>

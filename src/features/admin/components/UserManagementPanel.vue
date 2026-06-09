@@ -29,7 +29,6 @@ const roleInOrgOptions = [
   { value: 'owner', label: t('admin.userManagementPanel.rolesInOrg.owner') },
   { value: 'contact', label: t('admin.userManagementPanel.rolesInOrg.contact') },
   { value: 'evaluator', label: t('admin.userManagementPanel.rolesInOrg.evaluator') },
-  { value: 'mentor', label: t('admin.userManagementPanel.rolesInOrg.mentor') },
 ]
 
 const users = ref<any[]>([])
