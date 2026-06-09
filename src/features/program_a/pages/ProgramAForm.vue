@@ -21,6 +21,7 @@ const selectedTeamId = ref<number | null>(null)
 const loadingTeams = ref(false)
 
 const category = ref('')
+const projectTitle = ref('')
 const academicDeclaration = ref(false)
 
 const requiredDocuments = ref<DocumentRequirement[]>([])
@@ -109,6 +110,10 @@ function nextStep() {
     error.value = t('programA.upload.errors.selectTeam')
     return
   }
+  if (!projectTitle.value.trim()) {
+    error.value = t('programA.upload.errors.projectTitle')
+    return
+  }
   if (!category.value) {
     error.value = t('programA.upload.errors.selectCategory')
     return
@@ -130,6 +135,7 @@ async function submit(mode: 'draft' | 'final' = 'final') {
       applicant_type: 'team' as const,
       program_type: 'a' as const,
       team_id: selectedTeamId.value,
+      project_title: projectTitle.value,
       category: category.value,
       submit_type: mode,
       academic_declaration: academicDeclaration.value ? 1 : 0,
@@ -240,6 +246,14 @@ async function submit(mode: 'draft' | 'final' = 'final') {
               <p v-if="myTeams.length === 0 && !loadingTeams" class="text-[11px] text-amber-500 mt-1.5 leading-normal">
                 {{ t('programA.upload.form.noTeamsWarning') }}
               </p>
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">
+                {{ t('programA.upload.form.projectTitleLabel') }}
+              </label>
+              <input v-model="projectTitle" type="text" class="w-full bg-slate-950 border border-slate-800 h-11 px-3 rounded-lg text-white focus:border-blue-600 transition outline-none text-sm" />
+              <p v-if="fieldErrors.project_title?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.project_title[0] }}</p>
             </div>
 
             <div>

@@ -1,22 +1,42 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { getArticles, deleteArticle as deleteArticleApi } from '@/features/articles/api/articles'
 import type { Article } from '@/features/articles/types/articles'
 import { useAuthStore } from '@/features/auth/stores/auth'
 
-const { t } = useI18n()
+const { t, locale } = useI18n() // Access the active language via locale
 const router = useRouter()
 const store = useAuthStore()
-const articlesObj = ref<Article[] | null>(null)
+
+const rawArticles = ref<Article[] | null>(null)
 const fetchSuccessfull = ref<boolean | null>(null)
 const canEdit = store.isAdmin || store.isContentEditor
+
+const articlesObj = computed(() => {
+  if (!rawArticles.value) return []
+
+  const currentLang = locale.value
+
+  return rawArticles.value.map((article) => {
+    const translation = 
+      article.translations?.find(trans => trans.language === currentLang) ||
+      article.translations?.find(trans => trans.language === 'en') ||
+      article.translations?.[0]
+
+    return {
+      ...article,
+      displayTitle: translation?.title || t('catalog.untitled'),
+      displayExcerpt: translation?.excerpt || ''
+    }
+  })
+})
 
 async function fetchData() {
   try {
     const res = await getArticles()
-    articlesObj.value = res.data.data
+    rawArticles.value = res.data.data
     fetchSuccessfull.value = true
   } catch(e: any) {
     fetchSuccessfull.value = false
@@ -26,8 +46,11 @@ async function fetchData() {
 async function deleteArticle(id: string | number) {
   try {
     await deleteArticleApi(id)
-    articlesObj.value = articlesObj.value?.filter(article => article.id != id) ?? []
+    if (rawArticles.value) {
+      rawArticles.value = rawArticles.value.filter(article => article.id != id)
+    }
   } catch(e: any) {
+    console.error(e)
   }
 }
 
@@ -39,7 +62,6 @@ onMounted(() => {
 <template>
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-    <!-- Add new article -->
     <button
       v-show="canEdit"
       @click="router.push('/article/create')"
@@ -50,27 +72,22 @@ onMounted(() => {
       </span>
     </button>
 
-    <!-- Article cards -->
     <div
-      v-for="article in articlesObj?.slice(0, canEdit ? 2 : 3)" :key="article.id"
+      v-for="article in articlesObj.slice(0, canEdit ? 2 : 3)" :key="article.id"
       class="card-glowing flex flex-col overflow-hidden transition">
-      {{ console.log(article) }}
 
-      <!-- Image — taller -->
       <img
         :src="article.cover_image?.image_path ?? '/missing_image.png'"
         class="w-full h-56 object-cover" />
 
-      <!-- Content -->
       <div class="flex flex-col flex-1 p-6">
         <h3 class="text-lg font-bold text-white mb-2 leading-snug">
-          {{ article.translations.find(t => t.language === 'en')?.title ?? t('catalog.untitled') }}
+          {{ article.displayTitle }}
         </h3>
         <p class="text-sm text-gray-400 leading-relaxed flex-1">
-          {{ article.translations.find(t => t.language === 'en')?.excerpt ?? '' }}
+          {{ article.displayExcerpt }}
         </p>
 
-        <!-- Actions -->
         <div class="flex items-center gap-2 mt-6">
           <div class="text-blue-400" v-show="!canEdit">
             {{ t('catalog.published') }} {{ new Date(article.published_at).toLocaleDateString() }}
@@ -96,7 +113,6 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Error state -->
     <div v-if="fetchSuccessfull === false"
       class="border border-slate-800 rounded-2xl flex items-center justify-center py-16 col-span-3">
       <p class="text-sm text-slate-600">{{ t('catalog.failedLoad') }}</p>

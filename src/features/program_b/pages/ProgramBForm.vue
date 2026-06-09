@@ -33,6 +33,7 @@ const step = ref<number>(1)
 
 const projectTitle = ref<string>('')
 const proposedSolution = ref<string>('')
+const academicDeclaration = ref<boolean>(false)
 
 const files = ref<Record<string, File | null>>({})
 
@@ -177,6 +178,7 @@ function nextStep(): void {
   if (applicantType.value == 'team' && !selectedTeamId.value) { error.value = t('programB.upload.errors.selectTeam'); return }
   if (!projectTitle.value.trim()) { error.value = t('programB.upload.errors.projectName'); return }
   if (!proposedSolution.value.trim()) { error.value = t('programB.upload.errors.solutionConcept'); return }
+  if (!academicDeclaration.value) { error.value = t('programB.upload.errors.confirmDeclaration'); return }
   step.value = 2
 }
 
@@ -205,6 +207,7 @@ async function submit(): Promise<void> {
       team_id: applicantType.value == 'team' ? selectedTeamId.value : null,
       project_title: projectTitle.value,
       proposed_solution: proposedSolution.value,
+      academic_declaration: academicDeclaration.value ? 1 : 0,
     }
 
     const formData = new FormData()
@@ -312,6 +315,15 @@ async function submit(): Promise<void> {
               <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">{{ t('programB.upload.form.solutionOutlineLabel') }}</label>
               <textarea v-model="proposedSolution" rows="5" :placeholder="t('programB.upload.form.solutionPlaceholder')" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-lg text-white resize-none focus:border-blue-600 transition outline-none text-sm"></textarea>
               <p v-if="fieldErrors.proposed_solution?.[0]" class="text-red-400 text-xs mt-1">{{ fieldErrors.proposed_solution[0] }}</p>
+            </div>
+
+            <div class="p-4 bg-blue-950/20 border border-blue-900/50 rounded-xl mt-2">
+              <label class="flex items-start gap-3 cursor-pointer select-none">
+                <input v-model="academicDeclaration" type="checkbox" class="mt-1 accent-blue-500 rounded" />
+                <span class="text-xs text-gray-400 leading-normal">
+                  {{ t('programB.upload.form.declaration') }}
+                </span>
+              </label>
             </div>
             
             <div class="flex gap-3 mt-2">

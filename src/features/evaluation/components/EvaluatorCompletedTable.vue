@@ -30,11 +30,11 @@ const { t } = useI18n()
         <div>
           <div class="flex items-center gap-2 mb-1">
             <span class="text-xs uppercase font-mono tracking-wider bg-green-950/40 border border-green-900/40 text-green-400 px-2 py-0.5 rounded-md">
-              {{ t('evaluation.program', { program: app.program?.toUpperCase() }) }}
+              {{ t('evaluation.program', { program: app.program_type?.toUpperCase() }) }}
             </span>
             <span class="text-slate-500 text-xs font-mono">ID: #{{ app.id }}</span>
           </div>
-          <h3 class="text-base font-bold text-slate-300 mb-1">{{ app.project_name || t('evaluation.untitled') }}</h3>
+          <h3 class="text-base font-bold text-slate-300 mb-1">{{ app.project_title || t('evaluation.untitled') }}</h3>
           <p class="text-xs text-slate-500">Tím: <span class="text-slate-400">{{ app.team_name || t('evaluation.unspecified') }}</span></p>
         </div>
         <button 
