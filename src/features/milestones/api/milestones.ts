@@ -22,3 +22,9 @@ export function uploadMilestoneDocument(id: number | string, formData: FormData)
     headers: { 'Content-Type': 'multipart/form-data' },
   })
 }
+
+export function downloadMilestoneDocument(milestoneId: number, documentId: number) {
+  return api.get(`/milestones/${milestoneId}/documents/${documentId}/download`, {
+    responseType: 'blob',
+  })
+}

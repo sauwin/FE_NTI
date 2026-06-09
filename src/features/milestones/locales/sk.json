@@ -13,6 +13,7 @@
     "btnUploadDoc": "↑ Nahrať dokument",
     "placeholderTitle": "Názov *",
     "placeholderDescription": "Popis (nepovinné)",
+    "btnDownload": "Stiahnuť",
     "status": {
       "pending": "čaká na spracovanie",
       "in_progress": "v procese",
@@ -23,7 +24,8 @@
       "loadFailed": "Nepodarilo sa načítať míľniky",
       "createFailed": "Nepodarilo sa vytvoriť míľnik",
       "updateFailed": "Nepodarilo sa aktualizovať stav",
-      "uploadFailed": "Nahrávanie zlyhalo"
+      "uploadFailed": "Nahrávanie zlyhalo",
+      "downloadFailed": "Stiahnutie súboru sa nepodarilo."
     },
     "success": {
       "created": "Míľnik bol vytvorený.",

@@ -13,6 +13,7 @@
     "btnUploadDoc": "↑ Upload doc",
     "placeholderTitle": "Title *",
     "placeholderDescription": "Description (optional)",
+    "btnDownload": "Download",
     "status": {
       "pending": "pending",
       "in_progress": "in progress",
@@ -23,7 +24,8 @@
       "loadFailed": "Could not load milestones",
       "createFailed": "Could not create milestone",
       "updateFailed": "Could not update status",
-      "uploadFailed": "Upload failed"
+      "uploadFailed": "Upload failed",
+      "downloadFailed": "Failed to download file."
     },
     "success": {
       "created": "Milestone created.",
