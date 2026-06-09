@@ -48,7 +48,7 @@ function showCreateForm() {
 
 function editFaq(faq: FaqItem) {
   editingId.value = faq.id
-  formState.page_context = faq.page_context
+  formState.page_context = 'general'
   formState.question = faq.question
   formState.answer = faq.answer
   formState.is_active = faq.is_active
@@ -74,7 +74,7 @@ async function saveFaq() {
   try {
     if (editingId.value) {
       await updateFaqItem(editingId.value, {
-        page_context: formState.page_context,
+        page_context: 'general',
         question: formState.question,
         answer: formState.answer,
         is_active: formState.is_active,
@@ -83,7 +83,7 @@ async function saveFaq() {
       success.value = t('faq.successUpdated')
     } else {
       await createFaqItem({
-        page_context: formState.page_context,
+        page_context: 'general',
         question: formState.question,
         answer: formState.answer,
         is_active: formState.is_active,
@@ -174,15 +174,7 @@ onMounted(() => {
           </label>
         </div>
 
-        <div class="grid gap-4 grid-cols-1 sm:grid-cols-3">
-          <label class="space-y-2 text-sm text-slate-300">
-            <span class="block">{{ t('faq.admin.labelContext') }}</span>
-            <select v-model="formState.page_context" class="w-full rounded-xl sm:rounded-2xl border border-slate-700 bg-slate-900 px-4 py-2.5 sm:py-3 text-white focus:border-blue-400 focus:outline-none text-sm sm:text-base">
-              <option value="general">{{ t('faq.admin.optionGeneral') }}</option>
-              <option value="program_a">{{ t('faq.admin.optionProgramA') }}</option>
-              <option value="program_b">{{ t('faq.admin.optionProgramB') }}</option>
-            </select>
-          </label>
+        <div class="grid gap-4 grid-cols-1 sm:grid-cols-2">
           <label class="space-y-2 text-sm text-slate-300">
             <span class="block">{{ t('faq.admin.labelActive') }}</span>
             <select v-model="formState.is_active" class="w-full rounded-xl sm:rounded-2xl border border-slate-700 bg-slate-900 px-4 py-2.5 sm:py-3 text-white focus:border-blue-400 focus:outline-none text-sm sm:text-base">
