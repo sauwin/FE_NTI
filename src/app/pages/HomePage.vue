@@ -199,9 +199,15 @@
 
     <div
       v-else-if="sortedCalls.length === 0"
-      class="card-glowing p-8 text-center"
+      class="card-glowing p-12 text-center max-w-2xl mx-auto flex flex-col items-center justify-center border border-dashed border-slate-800"
     >
-      <p class="text-slate-400">
+      <div class="h-12 w-12 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center mb-4 text-slate-500 text-xl">
+        🔔
+      </div>
+      <h4 class="text-lg font-semibold text-white mb-2">
+        {{ t('home.calls.empty_title', 'No Active Calls') }}
+      </h4>
+      <p class="text-sm text-slate-400 max-w-sm leading-relaxed mb-1">
         {{ t('home.calls.empty') }}
       </p>
     </div>
