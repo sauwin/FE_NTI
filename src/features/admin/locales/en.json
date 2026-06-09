@@ -63,7 +63,11 @@
         "regNumberLabel": "Registration Number",
         "statusLabel": "Status",
         "close": "Close",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "yes": "Yes",
+        "no": "No",
+        "membersLabel": "Company Members",
+        "noMembers": "No registered members found"
       },
       "confirm": {
         "approveTitle": "Approve Company",
@@ -99,6 +103,13 @@
         "pending": "Pending",
         "inactive": "Inactive",
         "pending_approval": "Pending Approval"
+      },
+      "roles": {
+        "owner": "Owner",
+        "contact": "Contact",
+        "member": "Member",
+        "mentor": "Mentor",
+        "evaluator": "Evaluator"
       }
     },
     "overview": {

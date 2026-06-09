@@ -93,10 +93,10 @@ onMounted(async () => {
             ? currentTask.required_skills.join(', ')
             : currentTask.required_skills || '',
           budget: currentTask.budget ? Number(currentTask.budget) : null,
-          min_team_size: currentTask.min_team_size ? Number(currentTask.min_team_size) : 0,
-          max_team_size: currentTask.max_team_size ? Number(currentTask.max_team_size) : 0,
-          opens_at: currentTask.opens_at?.split('T')[0] ?? '',
-          deadline_at: currentTask.deadline_at?.split('T')[0] ?? '',
+          min_team_size: currentTask?.call.min_team_size ? Number(currentTask.call.min_team_size) : 0,
+          max_team_size: currentTask?.call.max_team_size ? Number(currentTask.call.max_team_size) : 0,
+          opens_at: currentTask?.call.opens_at?.split('T')[0] ?? '',
+          deadline_at: currentTask?.call.deadline_at?.split('T')[0] ?? '',
         }
 
         if (currentTask.call) {

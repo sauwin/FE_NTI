@@ -457,7 +457,7 @@ onMounted(loadCompanies)
     />
 
     <div v-if="showDetailsModal && selectedCompany" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95 duration-150 text-white">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl animate-in fade-in zoom-in-95 duration-150 text-white">
         <h3 class="text-xl font-bold mb-1">{{ t('admin.companyManagement.modal.detailsTitle') }}</h3>
         <p class="text-slate-500 text-xs mb-6 font-mono">ID: {{ selectedCompany.id }}</p>
 
@@ -483,12 +483,31 @@ onMounted(loadCompanies)
             </div>
           </div>
 
-          <div>
-            <span class="block text-xs font-mono uppercase text-slate-500 mb-1">
-              {{ t('admin.companyManagement.modal.regNumberLabel') }}
-            </span>
-            <div class="bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm font-mono">
-              {{ selectedCompany.registration_number || '—' }}
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <span class="block text-xs font-mono uppercase text-slate-500 mb-1">
+                {{ t('admin.companyManagement.modal.regNumberLabel') }}
+              </span>
+              <div class="bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm font-mono">
+                {{ selectedCompany.registration_number || '—' }}
+              </div>
+            </div>
+
+            <div>
+              <span class="block text-xs font-mono uppercase text-slate-500 mb-1">
+                {{ t('admin.companyManagement.modal.statusLabel') }}
+              </span>
+              <div class="pt-1">
+                <div class="inline-block text-xs px-2 py-1 rounded border font-mono uppercase"
+                  :class="[
+                    selectedCompany.status === 'active' ? 'bg-emerald-900/40 text-emerald-400 border-emerald-800' : '',
+                    selectedCompany.status === 'pending' ? 'bg-yellow-900/40 text-yellow-400 border-yellow-800' : '',
+                    selectedCompany.status === 'inactive' ? 'bg-rose-900/40 text-rose-400 border-rose-800' : '',
+                  ]"
+                >
+                  {{ t(`admin.companyManagement.status.${selectedCompany.status}`) }}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -506,23 +525,41 @@ onMounted(loadCompanies)
                 class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-blue-600 cursor-pointer disabled:opacity-40"
               />
               <label for="modalPublicPartner" class="text-slate-300 text-xs select-none cursor-pointer">
-                {{ selectedCompany.is_public_partner === 1 ? 'Так (1)' : 'Ні (0)' }}
+                {{ selectedCompany.is_public_partner === 1 ? t('admin.companyManagement.modal.yes') : t('admin.companyManagement.modal.no') }}
               </label>
             </div>
           </div>
 
           <div>
             <span class="block text-xs font-mono uppercase text-slate-500 mb-1">
-              {{ t('admin.companyManagement.modal.statusLabel') }}
+              {{ t('admin.companyManagement.modal.membersLabel', 'Company Members') }}
             </span>
-            <div class="inline-block text-xs px-2 py-1 rounded border font-mono uppercase"
-              :class="[
-                selectedCompany.status === 'active' ? 'bg-emerald-900/40 text-emerald-400 border-emerald-800' : '',
-                selectedCompany.status === 'pending' ? 'bg-yellow-900/40 text-yellow-400 border-yellow-800' : '',
-                selectedCompany.status === 'inactive' ? 'bg-rose-900/40 text-rose-400 border-rose-800' : '',
-              ]"
-            >
-              {{ t(`admin.companyManagement.status.${selectedCompany.status}`) }}
+            
+            <div v-if="selectedCompany.members && selectedCompany.members.length > 0" class="border border-slate-800 rounded-lg overflow-hidden bg-slate-950">
+              <div class="divide-y divide-slate-800">
+                <div 
+                  v-for="member in selectedCompany.members" 
+                  :key="member.id" 
+                  class="p-3 flex items-center justify-between text-sm gap-4"
+                >
+                  <div>
+                    <div class="font-medium text-slate-200">
+                      {{ member.first_name }} {{ member.last_name }}
+                    </div>
+                    <div class="text-xs text-slate-500 font-mono mt-0.5">
+                      {{ member.email }}
+                    </div>
+                  </div>
+                  
+                  <span class="text-[10px] px-2 py-0.5 rounded-full border border-slate-700 bg-slate-900 font-mono text-slate-400 uppercase tracking-wide">
+                    {{ t(`admin.companyManagement.roles.${member.role_in_org || 'member'}`) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div v-else class="text-slate-500 bg-slate-950/40 border border-slate-800/60 border-dashed rounded-lg p-4 text-center text-xs italic">
+              {{ t('admin.companyManagement.modal.noMembers', 'No registered members found') }}
             </div>
           </div>
         </div>

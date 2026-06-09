@@ -63,7 +63,11 @@
         "regNumberLabel": "Registračné číslo",
         "statusLabel": "Stav",
         "close": "Zavrieť",
-        "cancel": "Zrušiť"
+        "cancel": "Zrušiť",
+        "yes": "Áno",
+        "no": "Nie",
+        "membersLabel": "Členovia firmy",
+        "noMembers": "Neboli nájdení žiadni registrovaní členovia"
       },
       "confirm": {
         "approveTitle": "Schváliť spoločnosť",
@@ -99,6 +103,13 @@
         "pending": "Čakajúca",
         "inactive": "Neaktívna",
         "pending_approval": "Čaká na schválenie"
+      },
+      "roles": {
+        "owner": "Vlastník",
+        "contact": "Kontaktná osoba",
+        "member": "Člen",
+        "mentor": "Mentor",
+        "evaluator": "Hodnotiteľ"
       }
     },
     "overview": {
