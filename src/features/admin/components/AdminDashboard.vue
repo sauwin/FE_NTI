@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, defineAsyncComponent } from 'vue'
-import { getDashboardStats, getAdminUsers } from '@/features/admin/api/admin'
+import { getDashboardStats, getAdminUsers, exportDashboardStats as exportDashboardStatsApi } from '@/features/admin/api/admin'
 import type { DashboardStats } from '@/features/admin/types/admin'
 import { useI18n } from 'vue-i18n'
 
@@ -82,6 +82,22 @@ async function loadAggregatedStats() {
   }
 }
 
+async function exportDashboardStats(format: 'csv' | 'xlsx') {
+  try {
+    const res = await exportDashboardStatsApi({ format })
+    const url  = window.URL.createObjectURL(new Blob([res.data]))
+    const link = document.createElement('a')
+    link.href  = url
+    link.setAttribute('download', `dashboard_stats_${new Date().toISOString().split('T')[0]}.${format}`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+  } catch {
+    error.value = t('admin.dashboard.errors.exportFailed')
+  }
+}
+
 async function loadUserData() {
   try {
     const res = await getAdminUsers()
@@ -157,6 +173,18 @@ onMounted(() => {
     </div>
 
     <div v-if="activeTab === 'overview'" class="space-y-6">
+          <!-- export buttons row, only shown when stats are loaded -->
+      <div v-if="!loadingStats" class="flex justify-end gap-2">
+        <button
+          @click="exportDashboardStats('csv')"
+          class="text-xs bg-green-900/40 hover:bg-green-900/60 px-3 py-1.5 rounded text-green-400 border border-green-800 transition-all font-mono"
+        >{{ t('admin.dashboard.exportCsv') }}</button>
+        <button
+          @click="exportDashboardStats('xlsx')"
+          class="text-xs bg-blue-900/40 hover:bg-blue-900/60 px-3 py-1.5 rounded text-blue-400 border border-blue-800 transition-all font-mono"
+        >{{ t('admin.dashboard.exportXlsx') }}</button>
+      </div>
+
       <div v-if="loadingStats" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         <div v-for="n in 3" :key="n" class="border border-slate-800 rounded-2xl p-6 bg-slate-900/50 animate-pulse">
           <div class="h-4 w-24 bg-slate-700 rounded mb-5"></div>

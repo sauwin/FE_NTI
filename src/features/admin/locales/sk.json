@@ -20,6 +20,8 @@
         "broadcastNotification": "Hromadné správy",
         "backlog": "Backlog"
       },
+      "exportCsv": "Exportovať CSV",
+      "exportXlsx": "Exportovať XLSX",
       "errors": {
         "metricsLoadFalied": "Nepodarilo sa načítať metriky nástenky",
         "usersLoadFailed": "Nepodarilo sa načítať používateľov",
