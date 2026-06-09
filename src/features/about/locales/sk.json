@@ -1,36 +1,147 @@
 {
   "about": {
     "hero": {
-      "badge": "O nás",
-      "title": "O",
-      "highlight": "NTI",
-      "description": "Nitriansky technologický inkubátor je inovačná platforma zameraná na študentov na UKF v Nitre. Pomáhame študentom premieňať nápady na produkty a spájame ich s reálnymi firmami."
+      "badge": "O NTI",
+      "title": "Nitriansky technologický",
+      "highlight": "inkubátor",
+      "description": "Platforma, ktorá prepája študentský talent s reálnymi výzvami z priemyslu — a mení ambiciózne nápady na softvérové produkty, startupy a kariéry."
     },
+
     "mission": {
-      "label": "Misia",
-      "title": "Čo robíme",
-      "items": {
-        "education": {
-          "title": "Vzdelávanie",
-          "desc": "Poskytujeme praktické workshopy, semináre a pravidelné odborné konzultácie."
-        },
+      "label": "Naša misia",
+      "title": "Postavené na štyroch strategických pilieroch",
+      "intro": "NTI vzniklo ako odpoveď na odliv technologických talentov a potrebu systematickej podpory inovatívnych projektov v regióne. Každé naše rozhodnutie slúži jednému zo štyroch strategických pilierov.",
+      "pillars": {
         "incubation": {
           "title": "Inkubácia",
-          "desc": "Transformujeme inovatívne nápady na životaschopné riešenia a začínajúce podniky."
+          "desc": "Podpora vzniku a akcelerácie projektov — evidencia tímov, prihlášok, míľnikov a výstupov od prvého nápadu až po finálny produkt."
         },
-        "networking": {
-          "title": "Networking",
-          "desc": "Prepájame talentovaných vysokoškolákov s technologickými spoločnosťami."
+        "partnerships": {
+          "title": "Partnerstvá",
+          "desc": "Prepájanie firiem so študentským talentom prostredníctvom štruktúrovaného backlogu reálnych technických výziev, spoločných Product Ownerov a transparentnej spolupráce."
+        },
+        "mentoring": {
+          "title": "Mentoring",
+          "desc": "Priraďovanie skúsených mentorov, plánovanie konzultácií, zaznamenávanie spätnej väzby a sledovanie progresu — každý tím má odborné vedenie počas celého projektu."
+        },
+        "retention": {
+          "title": "Retencia",
+          "desc": "Budovanie dlhodobej komunity cez profily absolventov, úspešné príbehy a väzbu na región — aby talenty zostali tu, a nie odchádzali."
         }
       }
     },
+
+    "process": {
+      "label": "Ako to funguje",
+      "title": "Od prihlášky po absolovovanie",
+      "intro": "Každý účastník prechádza transparentným životným cyklom spravovaným výhradne v platforme — od registrácie až po odovzdanie záverečného projektu.",
+      "steps": {
+        "register": {
+          "title": "Registrácia",
+          "desc": "Vytvorte si účet a vyplňte profil študenta alebo firmy."
+        },
+        "apply": {
+          "title": "Prihláška",
+          "desc": "Odošlite prihlášku s požadovanými dokumentmi a údajmi o tíme."
+        },
+        "evaluate": {
+          "title": "Hodnotenie",
+          "desc": "Komisia posúdi prihlášky podľa definovaných kritérií."
+        },
+        "onboard": {
+          "title": "Onboarding",
+          "desc": "Schválené projekty dostanú mentora a stanovia prvé míľniky."
+        },
+        "build": {
+          "title": "Realizácia",
+          "desc": "Tímy pracujú na projekte so štruktúrovanými kontrolami a sledovaním míľnikov."
+        },
+        "graduate": {
+          "title": "Záver",
+          "desc": "Odovzdanie výstupu, archivácia výsledkov a vstup do siete absolventov NTI."
+        }
+      }
+    },
+
     "opportunities": {
-      "label": "Kto sme",
-      "title": "Vytvorené pre študentov, pod záštitou UKF",
-      "students_title": "Pre študentov",
-      "students_desc": "NTI je otvorený pre všetkých študentov UKF v Nitre, ktorí chcú pracovať na reálnych technologických projektoch. Či už máš startupový nápad alebo chceš získať komerčné skúsenosti – máme pre teba program.",
-      "companies_title": "Pre firmy",
-      "companies_desc": "Firmy môžu zadávať svoje projekty do nášho backlogu. NTI ich prepojí s motivovanými študentskými tímami, koordinuje celý proces a zabezpečuje kvalitný výstup pod dohľadom mentora."
+      "label": "Programy",
+      "title": "Dva programy, jeden ekosystém",
+      "intro": "NTI prevádzkuje dva komplementárne programy. Vyberte cestu, ktorá zodpovedá vašej situácii — alebo sa zapojte do oboch.",
+      "programA": {
+        "badge": "Program A",
+        "title": "Grantový inkubačný program",
+        "desc": "Pre tímy s vlastným inovatívnym nápadom, ktoré chcú vybudovať startup alebo produkt od nuly s financovaním a odborným mentoringom.",
+        "points": [
+          "Grantové financovanie vývoja projektu",
+          "Dedikovaný mentor NTI po celú dobu trvania",
+          "Kvartálne hodnotiace kolá otvorené pre nové prihlášky",
+          "Minimálna veľkosť tímu 3 členovia",
+          "Pokrýva softvér, AI, web, vývoj hier a IoT"
+        ]
+      },
+      "programB": {
+        "badge": "Program B",
+        "title": "Program živej praxe",
+        "desc": "Pre tímy, ktoré chcú reálne priemyselné skúsenosti prácou na skutočných firemných zadaniach s Product Ownerom a plateným zapojením.",
+        "points": [
+          "Reálne technické špecifikácie od partnerských firiem",
+          "Dedikovaný Product Owner na strane firmy",
+          "Odmena pre členov študentského tímu",
+          "Mentor NTI koordinuje celý proces",
+          "Produkčne použiteľný výstup vhodný do portfólia"
+        ]
+      },
+      "forStudents": {
+        "label": "Pre študentov",
+        "title": "Premeňte štúdium na reálny dopad",
+        "desc": "Či už máte nápad na startup alebo chcete praktické priemyselné skúsenosti, NTI vám poskytne štruktúru, podporu a komunitu — počas štúdia."
+      },
+      "forCompanies": {
+        "label": "Pre firmy",
+        "title": "Získajte prístup k motivovanému technickému talentu",
+        "desc": "Zadajte reálnu technickú výzvu, definujte požiadavky a získajte študentský tím plne koordinovaný cez proces NTI — od výberu a párovania až po záverečné odovzdanie."
+      }
+    },
+
+    "roles": {
+      "label": "Kto sa zapája",
+      "title": "Každý účastník má definovanú rolu",
+      "intro": "Platforma NTI je postavená na jasných zodpovednostiach. Každý — od žiadateľov po hodnotiteľov — funguje v transparentnom systéme oprávnení.",
+      "items": {
+        "student": {
+          "label": "Študent / Tím",
+          "title": "Vytvorte niečo reálne",
+          "desc": "Zaregistrujte sa individuálne alebo ako tím, odošlite prihlášku, nahrajte požadované dokumenty a sledujte projekt cez každý míľnik.",
+          "perks": [
+            "Prihláste sa do Programu A alebo B",
+            "Spravujte tím a pozývajte členov",
+            "Sledujte stav prihlášky v reálnom čase",
+            "Prístup k mentorským konzultáciám a spätnej väzbe"
+          ]
+        },
+        "company": {
+          "label": "Firma / Partner",
+          "title": "Zadajte reálnu výzvu",
+          "desc": "Zaregistrujte svoju organizáciu, odošlite technickú špecifikáciu, priraďte Product Ownera a sledujte projekt od backlogu až po záverečné odovzdanie.",
+          "perks": [
+            "Publikujte úlohy do verejného backlogu",
+            "Definujte rozpočet, rozsah a očakávané výstupy",
+            "Zúčastnite sa výberu tímu",
+            "Schvaľujte míľniky a záverečný výstup"
+          ]
+        },
+        "mentor": {
+          "label": "Mentor",
+          "title": "Veďte novú generáciu",
+          "desc": "Sprevádzajte jeden alebo viac projektov ako skúsený mentor — zaznamenávajte konzultácie, posúvajte míľniky a poskytujte štruktúrovanú spätnú väzbu.",
+          "perks": [
+            "Zobrazte pridelené detaily projektu a dokumenty",
+            "Plánujte a zaznamenávajte konzultácie",
+            "Schvaľujte plnenie míľnikov",
+            "Poskytnite hodnotiacu spätnú väzbu komisii"
+          ]
+        }
+      }
     }
   }
 }

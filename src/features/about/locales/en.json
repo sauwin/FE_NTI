@@ -1,36 +1,147 @@
 {
   "about": {
     "hero": {
-      "badge": "About",
-      "title": "About",
-      "highlight": "NTI",
-      "description": "Nitriansky technologický inkubátor is a student-focused innovation platform at UKF Nitra. We help students turn ideas into products and connect them with real companies."
+      "badge": "About NTI",
+      "title": "Nitriansky technologický",
+      "highlight": "inkubátor",
+      "description": "A platform that connects student talent with real-world industry challenges — and turns ambitious ideas into software products, startups, and careers."
     },
+
     "mission": {
-      "label": "Mission",
-      "title": "What we do",
-      "items": {
-        "education": {
-          "title": "Education",
-          "desc": "We provide practical workshops, seminars, and regular professional consultations."
-        },
+      "label": "Our mission",
+      "title": "Built on four strategic pillars",
+      "intro": "NTI was created in response to the outflow of technological talent and the need for systematic support of innovative projects in the region. Every decision we make serves one of four strategic pillars.",
+      "pillars": {
         "incubation": {
           "title": "Incubation",
-          "desc": "We transform innovative ideas into viable solutions and starting businesses."
+          "desc": "Supporting the creation and acceleration of projects — tracking teams, applications, milestones, and outcomes from first idea to shipped product."
         },
-        "networking": {
-          "title": "Networking",
-          "desc": "We bridge the gap between talented university students and tech companies."
+        "partnerships": {
+          "title": "Partnerships",
+          "desc": "Connecting companies with student talent through a structured backlog of real technical challenges, shared Product Owners, and transparent collaboration."
+        },
+        "mentoring": {
+          "title": "Mentoring",
+          "desc": "Assigning experienced mentors, scheduling consultations, recording feedback, and tracking progress so every team has expert guidance throughout."
+        },
+        "retention": {
+          "title": "Retention",
+          "desc": "Building lasting community through alumni profiles, success stories, and long-term ties to the region — keeping talent here instead of losing it."
         }
       }
     },
+
+    "process": {
+      "label": "How it works",
+      "title": "From application to graduation",
+      "intro": "Every participant follows a transparent lifecycle managed entirely within the platform — from the moment you register to the final project handover.",
+      "steps": {
+        "register": {
+          "title": "Register",
+          "desc": "Create your account and complete your student or company profile."
+        },
+        "apply": {
+          "title": "Apply",
+          "desc": "Submit your application with the required documents and team details."
+        },
+        "evaluate": {
+          "title": "Evaluate",
+          "desc": "A commission reviews submissions against defined criteria."
+        },
+        "onboard": {
+          "title": "Onboard",
+          "desc": "Approved projects receive a mentor and define their first milestones."
+        },
+        "build": {
+          "title": "Build",
+          "desc": "Teams execute the project with structured check-ins and milestone tracking."
+        },
+        "graduate": {
+          "title": "Graduate",
+          "desc": "Deliver the final output, archive results, and join the NTI alumni network."
+        }
+      }
+    },
+
     "opportunities": {
-      "label": "Who we are",
-      "title": "Built for students, by UKF",
-      "students_title": "For Students",
-      "students_desc": "NTI is open to all students of UKF Nitra who want to work on real tech projects. Whether you have a startup idea or want to gain commercial experience — there's a program for you.",
-      "companies_title": "For Companies",
-      "companies_desc": "Companies can submit projects to our backlog. NTI matches them with motivated student teams, coordinates the process, and ensures quality output with mentor supervision."
+      "label": "Programs",
+      "title": "Two programs, one ecosystem",
+      "intro": "NTI runs two complementary programs. Choose the path that fits your situation — or participate in both over time.",
+      "programA": {
+        "badge": "Program A",
+        "title": "Grant Incubation Program",
+        "desc": "For teams with an original innovative idea who want to build a startup or product from scratch with funding and expert mentorship.",
+        "points": [
+          "Grant funding for project development",
+          "Dedicated NTI mentor for the full duration",
+          "Quarterly evaluation rounds open to new applications",
+          "Minimum team size of 3 members",
+          "Covers software, AI, web, game dev, and IoT verticals"
+        ]
+      },
+      "programB": {
+        "badge": "Program B",
+        "title": "Live Practice Program",
+        "desc": "For teams who want real industry experience by working on actual company specifications with a Product Owner and paid engagement.",
+        "points": [
+          "Real project specifications from partner companies",
+          "Dedicated Product Owner from the company side",
+          "Student team earns a project budget reward",
+          "NTI mentor coordinates the process end-to-end",
+          "Portfolio-ready, production-grade deliverable"
+        ]
+      },
+      "forStudents": {
+        "label": "For students",
+        "title": "Turn coursework into real impact",
+        "desc": "Whether you have a startup idea or want hands-on industry experience, NTI gives you the structure, support, and community to make it happen — while still studying."
+      },
+      "forCompanies": {
+        "label": "For companies",
+        "title": "Access motivated technical talent",
+        "desc": "Submit a real technical challenge, define your requirements, and get a student team fully managed through the NTI process — from selection and matching to final delivery and handover."
+      }
+    },
+
+    "roles": {
+      "label": "Who's involved",
+      "title": "Every participant has a defined role",
+      "intro": "NTI's platform is built around clear responsibilities. Everyone from applicants to evaluators operates within a transparent, permission-based system.",
+      "items": {
+        "student": {
+          "label": "Student / Team",
+          "title": "Build something real",
+          "desc": "Register individually or as a team, submit your application, upload required documents, and track your project through every milestone.",
+          "perks": [
+            "Apply to Program A or B",
+            "Manage your team and invite members",
+            "Track application status in real time",
+            "Access mentor consultations and feedback"
+          ]
+        },
+        "company": {
+          "label": "Company / Partner",
+          "title": "Sponsor a real challenge",
+          "desc": "Register your organisation, submit a technical specification, assign a Product Owner, and follow your project from the backlog to final delivery.",
+          "perks": [
+            "Post tasks to the public backlog",
+            "Define budget, scope, and expected outcomes",
+            "Participate in team selection",
+            "Review milestones and approve the final output"
+          ]
+        },
+        "mentor": {
+          "label": "Mentor",
+          "title": "Guide the next generation",
+          "desc": "Accompany one or more projects as an experienced mentor — log consultations, advance milestones, and provide structured feedback at every stage.",
+          "perks": [
+            "View assigned project details and documents",
+            "Schedule and record consultation sessions",
+            "Approve milestone progress",
+            "Provide evaluative feedback to the commission"
+          ]
+        }
+      }
     }
   }
 }
