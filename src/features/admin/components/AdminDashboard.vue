@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, defineAsyncComponent } from 'vue'
-import { getDashboardStats, getAdminUsers, exportDashboardStats as exportDashboardStatsApi } from '@/features/admin/api/admin'
+import { getDashboardStats, getAdminUsers, exportDashboardStats } from '@/features/admin/api/admin'
 import type { DashboardStats } from '@/features/admin/types/admin'
 import { useI18n } from 'vue-i18n'
 
@@ -82,9 +82,9 @@ async function loadAggregatedStats() {
   }
 }
 
-async function exportDashboardStats(format: 'csv' | 'xlsx') {
+async function exportDashboardStatsApi(format: 'csv' | 'xlsx') {
   try {
-    const res = await exportDashboardStatsApi({ format })
+    const res = await exportDashboardStats({ format })
     const url  = window.URL.createObjectURL(new Blob([res.data]))
     const link = document.createElement('a')
     link.href  = url
@@ -176,11 +176,11 @@ onMounted(() => {
           <!-- export buttons row, only shown when stats are loaded -->
       <div v-if="!loadingStats" class="flex justify-end gap-2">
         <button
-          @click="exportDashboardStats('csv')"
+          @click="exportDashboardStatsApi('csv')"
           class="text-xs bg-green-900/40 hover:bg-green-900/60 px-3 py-1.5 rounded text-green-400 border border-green-800 transition-all font-mono"
         >{{ t('admin.dashboard.exportCsv') }}</button>
         <button
-          @click="exportDashboardStats('xlsx')"
+          @click="exportDashboardStatsApi('xlsx')"
           class="text-xs bg-blue-900/40 hover:bg-blue-900/60 px-3 py-1.5 rounded text-blue-400 border border-blue-800 transition-all font-mono"
         >{{ t('admin.dashboard.exportXlsx') }}</button>
       </div>
