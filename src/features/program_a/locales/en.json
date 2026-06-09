@@ -46,6 +46,7 @@
       "tabDocuments": "Documents",
       "errors": {
         "selectTeam": "Please select a qualified team.",
+        "projectTitle": "Please enter your project title.",
         "selectCategory": "Please select a focus category.",
         "confirmDeclaration": "You must confirm the academic status declaration.",
         "noDocsConfigured": "Active call has no required documents configured.",
@@ -57,6 +58,7 @@
         "selectTeamLabel": "Select Your Team *",
         "chooseTeamPlaceholder": "Choose a team...",
         "noTeamsWarning": "⚠️ No eligible teams found. You must be the team leader, and at least 3 members must have already accepted your invitation.",
+        "projectTitleLabel": "Project Title / Specifications *",
         "focusCategoryLabel": "Focus Category *",
         "selectCategoryPlaceholder": "Select category...",
         "declaration": "I declare that I have no carried-over courses and my average grade of core courses meets the required threshold. I understand this will be verified by the committee. *",

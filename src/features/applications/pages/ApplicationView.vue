@@ -154,7 +154,7 @@ const documentsMap = computed(() =>
               {{ t('applications.view.program_badge', { type: app.program_type?.toUpperCase() }) }}
             </div>
             <h1 class="text-3xl font-bold text-white">
-              {{ t('applications.view.title', { id: app.id }) }}
+              {{ app.project_title }}
             </h1>
           </div>
           <span :class="['text-xs px-3 py-1 rounded-full border capitalize font-mono', statusColor(app.status)]">

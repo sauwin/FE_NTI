@@ -204,6 +204,7 @@ function nextStep(): void {
     if (applicantType.value === 'team' && !selectedTeamId.value) { error.value = t('applications.edit.validation.team'); return }
     if (!projectTitle.value.trim()) { error.value = t('applications.edit.validation.title'); return }
     if (!proposedSolution.value.trim()) { error.value = t('applications.edit.validation.solution'); return }
+    if (!academicDeclaration.value) { error.value = t('applications.edit.validation.academic'); return }
   }
   step.value = 2
 }
@@ -221,11 +222,13 @@ async function submit(): Promise<void> {
     if (programType.value === 'a') {
       payload.team_id = selectedTeamId.value
       payload.category = category.value
+      payload.project_title = projectTitle.value
       payload.academic_declaration = academicDeclaration.value ? 1 : 0
     } else {
       payload.team_id = applicantType.value === 'team' ? selectedTeamId.value : null
       payload.project_title = projectTitle.value
       payload.proposed_solution = proposedSolution.value
+      payload.academic_declaration = academicDeclaration.value ? 1 : 0
     }
 
     await updateApplication(applicationId, payload)
@@ -305,6 +308,11 @@ async function submit(): Promise<void> {
 
           <template v-if="programType === 'a'">
             <div>
+              <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">{{ t('applications.edit.project_name') }}</label>
+              <input v-model="projectTitle" type="text" class="w-full bg-slate-950 border border-slate-800 h-11 px-3 rounded-lg text-white focus:border-blue-600 transition outline-none text-sm" />
+            </div>
+
+            <div>
               <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">{{ t('applications.edit.incubation_track') }}</label>
               <select v-model="category" class="w-full bg-slate-950 border border-slate-800 h-11 px-3 rounded-lg text-white focus:border-blue-600 transition outline-none text-sm cursor-pointer">
                 <option value="" disabled>{{ t('applications.edit.select_track') }}</option>
@@ -331,6 +339,15 @@ async function submit(): Promise<void> {
             <div>
               <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">{{ t('applications.edit.solution_outline') }}</label>
               <textarea v-model="proposedSolution" rows="5" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-lg text-white resize-none focus:border-blue-600 transition outline-none text-sm"></textarea>
+            </div>
+
+            <div class="p-4 bg-blue-950/20 border border-blue-900/50 rounded-xl mt-2">
+              <label class="flex items-start gap-3 cursor-pointer select-none">
+                <input v-model="academicDeclaration" type="checkbox" class="mt-1 accent-blue-500 rounded" />
+                <span class="text-xs text-gray-400 leading-normal">
+                  {{ t('applications.edit.academic_declaration') }}
+                </span>
+              </label>
             </div>
           </template>
 

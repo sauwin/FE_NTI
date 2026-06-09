@@ -21,7 +21,6 @@ const roleInOrgOptions = computed(() => [
   { value: 'owner', label: t('company.roles.owner') },
   { value: 'contact', label: t('company.roles.contact') },
   { value: 'evaluator', label: t('company.roles.evaluator') },
-  { value: 'mentor', label: t('company.roles.mentor') }
 ])
 
 const hasMembers = computed(() => props.activeMembers && props.activeMembers.length > 0)

@@ -40,6 +40,7 @@ onMounted(async () => {
     ])
     calls.value = Array.isArray(callsRes.data) ? callsRes.data : (callsRes.data as { data?: unknown[] })?.data ?? []
     allUsers.value = (usersRes.data.data ?? []).filter((u: any) =>
+        u.role_in_org == 'evaluator' ||
         u.roles?.some((r: any) => r.slug === 'evaluator')
     )
   } catch (e) {
