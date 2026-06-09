@@ -18,7 +18,7 @@ defineProps<Props>()
       {{ badge }}
     </div>
 
-    <h1 class="font-bold text-6xl leading-tight mb-7 max-w-3xl">
+    <h1 class="font-bold text-6xl leading-tight mb-7 max-w-4xl">
       {{ title }}
       <span v-if="highlight" class="text-blue-400">
         {{ highlight }}
