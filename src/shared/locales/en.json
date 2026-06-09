@@ -152,6 +152,57 @@
     "notificationFallback": "Notification"
   },
 
+  "about": {
+    "opportunities": {
+      "programA": {
+        "points": [
+          "Grant funding for project development",
+          "Dedicated NTI mentor for the full duration",
+          "Quarterly evaluation rounds open to new applications",
+          "Minimum team size of 3 members",
+          "Covers software, AI, web, game dev, and IoT verticals"
+        ]
+      },
+      "programB": {
+        "points": [
+          "Real project specifications from partner companies",
+          "Dedicated Product Owner from the company side",
+          "Student team earns a project budget reward",
+          "NTI mentor coordinates the process end-to-end",
+          "Portfolio-ready, production-grade deliverable"
+        ]
+      }
+    },
+    "roles": {
+      "items": {
+        "student": {
+          "perks": [
+            "Apply to Program A or B",
+            "Manage your team and invite members",
+            "Track application status in real time",
+            "Access mentor consultations and feedback"
+          ]
+        },
+        "company": {
+          "perks": [
+            "Post tasks to the public backlog",
+            "Define budget, scope, and expected outcomes",
+            "Participate in team selection",
+            "Review milestones and approve the final output"
+          ]
+        },
+        "mentor": {
+          "perks": [
+            "View assigned project details and documents",
+            "Schedule and record consultation sessions",
+            "Approve milestone progress",
+            "Provide evaluative feedback to the commission"
+          ]
+        }
+      }
+    }
+  },
+
   "admin": {
     "backlog": {
       "title": "Task Backlog",

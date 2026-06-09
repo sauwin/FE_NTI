@@ -142,6 +142,57 @@
     }
   },
 
+  "about": {
+    "opportunities": {
+      "programA": {
+        "points": [
+          "Grantové financovanie vývoja projektu",
+          "Dedikovaný mentor NTI po celú dobu trvania",
+          "Kvartálne hodnotiace kolá otvorené pre nové prihlášky",
+          "Minimálna veľkosť tímu 3 členovia",
+          "Pokrýva softvér, AI, web, vývoj hier a IoT"
+        ]
+      },
+      "programB": {
+        "points": [
+          "Reálne technické špecifikácie od partnerských firiem",
+          "Dedikovaný Product Owner na strane firmy",
+          "Odmena pre členov študentského tímu",
+          "Mentor NTI koordinuje celý proces",
+          "Produkčne použiteľný výstup vhodný do portfólia"
+        ]
+      }
+    },
+    "roles": {
+      "items": {
+        "student": {
+          "perks": [
+            "Prihláste sa do Programu A alebo B",
+            "Spravujte tím a pozývajte členov",
+            "Sledujte stav prihlášky v reálnom čase",
+            "Prístup k mentorským konzultáciám a spätnej väzbe"
+          ]
+        },
+        "company": {
+          "perks": [
+            "Publikujte úlohy do verejného backlogu",
+            "Definujte rozpočet, rozsah a očakávané výstupy",
+            "Zúčastnite sa výberu tímu",
+            "Schvaľujte míľniky a záverečný výstup"
+          ]
+        },
+        "mentor": {
+          "perks": [
+            "Zobrazte pridelené detaily projektu a dokumenty",
+            "Plánujte a zaznamenávajte konzultácie",
+            "Schvaľujte plnenie míľnikov",
+            "Poskytnite hodnotiacu spätnú väzbu komisii"
+          ]
+        }
+      }
+    }
+  },
+
   "cta": {
     "logged_in": {
       "title": "Chceš sa pridať?",
