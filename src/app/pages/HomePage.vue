@@ -41,59 +41,37 @@
 
   function statusClass(status: string) {
     switch (status) {
-      case 'open':
-        return 'bg-green-500/15 text-green-400 border-green-800'
-      case 'closed':
-        return 'bg-red-500/15 text-red-400 border-red-800'
-      case 'draft':
-        return 'bg-yellow-500/15 text-yellow-400 border-yellow-800'
-      default:
-        return 'bg-slate-500/15 text-slate-400 border-slate-700'
+      case 'open':   return 'bg-green-500/15 text-green-400 border-green-800'
+      case 'closed': return 'bg-red-500/15 text-red-400 border-red-800'
+      case 'draft':  return 'bg-yellow-500/15 text-yellow-400 border-yellow-800'
+      default:       return 'bg-slate-500/15 text-slate-400 border-slate-700'
     }
   }
 
   function formatDeadline(date?: string | null) {
     if (!date) return t('home.calls.no_deadline')
-
     return new Date(date).toLocaleDateString(locale.value === 'sk' ? 'sk-SK' : 'en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
+      day: '2-digit', month: 'short', year: 'numeric',
     })
   }
 
   function calculateUrgency(deadlineStr: string | null | undefined, currentNow: number) {
     if (!deadlineStr) return null
-    
     const distance = new Date(deadlineStr).getTime() - currentNow
     if (distance < 0) return { text: t('home.calls.urgency.ended'), isUrgent: false }
-
-    const days = Math.floor(distance / (1000 * 60 * 60 * 24))
+    const days  = Math.floor(distance / (1000 * 60 * 60 * 24))
     const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-
-    if (days > 7) {
-      return { text: t('home.calls.urgency.days_left', { days }), isUrgent: false }
-    } else if (days > 0) {
-      return { text: t('home.calls.urgency.time_left', { days, hours }), isUrgent: true }
-    } else {
-      return { text: t('home.calls.urgency.closes_hours', { hours }), isUrgent: true }
-    }
+    if (days > 7) return { text: t('home.calls.urgency.days_left', { days }), isUrgent: false }
+    if (days > 0) return { text: t('home.calls.urgency.time_left', { days, hours }), isUrgent: true }
+    return { text: t('home.calls.urgency.closes_hours', { hours }), isUrgent: true }
   }
 
   const sortedCalls = computed(() => {
     const data = Array.isArray(activeCalls.value) ? activeCalls.value : []
-    
     return data
-      .map(call => ({
-        ...call,
-        urgency: calculateUrgency(call.deadline_at, now.value)
-      }))
-      .sort((a, b) => {
-        return (
-          new Date(a.deadline_at || '').getTime() -
-          new Date(b.deadline_at || '').getTime()
-        )
-      })
+      .filter(call => call.status === 'open')
+      .map(call => ({ ...call, urgency: calculateUrgency(call.deadline_at, now.value) }))
+      .sort((a, b) => new Date(a.deadline_at || '').getTime() - new Date(b.deadline_at || '').getTime())
   })
 </script>
 
@@ -124,26 +102,13 @@
           {{ t('home.programs.prog_a_label') }}
         </div>
         <h3 class="text-2xl font-bold mb-3">{{ t('home.programs.prog_a_title') }}</h3>
-        <p class="text-gray-400 text-sm leading-relaxed mb-6">
-          {{ t('home.programs.prog_a_desc') }}
-        </p>
+        <p class="text-gray-400 text-sm leading-relaxed mb-6">{{ t('home.programs.prog_a_desc') }}</p>
         <ul class="flex flex-col gap-2 mb-8">
-          <li class="bullet-point">
-            <span class="bullet-dot"></span>
-            {{ t('home.programs.prog_a_bullets.team') }}
-          </li>
-          <li class="bullet-point">
-            <span class="bullet-dot"></span>
-            {{ t('home.programs.prog_a_bullets.rounds') }}
-          </li>
-          <li class="bullet-point">
-            <span class="bullet-dot"></span>
-            {{ t('home.programs.prog_a_bullets.docs') }}
-          </li>
+          <li class="bullet-point"><span class="bullet-dot"></span>{{ t('home.programs.prog_a_bullets.team') }}</li>
+          <li class="bullet-point"><span class="bullet-dot"></span>{{ t('home.programs.prog_a_bullets.rounds') }}</li>
+          <li class="bullet-point"><span class="bullet-dot"></span>{{ t('home.programs.prog_a_bullets.docs') }}</li>
         </ul>
-        <router-link to="/programs/a" class="btn-link">
-          {{ t('home.programs.learn_more') }}
-        </router-link>
+        <router-link to="/programs/a" class="btn-link">{{ t('home.programs.learn_more') }}</router-link>
       </div>
 
       <div class="card-glowing p-6 sm:p-8">
@@ -151,32 +116,20 @@
           {{ t('home.programs.prog_b_label') }}
         </div>
         <h3 class="text-2xl font-bold mb-3">{{ t('home.programs.prog_b_title') }}</h3>
-        <p class="text-gray-400 text-sm leading-relaxed mb-6">
-          {{ t('home.programs.prog_b_desc') }}
-        </p>
+        <p class="text-gray-400 text-sm leading-relaxed mb-6">{{ t('home.programs.prog_b_desc') }}</p>
         <ul class="flex flex-col gap-2 mb-8">
-          <li class="bullet-point">
-            <span class="bullet-dot"></span>
-            {{ t('home.programs.prog_b_bullets.projects') }}
-          </li>
-          <li class="bullet-point">
-            <span class="bullet-dot"></span>
-            {{ t('home.programs.prog_b_bullets.comp') }}
-          </li>
-          <li class="bullet-point">
-            <span class="bullet-dot"></span>
-            {{ t('home.programs.prog_b_bullets.mentor') }}
-          </li>
+          <li class="bullet-point"><span class="bullet-dot"></span>{{ t('home.programs.prog_b_bullets.projects') }}</li>
+          <li class="bullet-point"><span class="bullet-dot"></span>{{ t('home.programs.prog_b_bullets.comp') }}</li>
+          <li class="bullet-point"><span class="bullet-dot"></span>{{ t('home.programs.prog_b_bullets.mentor') }}</li>
         </ul>
-        <router-link to="/programs/b" class="btn-link">
-          {{ t('home.programs.learn_more') }}
-        </router-link>
+        <router-link to="/programs/b" class="btn-link">{{ t('home.programs.learn_more') }}</router-link>
       </div>
 
     </div>
   </PageSection>
-  
+
   <PageSection
+    v-if="!loadingCalls && sortedCalls.length > 0"
     :label="t('home.calls.label')"
     :title="t('home.calls.title')"
   >
@@ -229,56 +182,40 @@
             >
               {{ call.status ? t(`home.calls.status.${call.status}`) : call.status }}
             </div>
-            
-            <span 
+            <span
               v-if="call.urgency"
               :class="[
                 'text-[11px] font-medium px-2 py-0.5 rounded',
-                call.urgency.isUrgent 
-                  ? 'text-amber-400 bg-amber-500/10 border border-amber-500/20 animate-pulse' 
+                call.urgency.isUrgent
+                  ? 'text-amber-400 bg-amber-500/10 border border-amber-500/20 animate-pulse'
                   : 'text-slate-400 bg-slate-800'
               ]"
             >
               {{ call.urgency.text }}
             </span>
           </div>
-
-          <div class="text-xs text-slate-500 font-mono">
-            {{ programLabel(call.program) }}
-          </div>
+          <div class="text-xs text-slate-500 font-mono">{{ programLabel(call.program) }}</div>
         </div>
 
-        <h3 class="text-xl font-bold text-white mb-3 leading-snug">
-          {{ call.name }}
-        </h3>
+        <h3 class="text-xl font-bold text-white mb-3 leading-snug">{{ call.name }}</h3>
 
         <p class="text-sm text-slate-400 leading-relaxed mb-6">
           {{ t('home.calls.deadline') }}
-          <span class="text-white font-medium">
-            {{ formatDeadline(call.deadline_at) }}
-          </span>
+          <span class="text-white font-medium">{{ formatDeadline(call.deadline_at) }}</span>
         </p>
 
         <div class="flex items-center justify-between text-xs text-slate-500 mb-6">
           <span>
             {{ t('home.calls.min_team') }}
-            <span class="text-slate-300">
-              {{ call.min_team_size }}
-            </span>
+            <span class="text-slate-300">{{ call.min_team_size }}</span>
           </span>
-
           <span v-if="call.max_team_size">
             {{ t('home.calls.max_team') }}
-            <span class="text-slate-300">
-              {{ call.max_team_size }}
-            </span>
+            <span class="text-slate-300">{{ call.max_team_size }}</span>
           </span>
         </div>
 
-        <router-link
-          :to="`/calls/${call.id}`"
-          class="btn-primary mt-auto text-center"
-        >
+        <router-link :to="`/calls/${call.id}`" class="btn-primary mt-auto text-center">
           {{ t('home.calls.btn_view') }}
         </router-link>
       </div>

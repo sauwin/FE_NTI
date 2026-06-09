@@ -49,7 +49,13 @@ async function loadMentors() {
   try {
     const res = await getAdminMentorships({ application_id: selectedApplicationId.value })
     let mentorsList = res.data?.data ?? res.data ?? []
-    mentors.value = mentorsList.filter((m: any) => m.application?.id === selectedApplicationId.value)
+    const filtered = mentorsList.filter((m: any) => m.application?.id === selectedApplicationId.value)
+    
+    mentors.value = filtered.map((m: any) => {
+      const full = allUsers.value.find(u => u.id === m.mentor?.id)
+      return { ...m, mentor: full ?? m.mentor }
+    })
+    
   } catch {
     error.value = t('admin.mentorsManager.errors.loadMentorsFailed')
   } finally {
@@ -187,7 +193,7 @@ async function remove(mentorshipId: number) {
           </thead>
           <tbody>
             <tr v-for="mentor in mentors" :key="mentor.id" class="border-b border-slate-800 hover:bg-slate-800/30 transition">
-              <td class="px-4 py-3 text-white">{{ mentor.mentor?.name }}</td>
+              <td class="px-4 py-3 text-white">{{ mentor.mentor?.first_name }} {{ mentor.mentor?.last_name }}</td>
               <td class="px-4 py-3 text-slate-400">{{ mentor.mentor?.email }}</td>
               <td class="px-4 py-3 text-slate-500 text-xs">{{ mentor.assigned_at ? new Date(mentor.assigned_at).toLocaleDateString() : '—' }}</td>
               <td class="px-4 py-3 text-right">
