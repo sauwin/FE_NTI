@@ -38,7 +38,7 @@ export interface TaskDetails {
   max_team_size: number | string
   opens_at: string | null
   deadline_at: string | null
-  call?: CallData
+  call: CallData
   organization?: Organization
   documents?: AttachedDocument[]
 }

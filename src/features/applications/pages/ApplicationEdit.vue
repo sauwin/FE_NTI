@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/features/auth/stores/auth'
 import { useI18n } from 'vue-i18n'
@@ -10,7 +10,7 @@ import {
 } from '@/features/applications/api/applications'
 import type { ApplicationData, ExistingDocument } from '@/features/applications/types/applications'
 import { getCallById } from '@/shared/api/calls'
-import type { CallShortInfo } from '@/shared/types/calls'
+import type { CallShortInfo, DocumentRequirement } from '@/shared/types/calls'
 import { uploadDocument } from '@/shared/api/documents'
 import { getTeams } from '@/features/student/api/teams'
 import type { Team } from '@/features/student/types/teams'
@@ -30,7 +30,9 @@ const error = ref<string>('')
 const step = ref<number>(1)
 
 const programType = ref<string>('')
+const applicantType = ref<'student' | 'team'>('team')
 const currentCall = ref<CallShortInfo | null>(null)
+const requiredDocuments = ref<DocumentRequirement[]>([])
 
 const selectedTeamId = ref<number | null>(null)
 const category = ref<string>('')
@@ -50,49 +52,84 @@ const categories = [
   'IoT & Embedded Systems',
 ]
 
-const defaultDocLabels: Record<string, string> = {
+// Base fallback labels mirrored directly from creation config
+const defaultDocLabels = computed<Record<string, string>>(() => ({
   executive_summary: 'Executive Summary',
   technical_architecture: 'Technical Architecture',
   roadmap: 'Project Roadmap',
   budget: 'Project Budget',
   risk_analysis: 'Risk Analysis',
   monetization_model: 'Monetization Model',
-  cv: 'CV (All team members in a single PDF file)',
-  motivation_letter: 'Motivation Letter',
+  cv: t('programB.upload.defaultLabels.cv', 'CV (All team members in a single PDF file)'),
+  motivation_letter: t('programB.upload.defaultLabels.motivation_letter', 'Motivation Letter'),
+  technical_proposal: t('programB.upload.defaultLabels.technical_proposal', 'Technical Proposal'),
+}))
+
+// Standardized safe slug normalizer matching the Program B form mechanism
+function documentKey(doc: string | DocumentRequirement): string {
+  const raw = typeof doc === 'string' ? doc : doc.type || doc.document_name || ''
+  return String(raw).toLowerCase().replace(/\s+/g, '_')
 }
 
-const docLabels = computed<Record<string, string>>(() => {
-  if (!currentCall.value || !currentCall.value.required_documents) {
-    return defaultDocLabels
-  }
+// Normalizes arbitrary/custom JSON backend schemas into uniform DocumentRequirement definitions
+function normalizeRequiredDocuments(raw: any): DocumentRequirement[] {
+  if (!raw) return []
 
-  const reqDocs = currentCall.value.required_documents
+  const docs = typeof raw === 'string' ? JSON.parse(raw) : raw
+  if (!Array.isArray(docs)) return []
 
-  if (Array.isArray(reqDocs)) {
-    const labels: Record<string, string> = {}
-    reqDocs.forEach((item: any) => {
-      if (!item) return
-      
-      if (typeof item === 'string') {
-        const cleanKey = item.toLowerCase().replace(/\s+/g, '_')
-        labels[cleanKey] = defaultDocLabels[cleanKey] || defaultDocLabels[item] || `${item.replace(/_/g, ' ').toUpperCase()}`
-      } else if (typeof item === 'object') {
-        const rawKey = item.slug || item.key || item.type || item.document_name || String(item.id)
-        const systemKey = String(rawKey).toLowerCase().replace(/\s+/g, '_')
-        const visualLabel = item.document_name || item.name || item.label || defaultDocLabels[systemKey] || `Document ${systemKey}`
-        
-        labels[systemKey] = visualLabel
+  return docs.map((item: any) => {
+    if (!item) {
+      return {
+        document_name: 'Document Requirement',
+        is_mandatory: true,
+        max_size_mb: 10,
+        type: 'document',
       }
-    })
-    return labels
+    }
+
+    if (typeof item === 'string') {
+      return {
+        document_name: item.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase()),
+        is_mandatory: true,
+        max_size_mb: 10,
+        type: documentKey(item),
+      }
+    }
+
+    const name = item.document_name || item.name || item.label || String(item.type || item.slug || item.key || 'document')
+    const key = String(item.type || item.slug || item.key || item.document_name || item.name || name)
+
+    return {
+      document_name: name,
+      is_mandatory: item.is_mandatory ?? true,
+      max_size_mb: item.max_size_mb ?? 10,
+      type: documentKey(key),
+    }
+  })
+}
+
+// Computes structural labels matching runtime fields
+const docLabels = computed<Record<string, string>>(() => {
+  if (requiredDocuments.value.length > 0) {
+    return requiredDocuments.value.reduce((labels: Record<string, string>, doc: DocumentRequirement) => {
+      const key = documentKey(doc)
+      labels[key] = doc.document_name || defaultDocLabels.value[key] || `Document (${key})`
+      return labels
+    }, {})
   }
 
-  if (typeof reqDocs === 'object') {
-    return reqDocs as Record<string, string>
-  }
-
-  return defaultDocLabels
+  return defaultDocLabels.value
 })
+
+// Ensures reactive local file map keys synchronize smoothly with computed labels
+watch(docLabels, (newLabels) => {
+  const newFilesState: Record<string, File | null> = {}
+  Object.keys(newLabels).forEach((key) => {
+    newFilesState[key] = files.value[key] || null
+  })
+  files.value = newFilesState
+}, { immediate: true })
 
 onMounted(async () => {
   if (!auth.isLoggedIn) {
@@ -107,11 +144,12 @@ onMounted(async () => {
     ])
 
     const appData = appRes.data as ApplicationData
-    console.log(appData)
+    
     programType.value = appData.program_type
+    applicantType.value = appData.applicant_type || (appData.team_id ? 'team' : 'student')
     myTeams.value = Array.isArray(teamsRes.data) ? teamsRes.data : []
 
-    selectedTeamId.value = appData.team_id
+    selectedTeamId.value = appData.team_id || (myTeams.value[0]?.id ?? null)
     category.value = appData.category || ''
     academicDeclaration.value = !!appData.academic_declaration
     projectTitle.value = appData.project_title || ''
@@ -123,8 +161,12 @@ onMounted(async () => {
     ])
 
     currentCall.value = callRes.data
+    
+    // Dynamic generation from Creation parsing scheme
+    requiredDocuments.value = normalizeRequiredDocuments(callRes.data?.required_documents)
     existingDocs.value = Array.isArray(docsRes.data) ? docsRes.data : []
 
+    // Fallback: Populate title using task descriptor if left empty on Program B calls
     if (programType.value === 'b' && !projectTitle.value && callRes.data?.task) {
       projectTitle.value = callRes.data.task.title || ''
     }
@@ -136,6 +178,14 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+// Custom helper method matching dynamic fields securely with currently fetched list parameters
+function resolveExistingFile(systemKey: string): ExistingDocument | undefined {
+  return existingDocs.value.find(d => {
+    const backendType = String(d.type || '').toLowerCase().replace(/\s+/g, '_')
+    return backendType === systemKey
+  })
+}
 
 function onFileChange(key: string, event: Event): void {
   const input = event.target as HTMLInputElement
@@ -151,6 +201,7 @@ function nextStep(): void {
     if (!category.value) { error.value = t('applications.edit.validation.category'); return }
     if (!academicDeclaration.value) { error.value = t('applications.edit.validation.academic'); return }
   } else {
+    if (applicantType.value === 'team' && !selectedTeamId.value) { error.value = t('applications.edit.validation.team'); return }
     if (!projectTitle.value.trim()) { error.value = t('applications.edit.validation.title'); return }
     if (!proposedSolution.value.trim()) { error.value = t('applications.edit.validation.solution'); return }
   }
@@ -164,7 +215,7 @@ async function submit(): Promise<void> {
   try {
     const payload: Record<string, any> = {
       program_type: programType.value,
-      applicant_type: 'team'
+      applicant_type: programType.value === 'a' ? 'team' : applicantType.value
     }
 
     if (programType.value === 'a') {
@@ -172,13 +223,14 @@ async function submit(): Promise<void> {
       payload.category = category.value
       payload.academic_declaration = academicDeclaration.value ? 1 : 0
     } else {
-      payload.team_id = selectedTeamId.value
+      payload.team_id = applicantType.value === 'team' ? selectedTeamId.value : null
       payload.project_title = projectTitle.value
       payload.proposed_solution = proposedSolution.value
     }
 
     await updateApplication(applicationId, payload)
 
+    // Process attachments sequentially using modern mapped keys
     for (const [type, file] of Object.entries(files.value)) {
       if (!file) continue
       const formData = new FormData()
@@ -224,9 +276,27 @@ async function submit(): Promise<void> {
 
         <div v-if="step === 1" class="flex flex-col gap-5">
           
-          <div>
+          <div v-if="programType === 'b'">
+            <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">
+              {{ t('programB.upload.form.applicantType', 'Applicant Type') }}
+            </label>
+            <select 
+              v-model="applicantType" 
+              class="w-full bg-slate-950 border border-slate-800 h-11 px-3 rounded-lg text-white focus:border-blue-600 transition outline-none text-sm cursor-pointer"
+            >
+              <option value="student">Student (Individual)</option>
+              <option value="team">Team</option>
+            </select>
+          </div>
+
+          <div v-show="programType === 'a' || applicantType === 'team'">
             <label class="block text-xs text-gray-400 font-semibold uppercase mb-2">{{ t('applications.edit.assigned_team') }}</label>
-            <select v-model="selectedTeamId" class="w-full bg-slate-950 border border-slate-800 h-11 px-3 rounded-lg text-white focus:border-blue-600 transition outline-none text-sm cursor-pointer">
+            
+            <div v-if="myTeams.length === 0" class="p-3 border border-dashed border-amber-900/60 bg-amber-950/20 rounded-lg text-xs text-amber-400 mb-2">
+              {{ t('programB.upload.form.noTeamsWarning', 'You have no teams created.') }}
+            </div>
+
+            <select v-else v-model="selectedTeamId" class="w-full bg-slate-950 border border-slate-800 h-11 px-3 rounded-lg text-white focus:border-blue-600 transition outline-none text-sm cursor-pointer">
               <option v-for="team in myTeams" :key="team.id" :value="team.id">
                 {{ team.name }} (Status: {{ team.status }})
               </option>
@@ -268,7 +338,7 @@ async function submit(): Promise<void> {
             <button @click="router.push('/dashboard')" class="w-1/3 border border-slate-800 text-slate-400 h-11 rounded-lg hover:text-white transition text-sm font-medium">
               {{ t('applications.edit.btn_cancel') }}
             </button>
-            <button @click="nextStep" class="flex-1 bg-blue-600 text-white h-11 rounded-lg font-medium hover:bg-blue-700 transition text-sm">
+            <button @click="nextStep" :disabled="applicantType === 'team' && myTeams.length === 0" class="flex-1 bg-blue-600 disabled:bg-slate-800 disabled:text-slate-600 text-white h-11 rounded-lg font-medium hover:bg-blue-700 transition text-sm">
               {{ t('applications.edit.btn_next') }}
             </button>
           </div>
@@ -285,9 +355,7 @@ async function submit(): Promise<void> {
             <div class="text-[11px] text-blue-400 mb-2 flex items-center gap-1.5 font-medium">
               <span>{{ t('applications.edit.current_file') }}</span>
               <span class="underline italic">
-                {{ 
-                  existingDocs.find(d => String(d.type).toLowerCase().replace(/\s+/g, '_') === String(key).toLowerCase().replace(/\s+/g, '_'))?.file_name || t('applications.edit.not_uploaded') 
-                }}
+                {{ resolveExistingFile(String(key))?.file_name || t('applications.edit.not_uploaded') }}
               </span>
             </div>
 

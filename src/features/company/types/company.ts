@@ -85,3 +85,27 @@ export interface TaskWithCall {
   call?: TaskCallData
   organization?: TaskOrganization
 }
+
+export interface ApplicationItem {
+  id: number
+  status: string
+  created_at: string
+  team?: {
+    id: number
+    name: string
+  } | null
+  student_profile?: {
+    user?: {
+      name: string
+      email: string
+    }
+  } | null
+  call?: {
+    id: number
+    name: string
+    task?: {
+      id: number
+      title: string
+    }
+  } | null
+}

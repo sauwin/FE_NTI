@@ -19,6 +19,7 @@ export interface ApplicationData {
   academic_declaration: boolean | number
   project_title: string | null
   proposed_solution: string | null
+  applicant_type: 'student' | 'team'
 }
 
 export interface ExistingDocument {

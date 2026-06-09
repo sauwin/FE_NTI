@@ -3,30 +3,8 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { getOrganizationApplications, updateApplicationStatus } from '@/features/company/api/company'
-
-interface ApplicationItem {
-  id: number
-  status: string
-  created_at: string
-  team?: {
-    id: number
-    name: string
-  } | null
-  student_profile?: {
-    user?: {
-      name: string
-      email: string
-    }
-  } | null
-  call?: {
-    id: number
-    name: string
-    task?: {
-      id: number
-      title: string
-    }
-  } | null
-}
+import { requestApplicationRevision } from '@/features/applications/api/applications'
+import type { ApplicationItem } from '@/features/company/types/company'
 
 const router = useRouter()
 const { t, locale } = useI18n()
@@ -80,7 +58,7 @@ async function submitRevision() {
   
   revisionLoading.value = true
   try {
-    await updateApplicationStatus(revisionAppId.value, 'pending_revision', revisionMessage.value.trim())
+    await requestApplicationRevision(revisionAppId.value, revisionMessage.value.trim())
     showRevisionModal.value = false
     await fetchApplications()
   } catch (err) {
