@@ -205,3 +205,7 @@ export function adminSetTaskStatus(taskId: number | string, status: string, prod
 export function exportTasks(params: Record<string, unknown>) {
   return api.get('/admin/export/tasks', { params, responseType: 'blob' })
 }
+
+export function exportDashboardStats(params: Record<string, unknown>) {
+  return api.get('/admin/export/dashboard-stats', { params, responseType: 'blob' })
+}

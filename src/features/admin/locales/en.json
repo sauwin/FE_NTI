@@ -20,6 +20,8 @@
         "broadcastNotification": "Broadcast",
         "backlog": "Backlog"
       },
+      "exportCsv": "Export CSV",
+      "exportXlsx": "Export XLSX",
       "errors": {
         "metricsLoadFalied": "Failed to load dashboard metrics",
         "usersLoadFailed": "Failed to load users",
