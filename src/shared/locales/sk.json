@@ -95,6 +95,53 @@
     "notificationFallback": "Oznámenie"
   },
 
+  "admin": {
+    "backlog": {
+      "title": "Zoznam úloh",
+      "subtitle": "Spravujte úlohy, prideľujte produktových vlastníkov a posúvajte workflow.",
+      "exportCsv": "Export CSV",
+      "exportXlsx": "Export XLSX",
+      "searchPlaceholder": "Hľadať úlohy...",
+      "allStatuses": "Všetky stavy",
+      "loadingTasks": "Načítavam úlohy...",
+      "noTasksFound": "Neboli nájdené žiadne úlohy.",
+      "tableHeaders": {
+        "task": "Úloha",
+        "organization": "Organizácia",
+        "status": "Stav",
+        "budget": "Rozpočet",
+        "po": "PO",
+        "deadline": "Termín",
+        "actions": "Akcie"
+      },
+      "actions": {
+        "override": "Prepísať"
+      },
+      "status": {
+        "draft": "Koncept",
+        "published": "Publikované",
+        "in_matching": "V zhode",
+        "assigned": "Priradené",
+        "in_progress": "V riešení",
+        "closed": "Uzavreté"
+      },
+      "confirmAdvanceTitle": "Posunúť stav úlohy?",
+      "confirmAdvanceMsg": "Presunúť túto úlohu do stavu {status}?",
+      "poModalTitle": "Priradiť produktového vlastníka",
+      "poModalSubtitle": "Pred posunom úlohy vyberte produktového vlastníka.",
+      "loadingUsers": "Načítavam používateľov...",
+      "poNone": "Žiadny produktový vlastník",
+      "cancel": "Zrušiť",
+      "confirmAssign": "Priradiť",
+      "overrideModalTitle": "Prepísať stav úlohy",
+      "confirmOverride": "Uložiť stav",
+      "messages": {
+        "exportSuccess": "Úlohy boli exportované ako {format}.",
+        "exportFailed": "Export zlyhal."
+      }
+    }
+  },
+
   "cta": {
     "logged_in": {
       "title": "Chceš sa pridať?",

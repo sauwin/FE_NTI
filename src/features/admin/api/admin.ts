@@ -184,3 +184,24 @@ export function exportCompanies(params: Record<string, unknown>) {
 export function updateCompanyPartnerStatus(companyId: number, payload: Record<string, unknown>) {
   return api.post(`/admin/company/partner-status/${companyId}`, payload)
 }
+
+export function getAdminTasks(params?: { status?: string; search?: string; page?: number; per_page?: number }) {
+  return api.get('/admin/tasks', { params })
+}
+
+export function adminAdvanceTaskStatus(taskId: number | string, productOwnerUserId?: number) {
+  return api.patch(`/admin/tasks/${taskId}/advance`, {
+    ...(productOwnerUserId ? { product_owner_user_id: productOwnerUserId } : {}),
+  })
+}
+
+export function adminSetTaskStatus(taskId: number | string, status: string, productOwnerUserId?: number) {
+  return api.patch(`/admin/tasks/${taskId}/status`, {
+    status,
+    ...(productOwnerUserId ? { product_owner_user_id: productOwnerUserId } : {}),
+  })
+}
+
+export function exportTasks(params: Record<string, unknown>) {
+  return api.get('/admin/export/tasks', { params, responseType: 'blob' })
+}
