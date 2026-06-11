@@ -149,9 +149,6 @@ function openAnonymizeModal() {
               {{ t('student.admin.rulesTip') }}
             </div>
           </div>
-          <div class="w-full h-1 rounded-full bg-slate-800 overflow-hidden mt-6">
-            <div class="w-1/3 h-full bg-blue-600 rounded-full"></div>
-          </div>
         </div>
       </div>
 

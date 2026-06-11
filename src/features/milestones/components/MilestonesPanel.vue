@@ -10,7 +10,7 @@ import {
   downloadMilestoneDocument,
 } from '@/features/milestones/api/milestones'
 
-const props = defineProps<{ applicationId: number | string }>()
+const props = defineProps<{ applicationId: number | string, applicationStatus: string }>()
 
 const { t, locale } = useI18n()
 const auth = useAuthStore()
@@ -115,7 +115,7 @@ async function downloadDoc(milestoneId: number, documentId: number, fileName: st
         {{ t('milestones.heading') }}
       </div>
       <button
-        v-if="canManage"
+        v-if="canManage && applicationStatus == 'active'"
         @click="showForm = !showForm"
         class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition"
       >
@@ -207,7 +207,7 @@ async function downloadDoc(milestoneId: number, documentId: number, fileName: st
             </div>
           </div>
 
-          <label class="ml-auto cursor-pointer text-xs text-blue-400 hover:text-blue-300 transition">
+          <label v-if="applicationStatus == 'active' && !canManage" class="ml-auto cursor-pointer text-xs text-blue-400 hover:text-blue-300 transition">
             {{ uploadingId === m.id ? t('milestones.btnUploading') : t('milestones.btnUploadDoc') }}
             <input
               type="file"

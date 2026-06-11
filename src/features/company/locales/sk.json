@@ -83,7 +83,7 @@
       "noEmail": "Bez emailu",
       "unknownChallenge": "Neznáma výzva",
       "callLabel": "Výzva: {name}",
-      "revision": "Revízia",
+      "revision": "Vyžiadať opravy",
       "details": "Detaily",
       "verify": "Overiť",
       "modalTitle": "Požiadať o revíziu pre #{id}",

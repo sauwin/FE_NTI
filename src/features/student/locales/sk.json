@@ -76,28 +76,28 @@
         "applications": "Spravovať prihlášky"
       },
       "quickActions": "Rýchle akcie",
-      "quickActionsDesc": "Urýchlite svoju prácu priamou interakciou s konfiguráciami platformy.",
+      "quickActionsDesc": "Pomocou rýchlych akcií môžete rýchlejšie spravovať svoje prihlášky a tímy.",
       "createTeam": "Vytvoriť tím",
-      "createTeamDesc": "Založte novú pracovnú skupinu a začnite pozývať kľúčových členov prostredníctvom firemného e-mailu.",
+      "createTeamDesc": "Vytvorte nový tím a pozvite členov e-mailom.",
       "applyProgA": "Prihlásiť sa do Programu A",
-      "applyProgADesc": "Odoslať prototyp komerčného projektu, zostaviť harmonogram cieľov a vyplniť systémové formuláre.",
+      "applyProgADesc": "Nahrajte požadované dokumenty a materiály k prihláške.",
       "applyProgB": "Prihlásiť sa do Programu B",
       "applyProgBDesc": "Nahrať systémové dokumenty, wireframy, špecifikácie kódu a prezentácie produktov.",
       "myProfile": "Môj profil",
-      "myProfileDesc": "Upraviť údaje účtu, zmeniť kontaktné údaje alebo konfigurovať bezpečnostné parametre.",
+      "myProfileDesc": "Spravujte svoj profil, kontaktné údaje a nastavenia účtu.",
       "rulesTitle": "Pravidlá inkubácie",
-      "rulesText": "Vezmite prosím prísne na vedomie, že Program A vyžaduje minimálnu veľkosť tímu {count} overených členov pred tým, než budete môcť legálne posunúť stav prihlášky do fázy čaká na overenie.",
-      "rulesTip": "Tímový kontajner si môžete vytvoriť už teraz, spustiť okamžité systémové pozvánky a pohodlne pripravovať súbory na platforme."
+      "rulesText": "Na odoslanie prihlášky do Programu A musí mať váš tím minimálne {count} overených členov.",
+      "rulesTip": "Tím si môžete vytvoriť už teraz, pozvať ďalších členov a začať pripravovať svoju prihlášku."
     },
     "invitations": {
       "title": "Tímové pozvánky",
       "description": "Tu môžete prijať alebo odmietnuť žiadosti o pripojenie sa do iných tímov inkubátora.",
       "errLoad": "Nepodarilo sa načítať pozvánky.",
       "noInvitations": "Žiadne čakajúce pozvánky.",
-      "noInvitationsDesc": "Keď vás niekto pozve do tímu prostredníctvom e-mailu, zobrazí sa to tu.",
-      "lockedContainer": "Uzamknutý kontajner",
+      "noInvitationsDesc": "Tu sa zobrazia pozvánky do tímov, ktoré vám boli zaslané.",
+      "lockedContainer": "Tím je uzamknutý",
       "teamLeader": "Vedúci tímu:",
-      "lockedConfigDesc": "Konfigurácia uzamknutá: Nemôžete pridať svoj používateľský rozsah k tomuto tímu, pretože stav tímu už bol uzamknutý pre záverečné hodnotenie prihlášky.",
+      "lockedConfigDesc": "Tento tím je uzamknutý a už nemôže prijímať nových členov, pretože jeho prihláška je už zverejnená",
       "accept": "Prijať",
       "dismiss": "Zatvoriť",
       "decline": "Odmietnuť"
@@ -128,10 +128,11 @@
       "confirmRemoveMsg": "Naozaj chcete zrušiť prístup tomuto členovi?",
       "confirmRemoveBtn": "Zrušiť prístup",
       "errRemove": "Nepodarilo sa odstrániť člena z tímu.",
-      "restricted": "Prístup obmedzený: Iba overený vedúci tímu má práva na zmenu zloženia členov."
+      "restricted": "Prístup obmedzený: Len vedúci tímu môže spravovať členov tímu."
     },
     "teamsList": {
       "title": "Spravovať tímy",
+      "createButton": "Vytvoriť tím",
       "description": "Vytvárajte a spravujte tímy, ktoré vediete alebo ktorých ste členom.",
       "errLoad": "Nepodarilo sa načítať tímy.",
       "noTeams": "Nenašli sa žiadne tímy.",

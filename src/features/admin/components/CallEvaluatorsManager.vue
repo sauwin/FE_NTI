@@ -198,7 +198,7 @@ function getMinDateTime(): string {
       >
         <option :value="null">{{ $t('admin.callEvaluatorsManager.chooseCallPlaceholder') }}</option>
         <option v-for="call in calls" :key="call.id" :value="call.id">
-          {{ call.name }} ({{ call.program?.name }})
+          {{ call.name }} ({{ call.program }})
         </option>
       </select>
     </div>

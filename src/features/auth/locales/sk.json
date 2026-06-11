@@ -22,7 +22,14 @@
     "btnSignIn": "Prihlásiť sa",
     "btnLoading": "Načítava sa...",
     "notRegistered": "Nemáte účet?",
-    "createAccount": "Vytvorte si ho"
+    "createAccount": "Vytvorte si ho",
+    "errors": {
+      "accessDenied": "Prístup zamietnutý",
+      "tooManyRequests": "Príliš veľa požiadaviek. Skúste to neskôr znova.",
+      "blocked": "Vaše konto bolo zablokované",
+      "invalidCredentials": "Nesprávne heslo alebo email",
+      "unexpected": "Neočakávana chyba"
+    }
   },
   "checkEmail": {
     "title": "Skontrolujte si e-mail",

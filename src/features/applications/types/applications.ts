@@ -36,6 +36,7 @@ export interface StudentApplication {
   category: string | null
   program_type: string
   applicant_type: string
+  project_title?: string
   created_at?: string
   call?: { name?: string; deadline_at?: string }
   team?: { name: string }

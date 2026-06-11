@@ -35,6 +35,8 @@ async function submit() {
         }
       } if (e.response?.status === 429) {
         error.value = t('login.errors.tooManyRequests')
+      } else if (e.response?.data?.message == 'blocked') {
+        error.value = t('login.errors.blocked')
       } else {
         error.value = t('login.errors.invalidCredentials')
       }

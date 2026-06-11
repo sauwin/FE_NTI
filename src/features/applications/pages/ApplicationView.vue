@@ -13,7 +13,8 @@ import {
   getApplicationDocuments, 
   deleteApplication,
   updateApplicationStatus,
-  getApplicationLastRevision
+  getApplicationLastRevision,
+  applyApplicationChanges
 } from '@/features/applications/api/applications'
 
 const route = useRoute()
@@ -25,6 +26,7 @@ const docs = ref<ApplicationDocument[]>([])
 const revision = ref<ApplicationRevisionRequest | null>(null)
 const error = ref('')
 const deleting = ref(false)
+const saving = ref(false)
 const statusUpdating = ref(false)
 
 const auth = useAuthStore();
@@ -131,6 +133,18 @@ async function deleteApp() {
   }
 }
 
+async function applyChanges() {
+  saving.value = true
+  try {
+    await applyApplicationChanges(id)
+    router.push('/dashboard')
+  } catch (e: any) {
+    error.value = e.response?.data?.message
+  } finally {
+    saving.value = false
+  }
+}
+
 const documentsMap = computed(() =>
   Object.fromEntries(
     docs.value.map(doc => [doc.type, doc])
@@ -198,8 +212,8 @@ const documentsMap = computed(() =>
               <p class="text-white capitalize">{{ app.status?.replace(/_/g, ' ') }}</p>
             </div>
             <div>
-              <p class="text-gray-500">{{ t('applications.view.created') }}</p>
-              <p class="text-white">{{ formatDate(app.created_at) }}</p>
+              <p class="text-gray-500">{{ t('applications.view.email') }}</p>
+              <p class="text-white">{{ app.student_profile.user.email }}</p>
             </div>
           </div>
         </div>
@@ -253,13 +267,17 @@ const documentsMap = computed(() =>
           </div>
         </div>
 
-        <MilestonesPanel v-if="app" :application-id="id" />
+        <MilestonesPanel v-if="app && app.status == 'active'" :application-id="id" :application-status="app.status" />
 
         <div v-if="app.status === 'draft' || app.status === 'pending_revision'" class="flex gap-3 mt-8">
           <router-link :to="`/applications/${app.id}/edit`"
-                       class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium">
+                       class="bg-slate-600 hover:bg-slate-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium">
             {{ t('applications.view.btn_edit') }}
           </router-link>
+          <button v-if="app.status == 'pending_revision'" @click="applyChanges" :disabled="saving"
+                  class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium">
+            {{ saving ? t('applications.view.saving') : t('applications.view.btn_applyChanges') }}
+          </button>
           <button @click="deleteApp" :disabled="deleting"
                   class="border border-red-900 hover:border-red-700 text-red-400 hover:text-red-300 px-6 py-2.5 rounded-lg text-sm font-medium disabled:opacity-50">
             {{ deleting ? t('applications.view.deleting') : t('applications.view.btn_delete') }}
@@ -267,7 +285,7 @@ const documentsMap = computed(() =>
         </div>
 
         <div 
-          v-if="(currentUserRole === 'admin' || currentUserRole === 'mentor') && app.status !== 'closed'" 
+          v-if="(currentUserRole === 'admin' || currentUserRole === 'mentor') && ['active', 'suspended'].includes(app.status)" 
           class="border border-slate-800 rounded-xl p-4 bg-slate-950/40 mt-6 flex items-center justify-between gap-3"
         >
           <div>

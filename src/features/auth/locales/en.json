@@ -26,6 +26,7 @@
     "errors": {
       "accessDenied": "Access denied",
       "tooManyRequests": "Too many requests. Please try again later",
+      "blocked": "Your account was blocked",
       "invalidCredentials": "Invalid email or password",
       "unexpected": "Unexpected error"
     }

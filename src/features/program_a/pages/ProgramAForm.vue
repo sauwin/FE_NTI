@@ -291,7 +291,6 @@ async function submit(mode: 'draft' | 'final' = 'final') {
           </template>
 
           <template v-if="step === 2">
-            {{ console.log(requiredDocuments) }}
             <div class="space-y-4">
               <div v-for="doc in requiredDocuments" :key="doc.document_name" class="border border-slate-950 p-4 rounded-xl bg-slate-950/60">
                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">

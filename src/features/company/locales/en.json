@@ -83,7 +83,7 @@
       "noEmail": "No email",
       "unknownChallenge": "Unknown Challenge",
       "callLabel": "Call: {name}",
-      "revision": "Revision",
+      "revision": "Request revision",
       "details": "Details",
       "verify": "Verify",
       "modalTitle": "Request Revision for #{id}",

@@ -215,7 +215,7 @@
           </span>
         </div>
 
-        <router-link :to="`/calls/${call.id}`" class="btn-primary mt-auto text-center">
+        <router-link :to="call.program == 'a' ? `/programs/a` : `/programs/b`" class="btn-primary mt-auto text-center">
           {{ t('home.calls.btn_view') }}
         </router-link>
       </div>

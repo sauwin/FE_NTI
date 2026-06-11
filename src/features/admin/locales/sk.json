@@ -835,6 +835,7 @@
       "peerSheetsFields": {
         "recommendationApprove": "Schváliť",
         "recommendationRevision": "Prepracovať",
+        "recommendationReject": "Zamietnúť",
         "reviewerStatement": "Vyjadrenie hodnotiteľa:",
         "scoreUnit": "{score} b. ({weight}%)"
       },

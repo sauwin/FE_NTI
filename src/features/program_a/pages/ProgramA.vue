@@ -16,7 +16,6 @@ const loading = ref(true)
 onMounted(async () => {
   try {
     const res = await getActiveCalls('a')
-    console.log('API Response:', res.data)
     
     if (res.data) {
       const callData = Array.isArray(res.data) ? res.data[0] : res.data

@@ -62,7 +62,6 @@
     if (res.data) {
       criteria.value = res.data
       scores.value = criteriaToEmptyScores()
-      console.log(criteria.value)
     } else {
       criteria.value = []
     }

@@ -82,7 +82,6 @@
       docs.value = docsRes.data
       evaluatorsReviews.value = revisionRes.data
 
-      console.log(app.value)
     } catch (e) {
       error.value = t('admin.finalVerdictPanel.messages.loadFailed')
     } finally {
@@ -147,8 +146,8 @@
           <div>
             <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">{{ t('admin.finalVerdictPanel.sections.specs') }}</h2>
             <div class="bg-slate-900/40 border border-slate-800 rounded-xl p-4 space-y-3 text-sm">
-              <div class="flex justify-between"><span class="text-slate-500">{{ t('admin.finalVerdictPanel.specsFields.teamName') }}</span> <span class="text-white font-medium">{{ app?.team?.name  }}</span></div>
-              <div class="flex justify-between"><span class="text-slate-500">{{ t('admin.finalVerdictPanel.specsFields.stackCategory') }}</span> <span class="text-slate-300 font-mono text-xs">{{ app?.category }}</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">{{ t('admin.finalVerdictPanel.specsFields.teamName') }}</span> <span class="text-white font-medium">{{ app?.team?.name ?? app?.project_title  }}</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">{{ t('admin.finalVerdictPanel.specsFields.stackCategory') }}</span> <span class="text-slate-300 font-mono text-xs">{{ app?.category ?? '_' }}</span></div>
               <div class="flex justify-between">
                 <span class="text-slate-500">{{ t('admin.finalVerdictPanel.specsFields.currentStatus') }}</span> 
                 <span class="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-mono uppercase">{{ app?.status?.replace(/_/g, ' ') }}</span>
@@ -192,9 +191,9 @@
                   
                   <span :class="[
                     'text-[10px] uppercase font-mono px-2 py-0.5 rounded border',
-                    review.recommendation === 'approve' ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                    review.recommendation === 'approve' ? 'bg-green-500/10 border-green-500/30 text-green-400' : (review.recommendation === 'reject' ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-amber-500/10 border-amber-500/30 text-amber-400')
                   ]">
-                    {{ review.recommendation === 'approve' ? t('admin.finalVerdictPanel.peerSheetsFields.recommendationApprove') : t('admin.finalVerdictPanel.peerSheetsFields.recommendationRevision') }}
+                    {{ review.recommendation === 'approve' ? t('admin.finalVerdictPanel.peerSheetsFields.recommendationApprove') : (review.recommendation === 'reject' ? t('admin.finalVerdictPanel.peerSheetsFields.recommendationReject') : t('admin.finalVerdictPanel.peerSheetsFields.recommendationRevision')) }}
                   </span>
                 </div>
 

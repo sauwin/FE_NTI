@@ -75,7 +75,6 @@ async function handleRemoveMember(userId: number) {
       </div>
       
       <div class="space-y-3">
-        {{ console.log(team) }}
         <div 
           v-for="member in (team.members ?? [])" 
           :key="member.id" 

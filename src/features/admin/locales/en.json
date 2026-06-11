@@ -797,6 +797,7 @@
       "peerSheetsFields": {
         "recommendationApprove": "Approve",
         "recommendationRevision": "Revision",
+        "recommendationReject": "Reject",
         "reviewerStatement": "Reviewer Statement:",
         "scoreUnit": "{score} b. ({weight}%)"
       },

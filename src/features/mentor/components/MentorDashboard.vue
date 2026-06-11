@@ -37,7 +37,7 @@ const mentorshipRequests = computed(() => {
 })
 
 const activeMentorships = computed(() => {
-  return mentorships.value.filter(m => m.application?.status !== 'onboarding')
+  return mentorships.value.filter(m => !['onboarding', 'closed'].includes(m.application?.status))
 })
 
 const handleViewProject = (mentorship: Mentorship) => {

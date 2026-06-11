@@ -2,8 +2,10 @@
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { updateMemberRole } from '@/features/company/api/company' 
+import { useAuthStore } from '@/features/auth/stores/auth'
 
 const { t } = useI18n()
+const auth = useAuthStore()
 
 const USERS_PER_PAGE = 25
 
@@ -114,6 +116,7 @@ async function handleRoleChange(user: any, newRole: string) {
             </td>
             <td class="py-4 px-5 text-right">
               <button 
+                v-if="user.id !== auth.user.id"
                 @click="$emit('kick', user)" 
                 class="text-xs bg-red-950/20 hover:bg-red-900/30 text-red-400 border border-red-900/40 px-3 py-1.5 rounded-lg transition"
               >

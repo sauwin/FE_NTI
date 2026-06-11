@@ -29,7 +29,6 @@ const { t } = useI18n()
       >
         <div>
           <div class="flex items-center gap-2 mb-1">
-            {{ console.log(app) }}
             <span class="text-xs uppercase font-mono tracking-wider bg-blue-600/15 border border-blue-900/40 text-blue-400 px-2 py-0.5 rounded-md">
               {{ t('evaluation.program', { program: app.program_type?.toUpperCase() }) }}
             </span>

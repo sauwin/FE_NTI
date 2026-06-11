@@ -161,7 +161,7 @@ function viewApplicationDetails(id: number) {
                   <button
                     @click="openRevisionModal(app.id)"
                     :disabled="actionLoading === app.id"
-                    class="text-xs bg-slate-800 hover:bg-rose-950/40 border border-slate-700 text-slate-400 hover:text-rose-400 px-3 py-1.5 rounded-lg transition font-medium cursor-pointer"
+                    class="text-xs bg-slate-900 hover:bg-rose-950/60 border border-slate-800 text-slate-400 hover:text-rose-400 px-3 py-1.5 rounded-lg transition font-medium cursor-pointer"
                   >
                     {{ t('company.applications.revision') }}
                   </button>

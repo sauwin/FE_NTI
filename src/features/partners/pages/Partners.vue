@@ -30,16 +30,16 @@ onMounted(async () => {
             contactMembers: contactsList
           }
         } catch (e) {
-          console.error(`Не вдалося завантажити контакти для партнера ${partner.id}:`, e)
+          console.error(`Partner data loading failed ${partner.id}:`, e)
           return {
             ...partner,
-            contactMembers: [] // у разі помилки конкретного запиту, картка не ламає всю сторінку
+            contactMembers: []
           }
         }
       })
     )
   } catch (e) {
-    console.error('Помилка завантаження сторінки партнерів:', e)
+    console.error('Partners page loading failed:', e)
     error.value = true
   } finally {
     loading.value = false
@@ -57,7 +57,7 @@ onMounted(async () => {
     :description="t('partners.hero.description')"
   />
 
-  <section class="max-w-6xl mx-auto px-6 py-10 mt-[-50px] relative">
+  <section class="max-w-6xl py-10 mt-[-50px] relative">
     <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <div v-for="i in 6" :key="i" class="h-[260px] rounded-2xl bg-slate-900/40 border border-slate-800/60 p-6 animate-pulse"></div>
     </div>

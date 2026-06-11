@@ -130,7 +130,7 @@ onMounted(() => { fetchTeams() })
           @click="showTeamForm = true"
           class="text-xs px-3 py-1.5 rounded border bg-emerald-900/40 hover:bg-emerald-900/60 text-emerald-400 border-emerald-800 transition font-mono uppercase cursor-pointer font-semibold"
         >
-          {{ t('student.teamsList.title') }}
+          {{ t('student.teamsList.createButton') }}
         </button>
         <button
           @click="fetchTeams"

@@ -47,6 +47,7 @@
       "program": "Program",
       "status": "Stav",
       "created": "Vytvorené",
+      "email": "Email študenta",
       "required_documents": "Požadované dokumenty",
       "no_docs_required": "Pre túto výzvu nie sú požadované žiadne špecifické dokumenty.",
       "file_size": "Veľkosť súboru: {size} MB",
