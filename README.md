@@ -1,64 +1,195 @@
-# be_nti
+# NTI Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+Vue 3 frontend for the NTI platform — a web application for managing student and company applications, programme calls, evaluations and mentorships.
 
-## Recommended IDE Setup
+The frontend works together with the **BE_NTI** Laravel backend.
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Tech Stack
 
-## Recommended Browser Setup
+* Vue 3 + Composition API
+* TypeScript
+* Vite
+* Tailwind CSS v4
+* Pinia
+* Vue Router
+* Axios
+* vue-i18n
+* Tiptap
+* docx / jsPDF / xlsx
+* Playwright
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+## Requirements
 
-## Type Support for `.vue` Imports in TS
+* Node.js `^20.19.0` or `>=22.12.0`
+* [BE_NTI](https://github.com/sauwin/) running on `http://localhost:8000`
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+## Setup
 
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-This repository contains two folders:
-
-- `BE_NTI` — Laravel backend
-- `FE_NTI` — Vue 3 frontend
-
-### Frontend setup
+Install dependencies:
 
 ```sh
-cd FE_NTI
 npm install
+```
+
+Start the development server:
+
+```sh
 npm run dev
 ```
 
-### Backend setup
+The app runs on:
 
-```sh
-cd BE_NTI
-composer install
-php artisan key:generate
-php artisan serve --host=127.0.0.1 --port=8000
+```text
+http://localhost:5173
 ```
 
-The frontend expects the backend API at `http://localhost:8000/api`.
+The API is expected at:
 
-### Compile and Hot-Reload for Development
-
-```sh
-cd FE_NTI
-npm run dev
+```text
+http://localhost:8000/api
 ```
 
-### Type-Check, Compile and Minify for Production
+The API URL is currently configured in `src/shared/api/axios.ts`.
+
+### Production build
 
 ```sh
-cd FE_NTI
 npm run build
+```
+
+The production files are generated in `dist/`.
+
+To preview the build:
+
+```sh
+npm run preview
+```
+
+## Docker
+
+Docker configuration is included for local development.
+
+```sh
+docker compose up
+```
+
+The frontend will be available on port `5173`.
+
+## Project Structure
+
+```text
+src/
+├── app/
+│   ├── layouts/
+│   ├── pages/
+│   ├── plugins/
+│   ├── router/
+│   └── styles/
+│
+├── features/
+│   ├── about/
+│   ├── admin/
+│   ├── applications/
+│   ├── articles/
+│   ├── auth/
+│   ├── company/
+│   ├── evaluation/
+│   ├── faq/
+│   ├── mentor/
+│   ├── milestones/
+│   ├── partners/
+│   ├── program_a/
+│   ├── program_b/
+│   ├── student/
+│   └── tasks/
+│
+└── shared/
+    ├── api/
+    ├── components/
+    └── types/
+```
+
+Feature-specific code is kept inside `features/<name>`:
+
+```text
+features/<name>/
+├── api/
+├── components/
+├── locales/
+├── pages/
+├── stores/
+└── types/
+```
+
+## Roles
+
+The platform has different dashboards and permissions depending on the user's role.
+
+| Role           | Slug             | Main access                       |
+| -------------- | ---------------- | --------------------------------- |
+| Student        | `student`        | Applications, profile, milestones |
+| Company        | `company`        | Company tasks and dashboard       |
+| Mentor         | `mentor`         | Mentorships                       |
+| Evaluator      | `evaluator`      | Application evaluations           |
+| Content Editor | `content_editor` | Articles                          |
+| NTI Admin      | `nti_admin`      | Administration                    |
+| Super Admin    | `super_admin`    | Administration                    |
+
+Route guards handle authentication and role-based access.
+
+Unauthenticated users are redirected to `/auth/login`. Users without the required permissions are redirected to `/unauthorized`.
+
+Students who have not completed their profile are redirected to `/profile/complete`.
+
+## Routes
+
+### Public
+
+| Path          | Page           |
+| ------------- | -------------- |
+| `/`           | Home           |
+| `/programs/a` | Programme A    |
+| `/programs/b` | Programme B    |
+| `/about`      | About          |
+| `/faq`        | FAQ            |
+| `/partners`   | Partners       |
+| `/privacy`    | Privacy Policy |
+| `/terms`      | Terms of Use   |
+
+### Authentication
+
+| Path                    | Page                |
+| ----------------------- | ------------------- |
+| `/auth/login`           | Login               |
+| `/auth/register`        | Register            |
+| `/auth/forgot-password` | Forgot password     |
+| `/auth/reset-password`  | Reset password      |
+| `/pending-verification` | Email verification  |
+| `/verified`             | Verification result |
+
+### Authenticated
+
+| Path                      | Access  | Page                    |
+| ------------------------- | ------- | ----------------------- |
+| `/dashboard`              | All     | Dashboard               |
+| `/profile`                | Student | Profile                 |
+| `/profile/complete`       | Student | Profile setup           |
+| `/mentor-profile`         | Mentor  | Mentor profile          |
+| `/programs/a/upload`      | Student | Programme A application |
+| `/programs/b/apply/:id`   | Student | Programme B application |
+| `/programs/b/create-task` | Company | Create task             |
+| `/programs/b/tasks/:id`   | All     | Task details            |
+
+## Internationalisation
+
+The frontend supports English and Slovak.
+
+The selected locale is stored in `localStorage` using the `locale` key.
+
+Translations are kept inside each feature:
+
+```text
+features/<name>/locales/
+├── en.json
+└── sk.json
 ```
